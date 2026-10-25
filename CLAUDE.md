@@ -67,5 +67,8 @@ Sections in the script, top to bottom:
 - Respect `prefers-reduced-motion`.
 - When this grows past one file, split into `scoring.js`, `render.js`, `players.js`, `rally.js` without changing the scoring behavior. Keep a quick test of the scoring rules (deuce, AD in/out, 7–5, tiebreak to 7 and 10, serve after tiebreak, best-of-3 and best-of-5 finish).
 
+## Agent team
+Nightly cloud agents build parts of the game in parallel. Ownership, branches, and shared contracts are in `docs/agents/TEAM.md`; read it before editing.
+
 ## Next task for Claude Code
 Footwork (step 2) has a first pass. Next: **positioning** (step 3), then replace the placeholder auto-hit with real **ball hitting** (step 4: swing timing and contact point relative to the body). The movement numbers in `bodyStats` are first guesses; tune them by feel. The file has `<!doctype html>` and a `[hidden]` rule so it also runs as a plain local file (`python3 -m http.server` in this folder). The pre-footwork version is in `backup/`.
