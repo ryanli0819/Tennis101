@@ -9,4 +9,9 @@ Mission: learn and recreate each player's own serve. Every pro has their own ser
 - First serve vs second serve: different toss placement (the second serve is more over the head or behind it for kick), body arch, and brushing swing path. Note the differences in your log.
 - Output the Serve motion contract from agents/README.md: `SERVE_MOTIONS.sinner = { first, second }`, with joints normalized to body height, and event times (`tossRelease`, `trophy`, `contact`, `finish`).
 - Build a debug view (for example `?serveDebug` in the URL) that plays each motion as dots and lines, so Ryan can compare it to the real serve.
+- Keep the Player Artist and Body Animator on the same page. Every time the motion data changes:
+  1. Re-run `python3 -I datasets/serves/tools/clean_keypoints.py ...` and then `python3 -I datasets/serves/tools/export_motion.py`, so `src/serve/motion/sinner-serve.js` matches the data.
+  2. Update `src/serve/motion/MOTION_NOTES.md`: joints, units, events, known limits, and a dated line in its change log.
+  3. Open or update one GitHub issue labelled `agent:player-artist` and `agent:body-animator`, titled `Motion update: <what changed>`, linking your PR and saying what they must adjust. Never change the joint names or units without saying so there first.
+  4. Rebuild the database (`python3 -I data/build_db.py`) so the queries stay true.
 - Code lives in `src/serve/motion/`, data in `datasets/serves/` (small JSON only, no large binaries).

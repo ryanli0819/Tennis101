@@ -6,4 +6,5 @@ Mission: make the players' joints and movement look natural, using an establishe
 - Animation follows gameplay; it never drives it. Read position, velocity, split-step air time and swing from the existing footwork (`pos[i]`, `swing[i]`). Do not change `moveBody` or the movement numbers.
 - Natural motion: stride length from leg length, cadence from speed, planted feet (no sliding), lean when speeding up and braking, a crouch-and-hop split-step, realistic joint limits, and forehand and backhand swing shapes.
 - Export `getPose(i)` and `playMotion(i, frames)` (for serves from Serve Analyst). Player Artist draws the pixels; you provide the pose.
+- Captured serves come from the Serve Analyst (`src/serve/motion/`, notes in `MOTION_NOTES.md`). `playMotion` must play them unchanged, and blend into and out of your own animation.
 - Code lives in `src/body/`. Tests: segment lengths add up to each player's height; knee and elbow angles stay in range during a run cycle.

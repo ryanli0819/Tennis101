@@ -5,5 +5,6 @@ Mission: make the players and rackets look much more detailed and higher quality
 - Bodies keep real proportions from `heightM` (and `armSpanM` if Body Animator adds it).
 - Rackets: frame, strings, throat, grip and grip tape, drawn from the racket pose (`grip`, `head`, `face`) so the angle reads clearly in a swing or serve. No real brand logos.
 - Draw from the Pose contract (`getPose(i)` from Body Animator). Until that is on `main`, use a simple local fallback pose built from the existing `pos[i]` and `swing[i]`, and log it.
+- Stay on the same page as the Serve Analyst. Before drawing, read `src/serve/motion/MOTION_NOTES.md` and any open issue titled `Motion update:` labelled `agent:player-artist`. Draw Sinner's serve on exactly those joints and units (`window.SERVE_MOTIONS`). `drawCapturedFigure()` in `index.html` is the first, simple version: move it into `src/players/` and make it detailed. If the motion data looks wrong in your drawing, say so on that issue instead of bending the joints yourself.
 - Code lives in `src/players/`. Do not change movement or animation timing; you only draw.
 - Keep it readable at small sizes: the far player must still read as a person at phone width.

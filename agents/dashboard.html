@@ -1,0 +1,261 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Control Room</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Silkscreen&display=swap">
+<style>
+/* Live view of the Tennis101 agent team. Reads agents/agents.json (who exists, who feeds whom) and the
+   public GitHub API (branches, pull requests, issues, logs) to show what each agent is doing now.
+   Single dark look, same tokens as the game. */
+:root {
+  --night: #0a1120; --panel: #0e1729; --panel-2: #16233c; --line: #2a3b5e; --ink: #eef3fb; --muted: #8b9cbc;
+  --ball: #d8ee4c; --working: #23b59c; --review: #5aa9ff; --needs: #f0a33a; --idle: #56658a; --merged: #a98bff;
+  --f-name: "Barlow Condensed", "Arial Narrow", sans-serif; --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace; --f-pix: "Silkscreen", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--night); color: var(--ink); font: 14px/1.45 var(--f-mono); }
+main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 48px; display: grid; gap: 22px; }
+header { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; justify-content: space-between; }
+h1 { margin: 0; font: 700 34px/1 var(--f-name); letter-spacing: .01em; }
+h1 small { display: block; font: 9px var(--f-pix); letter-spacing: .1em; color: var(--ball); margin-bottom: 8px; }
+h2 { margin: 0 0 10px; font: 600 20px var(--f-name); letter-spacing: .02em; }
+.muted { color: var(--muted); }
+.btn { font: 600 14px var(--f-name); letter-spacing: .05em; text-transform: uppercase; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 7px 12px; cursor: pointer; }
+.btn:hover { background: var(--panel-2); }
+.btn:focus-visible, .node:focus-visible, a:focus-visible { outline: 2px solid var(--ball); outline-offset: 2px; }
+a { color: var(--ball); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted); }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+.flow { overflow-x: auto; }
+.flow svg { display: block; min-width: 860px; width: 100%; height: auto; }
+.node rect { fill: var(--panel-2); stroke: var(--line); }
+.node { cursor: pointer; }
+.node.sel rect { stroke: var(--ball); stroke-width: 2; }
+.node text { fill: var(--ink); font: 600 16px var(--f-name); }
+.node .sub { fill: var(--muted); font: 10px var(--f-mono); }
+.edge { stroke: #3c5180; stroke-width: 1.6; fill: none; }
+.edge.hot { stroke: var(--ball); }
+.clock { display: grid; gap: 6px; }
+.track { position: relative; height: 40px; background: var(--panel-2); border-radius: 5px; }
+.tick { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); font-size: 10px; color: var(--muted); }
+.tick span { position: absolute; bottom: -16px; left: -8px; white-space: nowrap; }
+.run { position: absolute; top: 7px; width: 26px; height: 26px; margin-left: -13px; border-radius: 50%; display: grid; place-items: center; font: 600 12px var(--f-name); color: var(--night); }
+.now { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ball); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 8px; align-content: start; }
+.card.sel { border-color: var(--ball); }
+.card h3 { margin: 0; font: 700 22px/1 var(--f-name); display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.pill { font: 9px var(--f-pix); letter-spacing: .06em; padding: 4px 7px; border-radius: 4px; color: var(--night); white-space: nowrap; }
+.card .job { color: var(--muted); }
+.kv { display: grid; grid-template-columns: 92px 1fr; gap: 3px 8px; font-size: 12px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+details summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+pre.log { white-space: pre-wrap; font-size: 11.5px; background: var(--night); border: 1px solid var(--line); border-radius: 5px; padding: 8px; max-height: 240px; overflow: auto; margin: 6px 0 0; }
+.note { font-size: 12px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .pulse { animation: pulse 1.6s ease-in-out infinite; } }
+@keyframes pulse { 50% { opacity: .45; } }
+</style>
+<main>
+  <header>
+    <h1><small>TENNIS101 · LIVE</small>Agent Control Room</h1>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span class="muted" id="updated">Loading…</span>
+      <button class="btn" id="refresh" type="button">Refresh</button>
+    </div>
+  </header>
+
+  <div class="legend" aria-label="Status colours">
+    <span><i class="dot" style="background:var(--working)"></i>Working now</span>
+    <span><i class="dot" style="background:var(--review)"></i>PR waiting for you</span>
+    <span><i class="dot" style="background:var(--needs)"></i>Asked you a question</span>
+    <span><i class="dot" style="background:var(--merged)"></i>Work merged</span>
+    <span><i class="dot" style="background:var(--idle)"></i>Waiting for its next run</span>
+  </div>
+
+  <section class="panel">
+    <h2>Workflow · who feeds whom</h2>
+    <p class="note" style="margin:0 0 10px">An arrow means "uses the output of". Click an agent to highlight its links and jump to its card.</p>
+    <div class="flow"><svg id="flow" role="img" aria-label="Agent workflow graph"></svg></div>
+  </section>
+
+  <section class="panel clock">
+    <h2>Tonight's schedule <span class="muted" style="font:12px var(--f-mono)">(Eastern time; the yellow line is now)</span></h2>
+    <div class="track" id="track"></div>
+    <div style="height:14px"></div>
+  </section>
+
+  <section>
+    <h2>Agents</h2>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <p class="note" id="source"></p>
+</main>
+<script>
+/* ---------- config ---------- */
+const STATUS = {
+  working: { label: "WORKING NOW", color: "var(--working)" },
+  needs:   { label: "NEEDS YOU",   color: "var(--needs)" },
+  review:  { label: "PR WAITING",  color: "var(--review)" },
+  merged:  { label: "MERGED",      color: "var(--merged)" },
+  idle:    { label: "NEXT RUN",    color: "var(--idle)" },
+};
+const WORKING_WINDOW_MIN = 90;          // a commit this recent = the agent is mid-run
+const CACHE_MIN = 3;                    // GitHub allows 60 unauthenticated calls an hour, so cache
+
+let REG = null, LIVE = {}, selected = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+/* ---------- data: registry + GitHub ---------- */
+async function gh(path) {
+  const key = "gh:" + path;
+  try { const c = JSON.parse(sessionStorage.getItem(key)); if (c && Date.now() - c.at < CACHE_MIN * 60e3) return c.data; } catch {}
+  const r = await fetch("https://api.github.com/repos/" + REG.repo + path, { headers: { Accept: "application/vnd.github+json" } });
+  if (!r.ok) throw new Error(r.status === 403 ? "GitHub rate limit reached; try again in a few minutes" : "GitHub " + r.status);
+  const data = await r.json();
+  try { sessionStorage.setItem(key, JSON.stringify({ at: Date.now(), data })); } catch {}
+  return data;
+}
+async function rawLog(name, branch) {
+  const r = await fetch(`https://raw.githubusercontent.com/${REG.repo}/${branch}/agents/${name}/LOG.md`, { cache: "no-store" });
+  return r.ok ? r.text() : null;
+}
+
+async function load(force) {
+  if (force) Object.keys(sessionStorage).filter(k => k.startsWith("gh:")).forEach(k => sessionStorage.removeItem(k));
+  REG = REG || await (await fetch("agents.json", { cache: "no-store" })).json();
+  render();                                                  // draw the team right away, live data fills in
+  let note = "";
+  try {
+    const [branches, pulls, questions] = await Promise.all([
+      gh("/branches?per_page=100"), gh("/pulls?state=all&per_page=100"), gh("/issues?state=open&labels=question&per_page=100")]);
+    const names = new Set(branches.map(b => b.name));
+    await Promise.all(REG.agents.map(async a => {
+      const br = "agent/" + a.name, L = LIVE[a.name] = { branch: names.has(br) ? br : null };
+      L.prs = pulls.filter(p => p.head.ref === br);
+      L.questions = questions.filter(q => q.labels.some(l => l.name === "agent:" + a.name));
+      if (L.branch) {
+        const [c] = await gh(`/commits?sha=${encodeURIComponent(br)}&per_page=1`);
+        L.lastCommit = c && { msg: c.commit.message.split("\n")[0], at: new Date(c.commit.committer.date), url: c.html_url };
+      }
+      L.log = await rawLog(a.name, L.branch || "main");
+    }));
+  } catch (e) { note = "Live data unavailable: " + e.message + ". Showing the team and schedule only."; }
+  $("updated").textContent = "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  $("source").innerHTML = (note ? esc(note) + " · " : "") +
+    `Team from <a href="https://github.com/${REG.repo}/blob/main/agents/agents.json">agents/agents.json</a>; live status from GitHub (branches <code>agent/*</code>, pull requests, issues labelled <code>question</code>, each agent's <code>LOG.md</code>).`;
+  render();
+}
+
+/* ---------- status of one agent ---------- */
+function statusOf(a) {
+  const L = LIVE[a.name] || {};
+  if (L.questions?.length) return "needs";
+  if (L.lastCommit && Date.now() - L.lastCommit.at < WORKING_WINDOW_MIN * 60e3) return "working";
+  if (L.prs?.some(p => p.state === "open")) return "review";
+  if (L.prs?.some(p => p.merged_at)) return "merged";
+  return "idle";
+}
+function nextRun(hour) {                                   // next time today/tomorrow at that Eastern hour
+  const now = new Date(), et = new Date(now.toLocaleString("en-US", { timeZone: REG.timezone }));
+  const diff = ((hour - et.getHours() + 24) % 24) * 60 - et.getMinutes();
+  const m = diff <= 0 ? diff + 1440 : diff;
+  return m < 60 ? `in ${m} min` : `in ${Math.floor(m / 60)} h ${m % 60} min`;
+}
+const ago = d => { const m = Math.round((Date.now() - d) / 60e3); return m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
+const fmtHour = h => `${(h % 12) || 12} ${h < 12 ? "AM" : "PM"}`;
+
+/* ---------- workflow graph: columns by longest path from the producers ---------- */
+function layout() {
+  const A = REG.agents.filter(a => a.name !== "version-keeper"), by = Object.fromEntries(A.map(a => [a.name, a]));
+  const depth = {};
+  const d = n => depth[n] ?? (depth[n] = Math.max(0, ...A.filter(a => a.feeds.includes(n)).map(a => d(a.name) + 1)));
+  A.forEach(a => d(a.name));
+  const cols = [];
+  A.forEach(a => (cols[depth[a.name]] = cols[depth[a.name]] || []).push(a));
+  const pos = {}, W = 196, H = 64, GX = 64, GY = 22;
+  cols.forEach((c, x) => c.sort((p, q) => p.order - q.order).forEach((a, y) => (pos[a.name] = { x: 16 + x * (W + GX), y: 16 + y * (H + GY), w: W, h: H })));
+  const rows = Math.max(...cols.map(c => c.length));
+  pos["version-keeper"] = { x: 16, y: 16 + rows * (H + GY) + 20, w: cols.length * (W + GX) - GX, h: 44 };
+  return { pos, width: cols.length * (W + GX) - GX + 32, height: pos["version-keeper"].y + 44 + 16 };
+}
+function drawFlow() {
+  const { pos, width, height } = layout(), svg = $("flow");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  let out = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#5d73a3"/></marker>
+    <marker id="arrHot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#d8ee4c"/></marker></defs>`;
+  for (const a of REG.agents) for (const t of a.feeds) {
+    const p = pos[a.name], q = pos[t]; if (!p || !q) continue;
+    const x1 = p.x + p.w, y1 = p.y + p.h / 2, x2 = q.x, y2 = q.y + q.h / 2, mx = (x1 + x2) / 2;
+    const hot = selected && (selected === a.name || selected === t);
+    out += `<path class="edge${hot ? " hot" : ""}" marker-end="url(#${hot ? "arrHot" : "arr"})" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2 - 2},${y2}"/>`;
+  }
+  for (const a of REG.agents) {
+    const p = pos[a.name], st = STATUS[statusOf(a)];
+    out += `<g class="node${selected === a.name ? " sel" : ""}" data-name="${a.name}" tabindex="0" role="button" aria-label="${esc(a.title)}: ${st.label}">
+      <rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="7"/>
+      <circle cx="${p.x + 16}" cy="${p.y + 20}" r="5.5" fill="${st.color}" class="${statusOf(a) === "working" ? "pulse" : ""}"/>
+      <text x="${p.x + 30}" y="${p.y + 26}">${esc(a.title)}${a.name === "version-keeper" ? " — records every change that lands" : ""}</text>
+      <text class="sub" x="${p.x + 30}" y="${p.y + 45}">${esc(a.name === "version-keeper" || a.contract.length <= 27 ? a.contract : a.contract.slice(0, 26) + "…")}</text></g>`;
+  }
+  svg.innerHTML = out;
+  svg.querySelectorAll(".node").forEach(n => {
+    const go = () => select(n.dataset.name);
+    n.addEventListener("click", go);
+    n.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+  });
+}
+function select(name) {
+  selected = selected === name ? null : name;
+  render();
+  if (selected) document.getElementById("card-" + name)?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+}
+
+/* ---------- schedule ribbon ---------- */
+function drawClock() {
+  const t = $("track");
+  let out = "";
+  for (let h = 0; h <= 24; h += 3) out += `<div class="tick" style="left:${h / 24 * 100}%"><span>${h === 24 ? "" : fmtHour(h)}</span></div>`;
+  for (const a of REG.agents) {
+    const st = STATUS[statusOf(a)];
+    out += `<div class="run" title="${esc(a.title)} · ${fmtHour(a.runsAt)}" style="left:${(a.runsAt + 0.5) / 24 * 100}%;background:${st.color}">${a.order}</div>`;
+  }
+  const et = new Date(new Date().toLocaleString("en-US", { timeZone: REG.timezone }));
+  out += `<div class="now" style="left:${(et.getHours() + et.getMinutes() / 60) / 24 * 100}%"></div>`;
+  t.innerHTML = out;
+}
+
+/* ---------- agent cards ---------- */
+function drawCards() {
+  const feedsFrom = n => REG.agents.filter(a => a.feeds.includes(n)).map(a => a.title);
+  $("cards").innerHTML = [...REG.agents].sort((a, b) => a.order - b.order).map(a => {
+    const L = LIVE[a.name] || {}, s = statusOf(a), st = STATUS[s];
+    const open = L.prs?.find(p => p.state === "open"), merged = L.prs?.filter(p => p.merged_at).length || 0;
+    const logBody = L.log ? L.log.split("\n").slice(0, 40).join("\n") : "";
+    return `<article class="card${selected === a.name ? " sel" : ""}" id="card-${a.name}">
+      <h3>${esc(a.title)}<span class="pill${s === "working" ? " pulse" : ""}" style="background:${st.color}">${s === "idle" ? "NEXT RUN " + esc(nextRun(a.runsAt).toUpperCase()) : st.label}</span></h3>
+      <div class="job">${esc(a.job)}</div>
+      <dl class="kv">
+        <dt>runs</dt><dd>daily ${fmtHour(a.runsAt)} ET · ${esc(nextRun(a.runsAt))}</dd>
+        <dt>owns</dt><dd>${a.owns.map(esc).join(", ")}</dd>
+        <dt>uses work of</dt><dd>${esc(feedsFrom(a.name).join(", ") || "—")}</dd>
+        <dt>feeds</dt><dd>${esc(a.feeds.map(n => REG.agents.find(x => x.name === n)?.title).join(", ") || (a.name === "version-keeper" ? "everyone (the record)" : "the game"))}</dd>
+        <dt>last activity</dt><dd>${L.lastCommit ? `<a href="${L.lastCommit.url}">${esc(L.lastCommit.msg)}</a> · ${ago(L.lastCommit.at)}` : (L.branch === undefined ? "loading…" : "no runs yet")}</dd>
+        <dt>pull requests</dt><dd>${open ? `<a href="${open.html_url}">#${open.number} ${esc(open.title)}</a> (open)` : "none open"}${merged ? ` · ${merged} merged` : ""}</dd>
+        <dt>questions</dt><dd>${L.questions?.length ? L.questions.map(q => `<a href="${q.html_url}">#${q.number} ${esc(q.title)}</a>`).join("<br>") : "none"}</dd>
+      </dl>
+      <details><summary>Its log (agents/${a.name}/LOG.md)</summary><pre class="log">${esc(logBody || "Not loaded yet.")}</pre></details>
+    </article>`;
+  }).join("");
+}
+
+function render() { if (!REG) return; drawFlow(); drawClock(); drawCards(); }
+$("refresh").onclick = () => load(true);
+load(false);
+setInterval(() => load(false), 5 * 60e3);
+</script>

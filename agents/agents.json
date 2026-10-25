@@ -1,0 +1,77 @@
+{
+  "_about": "Single source of truth for the agent team. Read by agents/dashboard.html (live view) and data/build_db.py (SQLite). Keep agents/README.md in sync when you change it.",
+  "repo": "ryanli0819/Tennis101",
+  "timezone": "America/New_York",
+  "agents": [
+    {
+      "name": "ball-physicist", "title": "Ball Physicist", "order": 1, "runsAt": 1,
+      "job": "Real ball flight and believable bounces on an open-source physics engine.",
+      "owns": ["src/ball/", "tests/ball.test.mjs"],
+      "feeds": ["court-designer", "serve-controller"],
+      "contract": "launchBall · stepBall · onBounce · onNet"
+    },
+    {
+      "name": "court-designer", "title": "Court Designer", "order": 2, "runsAt": 2,
+      "job": "Grass, red clay and hard courts, nets and the ball's look, in detailed pixel art.",
+      "owns": ["src/court/"], "reads": ["datasets/courts/"],
+      "feeds": ["start-page-builder"],
+      "contract": "drawCourt(surface) · drawNet · drawBall"
+    },
+    {
+      "name": "player-artist", "title": "Player Artist", "order": 3, "runsAt": 3,
+      "job": "Detailed pixel players and rackets, drawn on the pose and the captured serve motion.",
+      "owns": ["src/players/"],
+      "feeds": [],
+      "contract": "draws getPose(i) + racket"
+    },
+    {
+      "name": "serve-analyst", "title": "Serve Analyst", "order": 4, "runsAt": 4,
+      "job": "Turns real serve video into clean joint motion for each player, and keeps the Player Artist in sync.",
+      "owns": ["src/serve/motion/", "datasets/serves/"], "reads": ["datasets/serves/"],
+      "feeds": ["body-animator", "player-artist", "serve-controller"],
+      "contract": "SERVE_MOTIONS[player] = { first, second }"
+    },
+    {
+      "name": "serve-controller", "title": "Serve Controller", "order": 5, "runsAt": 5,
+      "job": "Toss, power and aim in one motion from the player's view; sweet spot, spin and ace chance from skill points.",
+      "owns": ["src/serve/control/", "src/profile/"],
+      "feeds": ["guide-writer"],
+      "contract": "serve input → { toss, power, spin, target, sweetSpot }"
+    },
+    {
+      "name": "version-keeper", "title": "Version Keeper", "order": 6, "runsAt": 11,
+      "job": "Records every game change; publishes a version once 5+ changes build up.",
+      "owns": ["CHANGELOG.md", "contemporary/", "versions/"],
+      "feeds": [],
+      "contract": "CHANGELOG · contemporary/ · git tags"
+    },
+    {
+      "name": "body-animator", "title": "Body Animator", "order": 7, "runsAt": 6,
+      "job": "Natural joints and movement: planted feet, lean, split-step, swings.",
+      "owns": ["src/body/"],
+      "feeds": ["player-artist"],
+      "contract": "getPose(i) · playMotion(i, frames)"
+    },
+    {
+      "name": "controls-designer", "title": "Controls Designer", "order": 8, "runsAt": 7,
+      "job": "WASD, arrow keys, touch or gamepad; only the chosen setup is shown.",
+      "owns": ["src/controls/"],
+      "feeds": ["start-page-builder", "guide-writer", "serve-controller"],
+      "contract": "CONTROL_SCHEMES · getMoveInput()"
+    },
+    {
+      "name": "start-page-builder", "title": "Start Page Builder", "order": 9, "runsAt": 8,
+      "job": "The Tennis101 title page: pick the match, surface and controls.",
+      "owns": ["src/start/"],
+      "feeds": [],
+      "contract": "match setup → match screen"
+    },
+    {
+      "name": "guide-writer", "title": "Guide Writer", "order": 10, "runsAt": 9,
+      "job": "A short, plain 'How to play' guide that reads its keys from the controls.",
+      "owns": ["src/guide/"],
+      "feeds": ["start-page-builder"],
+      "contract": "How to play"
+    }
+  ]
+}
