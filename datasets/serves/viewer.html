@@ -1,0 +1,90 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serve Keypoints</title>
+<style>
+:root { --night: #0a1120; --panel: #0e1729; --line: #2a3b5e; --ink: #eef3fb; --muted: #8b9cbc; --ball: #d8ee4c; --sinner: #23b59c; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--night); color: var(--ink); font: 14px/1.4 ui-monospace, Menlo, monospace; }
+main { max-width: 760px; margin: 0 auto; padding: 16px; display: grid; gap: 12px; }
+h1 { margin: 0; font-size: 18px; }
+p { margin: 0; color: var(--muted); }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button, select { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 6px 10px; cursor: pointer; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--ball); outline-offset: 2px; }
+input[type=range] { flex: 1; min-width: 140px; accent-color: var(--ball); }
+canvas { width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; display: block; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; margin-right: 14px; }
+.legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+</style>
+<main>
+  <div>
+    <h1>Sinner serve · body points</h1>
+    <p>Dots are joints found by pose detection, lines connect them. Raw data, not cleaned.</p>
+  </div>
+  <div class="bar">
+    <select id="clip" aria-label="Clip">
+      <option value="sinner/front.keypoints.json">Front view</option>
+      <option value="sinner/birdseye.keypoints.json">Overhead + landing</option>
+    </select>
+    <button id="play" type="button">Pause</button>
+    <select id="speed" aria-label="Speed"><option value="1">1×</option><option value="0.5">½×</option><option value="0.25" selected>¼×</option></select>
+    <label>min confidence <input id="conf" type="range" min="0" max="0.9" step="0.05" value="0.3" style="width:100px;flex:none"></label>
+  </div>
+  <div class="bar"><input id="scrub" type="range" min="0" value="0" aria-label="Frame"><span id="info"></span></div>
+  <canvas id="cv" width="720" height="720"></canvas>
+  <p class="legend"><span><i style="background:var(--sinner)"></i>left side (tossing arm)</span><span><i style="background:var(--ball)"></i>right side (racket arm)</span><span><i style="background:var(--ink)"></i>centre</span></p>
+</main>
+<script>
+const BONES = [["nose","neck"],["neck","leftShoulder"],["neck","rightShoulder"],["leftShoulder","leftElbow"],["leftElbow","leftWrist"],
+  ["rightShoulder","rightElbow"],["rightElbow","rightWrist"],["neck","root"],["root","leftHip"],["root","rightHip"],
+  ["leftHip","leftKnee"],["leftKnee","leftAnkle"],["rightHip","rightKnee"],["rightKnee","rightAnkle"],["leftShoulder","leftHip"],["rightShoulder","rightHip"]];
+const cv = document.getElementById("cv"), g = cv.getContext("2d");
+const ui = id => document.getElementById(id);
+let data = null, k = 0, playing = !matchMedia("(prefers-reduced-motion: reduce)").matches, acc = 0, last = performance.now();
+ui("play").textContent = playing ? "Pause" : "Play";
+
+async function load() {
+  data = await (await fetch(ui("clip").value)).json();
+  cv.height = Math.round(cv.width * data.height / data.width);
+  ui("scrub").max = data.frames.length - 1; k = 0; draw();
+}
+const col = n => n.startsWith("left") ? getComputedStyle(document.documentElement).getPropertyValue("--sinner")
+  : n.startsWith("right") ? getComputedStyle(document.documentElement).getPropertyValue("--ball") : "#eef3fb";
+function draw() {
+  if (!data) return;
+  const f = data.frames[k], min = +ui("conf").value, W = cv.width, H = cv.height;
+  g.fillStyle = "#0e1729"; g.fillRect(0, 0, W, H);
+  // faint trail of the last frames
+  for (let b = Math.max(0, k - 6); b <= k; b++) drawPose(data.frames[b], min, b === k ? 1 : 0.12 * (b - k + 7) / 7, W, H);
+  const seg = (data.segments || []).find(s => k >= s.from && k <= s.to);
+  ui("info").textContent = `frame ${f.i} · ${f.t.toFixed(2)} s${seg ? " · " + seg.view : ""}`;
+  ui("scrub").value = k;
+}
+function drawPose(f, min, alpha, W, H) {
+  const J = {};
+  for (const [n, [x, y, c]] of Object.entries(f.joints)) if (c >= min) J[n] = [x * W, y * H];
+  g.globalAlpha = alpha; g.lineWidth = 3;
+  for (const [a, b] of BONES) if (J[a] && J[b]) {
+    g.strokeStyle = a.startsWith("left") || b.startsWith("left") ? col("left") : a.startsWith("right") || b.startsWith("right") ? col("right") : "#eef3fb";
+    g.beginPath(); g.moveTo(...J[a]); g.lineTo(...J[b]); g.stroke();
+  }
+  for (const [n, [x, y]] of Object.entries(J)) { g.fillStyle = col(n); g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); }
+  g.globalAlpha = 1;
+}
+function tick(now) {
+  const dt = (now - last) / 1000; last = now;
+  if (playing && data) {
+    acc += dt * +ui("speed").value;
+    const step = 1 / data.fps;
+    while (acc >= step) { acc -= step; k = (k + 1) % data.frames.length; }
+    draw();
+  }
+  requestAnimationFrame(tick);
+}
+ui("play").onclick = () => { playing = !playing; ui("play").textContent = playing ? "Pause" : "Play"; };
+ui("scrub").oninput = e => { k = +e.target.value; draw(); };
+ui("conf").oninput = draw;
+ui("clip").onchange = load;
+load(); requestAnimationFrame(tick);
+</script>

@@ -1,0 +1,60 @@
+# Tennis101 agent team
+
+Ten cloud agents build the game in parallel, one run each per night. Every agent:
+- reads `CLAUDE.md`, this file, and its own log `agents/<name>/LOG.md` first;
+- works only on its branch `agent/<name>` and opens or updates one PR to `main` (never pushes to `main`, never merges);
+- edits only the folders it owns below, plus the smallest possible hooks in `index.html`;
+- keeps the page a static file with no build step (libraries from cdn.jsdelivr.net/npm, exact pinned versions);
+- ends each run by updating its log: what is done, open problems, the exact next step.
+
+Each agent has its own folder: `agents/<name>/PROMPT.md` (instructions) and `agents/<name>/LOG.md` (its running log). Shared rules: `agents/_shared/RULES.md`.
+
+| # | Agent | Branch | Owns | Runs daily (Eastern) |
+|---|---|---|---|---|
+| 1 | Ball Physicist | `agent/ball-physicist` | `src/ball/`, `tests/ball.test.mjs` | 1 AM |
+| 2 | Court Designer | `agent/court-designer` | `src/court/`, reads `datasets/courts/` | 2 AM |
+| 3 | Player Artist | `agent/player-artist` | `src/players/` | 3 AM |
+| 4 | Serve Analyst | `agent/serve-analyst` | `src/serve/motion/`, reads `datasets/serves/` | 4 AM |
+| 5 | Serve Controller | `agent/serve-controller` | `src/serve/control/`, `src/profile/` | 5 AM |
+| 6 | Version Keeper | `agent/version-keeper` | `CHANGELOG.md`, `contemporary/`, `versions/` | 11 AM, and after every push to `main` |
+| 7 | Body Animator | `agent/body-animator` | `src/body/` | 6 AM |
+| 8 | Controls Designer | `agent/controls-designer` | `src/controls/` | 7 AM |
+| 9 | Start Page Builder | `agent/start-page-builder` | `src/start/` | 8 AM |
+| 10 | Guide Writer | `agent/guide-writer` | `src/guide/` | 9 AM |
+
+Give any new agent a row here before it starts.
+
+## Shared contracts
+Keep these stable. Change one only in your own PR, and say so in its description. Until the owner's code is on `main`, build against the contract with a small local fallback and note that in your log.
+
+**Ball (Ball Physicist).** `src/ball/` exports `launchBall({ from:{x,y,z}, vel:{x,y,z}, spin:{x,y,z} })`, `stepBall(dt)`, `getBall()`, and events `onBounce(cb)` / `onNet(cb)`. The surface table lives in `src/ball/surfaces.js`. Court Designer draws the ball; Ball Physicist only moves it.
+
+**Court (Court Designer).** `drawCourt(surface)` and `drawNet()`, plus `drawBall(ball)`, with `surface` = `"hard" | "clay" | "grass"` (clay = red clay).
+
+**Pose (Body Animator).** `src/body/` exports `JOINTS` (names: head, neck, chest, pelvis, l/r shoulder, elbow, wrist, hip, knee, ankle, toe) and `getPose(i)` → `{ joints: { name: {x,y,z} } }` in court metres, plus `racket: { grip, head, face }`. `playMotion(i, frames)` plays a keyframed motion, such as a serve from Serve Analyst.
+
+**Player art (Player Artist)** draws `getPose(i)` in pixels, plus the racket.
+
+**Serve motion (Serve Analyst).** `SERVE_MOTIONS[playerId] = { first: Motion, second: Motion }`. A Motion is `{ frames: [{ t, joints:{...} }], events: { tossRelease, trophy, contact, finish } }`, with joints normalized to body height (1.0 = standing height) so it scales to each player.
+
+**Serve control (Serve Controller).** Turns the player's continuous serve input into `{ toss:{ height }, power, spin:{ type:"flat"|"kick"|"slice", rpm }, target:{x,y}, sweetSpot: 0..1 }`. It plays the right motion from Serve Analyst (second motion after a first-serve fault) and calls `launchBall`. Skill points persist across matches in `src/profile/` (localStorage `tennis101.profile`).
+
+**Controls (Controls Designer).** `src/controls/schemes.js` exports `CONTROL_SCHEMES`, a list of `{ id, label, devices, bindings:[{ action, keys, text }] }`. Required actions: `moveForward`, `moveBack`, `moveLeft`, `moveRight`, `splitStep`, `playPoint`, plus the serve actions Serve Controller defines. Also exports `getMoveInput()` → `{x,y}` (y = toward the net), `setScheme(id)` / `getScheme()` (localStorage `tennis101.controls`). Only the chosen scheme's UI and hints are shown.
+
+**Match setup (Start Page Builder).** The start page produces `{ bestOf, tbTo, firstServer, controls, surface, players }` for the match screen.
+
+**Guide (Guide Writer)** builds its key list from `CONTROL_SCHEMES`, so it never goes out of date.
+
+## Known conflicts
+- WASD uses `A`, which is currently the "Point Sinner" test key (`L` is "Point Alcaraz"). Controls Designer moves them, for example to `1` and `2`.
+- `CLAUDE.md` lists the home page last. Ryan moved the start page up, so Start Page Builder builds it now.
+- The HUD no longer shows player speed (Ryan's call). Do not add speed readouts back.
+
+## Website
+GitHub Pages publishes `main` at https://ryanli0819.github.io/Tennis101/ and rebuilds it after every push, so every merged PR is live within minutes. Keep `main` playable: never merge a PR that breaks the page.
+
+## Talking to the team
+GitHub is the message board.
+- Ryan (or Claude for Ryan) opens an issue labelled `agent:<name>`, or `agent:all` for everyone. Agents act only on issues opened by `ryanli0819`.
+- Agents reply on the issue, report in their PRs, and ask questions with the `question` label.
+- Each agent's log in `agents/<name>/LOG.md` is its running status.
