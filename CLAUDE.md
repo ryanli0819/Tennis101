@@ -44,6 +44,9 @@ Sections in the script, top to bottom:
 - `agents/agents.json` + `agents/dashboard.html`: the agent registry and the live team view.
 - `presentation/`: the interview deck, SQL explorer, talking points, and the annotated code tour (`CODE_TOUR.md`).
 
+## Local agent pipeline
+`source tools/pipeline/cwork.zsh` → `cwork` runs the agent team locally, stage by stage (order and effort from `agents/agents.json` via `tools/pipeline/stages.py`), each agent in `.worktrees/<name>` on `agent/<name>`. See `tools/pipeline/README.md`.
+
 ## Scoring rules (must stay exactly like this)
 - Points in a game: **0 (said "love"), 15, 30, 40**. The board shows `0`; the umpire call line says `LOVE`.
 - 40–40 is **DEUCE**. Next point gives advantage: **AD IN** if the server leads, **AD OUT** if the receiver leads. The player with advantage shows `AD` (highlighted ball-yellow), the other shows blank. Winning the next point after AD wins the game; losing it returns to DEUCE.

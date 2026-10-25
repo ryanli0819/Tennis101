@@ -5,3 +5,5 @@
 datasets/**/*.mov
 datasets/**/*.mp4
 datasets/**/*.m4v
+.worktrees/
+.pipeline/

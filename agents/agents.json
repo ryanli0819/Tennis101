@@ -1,5 +1,5 @@
 {
-  "_about": "Single source of truth for the agent team. Read by agents/dashboard.html (live view) and data/build_db.py (SQLite). Keep agents/README.md in sync when you change it.",
+  "_about": "Single source of truth for the agent team. Read by agents/dashboard.html (live view) and data/build_db.py (SQLite). Keep agents/README.md in sync when you change it. 'effort' (high/medium/low) is the reasoning effort tools/pipeline/cwork.zsh gives each agent.",
   "repo": "ryanli0819/Tennis101",
   "timezone": "America/New_York",
   "agents": [
@@ -17,7 +17,8 @@
         "court-designer",
         "serve-controller"
       ],
-      "contract": "launchBall · stepBall · onBounce · onNet"
+      "contract": "launchBall · stepBall · onBounce · onNet",
+      "effort": "high"
     },
     {
       "name": "court-designer",
@@ -34,7 +35,8 @@
       "feeds": [
         "start-page-builder"
       ],
-      "contract": "drawCourt(surface) · drawNet · drawBall"
+      "contract": "drawCourt(surface) · drawNet · drawBall",
+      "effort": "medium"
     },
     {
       "name": "player-artist",
@@ -48,7 +50,8 @@
       "feeds": [
         "locker-room-designer"
       ],
-      "contract": "draws getPose(i) + racket"
+      "contract": "draws getPose(i) + racket",
+      "effort": "high"
     },
     {
       "name": "serve-analyst",
@@ -68,7 +71,8 @@
         "player-artist",
         "serve-controller"
       ],
-      "contract": "SERVE_MOTIONS[player] = { first, second }"
+      "contract": "SERVE_MOTIONS[player] = { first, second }",
+      "effort": "high"
     },
     {
       "name": "serve-controller",
@@ -83,7 +87,8 @@
       "feeds": [
         "guide-writer"
       ],
-      "contract": "serve input → { toss, power, spin, target, sweetSpot }"
+      "contract": "serve input → { toss, power, spin, target, sweetSpot }",
+      "effort": "high"
     },
     {
       "name": "version-keeper",
@@ -97,7 +102,8 @@
         "versions/"
       ],
       "feeds": [],
-      "contract": "CHANGELOG · contemporary/ · git tags"
+      "contract": "CHANGELOG · contemporary/ · git tags",
+      "effort": "low"
     },
     {
       "name": "body-animator",
@@ -111,7 +117,8 @@
       "feeds": [
         "player-artist"
       ],
-      "contract": "getPose(i) · playMotion(i, frames)"
+      "contract": "getPose(i) · playMotion(i, frames)",
+      "effort": "high"
     },
     {
       "name": "controls-designer",
@@ -127,7 +134,8 @@
         "guide-writer",
         "serve-controller"
       ],
-      "contract": "CONTROL_SCHEMES · getMoveInput()"
+      "contract": "CONTROL_SCHEMES · getMoveInput()",
+      "effort": "medium"
     },
     {
       "name": "start-page-builder",
@@ -139,7 +147,8 @@
         "src/start/"
       ],
       "feeds": [],
-      "contract": "match setup → match screen"
+      "contract": "match setup → match screen",
+      "effort": "medium"
     },
     {
       "name": "guide-writer",
@@ -153,7 +162,8 @@
       "feeds": [
         "start-page-builder"
       ],
-      "contract": "How to play"
+      "contract": "How to play",
+      "effort": "low"
     },
     {
       "name": "skills-coach",
@@ -169,7 +179,8 @@
         "serve-controller",
         "ball-physicist"
       ],
-      "contract": "getSkills(id) · applySkills(body, skills)"
+      "contract": "getSkills(id) · applySkills(body, skills)",
+      "effort": "medium"
     },
     {
       "name": "locker-room-designer",
@@ -183,7 +194,8 @@
       "feeds": [
         "start-page-builder"
       ],
-      "contract": "Lockerroom.render(el, …)"
+      "contract": "Lockerroom.render(el, …)",
+      "effort": "medium"
     }
   ]
 }

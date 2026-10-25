@@ -56,6 +56,9 @@ Keep these stable. Change one only in your own PR, and say so in its description
 - `CLAUDE.md` lists the home page last. Ryan moved the start page up, so Start Page Builder builds it now.
 - The HUD no longer shows player speed (Ryan's call). Do not add speed readouts back.
 
+## Running the team locally
+`tools/pipeline/cwork.zsh` runs the same agents on Ryan's Mac, stage by stage, in tmux panes (or in the background), each in its own git worktree with the effort level from `agents.json`. See `tools/pipeline/README.md`. Same rules: own branch, PR only, never merge.
+
 ## Website
 GitHub Pages publishes `main` at https://ryanli0819.github.io/Tennis101/ and rebuilds it after every push, so every merged PR is live within minutes. Keep `main` playable: never merge a PR that breaks the page.
 
