@@ -180,7 +180,7 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
     <div class="hud-top"><b>ALCARAZ</b><span id="spec1"></span></div>
     <div class="bar"><i id="st1" style="background:var(--alcaraz)"></i><span class="cap" id="cap1"></span></div>
   </div>
-  <div class="hud-top"><span id="spd">0.0 M/S</span><span class="hud-msg" id="hudMsg" aria-live="polite"></span></div>
+  <div class="hud-msg" id="hudMsg" aria-live="polite"></div>
   <div class="hud-hint" id="hint">ARROWS MOVE · SHIFT SPLIT-STEP</div>
 </aside>
 <div class="stick" id="stick" hidden><i id="knob"></i></div>
@@ -762,18 +762,14 @@ function drawReach() {
 }
 
 const hudEls = [0, 1].map(i => ({ st: document.getElementById("st" + i), cap: document.getElementById("cap" + i) }));
-const spdEl = document.getElementById("spd");
 function renderHud() {
   [0, 1].forEach(i => {
     hudEls[i].st.style.width = pos[i].stam.toFixed(1) + "%";
     hudEls[i].cap.style.left = `calc(${pos[i].cap.toFixed(1)}% - 2px)`;
   });
-  spdEl.textContent = `${Math.hypot(pos[0].vx, pos[0].vy).toFixed(1)} M/S`;
 }
 [0, 1].forEach(i => {
-  const B = BODY[i];
-  document.getElementById("spec" + i).textContent = `${PLAYERS[i].heightM} M · ${PLAYERS[i].weightKg} KG · ${B.top.toFixed(1)} M/S`;
-  document.getElementById("spec" + i).title = `Top speed ${B.top.toFixed(2)} m/s · first step ${B.accel.toFixed(1)} m/s² · brake ${B.brake.toFixed(1)} m/s² · reach ${B.reach.toFixed(2)} m`;
+  document.getElementById("spec" + i).textContent = `${PLAYERS[i].heightM} M · ${PLAYERS[i].weightKg} KG`;
 });
 
 /* =====================================================================
