@@ -1,0 +1,365 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tennis101 Project Story</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Silkscreen&display=swap">
+<style>
+/* Interview deck: how Tennis101 was figured out, step by step. Arrow keys / space / click to move.
+   Charts and skeletons are drawn from the project's own data files, so the deck never goes stale. */
+:root {
+  --night: #0a1120; --panel: #0e1729; --panel-2: #16233c; --line: #2a3b5e; --ink: #eef3fb; --muted: #8b9cbc;
+  --ball: #d8ee4c; --sinner: #23b59c; --alcaraz: #e2544a; --blue: #5aa9ff;
+  --f-name: "Barlow Condensed", "Arial Narrow", sans-serif; --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace; --f-pix: "Silkscreen", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--night); color: var(--ink); font: 17px/1.45 var(--f-mono); overflow: hidden; }
+.deck { position: fixed; inset: 0; }
+.slide { position: absolute; inset: 0; padding: clamp(20px, 5vw, 64px) clamp(16px, 6vw, 88px) 84px; display: none; flex-direction: column; gap: 18px; overflow-y: auto; }
+.slide.on { display: flex; }
+.eyebrow { font: 10px var(--f-pix); letter-spacing: .12em; color: var(--ball); margin: 0; }
+h1 { font: 700 clamp(44px, 9vw, 104px)/.95 var(--f-name); margin: 0; letter-spacing: .005em; }
+h2 { font: 700 clamp(30px, 5vw, 54px)/1 var(--f-name); margin: 0; text-wrap: balance; }
+h3 { font: 600 22px/1.1 var(--f-name); margin: 0 0 6px; letter-spacing: .02em; }
+p { margin: 0; max-width: 64ch; }
+.lead { font-size: clamp(17px, 2vw, 22px); color: var(--muted); }
+.muted { color: var(--muted); }
+.hl { color: var(--ball); }
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+.card p, .card li { font-size: 15px; }
+ul, ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+table { border-collapse: collapse; font-size: 15px; }
+th, td { padding: 7px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+th { color: var(--muted); font-weight: 400; }
+td.n { font-variant-numeric: tabular-nums; text-align: right; }
+.flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.flow .step { background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 10px 12px; font-size: 14px; flex: 1 1 130px; }
+.flow .step b { display: block; font: 600 18px var(--f-name); margin-bottom: 3px; }
+.flow .arrow { align-self: center; color: var(--ball); }
+.links a { color: var(--ball); }
+canvas { display: block; width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+#heroServe { max-width: 760px; }
+.cap { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.quote { border-left: 3px solid var(--ball); padding: 4px 0 4px 14px; font-size: clamp(18px, 2.2vw, 24px); }
+svg text { font-family: var(--f-mono); }
+nav { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 12px clamp(16px, 4vw, 40px); background: linear-gradient(transparent, var(--night) 40%); }
+nav button { font: 600 15px var(--f-name); letter-spacing: .05em; text-transform: uppercase; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 7px 14px; cursor: pointer; }
+nav button:focus-visible, a:focus-visible { outline: 2px solid var(--ball); outline-offset: 2px; }
+.bar { flex: 1; height: 3px; background: var(--panel-2); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--ball); width: 0; }
+#count { font: 11px var(--f-pix); color: var(--muted); min-width: 52px; text-align: right; }
+@media print { body { overflow: visible; } .deck { position: static; } .slide { position: relative; display: flex; page-break-after: always; min-height: 100vh; } nav { display: none; } }
+</style>
+
+<div class="deck" id="deck">
+
+<!-- 1 · TITLE -->
+<section class="slide" aria-label="Title">
+  <p class="eyebrow">PROJECT STORY · RYAN LI · OCTOBER 2026</p>
+  <h1>Tennis101</h1>
+  <p class="lead">A tennis game where you play inside a real pro's body. Height, weight and reach change how you move, serve and tire.</p>
+  <canvas id="heroServe" width="900" height="420" aria-label="Sinner's real serve, played back as joint dots"></canvas>
+  <p class="cap">Above: Jannik Sinner's real first serve, captured from video, cleaned, and replayed as joint dots. The same data now drives him in the game.</p>
+</section>
+
+<!-- 2 · PROBLEM -->
+<section class="slide" aria-label="The problem">
+  <p class="eyebrow">01 · THE PROBLEM</p>
+  <h2>In most tennis games, every pro plays the same.</h2>
+  <div class="grid">
+    <div class="card"><h3>Animation lock</h3><p>Press a button and the game carries you to the ball. Footwork doesn't matter.</p></div>
+    <div class="card"><h3>Same body</h3><p>A 1.91 m player and a 1.83 m player move identically. Only the ratings change.</p></div>
+    <div class="card"><h3>Free stamina</h3><p>Energy refills every point, so a 4-hour match feels like the first game.</p></div>
+  </div>
+  <p class="quote">My rule: <span class="hl">every physical trait is a trade-off you can feel</span>, never just a bigger number.</p>
+</section>
+
+<!-- 3 · PLAN -->
+<section class="slide" aria-label="The plan">
+  <p class="eyebrow">02 · HOW I PLANNED IT</p>
+  <h2>A build order from my notebook</h2>
+  <p class="lead">I broke the game into eight steps and build them in order, so each step stands on a working one.</p>
+  <table>
+    <tr><th>#</th><th>Step</th><th>Status</th></tr>
+    <tr><td>1</td><td>Match screen + scoreboard (full tennis scoring)</td><td class="hl">done · v0.1</td></tr>
+    <tr><td>2</td><td>Footsteps: you move your own body, split-step, momentum</td><td class="hl">done · v0.2</td></tr>
+    <tr><td>3–4</td><td>Positioning, ball hitting (timing + contact point)</td><td>agents building</td></tr>
+    <tr><td>5–7</td><td>Returns, rally, volleys</td><td>next</td></tr>
+    <tr><td>8</td><td>Home page</td><td>agents building (moved up)</td></tr>
+    <tr><td>+</td><td>Real serve motion from video</td><td class="hl">first version in game</td></tr>
+  </table>
+</section>
+
+<!-- 4 · PHYSICS -->
+<section class="slide" aria-label="Bodies that obey physics">
+  <p class="eyebrow">03 · BODIES THAT OBEY PHYSICS</p>
+  <h2>Height and weight become movement</h2>
+  <div class="pair">
+    <div>
+      <table>
+        <tr><th></th><th style="color:var(--sinner)">Sinner</th><th style="color:var(--alcaraz)">Alcaraz</th></tr>
+        <tr><td>Height · weight</td><td class="n">1.91 m · 77 kg</td><td class="n">1.83 m · 74 kg</td></tr>
+        <tr><td>Top speed</td><td class="n hl">5.35 m/s</td><td class="n">5.29 m/s</td></tr>
+        <tr><td>First step</td><td class="n">6.7 m/s²</td><td class="n hl">7.1 m/s²</td></tr>
+        <tr><td>Braking</td><td class="n">8.8 m/s²</td><td class="n hl">9.1 m/s²</td></tr>
+        <tr><td>Reach</td><td class="n hl">1.53 m</td><td class="n">1.50 m</td></tr>
+      </table>
+      <p class="cap">Longer legs → longer stride → higher top speed. More mass → slower to start and stop.</p>
+    </div>
+    <div class="card">
+      <h3>What the player feels</h3>
+      <ul>
+        <li><b>Momentum:</b> to change direction you must brake first, so you can be wrong-footed.</li>
+        <li><b>Split-step:</b> land it within ±0.07 s of the opponent's hit for a 1.8× first step.</li>
+        <li><b>Stamina:</b> only 35% comes back between points; the ceiling drops all match.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · AGENTS -->
+<section class="slide" aria-label="A team of agents">
+  <p class="eyebrow">04 · SCALING MYSELF</p>
+  <h2>A team of 10 AI agents, one job each</h2>
+  <p class="lead">Each agent runs every night in the cloud, owns one folder, and talks to the others through contracts and GitHub issues.</p>
+  <svg id="team" viewBox="0 0 900 300" role="img" aria-label="Agent workflow"></svg>
+  <p class="links">Live view of what each agent is doing: <a href="../agents/dashboard.html">Agent Control Room</a></p>
+</section>
+
+<!-- 6 · GUARDRAILS -->
+<section class="slide" aria-label="How changes ship">
+  <p class="eyebrow">05 · GUARDRAILS</p>
+  <h2>How a change ships safely</h2>
+  <div class="flow">
+    <div class="step"><b>Own branch</b>agent/serve-analyst</div><span class="arrow">→</span>
+    <div class="step"><b>Pull request</b>with how to try it</div><span class="arrow">→</span>
+    <div class="step"><b>I review</b>agents never merge</div><span class="arrow">→</span>
+    <div class="step"><b>main</b>always playable</div><span class="arrow">→</span>
+    <div class="step"><b>Website</b>auto-deploys in ~1 min</div><span class="arrow">→</span>
+    <div class="step"><b>Version</b>published at 5+ changes</div>
+  </div>
+  <div class="grid">
+    <div class="card"><h3>Contracts</h3><p>Agents agree on interfaces (<code>launchBall</code>, <code>getPose</code>, <code>SERVE_MOTIONS</code>) instead of editing each other's code.</p></div>
+    <div class="card"><h3>Memory</h3><p>Each run starts fresh, so every agent keeps a log in its folder. The log is how it knows where it stopped.</p></div>
+    <div class="card"><h3>Version history</h3><p>Small changes wait in <code>contemporary/</code>; five of them become one version with a playable copy.</p></div>
+  </div>
+</section>
+
+<!-- 7 · CAPTURE PIPELINE -->
+<section class="slide" aria-label="Capturing a real serve">
+  <p class="eyebrow">06 · MOTION CAPTURE</p>
+  <h2>From a screen recording to a playable serve</h2>
+  <div class="flow">
+    <div class="step"><b>Record</b>Sinner's serve, front + overhead</div><span class="arrow">→</span>
+    <div class="step"><b>Detect</b>Apple Vision finds 19 joints per frame</div><span class="arrow">→</span>
+    <div class="step"><b>Track</b>pick Sinner out of the crowd</div><span class="arrow">→</span>
+    <div class="step"><b>Clean</b>fix swaps, overlaps, bad joints</div><span class="arrow">→</span>
+    <div class="step"><b>Export</b>body heights, mirrored</div><span class="arrow">→</span>
+    <div class="step"><b>Play</b>drives Sinner in game</div>
+  </div>
+  <p class="muted">Raw video stays on my laptop (it's TV footage). Only joint numbers go to GitHub.</p>
+</section>
+
+<!-- 8 · BUG + INSIGHT -->
+<section class="slide" aria-label="The bug and the insight">
+  <p class="eyebrow">07 · THE BUG I CAUGHT</p>
+  <h2>At the toss, the skeleton fell apart</h2>
+  <div class="pair">
+    <div><canvas id="rawPose" width="420" height="460" aria-label="Raw detection at the toss"></canvas><p class="cap">Raw, frame 60: neck and shoulders jump onto the raised hand, so the torso stretches up to the ball.</p></div>
+    <div><canvas id="cleanPose" width="420" height="460" aria-label="Cleaned pose at the toss"></canvas><p class="cap">Cleaned: the torso is the right length and the tossing arm on top reaches up. Hollow dots were rebuilt.</p></div>
+  </div>
+  <p class="quote">My fix: when the arms fold or overlap, <span class="hl">whichever arm is on top is the one that's shown.</span></p>
+</section>
+
+<!-- 9 · SQL -->
+<section class="slide" aria-label="Organizing the data with SQL">
+  <p class="eyebrow">08 · ORGANIZING THE DATA</p>
+  <h2>One SQLite database for everything</h2>
+  <svg id="schema" viewBox="0 0 930 330" role="img" aria-label="Database tables and how they connect"></svg>
+  <p class="muted">The files stay the source of truth; <code>build_db.py</code> rebuilds the database from them every time, so it can't drift. <a class="hl" href="sql-explorer.html">Run the queries live →</a></p>
+</section>
+
+<!-- 10 · FINDINGS -->
+<section class="slide" aria-label="What the data showed">
+  <p class="eyebrow">09 · WHAT THE DATA SHOWED</p>
+  <h2>The detector fails exactly when the arms go up</h2>
+  <svg id="failChart" viewBox="0 0 900 300" role="img" aria-label="Share of joints dropped by the cleaner, per serve phase"></svg>
+  <p class="cap">Share of detected joints the cleaner had to throw away, per serve phase (query Q2). Head and arms collapse at the trophy position and racket drop: the arm-in-front-of-the-face problem, measured.</p>
+</section>
+
+<!-- 11 · RESULT -->
+<section class="slide" aria-label="Result">
+  <p class="eyebrow">10 · RESULT</p>
+  <h2>Sinner now serves like Sinner</h2>
+  <div class="grid">
+    <div class="card"><h3 class="hl">2.95 m</h3><p>Contact height in the game, from his captured motion scaled to 1.91 m. Realistic for a pro.</p></div>
+    <div class="card"><h3 class="hl">0.65 s</h3><p>From toss release to contact, taken from the video and solved as one real throw under gravity.</p></div>
+    <div class="card"><h3 class="hl">30 / 30</h3><p>Test serves struck cleanly in an automated run, with no errors.</p></div>
+  </div>
+  <p class="links">Try it: <a href="../index.html">play the game</a> · <a href="../datasets/serves/viewer.html">serve viewer</a> · <a href="../agents/dashboard.html">agent dashboard</a></p>
+</section>
+
+<!-- 12 · LEARNED -->
+<section class="slide" aria-label="What I learned and what's next">
+  <p class="eyebrow">11 · WHAT I LEARNED</p>
+  <h2>What I learned, and what's next</h2>
+  <div class="pair">
+    <div class="card"><h3>Learned</h3><ul>
+      <li>Look at the data before trusting it: raw pose looked fine until I watched frame 60.</li>
+      <li>Rules beat guesses: one clear rule (arm on top is shown) fixed most frames.</li>
+      <li>Parallel work needs contracts and ownership, or agents overwrite each other.</li>
+      <li>Store data so you can ask questions of it: SQL turned a hunch into a number.</li>
+    </ul></div>
+    <div class="card"><h3>Next</h3><ul>
+      <li>Serve control: toss height, power and aim in one motion; sweet spot; spin.</li>
+      <li>Real ball physics with surface-specific bounces.</li>
+      <li>More pros, each with their own captured serve.</li>
+      <li>First-person camera at the pro's real eye height.</li>
+    </ul></div>
+  </div>
+  <p class="links">Code: <a href="https://github.com/ryanli0819/Tennis101">github.com/ryanli0819/Tennis101</a> · Code tour: <a href="https://github.com/ryanli0819/Tennis101/blob/main/presentation/CODE_TOUR.md">CODE_TOUR.md</a></p>
+</section>
+
+</div>
+
+<nav aria-label="Slides">
+  <button id="prev" type="button">← Back</button>
+  <div class="bar"><i id="prog"></i></div>
+  <span id="count"></span>
+  <button id="next" type="button">Next →</button>
+</nav>
+
+<script>
+/* ---------------- slide navigation ---------------- */
+const slides = [...document.querySelectorAll(".slide")];
+let cur = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1)) || 1) - 1));
+function show(n) {
+  cur = Math.max(0, Math.min(slides.length - 1, n));
+  slides.forEach((s, i) => s.classList.toggle("on", i === cur));
+  document.getElementById("count").textContent = `${cur + 1} / ${slides.length}`;
+  document.getElementById("prog").style.width = `${(cur + 1) / slides.length * 100}%`;
+  history.replaceState(null, "", "#" + (cur + 1));
+}
+document.getElementById("prev").onclick = () => show(cur - 1);
+document.getElementById("next").onclick = () => show(cur + 1);
+addEventListener("keydown", e => {
+  if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+  if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+});
+addEventListener("hashchange", () => { const n = (parseInt(location.hash.slice(1)) || 1) - 1; if (n !== cur) show(n); });
+show(cur);
+
+const C = { ink: "#eef3fb", muted: "#8b9cbc", line: "#2a3b5e", panel: "#0e1729", panel2: "#16233c", ball: "#d8ee4c", left: "#23b59c", right: "#d8ee4c" };
+const BONES = [["nose","neck"],["neck","leftShoulder"],["neck","rightShoulder"],["leftShoulder","leftElbow"],["leftElbow","leftWrist"],
+  ["rightShoulder","rightElbow"],["rightElbow","rightWrist"],["neck","root"],["root","leftHip"],["root","rightHip"],
+  ["leftHip","leftKnee"],["leftKnee","leftAnkle"],["rightHip","rightKnee"],["rightKnee","rightAnkle"]];
+const colOf = n => n.startsWith("left") ? C.left : n.startsWith("right") ? C.right : C.ink;
+
+/* ---------------- skeletons from the real keypoint file (slides 1 and 8) ---------------- */
+function drawSkeleton(cv, J, est, box) {
+  const g = cv.getContext("2d"), W = cv.width, H = cv.height;
+  g.fillStyle = C.panel; g.fillRect(0, 0, W, H);
+  const P = {};
+  for (const [n, v] of Object.entries(J)) P[n] = [(v[0] - box.x0) / (box.x1 - box.x0) * W, (v[1] - box.y0) / (box.y1 - box.y0) * H];
+  g.lineWidth = 4; g.lineCap = "round";
+  for (const [a, b] of BONES) if (P[a] && P[b]) { g.strokeStyle = a === "neck" || a === "root" ? colOf(b) : colOf(a); g.beginPath(); g.moveTo(...P[a]); g.lineTo(...P[b]); g.stroke(); }
+  for (const [n, [x, y]] of Object.entries(P)) {
+    g.beginPath(); g.arc(x, y, 6, 0, 7);
+    if (est.has(n)) { g.fillStyle = C.panel; g.fill(); g.strokeStyle = colOf(n); g.lineWidth = 2.5; g.stroke(); g.lineWidth = 4; }
+    else { g.fillStyle = colOf(n); g.fill(); }
+  }
+}
+fetch("../datasets/serves/sinner/front.keypoints.json").then(r => r.json()).then(d => {
+  const f = d.frames[60], box = { x0: 0.2, x1: 0.8, y0: 0.05, y1: 0.98 };
+  const pick = (o, min) => Object.fromEntries(Object.entries(o).filter(([, v]) => v[2] >= min));
+  drawSkeleton(document.getElementById("rawPose"), pick(f.joints, 0.3), new Set(), box);
+  drawSkeleton(document.getElementById("cleanPose"), f.clean, new Set(f.estimated || []), box);
+}).catch(() => {});
+
+/* hero: replay the exported game motion (body heights, seen from behind) as dots, looping */
+const hero = document.getElementById("heroServe");
+const s = document.createElement("script"); s.src = "../src/serve/motion/sinner-serve.js";
+s.onload = () => {
+  const m = window.SERVE_MOTIONS.sinner.first, g = hero.getContext("2d"), still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let t = m.events.trophy, last = performance.now();
+  function frame(now) {
+    if (!still) { t += (now - last) / 1000 * 0.5; if (t > m.events.finish) t = m.events.start; }
+    last = now;
+    let k = m.frames.findIndex(f => f.t >= t); if (k < 0) k = m.frames.length - 1;
+    const J = m.frames[k].j, W = hero.width, H = hero.height, sc = H / 1.45, ox = W / 2, gy = H - 24;
+    g.fillStyle = C.panel; g.fillRect(0, 0, W, H);
+    g.strokeStyle = C.line; g.beginPath(); g.moveTo(40, gy); g.lineTo(W - 40, gy); g.stroke();
+    const P = {}; for (const n in J) P[n] = [ox + J[n][0] * sc, gy - J[n][1] * sc];
+    g.lineWidth = 4; g.lineCap = "round";
+    for (const [a, b] of BONES) if (P[a] && P[b]) { g.strokeStyle = a === "neck" || a === "root" ? colOf(b) : colOf(a); g.beginPath(); g.moveTo(...P[a]); g.lineTo(...P[b]); g.stroke(); }
+    for (const n in P) { g.fillStyle = colOf(n); g.beginPath(); g.arc(...P[n], 5, 0, 7); g.fill(); }
+    g.fillStyle = C.muted; g.font = "13px IBM Plex Mono, monospace";
+    const ph = t < m.events.tossRelease ? "toss" : t < m.events.trophy ? "rising" : t < m.events.contact ? "trophy → racket drop" : "contact → landing";
+    g.fillText(`t = ${t.toFixed(2)} s · ${ph}`, 20, 28);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+};
+document.head.appendChild(s);
+
+/* ---------------- agent workflow (from agents/agents.json) ---------------- */
+fetch("../agents/agents.json").then(r => r.json()).then(reg => {
+  const A = reg.agents.filter(a => a.name !== "version-keeper"), depth = {};
+  const d = n => depth[n] ?? (depth[n] = Math.max(0, ...A.filter(a => a.feeds.includes(n)).map(a => d(a.name) + 1)));
+  A.forEach(a => d(a.name));
+  const cols = []; A.forEach(a => (cols[depth[a.name]] = cols[depth[a.name]] || []).push(a));
+  const pos = {}, w = 190, h = 44;
+  cols.forEach((c, x) => c.sort((p, q) => p.order - q.order).forEach((a, y) => (pos[a.name] = { x: 10 + x * 225, y: 10 + y * 62 })));
+  let out = `<defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#5d73a3"/></marker></defs>`;
+  for (const a of A) for (const t of a.feeds) { const p = pos[a.name], q = pos[t]; if (!q) continue;
+    const x1 = p.x + w, y1 = p.y + h / 2, x2 = q.x, y2 = q.y + h / 2, mx = (x1 + x2) / 2;
+    out += `<path d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2 - 2},${y2}" stroke="#3c5180" stroke-width="1.6" fill="none" marker-end="url(#m)"/>`; }
+  for (const a of A) { const p = pos[a.name];
+    out += `<rect x="${p.x}" y="${p.y}" width="${w}" height="${h}" rx="6" fill="${C.panel2}" stroke="${C.line}"/><text x="${p.x + 12}" y="${p.y + 27}" fill="${C.ink}" font-size="15" style="font-family:Barlow Condensed;font-weight:600">${a.title}</text>`; }
+  const vy = 10 + Math.max(...cols.map(c => c.length)) * 62 + 6;
+  out += `<rect x="10" y="${vy}" width="${(cols.length - 1) * 225 + w}" height="34" rx="6" fill="none" stroke="${C.ball}" stroke-dasharray="4 4"/><text x="22" y="${vy + 22}" fill="${C.ball}" font-size="14" style="font-family:Barlow Condensed;font-weight:600">Version Keeper — records every change that lands on main</text>`;
+  const svg = document.getElementById("team"); svg.setAttribute("viewBox", `0 0 ${(cols.length - 1) * 225 + w + 20} ${vy + 44}`); svg.innerHTML = out;
+}).catch(() => {});
+
+/* ---------------- schema diagram ---------------- */
+(function schema() {
+  const T = [
+    ["players", 20, 20, ["id", "height_m", "weight_kg"]], ["clips", 250, 20, ["id", "player_id → players", "view", "toss_until"]],
+    ["frames", 480, 20, ["clip_id → clips", "frame_index", "t_sec", "body_scale", "is_keyframe"]],
+    ["joints", 710, 20, ["frame → frames", "joint → joint_names", "kind: raw | clean", "x, y, confidence", "estimated"]],
+    ["serve_phases", 480, 190, ["clip_id → clips", "phase", "start / end frame"]], ["cleaning_fixes", 710, 190, ["frame → frames", "fix"]],
+    ["agents", 20, 170, ["name", "runs_at_hour", "contract"]], ["agent_feeds", 250, 170, ["from_agent → agents", "to_agent → agents"]],
+    ["versions", 20, 270, ["version", "published"]], ["version_notes", 250, 270, ["version → versions", "note"]]];
+  let out = "";
+  for (const [name, x, y, cols] of T) {
+    const hgt = 26 + cols.length * 17;
+    out += `<rect x="${x}" y="${y}" width="200" height="${hgt}" rx="6" fill="${C.panel}" stroke="${C.line}"/>
+      <rect x="${x}" y="${y}" width="200" height="24" rx="6" fill="${C.panel2}"/><text x="${x + 10}" y="${y + 17}" fill="${C.ball}" font-size="13">${name}</text>`;
+    cols.forEach((c, i) => (out += `<text x="${x + 10}" y="${y + 41 + i * 17}" fill="${C.muted}" font-size="11.5">${c}</text>`));
+  }
+  const svg = document.getElementById("schema"); svg.innerHTML = out;
+})();
+
+/* ---------------- detector failure chart (Q2 results, dropped % per phase) ---------------- */
+(function failChart() {
+  // From data/query_results.md, Q2 "Where does the pose detector fail?"
+  const phases = ["setup", "toss", "trophy", "racket drop", "contact", "landing"];
+  const series = { head: [4, 24, 98, 100, 67, 29], arm: [0, 8, 48, 91, 88, 37], leg: [0, 0, 7, 0, 44, 17] };
+  const color = { head: "#d8ee4c", arm: "#23b59c", leg: "#5aa9ff" };
+  const W = 900, H = 300, L = 46, B = 250, T = 20, gw = (W - L - 10) / phases.length, bw = 22;
+  let out = "";
+  for (const v of [0, 50, 100]) { const y = B - (B - T) * v / 100;
+    out += `<line x1="${L}" x2="${W - 10}" y1="${y}" y2="${y}" stroke="${C.line}"/><text x="${L - 8}" y="${y + 4}" fill="${C.muted}" font-size="11" text-anchor="end">${v}%</text>`; }
+  phases.forEach((p, i) => {
+    const cx = L + gw * i + gw / 2;
+    Object.keys(series).forEach((k, j) => { const v = series[k][i], hgt = (B - T) * v / 100, x = cx + (j - 1) * (bw + 4) - bw / 2;
+      out += `<rect x="${x}" y="${B - hgt}" width="${bw}" height="${Math.max(1, hgt)}" rx="2" fill="${color[k]}"><title>${p} · ${k}: ${v}% dropped</title></rect>`; });
+    out += `<text x="${cx}" y="${B + 20}" fill="${C.ink}" font-size="13" text-anchor="middle">${p}</text>`;
+  });
+  Object.keys(series).forEach((k, j) => (out += `<rect x="${L + 10 + j * 90}" y="${H - 18}" width="10" height="10" fill="${color[k]}"/><text x="${L + 26 + j * 90}" y="${H - 9}" fill="${C.muted}" font-size="12">${k}</text>`));
+  document.getElementById("failChart").innerHTML = out;
+})();
+</script>

@@ -1,0 +1,79 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tennis101 SQL Explorer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Silkscreen&display=swap">
+<style>
+/* Runs real SQL against data/tennis101.sqlite inside the browser (sql.js = SQLite compiled to WebAssembly).
+   Nothing is sent to a server: the database file is downloaded and queried locally. */
+:root { --night:#0a1120; --panel:#0e1729; --panel-2:#16233c; --line:#2a3b5e; --ink:#eef3fb; --muted:#8b9cbc; --ball:#d8ee4c; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--night); color: var(--ink); font: 13px/1.45 "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 48px; display: grid; gap: 14px; }
+h1 { margin: 0; font: 700 32px/1 "Barlow Condensed", sans-serif; }
+h1 small { display: block; font: 9px Silkscreen, monospace; letter-spacing: .1em; color: var(--ball); margin-bottom: 8px; }
+p { margin: 0; color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+select, button, textarea { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 5px; }
+select, button { padding: 7px 10px; cursor: pointer; }
+button.primary { background: var(--ball); color: var(--night); border-color: var(--ball); font-weight: 500; }
+select:focus-visible, button:focus-visible, textarea:focus-visible { outline: 2px solid var(--ball); outline-offset: 2px; }
+textarea { width: 100%; min-height: 220px; padding: 10px; resize: vertical; line-height: 1.5; }
+.out { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { position: sticky; top: 0; background: var(--panel-2); color: var(--ball); font-weight: 500; }
+.status { color: var(--muted); }
+.err { color: #ff8a7a; }
+.tables { display: flex; flex-wrap: wrap; gap: 6px; }
+.tables button { font-size: 12px; padding: 4px 8px; }
+</style>
+<main>
+  <div>
+    <h1><small>TENNIS101 · DATA</small>SQL Explorer</h1>
+    <p>Every player, agent, serve frame, joint, cleaning fix and version, in one SQLite database (<code>data/tennis101.sqlite</code>). Pick a saved question or write your own. It runs right here in your browser.</p>
+  </div>
+  <div class="row">
+    <select id="preset" aria-label="Saved questions"></select>
+    <button class="primary" id="run" type="button">Run ▸ (Ctrl+Enter)</button>
+    <span class="status" id="status">Loading database…</span>
+  </div>
+  <div class="tables" id="tables" aria-label="Tables"></div>
+  <textarea id="sql" spellcheck="false" aria-label="SQL"></textarea>
+  <div class="out"><table id="result"></table></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<script>
+const QUERIES = ["01_serve_timeline", "02_where_the_detector_fails", "03_toss_height", "04_what_the_cleaner_fixed", "05_agent_workflow", "06_version_history"];
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+let db;
+
+async function boot() {
+  const SQL = await initSqlJs({ locateFile: f => "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/" + f });
+  const buf = await (await fetch("../data/tennis101.sqlite")).arrayBuffer();
+  db = new SQL.Database(new Uint8Array(buf));
+  // saved questions come straight from data/queries/*.sql, so this page and the repo never disagree
+  const texts = await Promise.all(QUERIES.map(q => fetch(`../data/queries/${q}.sql`).then(r => r.text())));
+  $("preset").innerHTML = texts.map((t, i) => `<option value="${i}">${esc(t.split("\n")[0].replace(/^--\s*/, ""))}</option>`).join("");
+  $("preset").onchange = () => { $("sql").value = texts[$("preset").value]; run(); };
+  const tables = db.exec("SELECT name, type FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY type, name")[0].values;
+  $("tables").innerHTML = tables.map(([n, t]) => `<button type="button" data-n="${n}" title="${t}">${t === "view" ? "◇ " : ""}${n}</button>`).join("");
+  $("tables").onclick = e => { const n = e.target.dataset.n; if (n) { $("sql").value = `SELECT * FROM ${n} LIMIT 50;`; run(); } };
+  $("sql").value = texts[0]; run();
+}
+function run() {
+  const t0 = performance.now();
+  try {
+    const res = db.exec($("sql").value);
+    const r = res[res.length - 1];
+    $("result").innerHTML = r ? `<thead><tr>${r.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${
+      r.values.map(v => `<tr>${v.map(x => `<td>${esc(typeof x === "number" && !Number.isInteger(x) ? +x.toFixed(4) : x)}</td>`).join("")}</tr>`).join("")}</tbody>` : "";
+    $("status").className = "status";
+    $("status").textContent = r ? `${r.values.length} rows · ${(performance.now() - t0).toFixed(1)} ms` : "Done (no rows).";
+  } catch (e) { $("status").className = "err"; $("status").textContent = e.message; $("result").innerHTML = ""; }
+}
+$("run").onclick = run;
+$("sql").addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); run(); } });
+boot().catch(e => { $("status").className = "err"; $("status").textContent = "Could not load: " + e.message; });
+</script>
