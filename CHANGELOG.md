@@ -4,6 +4,14 @@ Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it 
 
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). Agent 6 manages this (rules: `docs/agents/prompts/6-version-history.md`).
 
+## v0.3.0 — Oct 25, 2026, 2 PM
+- The game opens on a welcome page: choose best of 3 or 5, then grass, red clay or hard, then enter the locker room and pick your pro. (Oct 25, 2 PM · Claude for Ryan, a2c842d)
+- Skill points: 8 skills from 1 to 20, where every point adds the same step (for example, +2% top speed per Speed point). (Oct 25, 2 PM · Claude for Ryan, a2c842d)
+- WASD controls: W toward the net, S back, A left, D right. How fast you move comes from the body and the Speed skill. (Oct 25, 2 PM · Claude for Ryan, a2c842d)
+- Volleys out of the air, and a net camera that moves in when you pass the service line. (Oct 25, 2 PM · Claude for Ryan, a2c842d)
+- Grass, red clay and hard courts change colour, pace and bounce height. (Oct 25, 2 PM · Claude for Ryan, a2c842d)
+- Sinner serves with his real, captured motion: toss from his hand, contact at about 2.95 m. (Oct 25, 1 AM · Claude for Ryan, e9cdd3d)
+
 ## v0.2.1 — Oct 24, 2026, 11 PM
 - HUD no longer shows player speed. It shows height, weight, stamina and split-step feedback only.
 - Team of 10 nightly agents planned (`docs/agents/TEAM.md`).
