@@ -16,7 +16,7 @@ Each agent's full instructions are in `docs/agents/prompts/` (shared rules in `_
 | 3 | Player and racket art | `agent/player-art` | `src/players/` | 07:00 |
 | 4 | Serve motion | `agent/serve-motion` | `src/serve/motion/`, reads `datasets/serves/` | 08:00 |
 | 5 | Serve control (player's view) | `agent/serve-control` | `src/serve/control/`, `src/profile/` | 09:00 |
-| 6 | Version history | `agent/version-history` | `CHANGELOG.md`, `versions/` | after every push to `main`, and 15:00 |
+| 6 | Version history | `agent/version-history` | `CHANGELOG.md`, `contemporary/`, `versions/` | after every push to `main`, and 15:00 |
 | 7 | Body motion (joints) | `agent/body-motion` | `src/body/` | 10:00 |
 | 8 | Control systems | `agent/controls` | `src/controls/` | 11:00 |
 | 9 | Start page | `agent/start-page` | `src/start/` | 12:00 |
@@ -49,3 +49,9 @@ Keep these stable. Change one only in your own PR, and say so in its description
 - WASD uses `A`, which is currently the "Point Sinner" test key (`L` is "Point Alcaraz"). Agent 8 moves them, for example to `1` and `2`.
 - `CLAUDE.md` lists the home page last. Ryan moved the start page up, so Agent 9 builds it now.
 - The HUD no longer shows player speed (Ryan's call). Do not add speed readouts back.
+
+## Talking to the team
+GitHub is the message board.
+- Ryan (or Claude for Ryan) opens an issue labelled `agent:<name>`, or `agent:all` for everyone. Agents act only on issues opened by `ryanli0819`.
+- Agents reply on the issue, report in their PRs, and ask questions with the `question` label.
+- Each agent's log in `docs/agents/<name>.md` is its running status.
