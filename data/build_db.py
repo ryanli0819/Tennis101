@@ -41,11 +41,20 @@ def build():
     db = sqlite3.connect(DB)
     db.executescript(open(path("data", "schema.sql")).read())
 
-    # PLAYERS: parsed from the PLAYERS array in index.html (the game's single source of player data)
+    # PLAYERS: parsed from the ROSTER array in index.html (the game's single source of player data).
+    # The first pro in the roster is the default near-court player; you can pick either in the locker room.
     src = open(path("index.html")).read()
-    for m in re.finditer(r'\{ last: "(\w+)",\s*first: "(\w+)", code: "(\w+)", heightM: ([\d.]+), weightKg: ([\d.]+),.*?side: "(\w+)" \}', src):
-        last, first, code, h, w, side = m.groups()
-        db.execute("INSERT INTO players VALUES (?,?,?,?,?,?,?)", (last.lower(), first, last.title(), code, float(h), float(w), side))
+    rows = re.findall(r'\{ id: "(\w+)",\s*last: "(\w+)",\s*first: "(\w+)", code: "(\w+)", heightM: ([\d.]+), weightKg: ([\d.]+)', src)
+    for n, (pid, last, first, code, h, w) in enumerate(rows):
+        db.execute("INSERT INTO players VALUES (?,?,?,?,?,?,?)", (pid, first, last.title(), code, float(h), float(w), "near" if n == 0 else "far"))
+
+    # SKILLS: the SKILLS list and PLAYER_SKILLS table in src/skills/skills.js
+    sk = open(path("src", "skills", "skills.js")).read()
+    for sid, name, what, step in re.findall(r'\{ id: "(\w+)",\s*name: "([^"]+)",\s*what: "([^"]+)",\s*step: "([^"]+)" \}', sk):
+        db.execute("INSERT INTO skills VALUES (?,?,?,?)", (sid, name, what, step))
+    for pid, body in re.findall(r'^\s*(\w+):\s*\{ (speed: [^}]+)\}', sk, re.M):
+        for skill, pts in re.findall(r'(\w+): (\d+)', body):
+            db.execute("INSERT INTO player_skills VALUES (?,?,?)", (pid, skill, int(pts)))
 
     # AGENTS: from the registry the dashboard also reads
     reg = json.load(open(path("agents", "agents.json")))
@@ -95,7 +104,7 @@ def build():
 
     db.commit()
     counts = {t: db.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
-              for t in ("players", "agents", "agent_feeds", "clips", "frames", "joints", "cleaning_fixes", "serve_phases", "versions")}
+              for t in ("players", "player_skills", "agents", "agent_feeds", "clips", "frames", "joints", "cleaning_fixes", "serve_phases", "versions")}
     db.execute("VACUUM"); db.close()
     print(f"built {os.path.relpath(DB, ROOT)} ({os.path.getsize(DB) // 1024} KB):", ", ".join(f"{k} {v}" for k, v in counts.items()))
 

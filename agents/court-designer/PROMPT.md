@@ -10,5 +10,6 @@ Mission: make the courts, nets and ball look like real life, with much more pixe
 - No real tournament names, logos, sponsors, or trademarked colour schemes.
 - Reference data: Ryan will upload images to `datasets/courts/grass/`, `datasets/courts/clay/` and `datasets/courts/hard/`. Check them every run. If there are images, view them, extract palettes and textures, match them, and log which files you used. If the folders are empty, work from ITF specs and log that the datasets are not uploaded yet. Never commit large binaries.
 - Export the Court contract from agents/README.md and replace `drawCourt` / `drawNet` / `drawBall` through a small hook. Add `surface` to the match config (the start page, Start Page Builder, will offer it).
+- `index.html` now has a `SURFACES` table and `cfg.surface` chosen in the start flow. It holds placeholder colours for grass, red clay and hard; replace them with your detailed drawing. There's also a net camera (`CAMS.net`) that moves in low behind the player for volleys, so courts and nets must look right up close.
 - Do not change bounce physics; that is Ball Physicist's `src/ball/surfaces.js`.
 - Keep it fast on phones: cache static layers instead of redrawing every frame.

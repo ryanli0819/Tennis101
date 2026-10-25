@@ -1,6 +1,6 @@
 # Tennis101 agent team
 
-Ten cloud agents build the game in parallel, one run each per night. Every agent:
+Twelve cloud agents build the game in parallel, one run each per night. Every agent:
 - reads `CLAUDE.md`, this file, and its own log `agents/<name>/LOG.md` first;
 - works only on its branch `agent/<name>` and opens or updates one PR to `main` (never pushes to `main`, never merges);
 - edits only the folders it owns below, plus the smallest possible hooks in `index.html`;
@@ -21,6 +21,8 @@ Each agent has its own folder: `agents/<name>/PROMPT.md` (instructions) and `age
 | 8 | Controls Designer | `agent/controls-designer` | `src/controls/` | 7 AM |
 | 9 | Start Page Builder | `agent/start-page-builder` | `src/start/` | 8 AM |
 | 10 | Guide Writer | `agent/guide-writer` | `src/guide/` | 9 AM |
+| 11 | Skills Coach | `agent/skills-coach` | `src/skills/` | 10 AM |
+| 12 | Locker Room Designer | `agent/locker-room-designer` | `src/lockerroom/` | 12 PM |
 
 Give any new agent a row here before it starts.
 
@@ -41,12 +43,16 @@ Keep these stable. Change one only in your own PR, and say so in its description
 
 **Controls (Controls Designer).** `src/controls/schemes.js` exports `CONTROL_SCHEMES`, a list of `{ id, label, devices, bindings:[{ action, keys, text }] }`. Required actions: `moveForward`, `moveBack`, `moveLeft`, `moveRight`, `splitStep`, `playPoint`, plus the serve actions Serve Controller defines. Also exports `getMoveInput()` → `{x,y}` (y = toward the net), `setScheme(id)` / `getScheme()` (localStorage `tennis101.controls`). Only the chosen scheme's UI and hints are shown.
 
-**Match setup (Start Page Builder).** The start page produces `{ bestOf, tbTo, firstServer, controls, surface, players }` for the match screen.
+**Skills (Skills Coach).** `src/skills/skills.js` exports `SKILLS` (8 skills, each with its constant `step` per point), `getSkills(id)` (1–20, 10 = neutral, saved overrides in `tennis101.profile`) and `applySkills(body, skills)`. That adds to the body: `top`, `accel`, `brake`, `drain`, `recoverMul`, `shotBonus` / `serveBonus` (m/s, shared with the Ball Physicist), `errMul`, `aimBonus`, `splitPerfect` / `splitGood`, `reactionCut`, `volleyReach`, `volleyErrMul`. The game uses these in `BODY[i]`.
+
+**Locker room (Locker Room Designer).** `Lockerroom.render(el, { roster, bodyStats, selected, onSelect })`, called by the start flow after the match and court choices.
+
+**Match setup (Start Page Builder).** `src/start/flow.js`: Welcome → Match (best of 3 / 5, tiebreak 7 / 10) → Court (grass / red clay / hard) → Locker room → `startMatch({ bestOf, tbTo, surface, playerId, firstServer })`. Add a `controls` field when the Controls Designer is ready.
 
 **Guide (Guide Writer)** builds its key list from `CONTROL_SCHEMES`, so it never goes out of date.
 
 ## Known conflicts
-- WASD uses `A`, which is currently the "Point Sinner" test key (`L` is "Point Alcaraz"). Controls Designer moves them, for example to `1` and `2`.
+- Done: WASD moves the player (W toward the net, S back, A left, D right); the test keys moved to `1` and `2`. It lives in `userInput()` in `index.html` until the Controls Designer moves it into `src/controls/`.
 - `CLAUDE.md` lists the home page last. Ryan moved the start page up, so Start Page Builder builds it now.
 - The HUD no longer shows player speed (Ryan's call). Do not add speed readouts back.
 

@@ -18,7 +18,24 @@ CREATE TABLE players (
   country     TEXT NOT NULL,             -- ITA, ESP
   height_m    REAL NOT NULL CHECK (height_m BETWEEN 1.5 AND 2.2),
   weight_kg   REAL NOT NULL CHECK (weight_kg BETWEEN 50 AND 120),
-  court_side  TEXT NOT NULL CHECK (court_side IN ('near', 'far'))
+  court_side  TEXT NOT NULL CHECK (court_side IN ('near', 'far'))   -- side in the default line-up (you pick in the locker room)
+);
+
+-- ---------------------------------------------------------------------
+-- SKILLS. Source: src/skills/skills.js. Each skill runs 1–20, 10 is neutral, and every point
+-- above 10 adds the same constant step (step_text) to one feature of the player.
+-- ---------------------------------------------------------------------
+CREATE TABLE skills (
+  id         TEXT PRIMARY KEY,         -- 'speed'
+  name       TEXT NOT NULL,            -- 'Speed'
+  what       TEXT NOT NULL,            -- what it changes
+  step_text  TEXT NOT NULL             -- the constant step per point, e.g. '+2% top speed per point'
+);
+CREATE TABLE player_skills (
+  player_id  TEXT NOT NULL REFERENCES players(id),
+  skill_id   TEXT NOT NULL REFERENCES skills(id),
+  points     INTEGER NOT NULL CHECK (points BETWEEN 1 AND 20),
+  PRIMARY KEY (player_id, skill_id)
 );
 
 -- ---------------------------------------------------------------------
