@@ -20,7 +20,7 @@ canvas { width: 100%; background: var(--panel); border: 1px solid var(--line); b
 <main>
   <div>
     <h1>Sinner serve · body points</h1>
-    <p>Dots are joints found by pose detection, lines connect them. Raw data, not cleaned.</p>
+    <p>Dots are joints found by pose detection, lines connect them. Hollow dots were rebuilt (an arm was covering them, or the detector slipped). "Raw" shows the detector's output before cleaning.</p>
   </div>
   <div class="bar">
     <select id="clip" aria-label="Clip">
@@ -29,6 +29,8 @@ canvas { width: 100%; background: var(--panel); border: 1px solid var(--line); b
     </select>
     <button id="play" type="button">Pause</button>
     <select id="speed" aria-label="Speed"><option value="1">1×</option><option value="0.5">½×</option><option value="0.25" selected>¼×</option></select>
+    <select id="mode" aria-label="Data"><option value="clean">Cleaned</option><option value="raw">Raw</option></select>
+    <select id="frames" aria-label="Frames"><option value="all">Every frame</option><option value="key">20 key frames</option></select>
     <label>min confidence <input id="conf" type="range" min="0" max="0.9" step="0.05" value="0.3" style="width:100px;flex:none"></label>
   </div>
   <div class="bar"><input id="scrub" type="range" min="0" value="0" aria-label="Frame"><span id="info"></span></div>
@@ -41,50 +43,61 @@ const BONES = [["nose","neck"],["neck","leftShoulder"],["neck","rightShoulder"],
   ["leftHip","leftKnee"],["leftKnee","leftAnkle"],["rightHip","rightKnee"],["rightKnee","rightAnkle"],["leftShoulder","leftHip"],["rightShoulder","rightHip"]];
 const cv = document.getElementById("cv"), g = cv.getContext("2d");
 const ui = id => document.getElementById(id);
-let data = null, k = 0, playing = !matchMedia("(prefers-reduced-motion: reduce)").matches, acc = 0, last = performance.now();
+let data = null, k = 0, order = [], playing = !matchMedia("(prefers-reduced-motion: reduce)").matches, acc = 0, last = performance.now();
 ui("play").textContent = playing ? "Pause" : "Play";
 
 async function load() {
   data = await (await fetch(ui("clip").value)).json();
   cv.height = Math.round(cv.width * data.height / data.width);
-  ui("scrub").max = data.frames.length - 1; k = 0; draw();
+  setOrder(); draw();
 }
 const col = n => n.startsWith("left") ? getComputedStyle(document.documentElement).getPropertyValue("--sinner")
   : n.startsWith("right") ? getComputedStyle(document.documentElement).getPropertyValue("--ball") : "#eef3fb";
+function setOrder() {
+  const key = ui("frames").value === "key" && data.keyframes;
+  order = key ? data.keyframes : data.frames.map((_, i) => i);
+  k = 0; ui("scrub").max = order.length - 1;
+}
 function draw() {
   if (!data) return;
-  const f = data.frames[k], min = +ui("conf").value, W = cv.width, H = cv.height;
+  const fi = order[k], f = data.frames[fi], min = +ui("conf").value, W = cv.width, H = cv.height;
   g.fillStyle = "#0e1729"; g.fillRect(0, 0, W, H);
-  // faint trail of the last frames
-  for (let b = Math.max(0, k - 6); b <= k; b++) drawPose(data.frames[b], min, b === k ? 1 : 0.12 * (b - k + 7) / 7, W, H);
-  const seg = (data.segments || []).find(s => k >= s.from && k <= s.to);
-  ui("info").textContent = `frame ${f.i} · ${f.t.toFixed(2)} s${seg ? " · " + seg.view : ""}`;
+  // faint trail of the previous frames (every-frame mode only)
+  if (ui("frames").value === "all") for (let b = Math.max(0, fi - 6); b < fi; b++) drawPose(data.frames[b], min, 0.12 * (b - fi + 7) / 7, W, H);
+  drawPose(f, min, 1, W, H);
+  const seg = (data.segments || []).find(s => fi >= s.from && fi <= s.to);
+  const kf = ui("frames").value === "key" ? `key frame ${k + 1}/${order.length} · ` : "";
+  ui("info").textContent = `${kf}frame ${f.i} · ${f.t.toFixed(2)} s${seg ? " · " + seg.view : ""}`;
   ui("scrub").value = k;
 }
 function drawPose(f, min, alpha, W, H) {
-  const J = {};
-  for (const [n, [x, y, c]] of Object.entries(f.joints)) if (c >= min) J[n] = [x * W, y * H];
+  const J = {}, raw = ui("mode").value === "raw" || !f.clean, est = new Set(raw ? [] : f.estimated || []);
+  for (const [n, [x, y, c]] of Object.entries(raw ? f.joints : f.clean)) if (c >= min || est.has(n)) J[n] = [x * W, y * H];
   g.globalAlpha = alpha; g.lineWidth = 3;
   for (const [a, b] of BONES) if (J[a] && J[b]) {
     g.strokeStyle = a.startsWith("left") || b.startsWith("left") ? col("left") : a.startsWith("right") || b.startsWith("right") ? col("right") : "#eef3fb";
     g.beginPath(); g.moveTo(...J[a]); g.lineTo(...J[b]); g.stroke();
   }
-  for (const [n, [x, y]] of Object.entries(J)) { g.fillStyle = col(n); g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); }
+  for (const [n, [x, y]] of Object.entries(J)) {
+    g.beginPath(); g.arc(x, y, 5, 0, 7);
+    if (est.has(n)) { g.fillStyle = "#0e1729"; g.fill(); g.strokeStyle = col(n); g.lineWidth = 2; g.stroke(); }
+    else { g.fillStyle = col(n); g.fill(); }
+  }
   g.globalAlpha = 1;
 }
 function tick(now) {
   const dt = (now - last) / 1000; last = now;
   if (playing && data) {
     acc += dt * +ui("speed").value;
-    const step = 1 / data.fps;
-    while (acc >= step) { acc -= step; k = (k + 1) % data.frames.length; }
+    const step = ui("frames").value === "key" ? 0.4 : 1 / data.fps;   // key frames: hold each for 0.4 s
+    while (acc >= step) { acc -= step; k = (k + 1) % order.length; }
     draw();
   }
   requestAnimationFrame(tick);
 }
 ui("play").onclick = () => { playing = !playing; ui("play").textContent = playing ? "Pause" : "Play"; };
 ui("scrub").oninput = e => { k = +e.target.value; draw(); };
-ui("conf").oninput = draw;
+ui("conf").oninput = draw; ui("mode").onchange = draw; ui("frames").onchange = () => { setOrder(); draw(); };
 ui("clip").onchange = load;
 load(); requestAnimationFrame(tick);
 </script>
