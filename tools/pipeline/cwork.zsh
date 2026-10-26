@@ -10,6 +10,7 @@
 #   cwork --only a,b      run just these agents (still in stage order)
 #   cwork --dry-run       print the plan and the exact commands, run nothing
 #   cwork-status          what is running, done or waiting, with the last log line of each
+#   cwork-watch NAME      follow one agent's live progress (tail -f of its log)
 #   cwork-stop            stop the pipeline (kills the tmux session)
 #   cwork-clean           remove worktrees whose work is committed and pushed
 #
@@ -56,7 +57,8 @@ _t101_cmd() {
   local prompt=$(_t101_prompt $name $title) log="$T101_STATE/logs/$name.log" done="$T101_STATE/done/$name"
   local run
   if [[ $mode == auto ]]; then
-    run="claude -p ${(q)prompt} --permission-mode acceptEdits --allowedTools ${(j: :)${(q)T101_ALLOW[@]}} 2>&1 | tee ${(q)log}; echo \${pipestatus[1]} > ${(q)done}"
+    # stream-json + progress.py = one readable line per step, live in the log (and the pane)
+    run="claude -p ${(q)prompt} --permission-mode acceptEdits --allowedTools ${(j: :)${(q)T101_ALLOW[@]}} --output-format stream-json --verbose 2>&1 | python3 -I ${(q)T101_ROOT}/tools/pipeline/progress.py | tee ${(q)log}; echo \${pipestatus[1]} > ${(q)done}"
   else
     run="claude ${(q)prompt}; echo \$? > ${(q)done}"
   fi
@@ -147,6 +149,8 @@ cwork-status() {
     printf "stage %s  %-21s %-8s %s\n" $s $name $state "${$(tail -n 1 "$log" 2>/dev/null | cut -c1-70)}"
   done
 }
+
+cwork-watch() { [[ -n $1 ]] || { print "usage: cwork-watch <agent-name>"; return 2 }; tail -n 30 -f "$T101_STATE/logs/$1.log" }
 
 cwork-stop() { tmux kill-session -t "$T101_SESSION" 2>/dev/null; rm -f "$T101_STATE/lock"; print "Pipeline stopped. Worktrees kept in .worktrees/ (cwork-clean removes finished ones)." }
 
