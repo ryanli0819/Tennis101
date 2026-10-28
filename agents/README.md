@@ -1,6 +1,6 @@
 # Tennis101 agent team
 
-Thirteen agents build the game in parallel, one run each per night. Every agent:
+Fourteen agents build the game in parallel, one run each per night. Every agent:
 - reads `CLAUDE.md`, this file, and its own log `agents/<name>/LOG.md` first;
 - works only on its branch `agent/<name>` and opens or updates one PR to `main` (never pushes to `main`, never merges);
 - edits only the folders it owns below, plus the smallest possible hooks in `index.html`;
@@ -24,6 +24,7 @@ Each agent has its own folder: `agents/<name>/PROMPT.md` (instructions) and `age
 | 11 | Skills Coach | `agent/skills-coach` | `src/skills/` | 10 AM |
 | 12 | Locker Room Designer | `agent/locker-room-designer` | `src/lockerroom/` | 12 PM |
 | 13 | First-Person Camera | `agent/pov-camera` | `src/camera/` | 1 PM |
+| 14 | Animator | `agent/animator` | `src/animation/` | 2 PM |
 
 Give any new agent a row here before it starts.
 
@@ -51,6 +52,10 @@ Keep these stable. Change one only in your own PR, and say so in its description
 **Serving (Serve Controller · first version in `index.html`).** The game serves by itself about 4 s after each point (`BETWEEN_POINTS`), with a 2 s READY countdown (`READY`), and 2.5 s after a fault or let. `planServe(server, no)` returns `{ land, target, fault, net, let, ace }`. `ACE_CHANCE` stores the last serve's ace probability: near zero unless the placement is perfect (within 45 cm of a line), and much higher when the receiver is on the wrong side. Per-player `letRate` is in `ROSTER`. Second serves use `SERVE_MOTIONS.sinner.second`.
 
 **First person (First-Person Camera).** `CAMS.pov` and `povWanted()`: from your READY countdown to just after your contact, at eye height = 94% of `heightM`.
+
+**Animation (Animator).** `src/animation/run-cycle.js`: `Anim.frame(p, B, near)` → `{ kind, frame, bob, lean, crouch, feet, arms }`. `kind` is one of run / backpedal / shuffle / plant / ready / split / slide. `drawPlayer()` draws from it, and `moveBody()` sets `p.plant` on hard direction changes.
+
+**Shot types.** `planShot(..., type)` with `type` = `"drive"` or `"slice"`. You slice by holding **E** (or with the touch Slice button) as you hit; the computer slices sometimes, more when stretched. A slice lands short (2–4.8 m past the net), low and slow, and barely carries after the bounce, so the receiver has to come forward.
 
 **Match setup (Start Page Builder).** `src/start/flow.js`: Welcome → Match (best of 3 / 5, tiebreak 7 / 10) → Court (grass / red clay / hard) → Locker room → `startMatch({ bestOf, tbTo, surface, playerId, firstServer })`. Add a `controls` field when the Controls Designer is ready.
 

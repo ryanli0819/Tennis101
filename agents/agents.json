@@ -118,6 +118,7 @@
         "src/body/"
       ],
       "feeds": [
+        "animator",
         "player-artist"
       ],
       "contract": "getPose(i) · playMotion(i, frames)",
@@ -211,6 +212,21 @@
       ],
       "feeds": [],
       "contract": "CAMS.pov · povWanted()",
+      "effort": "high"
+    },
+    {
+      "name": "animator",
+      "title": "Animator",
+      "order": 14,
+      "runsAt": 14,
+      "job": "Pixel animation frames: running, direction changes, shuffles, plants, strokes, chosen from how the body really moves.",
+      "owns": [
+        "src/animation/"
+      ],
+      "feeds": [
+        "player-artist"
+      ],
+      "contract": "Anim.frame(p, B, near)",
       "effort": "high"
     }
   ]

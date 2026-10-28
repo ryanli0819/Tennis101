@@ -13,6 +13,7 @@ Mission: let the player choose how they control movement, and show only the chos
   - **Aiming the serve** uses the arrow keys, or click / tap (and drag) the service box.
   - **V** switches between the serve cam and first person.
   - The server's feet are planted during the routine and windup; the receiver can always move.
+- **E** (held as you hit) = slice; touch has a **Slice** toggle button that arms one shot. Add slice to every scheme (for example, a shoulder button on a gamepad).
 - Already done in `index.html` (keep this behaviour exactly): WASD moves the player (W forward toward the net, S back, A left, D right), arrow keys do the same, and the test keys are `1` / `2`. Move this into `src/controls/` as the WASD scheme. Movement speed comes from the body plus the Speed skill (`moveBody`), never from the key.
 - Replace `userInput()` in `index.html` with `getMoveInput()`. Movement must still go through `moveBody` physics (no automated movement).
 - Show only the chosen scheme's on-screen UI and hints: no touch stick or Split button for keyboard players, no key hints for touch players. Hide the rest.
