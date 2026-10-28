@@ -4,6 +4,15 @@ Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it 
 
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
 
+## v0.5.0 — Oct 27, 2026, 11 PM
+- WASD always moves; arrows or a click aim the serve: WASD now always moves your player, including walking to your serving spot before you serve. Aim your serve with the arrow keys or by clicking or tapping the service box. (Oct 27, 11 PM · Claude for Ryan, 6afc716)
+- The whole serve, from the bounce: Every serve shows GET SET, then the ball bouncing, then the full windup and contact, with a close camera behind the server. V switches to first person. (Oct 27, 11 PM · Claude for Ryan, 6afc716)
+- Serves curve like real ones: First serves skim low over the net and bend toward the line; second serves kick: a high arc, then a jump after the bounce. (Oct 27, 11 PM · Claude for Ryan, 6afc716)
+- A real returner on the other side: The computer reads your toss and gets most serves back (about 93% of serves that land in). Aces are rare (about 4%) and need a perfect spot. (Oct 27, 11 PM · Claude for Ryan, 6afc716)
+- Cleaner background: No stands or crowd behind the court; just the sky and the back wall, matched to each surface. (Oct 27, 11 PM · Claude for Ryan, 6afc716)
+- Exit only where it belongs: No exit buttons on the welcome page or during a match. The locker room and the help guide have one. (Oct 27, 11 PM · Claude for Ryan, 6afc716)
+- Outfits for each court: Sinner wears his real kits from the clips: all black on clay, navy and white on hard, all white on grass. (Oct 27, 11 PM · Claude for Ryan, 6afc716)
+
 ## v0.4.0 — Oct 27, 2026, 9 PM
 - Points serve by themselves: About 4 seconds after each point the next serve comes by itself, with a READY countdown. No key needed. (Oct 27, 9 PM · Claude for Ryan, a8ea102)
 - Aim your serve, with an ace chance: While you serve, A/D aims sideways and W/S sets the depth. A perfect spot with the receiver on the wrong side gives a big ace chance (stored in ACE_CHANCE). (Oct 27, 9 PM · Claude for Ryan, a8ea102)
