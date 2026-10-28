@@ -2,7 +2,17 @@
 
 Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it was published (Eastern time, to the hour).
 
-A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). Agent 6 manages this (rules: `docs/agents/prompts/6-version-history.md`).
+A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
+
+## v0.4.0 — Oct 27, 2026, 9 PM
+- Points serve by themselves: About 4 seconds after each point the next serve comes by itself, with a READY countdown. No key needed. (Oct 27, 9 PM · Claude for Ryan, a8ea102)
+- Aim your serve, with an ace chance: While you serve, A/D aims sideways and W/S sets the depth. A perfect spot with the receiver on the wrong side gives a big ace chance (stored in ACE_CHANCE). (Oct 27, 9 PM · Claude for Ryan, a8ea102)
+- Faults, double faults and lets: Serves can miss the box or hit the net; a second serve follows, and a second miss is a double fault. Lets are replayed, at each player's own let rate. (Oct 27, 9 PM · Claude for Ryan, a8ea102)
+- Esc pauses; every screen has an exit: Esc opens Pause (Resume, New match, Exit to home). Setup screens have ✕ Exit, and the welcome page has Back to match. (Oct 27, 9 PM · Claude for Ryan, a8ea102)
+- Faster movement and a slide: Base running speed is about 25% higher. Space slides in the direction you move: furthest on clay, least on grass. (Oct 27, 9 PM · Claude for Ryan, a8ea102)
+- First-person view when you serve: From the countdown until just after you hit, you see the court through your own eyes at your pro's real eye height. (Oct 27, 9 PM · Claude for Ryan, a8ea102)
+- A setting for each court: Grass is a summer afternoon (based on Ryan's references), clay a warm late afternoon, and hard a night session under floodlights. (Oct 27, 9 PM · Claude for Ryan, a8ea102)
+- Sinner's real second serve: After a fault, Sinner serves with his real second serve, captured from video (toss over the head), instead of repeating his first. (Oct 27, 9 PM · Claude for Ryan, a8ea102)
 
 ## v0.3.0 — Oct 25, 2026, 2 PM
 - The game opens on a welcome page: choose best of 3 or 5, then grass, red clay or hard, then enter the locker room and pick your pro. (Oct 25, 2 PM · Claude for Ryan, a2c842d)
