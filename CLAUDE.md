@@ -67,16 +67,17 @@ Sections in the script, top to bottom:
 
 ## Controls (temporary, for testing until real gameplay exists)
 - Points serve **by themselves**: ~4 s after a point (`BETWEEN_POINTS`), with a 2 s READY countdown; 2.5 s after a fault or let. No key starts a point.
-- When **you** serve: first-person view at your eye height; A/D aim sideways, W/S depth (yellow cross in the box). `planServe` decides fault / net / let / ace; `ACE_CHANCE` stores the ace probability (perfect spot + receiver on the wrong side). Second serves use Sinner's real 2nd-serve motion.
-- **Esc** = pause (Resume / New match / Exit to home). Every screen has an exit (✕ Exit / ✕ Close, Back to match).
+- Every serve: GET SET (~1 s, position) → the bounce routine (2 bounces; Sinner's 1st serve uses his real routine frames) → windup → contact; the camera moves close behind the server (serve cam) so the whole windup shows. Serves curve (1st: flat-slice, low; 2nd: kick, high arc, jumps after the bounce). `planServe` decides fault / net / let / ace; `ACE_CHANCE` stores the ace probability (perfect spot + receiver on the wrong side). Second serves use Sinner's real 2nd-serve motion.
+- **Esc** = pause (Resume / New match). Exit buttons only on side screens (locker room ✕ Exit, help Close) — none on the welcome page or during a match (Ryan's rule).
 - **Space** = slide in the direction you're moving (clay ~2.4 m, hard ~1.6 m, grass ~1.3 m; Agility adds a little; stamina cost, short recovery, cooldown).
-- **WASD** (W forward toward the net, S back, A left, D right), arrow keys, or drag on the court (touch/mouse): move your player. Speed comes from the body + the Speed skill.
+- **WASD** (W forward toward the net, S back, A left, D right) or drag on the court (touch): move your player — always, including walking to your serving spot during GET SET (the server is held to the legal area behind the baseline). Speed comes from the body + the Speed skill.
+- **Arrow keys** or click/tap the service box: aim your serve. **V**: serve cam ↔ first person.
 - Past the service line toward the net, the camera switches to the **net camera** (low, behind you) for volleys; it switches back when you retreat.
 - Shift / "Split step": split-step hop.
 - 1 / "Point <you>", 2 / "Point <opponent>": award a point manually (A and L now move the player).
 - Z / "Undo": restores the previous state (history stack of JSON snapshots).
 - "New match" → start flow at match length; "← Home" → welcome page (with Back to match while a match is on).
-- Each surface has its own setting (`SCENES`): grass = summer afternoon, clay = warm late afternoon, hard = night under floodlights.
+- Each surface has its own sky and back wall (`SCENES`, no stands or crowd): grass = summer afternoon, clay = warm late afternoon, hard = night under floodlights. Each pro wears an outfit per court (`ROSTER[].outfits`).
 
 ## Conventions
 - Units are metres and seconds everywhere in game logic.

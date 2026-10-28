@@ -10,6 +10,7 @@ Mission: at the start of every point you serve, the player sees the serve throug
   - **Look up with the toss** (tilt the view toward the ball at its peak), then back down the court as you hit.
   - Taller pros see the court from higher up: use `heightM` and nothing hard-coded.
   - A subtle head movement from the motion (pelvis and neck), never anything sickening. With `prefers-reduced-motion`, keep the view still and cut instead of blending.
+- Since v0.5.0 the default while you serve is a close **serve cam** behind you (`CAMS.serve`), so you watch your whole bounce routine and windup. First person is optional (**V**, `firstPersonServe`). Make both feel great, and keep V as the switch.
 - The aim cross and the service box (`drawAim`) must stay readable in first person.
 - When you receive, keep the broadcast camera unless Ryan asks otherwise.
 - Coordinate with the Serve Analyst (the motion data), the Player Artist (hands and racket art) and the Serve Controller (aiming input). Use issues labelled `agent:pov-camera`.

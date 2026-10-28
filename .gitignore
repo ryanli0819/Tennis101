@@ -13,3 +13,6 @@ datasets/courts/**/*.png
 datasets/courts/**/*.jpg
 datasets/courts/**/*.jpeg
 datasets/courts/**/*.webp
+
+# Pixel reference sprites cut from TV clips stay local
+datasets/players/**/*.png

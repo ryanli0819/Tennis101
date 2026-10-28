@@ -109,13 +109,13 @@
         b.onclick = () => { choice.firstServer = b.dataset.fs; v.querySelectorAll("[data-fs]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); };
       });
     }
-    // EXIT on every screen: from a setup step back to the welcome page; from the welcome page back to the match (if one is on)
-    if (n > 0 || onResume) {
+    // EXIT only on side screens (Ryan's rule): the locker room has ✕ Exit back to the welcome page.
+    // The welcome page, the match setup steps (they have ← Back) and the match itself have no exit button.
+    if (n >= 3) {
       const x = document.createElement("button");
-      x.type = "button"; x.className = "sf-exit";
-      x.textContent = n > 0 ? "✕ Exit" : "✕ Close";
-      x.setAttribute("aria-label", n > 0 ? "Exit setup, back to the welcome page" : "Close the menu, back to the match");
-      x.onclick = () => (n > 0 ? show(0) : resume());
+      x.type = "button"; x.className = "sf-exit"; x.textContent = "✕ Exit";
+      x.setAttribute("aria-label", "Leave the locker room, back to the welcome page");
+      x.onclick = () => show(0);
       v.appendChild(x);
     }
     const r = v.querySelector("#sfResume"); if (r) r.onclick = resume;
@@ -136,7 +136,7 @@
       root = document.createElement("div"); root.className = "sf"; root.id = "startFlow";
       root.innerHTML = `<div class="sf-in"></div>`;
       document.body.appendChild(root);
-      root.addEventListener("keydown", e => { if (e.key === "Escape") { e.preventDefault(); step > 0 ? show(0) : onResume && resume(); } });
+      root.addEventListener("keydown", e => { if (e.key === "Escape" && step >= 3) { e.preventDefault(); show(0); } });   // Esc = the locker room's exit
     }
     onResume = resumeFn;
     root.hidden = false; show(n);

@@ -16,6 +16,8 @@ Every run (after each push to `main` and once a night):
 
 The website (GitHub Pages) rebuilds from `main` after every push, so each merged PR is live right away. Make sure `versions/index.html` is reachable from the site and each published version's "Play" link works there.
 
+Cache-busting: when you publish a version, update the `?v=` query on every local `<script src="src/...">` in `index.html` to the new version number. Otherwise players' browsers can keep running the old scripts for up to 10 minutes after the site updates.
+
 Rules:
 - Never count the same change twice. Match changes by commit SHA or PR number.
 - Keep notes short and readable.

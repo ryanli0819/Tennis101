@@ -186,7 +186,6 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 
 <canvas id="court" aria-label="Pixel tennis court: Jannik Sinner near side, Carlos Alcaraz far side"></canvas>
 
-<button class="btn home-btn" id="homeBtn" type="button">&larr; Home</button>
 
 <aside class="hud" aria-label="Player condition">
   <div class="hud-row">
@@ -198,7 +197,7 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
     <div class="bar"><i id="st1" style="background:var(--alcaraz)"></i><span class="cap" id="cap1"></span></div>
   </div>
   <div class="hud-msg" id="hudMsg" aria-live="polite"></div>
-  <div class="hud-hint" id="hint">WASD / ARROWS MOVE · SHIFT SPLIT-STEP</div>
+  <div class="hud-hint" id="hint">WASD MOVE · SPACE SLIDE · SHIFT SPLIT · ARROWS AIM SERVE</div>
 </aside>
 <div class="stick" id="stick" hidden><i id="knob"></i></div>
 <div class="cam-tag" id="camTag" hidden>NET CAM · VOLLEY</div>
@@ -224,8 +223,6 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
     </div>
     <p class="result-line" id="resultLine"></p>
     <button class="btn primary" type="button" id="againBtn">New match</button>
-    <button class="btn" type="button" id="resultExit">Exit to home</button>
-    <button class="x-btn" type="button" id="resultX" aria-label="Close">✕ Close</button>
   </div>
 </div>
 
@@ -236,7 +233,6 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
     <div class="pause-actions">
       <button class="btn primary" type="button" id="resumeBtn">Resume <kbd>ESC</kbd></button>
       <button class="btn" type="button" id="pauseNew">New match</button>
-      <button class="btn" type="button" id="pauseExit">Exit to home</button>
     </div>
   </div>
 </div>
@@ -244,15 +240,21 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <div class="toast" id="toast" hidden></div>
 
 <!-- Skill points (Skills Coach) and Sinner's real serve, captured from video (Serve Analyst) -->
-<script src="src/skills/skills.js"></script>
-<script src="src/serve/motion/sinner-serve.js"></script>
+<script src="src/skills/skills.js?v=0.5.0"></script>
+<script src="src/serve/motion/sinner-serve.js?v=0.5.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
    ===================================================================== */
 const ROSTER = [
-  { id: "sinner",  last: "SINNER",  first: "Jannik", code: "ITA", heightM: 1.91, weightKg: 77, shirt: "#23b59c", shorts: "#11233a", hair: "#c4672f", letRate: 0.02 },
-  { id: "alcaraz", last: "ALCARAZ", first: "Carlos", code: "ESP", heightM: 1.83, weightKg: 74, shirt: "#e2544a", shorts: "#f1f1ec", hair: "#2a1c14", letRate: 0.03 }
+  { id: "sinner",  last: "SINNER",  first: "Jannik", code: "ITA", heightM: 1.91, weightKg: 77, shirt: "#23b59c", shorts: "#11233a", hair: "#c4672f", letRate: 0.02,
+    // outfit per court, from his clips (datasets/players/sinner/outfits.json); grass = all white (dress code)
+    outfits: { clay:  { shirt: "#141418", shorts: "#1e1d22", cap: "#16161b", shoes: "#1c1b20" },
+               hard:  { shirt: "#1f2f4a", shorts: "#f5f5f2", cap: "#f2f2ef", shoes: "#f0ece6" },
+               grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", cap: "#f4f4f0", shoes: "#f4f4f0" } } },
+  { id: "alcaraz", last: "ALCARAZ", first: "Carlos", code: "ESP", heightM: 1.83, weightKg: 74, shirt: "#e2544a", shorts: "#f1f1ec", hair: "#2a1c14", letRate: 0.03,
+    // no clips of him yet: his usual colours, and all white on grass (dress code). The Player Artist refines these.
+    outfits: { grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", shoes: "#f4f4f0" } } }
 ];
 /* letRate = chance a serve that would land in clips the net cord first (a LET, served again). Estimates
    (lets happen on roughly 1–3% of pro serves); the Serve Analyst refines them from match data. */
@@ -274,9 +276,10 @@ function bodyStats(P) {
 let BODY = [];
 /* You pick a pro in the locker room: they go to the near court, the other pro is your opponent.
    Each body = height/weight physics (bodyStats) + skill points (src/skills/skills.js). */
-function choosePlayers(youId) {
+function choosePlayers(youId, surface = "hard") {
   const you = ROSTER.find(r => r.id === youId) || ROSTER[0], opp = ROSTER.find(r => r !== you);
-  PLAYERS.splice(0, 2, { ...you, side: "near" }, { ...opp, side: "far" });
+  const dress = P => ({ ...P, ui: P.shirt, ...(P.outfits && P.outfits[surface] || {}) });   // outfit for this court; ui keeps the signature colour for the HUD
+  PLAYERS.splice(0, 2, { ...dress(you), side: "near" }, { ...dress(opp), side: "far" });
   BODY = PLAYERS.map(P => applySkills(bodyStats(P), getSkills(P.id)));
 }
 choosePlayers("sinner");
@@ -380,7 +383,7 @@ function renderScore() {
       `<div class="sb-cell sb-pts${pts[i] === "AD" ? " adv" : ""}">${pts[i]}</div>`;
     return `<div class="sb-grid sb-row" style="grid-template-columns:${cols.join(" ")}">
       <div class="sb-cell sb-serve">${serving ? '<i title="Serving" aria-label="Serving"></i>' : ""}</div>
-      <div class="sb-cell sb-name"><span class="stripe" style="background:${P.shirt}"></span><b>${P.last}</b><small>${P.code}</small></div>
+      <div class="sb-cell sb-name"><span class="stripe" style="background:${P.ui || P.shirt}"></span><b>${P.last}</b><small>${P.code}</small></div>
       ${setCells}${live}
     </div>`;
   }).join("");
@@ -407,26 +410,28 @@ const COURT = { L: 11.885, DBL: 5.485, SGL: 4.115, SVC: 6.40 };
 const CAMS = {
   broadcast: () => ({ back: 19, h: 5, x: 0, anchor: -COURT.L }),
   net:       () => ({ back: 5.2 - pos[0].y, h: 2.7, x: pos[0].x * 0.55, anchor: pos[0].y }),
-  // FIRST PERSON while you serve: your own eyes (eye height ≈ 94% of your real height), looking down the court
+  // SERVE CAM: close behind you, so you watch your whole routine and windup while you aim
+  serve:     () => ({ back: 4.6 - pos[0].y, h: 2.4, x: pos[0].x * 0.8, anchor: pos[0].y }),
+  // FIRST PERSON (press V): your own eyes (eye height ≈ 94% of your real height), looking down the court
   pov:       () => ({ back: 0.35 - pos[0].y, h: PLAYERS[0].heightM * 0.94, x: pos[0].x, anchor: null }),
 };
-/* You're serving: from the READY countdown until just after your racket meets the ball. */
-const povWanted = () => S.server === 0 && !S.over && (
-  (nextServe && nextServe.at - gameT <= READY) ||
-  (rally && (rally.serve || (rally.shot && rally.shot.isServe && clock - (rally.serveClock || 0) < 0.35))));
+/* You're serving: from the start of your routine until just after your racket meets the ball. */
+const serveCamWanted = () => S.server === 0 && !S.over && !!rally &&
+  (!!rally.serve || (rally.shot && rally.shot.isServe && clock - (rally.serveClock || 0) < 0.35));
+const povWanted = () => serveCamWanted() && firstPersonServe;
 const NET_LINE = -COURT.SVC + 0.4, NET_EXIT = -COURT.SVC - 0.8;   // enter just inside the service line
 let CAM_BACK = 19, CAM_H = 5, CAM_X = 0, camMode = "broadcast";
 const horizonFor = t => t.anchor === null ? BH * 0.45 : BH * 0.76 - F * t.h / (t.anchor + t.back) * 0.97;   // eye level in first person
 function setHorizon() { HZ = horizonFor(CAMS[camMode]()); }
 function updateCamera(dt) {
   const y = pos[0].y;
-  if (povWanted()) camMode = "pov";
-  else if (camMode === "pov") camMode = "broadcast";
+  if (serveCamWanted()) camMode = firstPersonServe ? "pov" : "serve";
+  else if (camMode === "pov" || camMode === "serve") camMode = "broadcast";
   else if (camMode === "broadcast" && rally && y > NET_LINE) camMode = "net";
   else if (camMode === "net" && (!rally || y < NET_EXIT)) camMode = "broadcast";
   const tag = document.getElementById("camTag");
   tag.hidden = camMode === "broadcast";
-  tag.textContent = camMode === "net" ? "NET CAM · VOLLEY" : "FIRST PERSON · YOUR SERVE";
+  tag.textContent = camMode === "net" ? "NET CAM · VOLLEY" : camMode === "pov" ? "FIRST PERSON · V TO SWITCH" : "SERVE CAM · V FOR FIRST PERSON";
   const t = CAMS[camMode](), k = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 1 - Math.exp(-dt * 5);
   CAM_BACK += (t.back - CAM_BACK) * k; CAM_H += (t.h - CAM_H) * k; CAM_X += (t.x - CAM_X) * k;
   HZ += (horizonFor(t) - HZ) * k;
@@ -447,10 +452,10 @@ function proj(x, y, z = 0) {
   return { x: BW / 2 + (x - CAM_X) * F / d, y: HZ + (CAM_H - z) * F / d, s: F / d };
 }
 
-/* Each court has its own setting (no real venue names or logos):
-   grass = a summer afternoon: soft grey sky, tall packed stands, dark green back wall (colours from Ryan's grass references,
-           datasets/courts/grass/reference.json); clay = a warm late afternoon, terracotta walls, sun-bleached stands;
-   hard = a night session under floodlights, as before. */
+/* Each court has its own setting — sky and back wall only, no stands or crowd (no real venue names or logos):
+   grass = a summer afternoon, soft grey sky, dark green back wall (colours from Ryan's grass references,
+           datasets/courts/grass/reference.json); clay = a warm late afternoon, terracotta wall;
+   hard = a night session under floodlights. */
 const SCENES = {
   grass: { sky: ["#c9d1d7", "#d8dee2", "#e6eaec", "#eef0f0"], roof: "#8d969c", stands: "#2b2627", wall: "#1f4a2c", trim: "#2e6b3e", skyFrac: 0.17, lights: false,
            crowd: ["#e9e4dc", "#c9b8a6", "#7d6b62", "#3b3a44", "#b04a4a", "#4f6d8f", "#d8c27a", "#f2efe8"] },
@@ -492,16 +497,14 @@ const SURFACES = {
 const SURF = () => SURFACES[cfg.surface] || SURFACES.hard;
 function drawCourt() {
   const sc = SCENE(), su = SURF(), wallY = Math.round(proj(0, 21).y);
-  const skyEnd = Math.max(0, Math.min(wallY - 8, Math.round(BH * sc.skyFrac)));
+  const skyEnd = Math.max(0, wallY - 5);                 // the sky reaches all the way down to the back wall
   // sky, in flat pixel bands
   sc.sky.forEach((c, k) => { b.fillStyle = c; b.fillRect(0, Math.floor(skyEnd * k / sc.sky.length), BW, Math.ceil(skyEnd / sc.sky.length) + 1); });
   if (sc.lights) {                                        // floodlights on their masts (night session)
     b.fillStyle = "#fff6c8";
     for (const fx of [0.08, 0.3, 0.7, 0.92]) { const x = Math.round(BW * fx); b.fillRect(x - 4, Math.round(skyEnd * 0.35), 9, 3); b.fillStyle = "rgba(255,246,200,0.12)"; b.fillRect(x - 10, Math.round(skyEnd * 0.35) - 3, 21, 9); b.fillStyle = "#fff6c8"; }
   }
-  b.fillStyle = sc.roof; b.fillRect(0, skyEnd - 2, BW, 2);                     // roof edge over the stands
-  b.fillStyle = sc.stands; b.fillRect(0, skyEnd, BW, Math.max(0, wallY - 5 - skyEnd));
-  for (const [x, y, c] of crowdFor(cfg.surface)) if (y > skyEnd + 1 && y < wallY - 6) { b.fillStyle = c; b.fillRect(x, y, 2, 2); }
+  // No stands or crowd (Ryan: take the background out) — just the sky down to a low back wall.
   b.fillStyle = su.runoff; b.fillRect(0, wallY, BW, BH - wallY);                 // ground all the way to the edges
   b.fillStyle = sc.wall; b.fillRect(0, wallY - 5, BW, 5);                       // sponsor-free back wall
   b.fillStyle = sc.trim; b.fillRect(0, wallY - 5, BW, 1);
@@ -547,7 +550,7 @@ function drawCapturedFigure(i, p, W) {
   // legs, shoes, shorts
   for (const s of ["left", "right"]) {
     seg(s + "Hip", s + "Knee", skin); seg(s + "Knee", s + "Ankle", skin);
-    const A = at(s + "Ankle"); if (A) { b.fillStyle = "#f2f2f2"; b.fillRect(Math.round(A.x - lw * 0.7), Math.round(A.y - lw * 0.4), Math.ceil(lw * 1.5), Math.ceil(lw * 0.8)); }
+    const A = at(s + "Ankle"); if (A) { b.fillStyle = P.shoes || "#f2f2f2"; b.fillRect(Math.round(A.x - lw * 0.7), Math.round(A.y - lw * 0.4), Math.ceil(lw * 1.5), Math.ceil(lw * 0.8)); }
     seg(s + "Hip", mid(s + "Hip", s + "Knee", 0.42), P.shorts, lw * 1.5);
   }
   // torso (shirt) between shoulders and hips
@@ -571,7 +574,7 @@ function drawCapturedFigure(i, p, W) {
   if (N && H) {
     const hx = H.x, hy = H.y - g.s * 0.04, r = Math.max(2, g.s * 0.12);
     b.fillStyle = skin; b.beginPath(); b.arc(Math.round(hx), Math.round(hy), r, 0, Math.PI * 2); b.fill();
-    b.fillStyle = P.side === "near" ? P.hair : skin; b.beginPath(); b.arc(Math.round(hx), Math.round(hy - r * 0.15), r * 0.95, Math.PI, Math.PI * 2.0); b.fill();
+    b.fillStyle = P.side === "near" ? (P.cap || P.hair) : (P.cap || skin); b.beginPath(); b.arc(Math.round(hx), Math.round(hy - r * 0.15), r * 0.95, Math.PI, Math.PI * 2.0); b.fill();
     b.font = "8px Silkscreen, monospace"; b.textAlign = "center"; b.fillStyle = "rgba(238,243,251,0.85)";
     b.fillText(P.last, Math.round(hx), Math.round(hy - r - 6));
   }
@@ -590,7 +593,7 @@ function drawPlayer(i, pos, swing) {
   // legs
   R(-w * 0.32, h * 0.47, w * 0.26, h * 0.45 + step * h * 0.03, "#e1b48b");
   R(w * 0.06, h * 0.47, w * 0.26, h * 0.45 - step * h * 0.03, "#e1b48b");
-  R(-w * 0.36, h * 0.04, w * 0.32, h * 0.05, "#f2f2f2"); R(w * 0.04, h * 0.04, w * 0.32, h * 0.05, "#f2f2f2"); // shoes
+  R(-w * 0.36, h * 0.04, w * 0.32, h * 0.05, P.shoes || "#f2f2f2"); R(w * 0.04, h * 0.04, w * 0.32, h * 0.05, P.shoes || "#f2f2f2"); // shoes
   // shorts + shirt
   R(-w * 0.42, h * 0.57, w * 0.84, h * 0.14, P.shorts);
   R(-w * 0.5, h * 0.86, w, h * 0.31, P.shirt);
@@ -606,7 +609,7 @@ function drawPlayer(i, pos, swing) {
   // head + hair
   const hw = w * 0.52;
   R(-hw / 2, h, hw, h * 0.15, "#e1b48b");
-  R(-hw / 2, h, hw, P.side === "near" ? h * 0.13 : h * 0.05, P.hair);
+  R(-hw / 2, h, hw, P.side === "near" ? h * 0.13 : h * 0.05, P.cap || P.hair);   // cap if the outfit has one
   // name tag
   if (h > 10 || P.side === "far") {
     b.font = "8px Silkscreen, monospace"; b.textAlign = "center"; b.fillStyle = "rgba(238,243,251,0.85)";
@@ -721,14 +724,19 @@ function aiInput() {
   if (d < 0.15 || d <= v * v / (2 * BODY[1].brake) + 0.1) return [0, 0];
   return [dx / d, dy / d];
 }
+/* MOVEMENT is always WASD: W = forward (toward the net), S = back, A = left, D = right (or drag on touch).
+   How fast you then move comes from moveBody(): body + Speed skill, not from the key. */
 function userInput() {
   const k = input.keys;
-  // W = forward (toward the net), S = back, A = left, D = right. Arrow keys do the same.
-  // How fast you then move comes from moveBody(): body + Speed skill, not from the key.
-  let x = (k.has("d") || k.has("ArrowRight") ? 1 : 0) - (k.has("a") || k.has("ArrowLeft") ? 1 : 0);
-  let y = (k.has("w") || k.has("ArrowUp") ? 1 : 0) - (k.has("s") || k.has("ArrowDown") ? 1 : 0);
+  let x = (k.has("d") ? 1 : 0) - (k.has("a") ? 1 : 0);
+  let y = (k.has("w") ? 1 : 0) - (k.has("s") ? 1 : 0);
   if (!x && !y) { x = input.stick.x; y = input.stick.y; }
   return [x, y];
+}
+/* AIMING your serve is separate: arrow keys (← → sideways, ↑ ↓ deeper / shorter), or click / tap the box. */
+function aimInput() {
+  const k = input.keys;
+  return [(k.has("ArrowRight") ? 1 : 0) - (k.has("ArrowLeft") ? 1 : 0), (k.has("ArrowUp") ? 1 : 0) - (k.has("ArrowDown") ? 1 : 0)];
 }
 
 let msgTimer;
@@ -772,7 +780,10 @@ function stepMotion(dt) {
   const W = mo.world = poseToWorld(0, pos[0], motionPose(m, mo.t));
   const sv = rally && rally.serve;
   if (sv) {
-    if (mo.t < E.tossRelease) {
+    if (mo.t < E.start) {                                // ROUTINE: he bounces the ball ROUTINE.bounces times
+      const P = (E.start - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1, h = W.leftWrist;
+      Object.assign(ball, { x: h.x, y: h.y + 0.25, z: h.z * (2 * f - 1) ** 2 });   // hand → ground → hand
+    } else if (mo.t < E.tossRelease) {
       Object.assign(ball, W.leftWrist);                  // ball in the tossing hand
     } else {
       if (!sv.release) {                                 // solve the toss once: release point → contact point
@@ -797,7 +808,12 @@ function stepMotion(dt) {
    The game serves by itself: ~4 s after a point (BETWEEN_POINTS), with a READY countdown at the end.
    During READY the server aims (A/D sideways, W/S depth) and the receiver moves into position.
    ===================================================================== */
-const BETWEEN_POINTS = 4.0, READY = 2.0, BETWEEN_SERVES = 2.5;   // seconds
+/* Rhythm: point ends → 0.9 s → players reset → GET SET (POSITION s: move with WASD, aim) → the serve sequence:
+   ball bounces (routine), toss and windup, contact. Contact lands ~4 s after the previous point ended. */
+const BETWEEN_POINTS = 2.0, POSITION = 1.1, BETWEEN_SERVES = 1.6;   // seconds until the serve sequence starts
+const READY = POSITION;                                              // (old name, still used by the start of a match)
+const ROUTINE = { bounces: 2, seconds: 1.3, toss: 0.8 };             // serve routine when no captured motion exists
+let firstPersonServe = false;                                        // V toggles: watch your windup, or serve through your own eyes
 let gameT = 0, paused = false;                          // game clock (stops while paused)
 const timers = [];
 function after(sec, fn) { timers.push({ at: gameT + sec, fn }); }
@@ -821,7 +837,7 @@ function serviceBox(server) {
 const aim = { x: 0, y: 0 };
 function resetAim() { const bx = serviceBox(0); aim.x = bx.mid; aim.y = bx.back * 0.8; }
 function steerAim(dt) {
-  const [x, y] = userInput(), bx = serviceBox(0);
+  const [x, y] = aimInput(), bx = serviceBox(0);
   aim.x = clamp(aim.x + x * 3.2 * dt, bx.xlo + 0.05, bx.xhi - 0.05);
   aim.y = clamp(aim.y + y * 2.4 * dt * bx.sy, bx.sy * 1.5, bx.sy * (COURT.SVC - 0.05));
 }
@@ -848,9 +864,9 @@ function planServe(server, no) {
   const perfect = !fault && edge < 0.45;
   const wrongSide = Math.sign(land.x - bx.mid) !== Math.sign(r.x - bx.mid) && Math.abs(land.x - r.x) > 1.4;
   const skill = (getSkills(PLAYERS[server].id).serve || 10) - 10;
-  let chance = perfect ? (wrongSide ? 0.45 + 0.03 * skill : 0.06 + 0.01 * skill) : 0;
-  if (second) chance *= 0.35;
-  chance = clamp(chance, 0, 0.85);
+  let chance = perfect ? (wrongSide ? 0.22 + 0.012 * skill : 0.04 + 0.004 * skill) : 0;   // never extreme: the receiver still gets a racket on most
+  if (second) chance *= 0.3;
+  chance = clamp(chance, 0, 0.4);
   ACE_CHANCE = window.ACE_CHANCE = { server, no, chance: +chance.toFixed(3), perfect, wrongSide, land, target };
   return { no, land, target, fault, net, let: isLet, ace: !isLet && Math.random() < chance };
 }
@@ -858,17 +874,42 @@ function planServe(server, no) {
 function readyStep(dt) {
   if (!nextServe || rally || S.over) return;
   const left = nextServe.at - gameT;
-  if (left <= READY && !nextServe.ready) {               // set up once, when the countdown starts
+  if (left <= POSITION && !nextServe.ready) {            // GET SET starts: set up once
     nextServe.ready = true;
-    if (S.server === 0) resetAim();
-    else { const bx = serviceBox(1); nextServe.guess = bx.mid + (Math.random() < 0.5 ? -1 : 1) * 0.6; }
-    if (S.server === 0) { const bx = serviceBox(0); ai.target = { x: bx.mid + (Math.random() < 0.5 ? -1 : 1) * Math.abs(bx.wide) * 0.35, y: pos[1].y }; }
+    if (S.server === 0) {
+      resetAim();
+      const bx = serviceBox(0);                          // the computer receiver stands mid-box, leaning a little one way
+      ai.target = { x: bx.mid + (Math.random() < 0.5 ? -1 : 1) * Math.abs(bx.wide) * 0.25, y: sideSign(1) * 12.4 };
+    }
   }
-  if (left <= READY) {
-    if (S.server === 0) { steerAim(dt); const a = aiInput(); moveBody(1, a[0], a[1], dt); }   // the computer receiver leans one way
-    else { const u = userInput(); moveBody(0, u[0], u[1], dt); }                              // you move into position
+  if (nextServe.ready) {
+    const u = userInput(); moveBody(0, u[0], u[1], dt);  // WASD: you walk to your spot (serving or receiving)
+    if (S.server === 0) { keepServeStance(0); steerAim(dt); const a = aiInput(); moveBody(1, a[0], a[1], dt); }
   }
   if (left <= 0) { const no = nextServe.no; nextServe = null; startRally(no); }
+}
+/* A server must stand behind the baseline, between the centre mark and the singles sideline, on the correct side. */
+function keepServeStance(i) {
+  const p = pos[i], side = Math.sign(startPositions()[i].x) || 1, s = sideSign(i);
+  p.x = side > 0 ? clamp(p.x, 0.2, COURT.SGL) : clamp(p.x, -COURT.SGL, -0.2);
+  p.y = s < 0 ? clamp(p.y, -14, -COURT.L - 0.05) : clamp(p.y, COURT.L + 0.05, 14);
+}
+
+/* Serve routine for players without a captured motion: bounce the ball, toss it, hit it at the top of their reach. */
+function stepRoutineServe(dt) {
+  const sv = rally.serve, i = S.server, p = pos[i], P = PLAYERS[i], near = P.side === "near";
+  sv.t += dt;
+  const hand = { x: p.x + (near ? -0.3 : 0.3), y: p.y + (near ? 0.25 : -0.25), z: 1.0 };
+  if (sv.t < ROUTINE.seconds) {
+    const f = (sv.t / (ROUTINE.seconds / ROUTINE.bounces)) % 1;
+    Object.assign(ball, { x: hand.x, y: hand.y, z: hand.z * (2 * f - 1) ** 2 });
+    return;
+  }
+  const tt = sv.t - ROUTINE.seconds, T = ROUTINE.toss, hitZ = P.heightM * 1.22 + 0.6;   // toss → contact at the top of the reach
+  const vz = (hitZ - hand.z + 4.905 * T * T) / T;
+  Object.assign(ball, { x: hand.x + (p.x + (near ? 0.25 : -0.25) - hand.x) * Math.min(1, tt / T), y: hand.y, z: hand.z + vz * tt - 4.905 * tt * tt });
+  swing[i] = Math.max(swing[i], tt > T * 0.7 ? 0.6 : 0);
+  if (tt >= T) { rally.serve = null; hitBall(i, true); }
 }
 
 /* =====================================================================
@@ -901,8 +942,8 @@ const rand = (a, c) => a + Math.random() * (c - a);
 /* q (0..1) = how well-set the hitter was: better footwork → faster, wider ball. out = the shot misses. */
 function planShot(hitter, isServe, q, out, sv = null) {
   const recv = 1 - hitter, sign = sideSign(recv);
-  const captured = isServe && hitter === 0 && capturedServe();   // Sinner's serve starts where his racket met the toss
-  const from = isServe && !captured ? { x: pos[hitter].x + 0.35, y: pos[hitter].y, z: 2.9 } : { x: ball.x, y: ball.y, z: Math.max(0.6, ball.z) };
+  // every serve now starts where the racket met the toss (captured or routine); rally shots where the ball was hit
+  const from = { x: ball.x, y: ball.y, z: isServe ? Math.max(2.4, ball.z) : Math.max(0.6, ball.z) };
   let bx, by;
   if (isServe) {
     bx = sv.land.x; by = sv.land.y;                     // where the serve lands (planServe)
@@ -923,7 +964,15 @@ function planShot(hitter, isServe, q, out, sv = null) {
   const dist = Math.hypot(bx - from.x, by - from.y);
   // Strength / Serve skills add a constant m/s per point (shared with the Ball Physicist)
   const speed = isServe ? (sv.no === 2 ? 32 : 40) + BODY[hitter].serveBonus : 19 + 6 * q + rand(0, 3) + BODY[hitter].shotBonus;   // 2nd serves are slower, safer
-  return { hitter, recv, from, bounce: { x: bx, y: by }, end: { x: cx, y: cy, z: 1.0 }, isServe, serve: sv,
+  /* CURVE. arc = how much the ball rises above a straight line (net clearance); curve = sideways bend in flight.
+     1st serve: flat-slice — low over the net, bending toward the sideline it's aimed at, skidding low.
+     2nd serve: kick — a high, safe arc over the net, bending the other way and jumping up after the bounce.
+     Rally shots: topspin — a higher arc and a little sideways drift. */
+  const toWide = Math.sign(bx - from.x) || 1;
+  const arc = isServe ? (sv.no === 2 ? 2.7 : 1.25) : 6;
+  const curve = isServe ? (sv.no === 2 ? -toWide * rand(0.2, 0.35) : toWide * rand(0.35, 0.6)) : rand(-0.35, 0.35);
+  const kick = isServe ? (sv.no === 2 ? { up: 1.45, side: -toWide * 0.45 } : { up: 0.8, side: toWide * 0.25 }) : { up: 1, side: 0 };
+  return { hitter, recv, from, bounce: { x: bx, y: by }, end: { x: cx, y: cy, z: 1.0 }, isServe, serve: sv, arc, curve, kick,
            t1: dist / speed, t2: (0.42 - 0.08 * q) / SURF().pace, t: 0, out, bounced: false, prevD: Infinity, prevV: Infinity };
 }
 
@@ -952,7 +1001,8 @@ function hitBall(i, isServe, volley = false) {
     if (Math.abs(op.vx) > 1.6 && op.vx * (rally.shot.end.x - op.x) < 0) say(0, "WRONG-FOOTED");
     ai.target = { x: 0, y: 12.2 }; ai.at = 0;         // AI recovers to the middle
   } else {
-    ai.target = null; ai.at = clock + Math.max(0.06, rand(0.12, 0.26) - BODY[o].reactionCut);   // AI reaction time (Reflexes)
+    const read = isServe ? rand(0.05, 0.12) : rand(0.12, 0.26);    // a returner reads the toss, so reacts sooner to a serve
+    ai.target = null; ai.at = clock + Math.max(0.04, read - BODY[o].reactionCut);   // AI reaction time (Reflexes)
     if (Math.random() < 0.6) { op.boost = 0.45; op.boostMul = 1.5; }   // AI's own split-step
   }
 }
@@ -964,12 +1014,14 @@ function startRally(no = 1) {                            // no = 1st or 2nd serv
   ball = { x: sp.x + 0.35, y: sp.y, z: 1.0 };
   if (no === 1) pos.forEach(p => (p.stamAtStart = p.stam));
   clock = 0;
-  rally = { shot: null, games: gamesPlayed(), sets: S.sets.length, serveNo: no };
+  rally = { shot: null, games: gamesPlayed(), sets: S.sets.length, serveNo: no, serve: { t: 0 } };   // every serve: routine → windup → contact
   if (S.server === 0 && capturedServe()) {                 // Sinner serves with his real, captured motion (1st or 2nd)
-    rally.serve = {};
     const m = motionFor(no);
-    pos[0].motion = { t: m.events.start, m };
-  } else hitBall(S.server, true);
+    // the 1st-serve clip includes his real routine; the 2nd doesn't, so he holds his stance while the ball bounces
+    const t0 = m.events.routine != null ? m.events.routine : m.events.start - ROUTINE.seconds;
+    rally.serve.captured = true;
+    pos[0].motion = { t: t0, m, t0 };
+  }
   bug.classList.add("live");                     // scoreboard fades while the point is live
   renderScore();
 }
@@ -977,7 +1029,12 @@ function startRally(no = 1) {                            // no = 1st or 2nd serv
 function stepRally(dt) {
   if (pos[0].motion) stepMotion(dt);
   if (!rally) return;
-  if (rally.serve) { if (S.server === 0) steerAim(dt); return; }   // ball still in the toss: you can still adjust your aim
+  if (rally.serve) {                                    // routine and windup: the server's feet are planted
+    if (S.server === 0) steerAim(dt);                    // you can aim until contact
+    else { const u = userInput(); moveBody(0, u[0], u[1], dt); }   // receiving: you can still move
+    if (rally.serve && !rally.serve.captured) stepRoutineServe(dt);
+    return;
+  }
   const sh = rally.shot; sh.t += dt;
   if (ai.at && clock >= ai.at) { ai.target = { x: sh.end.x, y: sh.end.y }; ai.at = 0; }
   const ui = userInput(), ain = aiInput();
@@ -987,9 +1044,9 @@ function stepRally(dt) {
 
   if (sh.t < sh.t1) {
     const u = sh.t / sh.t1;
-    ball.x = sh.from.x + (sh.bounce.x - sh.from.x) * u;
+    ball.x = sh.from.x + (sh.bounce.x - sh.from.x) * u + sh.curve * Math.sin(Math.PI * u);   // bends in flight, lands on target
     ball.y = sh.from.y + (sh.bounce.y - sh.from.y) * u;
-    ball.z = sh.from.z * (1 - u) + 4 * (sh.from.z > 2 ? 0.4 : 1.5) * u * (1 - u);
+    ball.z = sh.from.z * (1 - u) + sh.arc * u * (1 - u);
     // VOLLEY: once the ball has crossed the net, the receiver may take it out of the air (never a serve)
     const r = pos[sh.recv], B = BODY[sh.recv];
     if (!sh.isServe && Math.sign(ball.y) === sideSign(sh.recv) && ball.z > 0.2 && ball.z < PLAYERS[sh.recv].heightM * 1.25) {
@@ -1008,15 +1065,16 @@ function stepRally(dt) {
     if (sh.out) return endPoint(sh.recv, "OUT");
   }
   const u = (sh.t - sh.t1) / sh.t2;               // past 1 the ball keeps travelling
-  ball.x = sh.bounce.x + (sh.end.x - sh.bounce.x) * u;
+  ball.x = sh.bounce.x + (sh.end.x - sh.bounce.x) * u + sh.kick.side * u;   // a kick serve jumps sideways after the bounce
   ball.y = sh.bounce.y + (sh.end.y - sh.bounce.y) * u;
-  ball.z = Math.max(0, sh.end.z * u + 3.6 * SURF().bounce * u * (1 - u));   // clay bounces higher, grass lower
+  ball.z = Math.max(0, sh.end.z * u + 3.6 * SURF().bounce * sh.kick.up * u * (1 - u));   // clay higher, grass lower; kick jumps up, slice skids
   if (u >= 0.3 && !(sh.serve && sh.serve.ace)) {          // an ace is out of reach by definition
     // contact: in reach, and either at the ideal point or the ball is starting to pass you
     const r = pos[sh.recv], d = Math.hypot(ball.x - r.x, ball.y - r.y);
     const passing = d > sh.prevD;
     sh.prevD = d;
-    if (d <= BODY[sh.recv].reach && (u >= 0.95 || passing)) return hitBall(sh.recv, false);
+    const reach = BODY[sh.recv].reach * (sh.isServe ? 1.15 : 1);    // returners stretch further for a serve
+    if (d <= reach && (u >= 0.95 || passing)) return hitBall(sh.recv, false);
   }
   if (u >= 1.28) {                                 // second bounce
     const who = PLAYERS[sh.hitter].last;
@@ -1057,7 +1115,7 @@ function afterPoint() {
 function retakeServe(no, call) {
   rally = null;
   toast(call);
-  after(0.9, () => { resetPositions(); renderScore(); });
+  after(0.4, () => { resetPositions(); renderScore(); });
   queueServe(BETWEEN_SERVES, no);
 }
 
@@ -1108,13 +1166,14 @@ function drawAim() {
 /* READY countdown before each serve, with what to do. */
 const readyEl = document.getElementById("ready"), readyBig = document.getElementById("readyBig"), readySmall = document.getElementById("readySmall");
 function renderReady() {
-  const left = nextServe ? nextServe.at - gameT : Infinity;
-  if (!nextServe || rally || paused || left > READY) { readyEl.hidden = true; return; }
+  const positioning = nextServe && nextServe.ready && !rally, serving = rally && rally.serve;
+  if (paused || S.over || !(positioning || serving)) { readyEl.hidden = true; return; }
   readyEl.hidden = false;
-  readyBig.textContent = left > 1.2 ? "READY" : String(Math.max(1, Math.ceil(left)));
+  const no = positioning ? nextServe.no : rally.serveNo;
   const who = S.server === 0 ? "YOUR SERVE" : `${PLAYERS[S.server].last} TO SERVE`;
-  const tip = S.server === 0 ? "A/D AIM · W/S DEPTH" : "MOVE INTO POSITION";
-  readySmall.textContent = `${who} · ${nextServe.no === 2 ? "2ND" : "1ST"} SERVE · ${tip}`;
+  readyBig.textContent = positioning ? "GET SET" : "";
+  readySmall.textContent = `${who} · ${no === 2 ? "2ND" : "1ST"} SERVE · ` +
+    (S.server === 0 ? (positioning ? "WASD: YOUR SPOT · ARROWS / CLICK: AIM" : "ARROWS / CLICK: AIM · V: FIRST PERSON") : "WASD: MOVE INTO POSITION");
 }
 
 /* Faint ground ring = Sinner's real reach (arm + racket), so you can learn your body */
@@ -1138,12 +1197,12 @@ function labelPlayers() {
     const P = PLAYERS[i];
     document.getElementById("name" + i).textContent = P.last;
     document.getElementById("spec" + i).textContent = `${P.heightM} M · ${P.weightKg} KG`;
-    document.getElementById("st" + i).style.background = P.shirt;
+    document.getElementById("st" + i).style.background = P.ui || P.shirt;
   });
   document.getElementById("lblA").textContent = "Point " + PLAYERS[0].last.charAt(0) + PLAYERS[0].last.slice(1).toLowerCase();
   document.getElementById("lblB").textContent = "Point " + PLAYERS[1].last.charAt(0) + PLAYERS[1].last.slice(1).toLowerCase();
-  document.getElementById("dotA").style.background = PLAYERS[0].shirt;
-  document.getElementById("dotB").style.background = PLAYERS[1].shirt;
+  document.getElementById("dotA").style.background = PLAYERS[0].ui;
+  document.getElementById("dotB").style.background = PLAYERS[1].ui;
   canvas.setAttribute("aria-label", `Pixel tennis court: ${PLAYERS[0].first} ${PLAYERS[0].last} (you) near side, ${PLAYERS[1].first} ${PLAYERS[1].last} far side`);
 }
 labelPlayers();
@@ -1196,7 +1255,7 @@ function setPaused(on) {
 /* Called by the start flow (src/start/flow.js) with everything the player chose. */
 function startMatch({ bestOf, tbTo, surface, playerId, firstServer }) {
   cfg.bestOf = bestOf; cfg.tbTo = tbTo; cfg.surface = surface;
-  choosePlayers(playerId); labelPlayers();
+  choosePlayers(playerId, surface); labelPlayers();
   cfg.firstServer = firstServer === "r" ? (Math.random() < 0.5 ? 0 : 1) : +firstServer;
   S = freshState(); history = []; matchOn = true;
   rally = null; cancelServe(); setPaused(false);
@@ -1214,18 +1273,14 @@ function toast(msg) {
 document.getElementById("pauseBtn").onclick = () => setPaused(!paused);
 document.getElementById("resumeBtn").onclick = () => setPaused(false);
 document.getElementById("pauseNew").onclick = () => openSetup(1);
-document.getElementById("pauseExit").onclick = () => openSetup(0);
-document.getElementById("resultExit").onclick = () => openSetup(0);
-document.getElementById("resultX").onclick = () => (document.getElementById("result").hidden = true);
 document.getElementById("slideBtn").onclick = () => slide(0);
 document.getElementById("ptA").onclick = () => manualPoint(0);
 document.getElementById("ptB").onclick = () => manualPoint(1);
 document.getElementById("undoBtn").onclick = undo;
 document.getElementById("newBtn").onclick = () => openSetup(1);
 document.getElementById("againBtn").onclick = () => openSetup(1);
-document.getElementById("homeBtn").onclick = () => openSetup(0);
 document.getElementById("splitBtn").onclick = () => splitStep(0);
-const MOVE_KEYS = ["w", "a", "s", "d", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];
+const MOVE_KEYS = ["w", "a", "s", "d", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];   // WASD moves, arrows aim
 const keyOf = e => (e.key.length === 1 ? e.key.toLowerCase() : e.key);   // W and w (Shift held) are the same key
 addEventListener("keyup", e => input.keys.delete(keyOf(e)));
 addEventListener("blur", () => input.keys.clear());
@@ -1241,6 +1296,7 @@ addEventListener("keydown", e => {
   if (e.key === "Shift") { if (!e.repeat) splitStep(0); return; }
   if (e.target.closest && e.target.closest("button") && e.code === "Space") return;
   if (e.code === "Space") { e.preventDefault(); if (!e.repeat) slide(0); }   // Space = slide (points now serve by themselves)
+  else if (e.key === "v" || e.key === "V") { firstPersonServe = !firstPersonServe; toast(firstPersonServe ? "FIRST-PERSON SERVE ON" : "SERVE CAM ON"); }
   else if (e.key === "1") manualPoint(0);                 // test keys (A and L now belong to movement)
   else if (e.key === "2") manualPoint(1);
   else if (e.key === "z" || e.key === "Z") undo();
@@ -1249,28 +1305,47 @@ addEventListener("resize", resize);
 
 /* Touch / mouse: drag on the court = virtual stick (screen up = toward the net) */
 const stick = document.getElementById("stick"), knob = document.getElementById("knob");
-let stickOrigin = null;
+let stickOrigin = null, aimDrag = null;
+/* Screen point → court point on the ground (inverse of proj with z = 0). */
+function screenToCourt(cx, cy) {
+  const sx = cx / innerWidth * BW, sy = cy / innerHeight * BH;
+  if (sy <= HZ + 1) return null;                         // above the horizon: not on the court
+  const d = F * CAM_H / (sy - HZ);
+  return { x: (sx - BW / 2) * d / F + CAM_X, y: d - CAM_BACK };
+}
+const aimingNow = () => S.server === 0 && !paused && ((nextServe && nextServe.ready && !rally) || (rally && rally.serve));
+function aimAt(cx, cy) {
+  const c = screenToCourt(cx, cy); if (!c) return;
+  const bx = serviceBox(0);
+  aim.x = clamp(c.x, bx.xlo + 0.05, bx.xhi - 0.05);
+  aim.y = clamp(c.y, bx.sy * 1.5, bx.sy * (COURT.SVC - 0.05));
+}
 canvas.addEventListener("pointerdown", e => {
+  if (aimingNow()) {                                      // serving: click / tap (and drag) to aim; you can't run during the windup anyway
+    const c = screenToCourt(e.clientX, e.clientY);
+    if (c && Math.sign(c.y) === serviceBox(0).sy) { aimDrag = e.pointerId; canvas.setPointerCapture(e.pointerId); aimAt(e.clientX, e.clientY); return; }
+  }
   stickOrigin = { x: e.clientX, y: e.clientY, id: e.pointerId };
   canvas.setPointerCapture(e.pointerId);
   stick.style.left = e.clientX + "px"; stick.style.top = e.clientY + "px"; stick.hidden = false;
   knob.style.transform = "";
 });
 canvas.addEventListener("pointermove", e => {
+  if (aimDrag === e.pointerId) { aimAt(e.clientX, e.clientY); return; }
   if (!stickOrigin || e.pointerId !== stickOrigin.id) return;
   let dx = (e.clientX - stickOrigin.x) / 40, dy = (e.clientY - stickOrigin.y) / 40;
   const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; }
   input.stick = { x: dx, y: -dy };
   knob.style.transform = `translate(${dx * 30}px, ${dy * 30}px)`;
 });
-const endStick = () => { stickOrigin = null; input.stick = { x: 0, y: 0 }; stick.hidden = true; };
+const endStick = () => { stickOrigin = null; aimDrag = null; input.stick = { x: 0, y: 0 }; stick.hidden = true; };
 canvas.addEventListener("pointerup", endStick);
 canvas.addEventListener("pointercancel", endStick);
-if (matchMedia("(pointer: coarse)").matches) document.getElementById("hint").textContent = "DRAG COURT TO MOVE · SPLIT BUTTON";
+if (matchMedia("(pointer: coarse)").matches) document.getElementById("hint").textContent = "DRAG TO MOVE · TAP THE BOX TO AIM YOUR SERVE";
 
 resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
 </script>
 <!-- Locker room (Locker Room Designer) and the start flow (Start Page Builder) -->
-<script src="src/lockerroom/lockerroom.js"></script>
-<script src="src/start/flow.js"></script>
+<script src="src/lockerroom/lockerroom.js?v=0.5.0"></script>
+<script src="src/start/flow.js?v=0.5.0"></script>
 <script>StartFlow.open();</script>

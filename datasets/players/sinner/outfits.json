@@ -1,0 +1,16 @@
+{
+  "player": "sinner",
+  "how": "Colours read off his clips by eye, then checked against colour samples at the chest, shorts, cap and shoes (Claude, Oct 27). The pixel reference sprites (datasets/players/sinner/ref/*.png, 96 px tall) stay on Ryan's Mac, because they're cut from TV footage.",
+  "by_clip": [
+    {"clip": "Sinner serve(Front).mov", "surface": "clay", "shirt": "#141418", "shorts": "#1e1d22", "cap": "#16161b", "shoes": "#1c1b20", "socks": "#16161b", "notes": "all black"},
+    {"clip": "close up jannik sinner back.mov", "surface": "hard", "shirt": "#1f2f4a", "shorts": "#f5f5f2", "cap": "#f2f2ef", "shoes": "#f0ece6", "socks": "#f2f2ef", "notes": "navy shirt, white shorts and cap; red accents on the shoes"},
+    {"clip": "jannik sinner back side.mov", "surface": "hard", "shirt": "#6c6f78", "shorts": "#14243a", "cap": "#8cc6ec", "shoes": "#8cc6ec", "notes": "grey shirt, navy shorts, light blue cap and shoes"},
+    {"clip": "jannik sinner front.mov", "surface": "hard", "shirt": "#e2482c", "shorts": "#d9dbe6", "cap": "#f2f2ef", "shoes": "#e7c22c", "wristband": "#d23a3a", "notes": "orange-red shirt with a white chest logo, light grey shorts, yellow shoes"},
+    {"clip": "jannik sinner left side.mov", "surface": "hard", "shirt": "#efe3a6", "shorts": "#d8d2bd", "cap": "#e9dca0", "shoes": "#efece2", "notes": "pale yellow shirt and cap, beige shorts"}
+  ],
+  "in_game": {
+    "clay":  {"shirt": "#141418", "shorts": "#1e1d22", "cap": "#16161b", "shoes": "#1c1b20", "from": "Sinner serve(Front).mov"},
+    "hard":  {"shirt": "#1f2f4a", "shorts": "#f5f5f2", "cap": "#f2f2ef", "shoes": "#f0ece6", "from": "close up jannik sinner back.mov"},
+    "grass": {"shirt": "#f4f4f0", "shorts": "#f4f4f0", "cap": "#f4f4f0", "shoes": "#f4f4f0", "from": "grass-court dress code: predominantly white (no clip yet)"}
+  }
+}
