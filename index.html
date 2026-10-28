@@ -149,23 +149,15 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 .result-line { font-family: var(--f-num); font-size: 18px; margin: 0; }
 
 /* ---------- Body HUD (top-right): stamina, speed, split-step feedback ---------- */
-.hud {
-  position: fixed; z-index: 5;
-  top: calc(12px + env(safe-area-inset-top, 0px));
-  right: max(16px, env(safe-area-inset-right, 0px));
-  width: 220px; max-width: calc(100% - 130px);
-  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
-  padding: 8px 10px; display: grid; gap: 7px;
-  font-family: var(--f-pix); font-size: 8px; letter-spacing: .06em; color: var(--muted);
-}
-.hud-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-.hud-top b { font-weight: 400; color: var(--ink); font-size: 9px; }
-.hud-row { display: grid; gap: 4px; }
-.bar { position: relative; height: 6px; background: var(--panel-2); border-radius: 2px; overflow: hidden; }
+.stamina { position: fixed; z-index: 5; top: calc(14px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px));
+  width: 120px; display: grid; gap: 4px; pointer-events: none; }
+.stamina-label { font-family: var(--f-pix); font-size: 7px; letter-spacing: .1em; color: rgb(238 243 251 / .75); text-shadow: 0 1px 0 rgb(0 0 0 / .5); }
+.bar { position: relative; height: 5px; background: rgb(14 23 41 / .65); border-radius: 2px; overflow: hidden; }
 .bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; }
-.bar .cap { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--muted); }
-.hud-msg { color: var(--ball); min-height: 10px; }
-.hud-hint { border-top: 1px solid var(--line); padding-top: 6px; }
+.bar .cap { position: absolute; top: 0; bottom: 0; width: 2px; background: rgb(238 243 251 / .7); }
+.callout { position: fixed; z-index: 6; left: 50%; transform: translateX(-50%); bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  font-family: var(--f-pix); font-size: 10px; letter-spacing: .08em; color: var(--ball); text-shadow: 0 2px 0 rgb(0 0 0 / .55);
+  pointer-events: none; white-space: nowrap; }
 .stick {
   position: fixed; z-index: 7; width: 96px; height: 96px; margin: -48px 0 0 -48px;
   border-radius: 50%; border: 1px solid rgb(238 243 251 / .35); pointer-events: none;
@@ -175,7 +167,6 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 
 @media (max-width: 480px) {
   .cam-tag { top: calc(56px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); transform: none; font-size: 8px; }
-  .hud { width: 168px; }
   .sb-name b { font-size: 18px; }
   .sb-cell { height: 30px; }
   .btn { font-size: 13px; padding: 6px 9px; }
@@ -187,18 +178,13 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <canvas id="court" aria-label="Pixel tennis court: Jannik Sinner near side, Carlos Alcaraz far side"></canvas>
 
 
-<aside class="hud" aria-label="Player condition">
-  <div class="hud-row">
-    <div class="hud-top"><b id="name0">SINNER</b><span id="spec0"></span></div>
-    <div class="bar"><i id="st0" style="background:var(--sinner)"></i><span class="cap" id="cap0"></span></div>
-  </div>
-  <div class="hud-row">
-    <div class="hud-top"><b id="name1">ALCARAZ</b><span id="spec1"></span></div>
-    <div class="bar"><i id="st1" style="background:var(--alcaraz)"></i><span class="cap" id="cap1"></span></div>
-  </div>
-  <div class="hud-msg" id="hudMsg" aria-live="polite"></div>
-  <div class="hud-hint" id="hint">WASD MOVE · HOLD E SLICE · SPACE SLIDE · SHIFT SPLIT · ARROWS AIM SERVE</div>
-</aside>
+<!-- Stamina only (no box, no heights or weights: Ryan's call). Messages (split-step, slide, ace chance) pop up above the buttons. -->
+<div class="stamina" aria-label="Stamina">
+  <span class="stamina-label">STAMINA</span>
+  <div class="bar"><i id="st0" style="background:var(--sinner)"></i><span class="cap" id="cap0"></span></div>
+  <div class="bar"><i id="st1" style="background:var(--alcaraz)"></i><span class="cap" id="cap1"></span></div>
+</div>
+<div class="callout" id="hudMsg" aria-live="polite"></div>
 <div class="stick" id="stick" hidden><i id="knob"></i></div>
 <div class="cam-tag" id="camTag" hidden>NET CAM · VOLLEY</div>
 <div class="ready" id="ready" hidden aria-live="polite"><b id="readyBig">READY</b><span id="readySmall"></span></div>
@@ -241,9 +227,9 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <div class="toast" id="toast" hidden></div>
 
 <!-- Skill points (Skills Coach) and Sinner's real serve, captured from video (Serve Analyst) -->
-<script src="src/skills/skills.js?v=0.5.0"></script>
-<script src="src/animation/run-cycle.js?v=0.5.0"></script>
-<script src="src/serve/motion/sinner-serve.js?v=0.5.0"></script>
+<script src="src/skills/skills.js?v=0.6.0"></script>
+<script src="src/animation/run-cycle.js?v=0.6.0"></script>
+<script src="src/serve/motion/sinner-serve.js?v=0.6.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -404,7 +390,13 @@ function renderScore() {
 const canvas = document.getElementById("court");
 const ctx = canvas.getContext("2d");
 const buf = document.createElement("canvas");
-const b = buf.getContext("2d");
+const bMain = buf.getContext("2d");
+let b = bMain;                                           // the context every draw call uses (switched for the actor layer)
+/* ACTOR LAYER: players, rackets, net and ball are drawn at AS× the court's pixel resolution, so characters get
+   real detail while the world keeps its chunky pixel look. Same coordinates (scaled by a transform). */
+const AS = 2;
+const abuf = document.createElement("canvas"), actx = abuf.getContext("2d");
+const q = v => Math.round(v * AS) / AS;                  // snap to the actor layer's finer pixel grid
 let BW = 320, BH = 200, F = 150, HZ = 60;
 const COURT = { L: 11.885, DBL: 5.485, SGL: 4.115, SVC: 6.40 };
 /* Camera. BROADCAST = high behind the baseline. When you cross the NET_LINE toward the net, the camera
@@ -445,6 +437,7 @@ function resize() {
   canvas.width = W; canvas.height = H;
   BW = Math.ceil(W / px); BH = Math.ceil(H / px);
   buf.width = BW; buf.height = BH;
+  abuf.width = BW * AS; abuf.height = BH * AS;
   F = Math.min(BW * 0.63, BH * 0.95);
   setHorizon();
   makeCrowd();
@@ -595,80 +588,232 @@ function drawCapturedFigure(i, p, W) {
   // legs, shoes, shorts
   for (const s of ["left", "right"]) {
     seg(s + "Hip", s + "Knee", skin); seg(s + "Knee", s + "Ankle", skin);
-    const A = at(s + "Ankle"); if (A) { b.fillStyle = P.shoes || "#f2f2f2"; b.fillRect(Math.round(A.x - lw * 0.7), Math.round(A.y - lw * 0.4), Math.ceil(lw * 1.5), Math.ceil(lw * 0.8)); }
+    const Kn = at(s + "Knee"), A0 = at(s + "Ankle");
+    if (Kn && A0) seg({ x: A0.x + (Kn.x - A0.x) * 0.18, y: A0.y + (Kn.y - A0.y) * 0.18 }, A0, "#f1f1ee", lw * 1.05);   // sock
+    const A = at(s + "Ankle"); if (A) { b.fillStyle = shade(P.shoes || "#f2f2f2", -0.45); b.fillRect(Math.round(A.x - lw * 0.75), Math.round(A.y + lw * 0.35), Math.ceil(lw * 1.6), Math.max(1, Math.ceil(lw * 0.3))); b.fillStyle = P.shoes || "#f2f2f2"; b.fillRect(Math.round(A.x - lw * 0.7), Math.round(A.y - lw * 0.4), Math.ceil(lw * 1.5), Math.ceil(lw * 0.8)); }
     seg(s + "Hip", mid(s + "Hip", s + "Knee", 0.42), P.shorts, lw * 1.5);
   }
   // torso (shirt) between shoulders and hips
   quad([at("leftShoulder"), at("rightShoulder"), at("rightHip"), at("leftHip")], P.shirt);
+  { const ls = at("leftShoulder"), lh = at("leftHip"), rs = at("rightShoulder"), rh = at("rightHip");   // shaded side of the jersey
+    if (ls && lh && rs && rh) quad([ls, { x: ls.x + (rs.x - ls.x) * 0.28, y: ls.y + (rs.y - ls.y) * 0.28 }, { x: lh.x + (rh.x - lh.x) * 0.28, y: lh.y + (rh.y - lh.y) * 0.28 }, lh], shade(P.shirt, -0.16)); }
   seg("leftHip", "rightHip", P.shorts, lw * 1.4);
   // arms, with short sleeves
   for (const s of ["left", "right"]) {
     seg(s + "Shoulder", s + "Elbow", skin); seg(s + "Elbow", s + "Wrist", skin);
     seg(s + "Shoulder", mid(s + "Shoulder", s + "Elbow", 0.4), P.shirt, lw * 1.3);
+    const wr = mid(s + "Wrist", s + "Elbow", 0.18); if (wr) seg(wr, mid(s + "Wrist", s + "Elbow", 0.05), P.ui || "#f2f2f2", lw * 1.1);   // wristband
   }
-  // racket: continues the right forearm, one racket length past the wrist
+  // racket: a real 3D racket continuing the right forearm (the same drawRacket as every other stroke)
   if (W.rightElbow && W.rightWrist) {
-    const e = W.rightElbow, r = W.rightWrist, dx = r.x - e.x, dz = r.z - e.z, L = Math.hypot(dx, dz) || 1;
-    const tip = proj(r.x + dx / L * RACKET_M, r.y, r.z + dz / L * RACKET_M), R = at("rightWrist");
-    const head = { x: R.x + (tip.x - R.x) * 0.72, y: R.y + (tip.y - R.y) * 0.72 };
-    seg(R, head, "#1b1b1f", Math.max(1, lw * 0.5));
-    b.fillStyle = "#1b1b1f"; b.beginPath(); b.ellipse(Math.round(tip.x), Math.round(tip.y), Math.max(1, g.s * 0.12), Math.max(1, g.s * 0.16), Math.atan2(tip.y - R.y, tip.x - R.x) + Math.PI / 2, 0, Math.PI * 2); b.fill();
+    const e = W.rightElbow, r = W.rightWrist, u = V3.norm({ x: r.x - e.x, y: r.y - e.y, z: r.z - e.z });
+    const n = V3.norm({ x: 0, y: u.z, z: -u.y });          // face square to the forearm, toward the net
+    drawRacket(r, u, n, RACKET_LOOK[P.id] || RACKET_LOOK.sinner);
   }
-  // head (seen from behind: mostly hair) between the neck and the nose
+  // head (seen from behind: cap or hair with strands) between the neck and the nose
   const N = at("neck"), H = at("nose");
   if (N && H) {
-    const hx = H.x, hy = H.y - g.s * 0.04, r = Math.max(2, g.s * 0.12);
-    b.fillStyle = skin; b.beginPath(); b.arc(Math.round(hx), Math.round(hy), r, 0, Math.PI * 2); b.fill();
-    b.fillStyle = P.side === "near" ? (P.cap || P.hair) : (P.cap || skin); b.beginPath(); b.arc(Math.round(hx), Math.round(hy - r * 0.15), r * 0.95, Math.PI, Math.PI * 2.0); b.fill();
-    b.font = "8px Silkscreen, monospace"; b.textAlign = "center"; b.fillStyle = "rgba(238,243,251,0.85)";
-    b.fillText(P.last, Math.round(hx), Math.round(hy - r - 6));
+    const r = Math.max(2, g.s * 0.12), hx = H.x, hy = H.y - g.s * 0.04, [hr, hrD, hrL] = HAIR[P.id] || [P.hair, P.hair, P.hair];
+    b.fillStyle = skin; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();
+    b.fillStyle = hr; b.beginPath(); b.arc(hx, hy + r * 0.15, r * 0.98, Math.PI * 0.05, Math.PI * 0.95); b.fill();   // hair below the cap
+    for (let k = -2; k <= 2; k++) { b.fillStyle = k % 2 ? hrL : hrD; b.fillRect(hx + k * r * 0.35 - 0.5 / AS, hy + r * 0.55, 1 / AS, r * 0.3); }  // curls
+    b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.1, r * 0.98, Math.PI, Math.PI * 2); b.fill();     // cap crown
+    if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(hx - 0.5 / AS, hy - r * 1.05, 1 / AS, r * 0.95); }  // seam
   }
+}
+
+/* =====================================================================
+   PLAYER SPRITE (detailed, on the actor layer) + 3D RACKET
+   Owners: Player Artist (looks), Animator (frames). Everything is sized from the sprite height h, so real heights show.
+   ===================================================================== */
+const HAIR = { sinner: ["#c4672f", "#8e441e", "#e7914f"], alcaraz: ["#2a1c14", "#120b07", "#4d3626"] };   // base, shadow, highlight
+const RACKET_LOOK = { sinner: { frame: "#1d1d22", accent: "#f2f2ef" }, alcaraz: { frame: "#1d1d22", accent: "#e2544a" } };
+function shade(hex, amt) {                               // lighten (+) or darken (−) a #rrggbb colour
+  const n = parseInt(hex.slice(1), 16), f = c => Math.max(0, Math.min(255, Math.round(c + (amt > 0 ? (255 - c) : c) * amt)));
+  return "#" + [f(n >> 16), f((n >> 8) & 255), f(n & 255)].map(v => v.toString(16).padStart(2, "0")).join("");
+}
+const V3 = { norm: v => { const l = Math.hypot(v.x, v.y, v.z) || 1; return { x: v.x / l, y: v.y / l, z: v.z / l }; },
+             lerp: (a, c, t) => ({ x: a.x + (c.x - a.x) * t, y: a.y + (c.y - a.y) * t, z: a.z + (c.z - a.z) * t }) };
+const ease = t => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
+
+/* The racket is a real object in court space: grip point, shaft direction u, string-face normal n.
+   Projected like the court, so its length, angle and how "open" the face looks are right from any camera:
+   face-on = a full oval with strings, edge-on = a thin line. (ox, oy) shifts it with the body's bob/crouch. */
+const RACKET = { len: 0.685, handle: 0.2, headL: 0.33, headW: 0.26 };
+function drawRacket(grip, u, n, look, ox = 0, oy = 0) {
+  const at = t => ({ x: grip.x + u.x * t, y: grip.y + u.y * t, z: grip.z + u.z * t });
+  const pp = w => { const r = proj(w.x, w.y, w.z); return { x: r.x + ox, y: r.y + oy, s: r.s }; };
+  const c = at(RACKET.len - RACKET.headL / 2), top = pp(at(RACKET.len)), bot = pp(at(RACKET.len - RACKET.headL)), hc = pp(c);
+  const g0 = pp(at(-0.03)), g1 = pp(at(RACKET.handle)), s = hc.s;
+  const camz = { x: CAM_X, y: -CAM_BACK, z: CAM_H }, vd = V3.norm({ x: c.x - camz.x, y: c.y - camz.y, z: c.z - camz.z });
+  const open = Math.abs(n.x * vd.x + n.y * vd.y + n.z * vd.z);          // 1 = strings face the camera, 0 = edge-on
+  const major = Math.max(1 / AS, Math.hypot(top.x - bot.x, top.y - bot.y) / 2);
+  const minor = Math.max(0.6 / AS, RACKET.headW / 2 * s * open);
+  const rot = Math.atan2(top.y - bot.y, top.x - bot.x), lw = Math.max(1 / AS, 0.024 * s);
+  b.lineCap = "round";
+  b.strokeStyle = "#2b2b31"; b.lineWidth = Math.max(1 / AS, 0.04 * s);  // grip (tape)
+  b.beginPath(); b.moveTo(g0.x, g0.y); b.lineTo(g1.x, g1.y); b.stroke();
+  b.fillStyle = look.accent; b.fillRect(q(g0.x) - 0.5 / AS, q(g0.y) - 0.5 / AS, 1 / AS, 1 / AS);   // butt cap
+  const nx = Math.cos(rot + Math.PI / 2) * minor * 0.8, ny = Math.sin(rot + Math.PI / 2) * minor * 0.8;
+  b.strokeStyle = look.frame; b.lineWidth = lw;                          // throat: the open V into the head
+  b.beginPath(); b.moveTo(g1.x, g1.y); b.lineTo(bot.x + nx, bot.y + ny); b.moveTo(g1.x, g1.y); b.lineTo(bot.x - nx, bot.y - ny); b.stroke();
+  b.save(); b.translate(hc.x, hc.y); b.rotate(rot);
+  b.beginPath(); b.ellipse(0, 0, major, minor, 0, 0, Math.PI * 2);
+  if (minor > 1.5 / AS) {                                                // strings: a pale bed with a cross-hatch
+    b.fillStyle = "rgba(236,236,226,0.22)"; b.fill();
+    b.save(); b.clip(); b.strokeStyle = "rgba(246,246,238,0.6)"; b.lineWidth = 1 / AS; b.beginPath();
+    for (let k = -3; k <= 3; k++) { const yy = k * minor / 3.6; b.moveTo(-major, yy); b.lineTo(major, yy); }
+    for (let k = -4; k <= 4; k++) { const xx = k * major / 4.6; b.moveTo(xx, -minor); b.lineTo(xx, minor); }
+    b.stroke(); b.restore();
+  }
+  b.strokeStyle = look.frame; b.lineWidth = lw; b.beginPath(); b.ellipse(0, 0, major, minor, 0, 0, Math.PI * 2); b.stroke();
+  b.strokeStyle = look.accent; b.lineWidth = Math.max(1 / AS, lw * 0.5);  // a painted accent along the top of the frame
+  b.beginPath(); b.ellipse(0, 0, major, minor, 0, -0.55, 0.55); b.stroke();
+  b.restore();
+}
+
+/* Where the racket is: ready position, backswing as the ball comes, contact, follow-through; forehand on the
+   racket side, two-handed backhand on the other; overhead for a serve. In player space: dx = to their right,
+   dy = forward (toward the net), z = height. Blended with easing so strokes flow. */
+function racketPose(i, p) {
+  const R = PLAYERS[i].side === "near" ? 1 : -1;        // near player's right is +x and forward is +y; far is the mirror
+  const W = (dx, dy, z) => ({ x: p.x + R * dx, y: p.y + R * dy, z });
+  const D = (dx, dy, dz) => V3.norm({ x: R * dx, y: R * dy, z: dz });
+  const POSE = {
+    ready:  { g: W(0.40, 0.18, 0.96), u: D(0.34, 0.30, 0.89), n: D(0.6, -0.8, 0), throat: true },    // head up beside the right side, strings toward the back
+    fhBack: { g: W(0.55, -0.15, 1.15), u: D(0.45, -0.55, 0.62), n: D(0, 1, 0.35) },
+    fhHit:  { g: W(0.60, 0.40, 1.00), u: D(0.90, 0.45, 0.10), n: D(0, 1, 0) },
+    fhEnd:  { g: W(-0.35, 0.15, 1.55), u: D(-0.35, -0.60, 0.72), n: D(0.7, 0, 0.3) },
+    bhBack: { g: W(-0.50, -0.10, 1.15), u: D(-0.50, -0.55, 0.62), n: D(0, 1, 0.35) },
+    bhHit:  { g: W(-0.55, 0.40, 1.00), u: D(-0.90, 0.45, 0.10), n: D(0, 1, 0) },
+    bhEnd:  { g: W(0.35, 0.15, 1.55), u: D(0.35, -0.60, 0.72), n: D(-0.7, 0, 0.3) },
+    trophy: { g: W(0.40, -0.10, 1.50), u: D(0.25, -0.45, -0.55), n: D(1, 0, 0) },
+    srvHit: { g: W(0.15, 0.25, 2.30), u: D(0.05, 0.25, 0.97), n: D(0, 1, 0.1) },
+    srvEnd: { g: W(-0.30, 0.25, 0.85), u: D(-0.35, -0.20, -0.90), n: D(0.8, 0, 0.2) },
+  };
+  const mix = (a, c, t) => ({ g: V3.lerp(a.g, c.g, ease(t)), u: V3.norm(V3.lerp(a.u, c.u, ease(t))), n: V3.norm(V3.lerp(a.n, c.n, ease(t))), throat: ease(t) < 0.5 ? a.throat : c.throat });
+  const out = (pose, twoHands) => ({ ...pose, twoHands, throat: !twoHands && !!pose.throat });
+  const tt = rally ? clock - (p.hitT ?? -9) : 9, fh = (p.strokeSide || 1) > 0;
+  if (rally && rally.serve && S.server === i && !rally.serve.captured) {          // serve routine: bounce, then trophy as the ball goes up
+    const k = Math.max(0, (rally.serve.t - ROUTINE.seconds) / ROUTINE.toss);
+    return out(mix(POSE.ready, POSE.trophy, k), false);
+  }
+  if (p.hitServe && tt >= 0 && tt < 0.7)                                          // serve: contact up high, follow through down across
+    return out(tt < 0.06 ? POSE.srvHit : tt < 0.36 ? mix(POSE.srvHit, POSE.srvEnd, (tt - 0.06) / 0.3) : mix(POSE.srvEnd, POSE.ready, (tt - 0.36) / 0.34), false);
+  const [B, H, E] = fh ? [POSE.fhBack, POSE.fhHit, POSE.fhEnd] : [POSE.bhBack, POSE.bhHit, POSE.bhEnd];
+  if (tt >= 0 && tt < 0.8)                                                        // just hit: contact → follow-through → back to ready
+    return out(tt < 0.06 ? H : tt < 0.32 ? mix(H, E, (tt - 0.06) / 0.26) : mix(E, POSE.ready, (tt - 0.32) / 0.48), !fh);
+  if (rally && rally.shot && rally.shot.recv === i && !rally.serve && ball) {     // the ball is coming: take the racket back
+    const d = Math.hypot(ball.x - p.x, ball.y - p.y), side = (ball.x - p.x) * R >= 0;
+    const [Bk] = side ? [POSE.fhBack] : [POSE.bhBack];
+    return out(mix(POSE.ready, Bk, (7 - d) / 4), !side);
+  }
+  return out(POSE.ready, false);
 }
 
 function drawPlayer(i, pos, swing) {
   if (pos.motion && pos.motion.world) return drawCapturedFigure(i, pos, pos.motion.world);
-  const P = PLAYERS[i], near = P.side === "near";
+  const P = PLAYERS[i], near = P.side === "near", R = near ? 1 : -1;
   const g = proj(pos.x, pos.y), s = g.s;
-  const h = Math.max(6, P.heightM * s), w = h * 0.30, skin = "#e1b48b";
-  // the frame comes from src/animation/run-cycle.js (Animator): run, back-pedal, shuffle, plant, ready, split, slide
+  const h = Math.max(6, P.heightM * s), w = h * 0.30, skin = "#e1b48b", skinD = shade(skin, -0.18), skinL = shade(skin, 0.12);
   const A = window.Anim ? Anim.frame(pos, BODY[i], near)
     : { bob: 0, lean: 0, crouch: 0.02, feet: [{ dx: -0.26, lift: 0 }, { dx: 0.26, lift: 0 }], arms: [0, 0] };
-  const hop = pos.air > 0 ? Math.max(1, h * 0.07) : 0;
-  const x = Math.round(g.x), y = Math.round(g.y - hop), lx = A.lean * h;
-  b.fillStyle = "rgba(0,0,0,0.32)"; b.beginPath(); b.ellipse(Math.round(g.x), Math.round(g.y), w * 0.9, Math.max(1, w * 0.28), 0, 0, Math.PI * 2); b.fill();
-  const R = (rx, ry, rw, rh, c) => { b.fillStyle = c; b.fillRect(Math.round(rx), Math.round(ry), Math.max(1, Math.round(rw)), Math.max(1, Math.round(rh))); };
-  const L = (x1, y1, x2, y2, c, lw) => { b.strokeStyle = c; b.lineWidth = Math.max(1, lw); b.lineCap = "round";
-    b.beginPath(); b.moveTo(Math.round(x1), Math.round(y1)); b.lineTo(Math.round(x2), Math.round(y2)); b.stroke(); };
-  const hipY = y - h * 0.5 + (A.crouch - A.bob) * h;    // crouch and bob move the whole upper body
-  // legs: hip → knee → foot, each foot placed and lifted by the frame
+  const hop = pos.air > 0 ? h * 0.07 : 0, drop = (A.crouch - A.bob) * h;
+  const x = g.x, y = g.y - hop, lx = A.lean * h, tx = x + lx;
+  const Rr = (rx, ry, rw, rh, c) => { b.fillStyle = c; b.fillRect(q(rx), q(ry), Math.max(1 / AS, q(rw)), Math.max(1 / AS, q(rh))); };
+  const Ln = (x1, y1, x2, y2, c, lw) => { b.strokeStyle = c; b.lineWidth = Math.max(1 / AS, lw); b.lineCap = "round";
+    b.beginPath(); b.moveTo(q(x1), q(y1)); b.lineTo(q(x2), q(y2)); b.stroke(); };
+  const look = RACKET_LOOK[P.id] || RACKET_LOOK.sinner;
+  const rp = racketPose(i, pos), behind = rp.g.y + rp.u.y * RACKET.len * 0.7 > pos.y + 0.05;   // head farther than the body?
+  const gs = proj(rp.g.x, rp.g.y, rp.g.z), grip = { x: gs.x + lx * 0.5, y: gs.y - hop + drop };
+
+  b.fillStyle = "rgba(0,0,0,0.32)"; b.beginPath(); b.ellipse(q(g.x), q(g.y), w * 0.95, Math.max(1 / AS, w * 0.3), 0, 0, Math.PI * 2); b.fill();
+  if (behind) drawRacket(rp.g, rp.u, rp.n, look, lx * 0.5, -hop + drop);
+
+  const hipY = y - h * 0.5 + drop;
+  // LEGS: thigh and shin (lit and shaded sides), white socks, shoes with a sole and an accent stripe
   for (const k of [0, 1]) {
     const side = k ? 1 : -1, f = A.feet[k];
     const hx = x + side * w * 0.2 + lx * 0.3, fx = x + f.dx * w + lx * 0.1, fy = y - f.lift * h;
     const kx = (hx + fx) / 2 + side * w * 0.06, ky = (hipY + fy) / 2 - f.lift * h * 0.6;
-    L(hx, hipY, kx, ky, skin, w * 0.26); L(kx, ky, fx, fy - h * 0.03, skin, w * 0.22);
-    R(fx - w * 0.17, fy - h * 0.05, w * 0.34, h * 0.05, P.shoes || "#f2f2f2");
+    Ln(hx, hipY, kx, ky, skin, w * 0.27); Ln(kx, ky, fx, fy - h * 0.06, skin, w * 0.22);
+    Ln(kx + side * w * 0.06, ky, fx + side * w * 0.05, fy - h * 0.08, skinD, w * 0.07);       // calf shadow
+    Ln(fx, fy - h * 0.085, fx, fy - h * 0.05, "#f1f1ee", w * 0.21);                        // sock
+    Rr(fx - w * 0.19, fy - h * 0.058, w * 0.38, h * 0.045, P.shoes || "#f2f2f2");            // shoe upper
+    Rr(fx - w * 0.2, fy - h * 0.016, w * 0.4, h * 0.016, shade(P.shoes || "#f2f2f2", -0.45)); // sole
+    Rr(fx - w * 0.12, fy - h * 0.04, w * 0.22, 1 / AS, P.ui || "#d23a3a");                   // accent stripe
   }
-  const tx = x + lx;                                     // the upper body leans with the run
-  R(tx - w * 0.42, hipY - h * 0.06, w * 0.84, h * 0.14, P.shorts);
-  R(tx - w * 0.5, hipY - h * 0.36, w, h * 0.31, P.shirt);
-  // arms swing opposite the legs; the racket arm also swings on contact
-  const armSwing = swing * h * 0.12;
-  R(tx - w * 0.72, hipY - h * 0.33 + A.arms[0] * h * 0.05, w * 0.22, h * 0.30, skin);
-  R(tx + w * 0.5, hipY - h * 0.33 + armSwing + A.arms[1] * h * 0.05, w * 0.22, h * 0.30, skin);
-  // racket (right hand)
-  b.strokeStyle = "#1b1b1f"; b.lineWidth = Math.max(1, s * 0.03);
-  const rx = tx + w * 0.62, ry = hipY - h * 0.02 + armSwing + A.arms[1] * h * 0.05;
-  b.beginPath(); b.moveTo(rx, ry); b.lineTo(rx + w * 0.5 * (1 + swing), ry - h * 0.16); b.stroke();
-  b.fillStyle = "#1b1b1f"; b.beginPath(); b.ellipse(rx + w * 0.62 * (1 + swing), ry - h * 0.22, Math.max(1, w * 0.22), Math.max(1, h * 0.09), 0.4, 0, Math.PI * 2); b.fill();
-  // head + cap/hair
-  const hw = w * 0.52, headY = hipY - h * 0.51;
-  R(tx - hw / 2, headY, hw, h * 0.15, skin);
-  R(tx - hw / 2, headY, hw, near ? h * 0.13 : h * 0.05, P.cap || P.hair);   // cap if the outfit has one
-  // name tag
-  if (h > 10 || !near) {
-    b.font = "8px Silkscreen, monospace"; b.textAlign = "center"; b.fillStyle = "rgba(238,243,251,0.85)";
-    b.fillText(P.last, tx, headY - 4);
+  // SHORTS: waistband, shaded side, the split between the legs
+  Rr(tx - w * 0.44, hipY - h * 0.06, w * 0.88, h * 0.16, P.shorts);
+  Rr(tx - w * 0.44, hipY - h * 0.06, w * 0.88, h * 0.022, shade(P.shorts, -0.22));
+  Rr(tx - w * 0.44, hipY - h * 0.04, w * 0.18, h * 0.14, shade(P.shorts, -0.12));
+  Rr(tx - 0.5 / AS, hipY + h * 0.05, 1 / AS, h * 0.05, shade(P.shorts, -0.3));
+  // JERSEY: broad at the shoulders, shaded on one side, lit on the other; collar; chest logo seen from the front
+  const shY = hipY - h * 0.36, shirt = P.shirt;
+  b.fillStyle = shirt; b.beginPath();
+  b.moveTo(q(tx - w * 0.56), q(shY + h * 0.02)); b.lineTo(q(tx + w * 0.56), q(shY + h * 0.02));
+  b.lineTo(q(tx + w * 0.46), q(hipY - h * 0.03)); b.lineTo(q(tx - w * 0.46), q(hipY - h * 0.03)); b.closePath(); b.fill();
+  Rr(tx - w * 0.5, shY + h * 0.03, w * 0.2, h * 0.28, shade(shirt, -0.16));
+  Rr(tx + w * 0.3, shY + h * 0.04, w * 0.12, h * 0.24, shade(shirt, 0.1));
+  Rr(tx - w * 0.46, hipY - h * 0.06, w * 0.92, h * 0.025, shade(shirt, -0.1));               // hem
+  if (near) Rr(tx - w * 0.14, shY, w * 0.28, h * 0.025, shade(shirt, -0.28));                // collar, from behind
+  else { Ln(tx - w * 0.12, shY, tx, shY + h * 0.05, shade(shirt, -0.3), 1 / AS); Ln(tx + w * 0.12, shY, tx, shY + h * 0.05, shade(shirt, -0.3), 1 / AS);
+         Rr(tx + R * -w * 0.22, shY + h * 0.08, w * 0.1, h * 0.03, shade(shirt, shirt === "#f4f4f0" ? -0.25 : 0.55)); }   // chest logo
+  // ARMS: sleeve, upper arm, forearm, wristband, hand. Racket arm reaches the grip; the other swings (or joins a backhand).
+  const arm = (sx, sy, hx2, hy2, out) => {
+    const ex = (sx + hx2) / 2 + out * w * 0.18, ey = (sy + hy2) / 2 + h * 0.02;
+    Ln(sx, sy, ex, ey, skin, w * 0.2); Ln(ex, ey, hx2, hy2, skin, w * 0.17);
+    Ln(sx, sy, sx + (ex - sx) * 0.45, sy + (ey - sy) * 0.45, shirt, w * 0.26);              // short sleeve
+    Ln(hx2 + (ex - hx2) * 0.22, hy2 + (ey - hy2) * 0.22, hx2 + (ex - hx2) * 0.08, hy2 + (ey - hy2) * 0.08, P.ui || "#f2f2f2", w * 0.2);  // wristband
+    Rr(hx2 - w * 0.08, hy2 - w * 0.08, w * 0.16, w * 0.16, skinL);                           // hand
+  };
+  const rS = { x: tx + R * w * 0.5, y: shY + h * 0.05 }, lS = { x: tx - R * w * 0.5, y: shY + h * 0.05 };
+  let freeHand = { x: lS.x - R * w * 0.25, y: shY + h * 0.33 + A.arms[0] * h * 0.05 };
+  if (rp.twoHands) freeHand = { x: grip.x, y: grip.y + h * 0.02 };
+  else if (rp.throat && A.kind !== "run" && A.kind !== "backpedal") {   // ready: the other hand cradles the racket's throat
+    const t = RACKET.handle + 0.06, th = proj(rp.g.x + rp.u.x * t, rp.g.y + rp.u.y * t, rp.g.z + rp.u.z * t);
+    freeHand = { x: th.x + lx * 0.5, y: th.y - hop + drop };
   }
+  arm(lS.x, lS.y, freeHand.x, freeHand.y, -R);
+  arm(rS.x, rS.y, grip.x, grip.y, R);
+  // HEAD: neck, ears, hair with strands (or cap with seams and the hair showing under it); face from the front
+  const hw = w * 0.56, hh = h * 0.15, hx0 = tx - hw / 2, hy0 = shY - hh - h * 0.015;
+  const [hair, hairD, hairL] = HAIR[P.id] || [P.hair, shade(P.hair, -0.35), shade(P.hair, 0.25)];
+  Rr(tx - w * 0.12, shY - h * 0.03, w * 0.24, h * 0.04, skinD);                              // neck
+  Rr(hx0, hy0, hw, hh, skin);                                                                // head
+  Rr(hx0 - 1 / AS, hy0 + hh * 0.4, 1 / AS, hh * 0.25, skinD); Rr(hx0 + hw, hy0 + hh * 0.4, 1 / AS, hh * 0.25, skinD);   // ears
+  const strands = (x0, y0, ww, hh2) => {                                                     // hair texture: base, shadow, highlights
+    Rr(x0, y0, ww, hh2, hair);
+    const step = 1 / AS;
+    for (let yy = 0; yy < hh2; yy += step) for (let xx = 0; xx < ww; xx += step) {
+      const v = (Math.sin((xx * 7.3 + yy * 3.1) * AS) + Math.sin((xx * 2.7 - yy * 5.9) * AS)) * 0.5;
+      if (v > 0.78) Rr(x0 + xx, y0 + yy, step, step, hairL); else if (v < -0.72) Rr(x0 + xx, y0 + yy, step, step, hairD);
+    }
+  };
+  if (near) {                                                                                // seen from behind
+    if (P.cap) {
+      strands(hx0 - 1 / AS, hy0 + hh * 0.42, hw + 2 / AS, hh * 0.34);                       // hair under the cap at the back of the head
+      for (let k = 0; k < 7; k++) {                                                          // curls: an uneven edge at the nape and sides
+        const cx = hx0 - 1 / AS + (hw + 2 / AS) * k / 6, len = hh * (0.1 + 0.12 * ((k * 37) % 5) / 4);
+        Rr(cx - 0.5 / AS, hy0 + hh * 0.74, 1.5 / AS, len, k % 2 ? hair : hairD);
+      }
+      Rr(hx0, hy0 - hh * 0.04, hw, hh * 0.55, P.cap);                                        // cap crown
+      Rr(hx0, hy0 - hh * 0.04, hw * 0.2, hh * 0.55, shade(P.cap, -0.12));                    // crown shading
+      Rr(tx - 0.5 / AS, hy0 - hh * 0.04, 1 / AS, hh * 0.55, shade(P.cap, -0.22));            // centre seam
+      Rr(tx - hw * 0.18, hy0 + hh * 0.42, hw * 0.36, hh * 0.1, hairD);                       // the strap opening, hair through it
+      Rr(tx - hw * 0.22, hy0 + hh * 0.36, hw * 0.44, hh * 0.05, shade(P.cap, -0.3));         // strap
+    } else {                                                                                 // a full head of hair: crown, shadow at the edge, a ragged nape
+      strands(hx0, hy0 - hh * 0.06, hw, hh * 0.82);
+      Rr(hx0, hy0 - hh * 0.06, 1 / AS, hh * 0.82, hairD); Rr(hx0 + hw - 1 / AS, hy0 - hh * 0.06, 1 / AS, hh * 0.82, hairD);
+      for (let k = 0; k < 6; k++) Rr(hx0 + hw * k / 5 - 0.5 / AS, hy0 + hh * 0.72, 1.5 / AS, hh * (0.08 + 0.06 * (k % 3)), hairD);
+    }
+  } else {                                                                                   // seen from the front: a face
+    if (P.cap) { Rr(hx0, hy0 - hh * 0.04, hw, hh * 0.4, P.cap); Rr(hx0 - hw * 0.1, hy0 + hh * 0.3, hw * 1.2, hh * 0.08, shade(P.cap, -0.25)); }   // cap + brim
+    else { strands(hx0, hy0 - hh * 0.06, hw, hh * 0.38); Rr(hx0, hy0 + hh * 0.25, hw * 0.18, hh * 0.3, hair); Rr(hx0 + hw * 0.82, hy0 + hh * 0.25, hw * 0.18, hh * 0.3, hair); }
+    Rr(tx - hw * 0.26, hy0 + hh * 0.5, 1 / AS, 1 / AS, "#1b1b1f"); Rr(tx + hw * 0.18, hy0 + hh * 0.5, 1 / AS, 1 / AS, "#1b1b1f");   // eyes
+    Rr(tx - hw * 0.1, hy0 + hh * 0.78, hw * 0.2, 1 / AS, skinD);                             // mouth
+  }
+  if (!behind) drawRacket(rp.g, rp.u, rp.n, look, lx * 0.5, -hop + drop);
 }
 
 function drawBall(ball) {
@@ -1054,6 +1199,8 @@ function hitBall(i, isServe, volley = false) {
   if (type === "slice") { err *= 1.25; if (i === 0) say(0, "SLICE"); }
   if (i === 0 && input.slice) { input.slice = false; sliceBtn.setAttribute("aria-pressed", "false"); sliceBtn.classList.remove("primary"); }
   swing[i] = 1;
+  const Rs = PLAYERS[i].side === "near" ? 1 : -1;
+  Object.assign(p, { hitT: clock, hitServe: isServe, strokeSide: Math.sign((ball.x - p.x) * Rs) || 1 });   // racket follow-through
   if (isServe) {
     const sv = planServe(i, rally.serveNo);
     rally.shot = planShot(i, true, 1, sv.fault, sv);
@@ -1101,7 +1248,8 @@ function stepRally(dt) {
     if (rally.serve && !rally.serve.captured) stepRoutineServe(dt);
     return;
   }
-  const sh = rally.shot; sh.t += dt;
+  const sh = rally.shot; if (!sh) return;               // (guard: a point always has a ball in flight here)
+  sh.t += dt;
   if (ai.at && clock >= ai.at) { ai.target = { x: sh.end.x, y: sh.end.y }; ai.at = 0; }
   const ui = userInput(), ain = aiInput();
   moveBody(0, ui[0], ui[1], dt);
@@ -1209,9 +1357,14 @@ function frame(now) {
   ];
   if (!firstPerson) items.push({ y: pos[0].y + 0.001, draw: drawReach }, { y: pos[0].y, draw: () => drawPlayer(0, pos[0], swing[0]) });
   if (ball) items.push({ y: ball.y - 0.01, draw: () => drawBall(ball) });
+  actx.setTransform(1, 0, 0, 1, 0, 0); actx.clearRect(0, 0, abuf.width, abuf.height);
+  actx.setTransform(AS, 0, 0, AS, 0, 0); actx.imageSmoothingEnabled = false;
+  b = actx;                                              // actors go on the finer layer, far to near
   items.sort((a, c) => c.y - a.y).forEach(it => it.draw());
+  b = bMain;
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(abuf, 0, 0, canvas.width, canvas.height);
   renderHud();
   renderReady();
 }
@@ -1261,8 +1414,6 @@ function renderHud() {
 function labelPlayers() {
   [0, 1].forEach(i => {
     const P = PLAYERS[i];
-    document.getElementById("name" + i).textContent = P.last;
-    document.getElementById("spec" + i).textContent = `${P.heightM} M · ${P.weightKg} KG`;
     document.getElementById("st" + i).style.background = P.ui || P.shirt;
   });
   document.getElementById("lblA").textContent = "Point " + PLAYERS[0].last.charAt(0) + PLAYERS[0].last.slice(1).toLowerCase();
@@ -1410,11 +1561,10 @@ canvas.addEventListener("pointermove", e => {
 const endStick = () => { stickOrigin = null; aimDrag = null; input.stick = { x: 0, y: 0 }; stick.hidden = true; };
 canvas.addEventListener("pointerup", endStick);
 canvas.addEventListener("pointercancel", endStick);
-if (matchMedia("(pointer: coarse)").matches) document.getElementById("hint").textContent = "DRAG TO MOVE · TAP THE BOX TO AIM YOUR SERVE";
 
 resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
 </script>
 <!-- Locker room (Locker Room Designer) and the start flow (Start Page Builder) -->
-<script src="src/lockerroom/lockerroom.js?v=0.5.0"></script>
-<script src="src/start/flow.js?v=0.5.0"></script>
+<script src="src/lockerroom/lockerroom.js?v=0.6.0"></script>
+<script src="src/start/flow.js?v=0.6.0"></script>
 <script>StartFlow.open();</script>
