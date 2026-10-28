@@ -4,6 +4,14 @@ Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it 
 
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
 
+## v0.6.0 — Oct 28, 2026, 10 AM
+- Players run like players: Running frames: a 4-step run with swinging arms, a side-step shuffle, a back-pedal, a planted stance when changing direction, and a ready stance. (Oct 27, 10 PM · Claude for Ryan, direct commit)
+- Slice to pull your opponent in: Hold E (or tap Slice) as you hit for a short, low slice; your opponent has to run up toward the net. (Oct 27, 10 PM · Claude for Ryan, direct commit)
+- A packed stadium all around: An oval bowl of tiers surrounds the court, packed with people up to the roof, with aisles and floodlights at night. (Oct 27, 10 PM · Claude for Ryan, direct commit)
+- Cleaner screen: No names over the players and no height/weight box; just a slim stamina strip, with tips popping up above the buttons. (Oct 28, 10 AM · Claude for Ryan, 9b44cd8)
+- Detailed players: Twice the pixel detail on the players: textured hair and caps, faces, shaded jerseys with collars, wristbands, socks and proper shoes. (Oct 28, 10 AM · Claude for Ryan, 9b44cd8)
+- A real racket: The racket has a handle, throat, frame and strings, and keeps its true shape from every camera angle and through every stroke. (Oct 28, 10 AM · Claude for Ryan, 9b44cd8)
+
 ## v0.5.0 — Oct 27, 2026, 11 PM
 - WASD always moves; arrows or a click aim the serve: WASD now always moves your player, including walking to your serving spot before you serve. Aim your serve with the arrow keys or by clicking or tapping the service box. (Oct 27, 11 PM · Claude for Ryan, 6afc716)
 - The whole serve, from the bounce: Every serve shows GET SET, then the ball bouncing, then the full windup and contact, with a close camera behind the server. V switches to first person. (Oct 27, 11 PM · Claude for Ryan, 6afc716)
