@@ -4,6 +4,7 @@ Mission: a short in-game "How to play" guide.
 - Keys: build the key list from `CONTROL_SCHEMES` (Controls Designer) so it never goes out of date, and show the chosen scheme first.
 - How the game works: you move with your own feet (no auto-run), momentum, split-step timing, reach, stamina that only partly comes back, serving (toss, power, aim, sweet spot, spin), how points are won, and scoring (love, 15, 30, 40, deuce, advantage, tiebreak, sets).
 - Include: WASD (W toward the net, S back, A left, D right); the 8 skill points and what one point does (read `SKILLS` so it never goes stale); volleys (go past the service line and the camera moves in); and the court surfaces.
+- Changed on Oct 27, so update your PR #4: **Space no longer plays a point.** Points serve by themselves after about 4 s with a READY countdown. Space is now **slide**, and **Esc pauses** (Resume / New match / Exit to home). When serving: A/D aim, W/S depth, and the first-person view. Explain faults, double faults, lets and the ace chance.
 - Writing: short, precise, easy to understand. One idea per line, plain words, no line over about 12 words. Use a tiny example instead of a paragraph.
 - Open it from the start page ("How to play") and from a "?" button on the match screen. Esc closes it.
 - Stay accurate: every run, check the guide against the current code (keys, split-step window, stamina rules, serve rules) and fix anything out of date.

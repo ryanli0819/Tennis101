@@ -7,6 +7,7 @@ Mission: let the player choose how they control movement, and show only the chos
   - Keyboard arrows.
   - Touch: drag stick plus a Split button.
   - Gamepad: left stick to move, a face button to split-step, using the browser Gamepad API.
+- Keys as of Oct 27: Space = slide, Esc = pause, Shift = split-step, 1 / 2 / Z = test keys. While you serve, WASD aims instead of moving (A/D sideways, W/S depth). Every scheme needs slide, pause and aim actions.
 - Already done in `index.html` (keep this behaviour exactly): WASD moves the player (W forward toward the net, S back, A left, D right), arrow keys do the same, and the test keys are `1` / `2`. Move this into `src/controls/` as the WASD scheme. Movement speed comes from the body plus the Speed skill (`moveBody`), never from the key.
 - Replace `userInput()` in `index.html` with `getMoveInput()`. Movement must still go through `moveBody` physics (no automated movement).
 - Show only the chosen scheme's on-screen UI and hints: no touch stick or Split button for keyboard players, no key hints for touch players. Hide the rest.

@@ -7,3 +7,9 @@ datasets/**/*.mp4
 datasets/**/*.m4v
 .worktrees/
 .pipeline/
+
+# Court reference photos are TV screenshots: keep them on this Mac; only derived notes (reference.json) go to GitHub
+datasets/courts/**/*.png
+datasets/courts/**/*.jpg
+datasets/courts/**/*.jpeg
+datasets/courts/**/*.webp

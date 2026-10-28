@@ -48,7 +48,8 @@
         "src/players/"
       ],
       "feeds": [
-        "locker-room-designer"
+        "locker-room-designer",
+        "pov-camera"
       ],
       "contract": "draws getPose(i) + racket",
       "effort": "high"
@@ -69,6 +70,7 @@
       "feeds": [
         "body-animator",
         "player-artist",
+        "pov-camera",
         "serve-controller"
       ],
       "contract": "SERVE_MOTIONS[player] = { first, second }",
@@ -85,7 +87,8 @@
         "src/profile/"
       ],
       "feeds": [
-        "guide-writer"
+        "guide-writer",
+        "pov-camera"
       ],
       "contract": "serve input → { toss, power, spin, target, sweetSpot }",
       "effort": "high"
@@ -196,6 +199,19 @@
       ],
       "contract": "Lockerroom.render(el, …)",
       "effort": "medium"
+    },
+    {
+      "name": "pov-camera",
+      "title": "First-Person Camera",
+      "order": 13,
+      "runsAt": 13,
+      "job": "Your serve through your own eyes at your pro's real eye height: toss, look up, contact.",
+      "owns": [
+        "src/camera/"
+      ],
+      "feeds": [],
+      "contract": "CAMS.pov · povWanted()",
+      "effort": "high"
     }
   ]
 }

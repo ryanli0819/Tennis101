@@ -1,6 +1,6 @@
 """Clean raw 2D pose keypoints for a serve clip and pick evenly spaced key frames.
 
-usage: python3 -I clean_keypoints.py <clip.keypoints.json> [keyframes=20] [refFrames=40] [tossUntil=-1]
+usage: python3 -I clean_keypoints.py <clip.keypoints.json> [keyframes=20] [refFrames=40] [tossUntil=-1] [refFrom=0]
 
 tossUntil: last frame where the raised arm on top is the tossing (left) arm; after it, a raised arm on top is
 the racket (right) arm. Read it off the video once per clip (front clip: 69). -1 = always the tossing arm.
@@ -32,6 +32,7 @@ path = sys.argv[1]
 NKEY = int(sys.argv[2]) if len(sys.argv) > 2 else 20
 NREF = int(sys.argv[3]) if len(sys.argv) > 3 else 40
 TOSS_UNTIL = int(sys.argv[4]) if len(sys.argv) > 4 else -1
+REF_FROM = int(sys.argv[5]) if len(sys.argv) > 5 else 0      # where the calm reference frames start (a clip may open mid-serve)
 MINC = 0.3
 d = json.load(open(path))
 F = d["frames"]
@@ -50,11 +51,15 @@ HIPS = ["root", "leftHip", "rightHip"]
 HEAD = ["nose", "leftEye", "rightEye", "leftEar", "rightEar"]
 
 def ref_len(a, b):
-    return med([dist(P(f["joints"], a), P(f["joints"], b)) for f in F[:NREF]
+    return med([dist(P(f["joints"], a), P(f["joints"], b)) for f in F[REF_FROM:REF_FROM + NREF]
                 if a in f["joints"] and b in f["joints"] and min(f["joints"][a][2], f["joints"][b][2]) >= 0.5])
-REF = {j: ref_len(j, p) for j, p in LIMB.items()}
-TORSO = ref_len("neck", "root"); HEADL = ref_len("nose", "neck")
-SHW = ref_len("leftShoulder", "rightShoulder"); HIPW = ref_len("leftHip", "rightHip")
+def full_len(a, b):                      # a limb's real length = how long it looks when it's square to the camera,
+    xs = sorted(dist(P(f["joints"], a), P(f["joints"], b)) for f in F    # i.e. near the longest it appears (85th percentile)
+                if a in f["joints"] and b in f["joints"] and min(f["joints"][a][2], f["joints"][b][2]) >= 0.5)
+    return xs[int(len(xs) * 0.85)] if xs else None
+REF = {j: full_len(j, p) for j, p in LIMB.items()}
+TORSO = ref_len("neck", "root"); HEADL = ref_len("nose", "neck") or (0.35 * TORSO if TORSO else None)   # no nose from behind: use torso
+SHW = ref_len("leftShoulder", "rightShoulder") or 0.9 * TORSO; HIPW = ref_len("leftHip", "rightHip")
 log = {f["i"]: [] for f in F}
 
 # ---- pass A: confidence + left/right swaps ----
@@ -62,9 +67,17 @@ J = []
 prev = None
 for f in F:
     j = {n: list(v) for n, v in f["joints"].items() if v[2] >= MINC}
+    # Shoulders: trust what they're attached to. Each shoulder belongs with the elbow nearer to it, so a
+    # brief detector swap can't poison the next frames (temporal matching below would copy the mistake).
+    if all(n in j and j[n][2] >= 0.5 for n in ("leftElbow", "rightElbow")) and "leftShoulder" in j and "rightShoulder" in j:
+        keep = dist(P(j, "leftShoulder"), P(j, "leftElbow")) + dist(P(j, "rightShoulder"), P(j, "rightElbow"))
+        swap = dist(P(j, "leftShoulder"), P(j, "rightElbow")) + dist(P(j, "rightShoulder"), P(j, "leftElbow"))
+        if swap < 0.7 * keep:
+            j["leftShoulder"], j["rightShoulder"] = j["rightShoulder"], j["leftShoulder"]; log[f["i"]].append("shoulders re-matched to their elbows")
     if prev:
         for part in PAIRS:
             L, R = "left" + part, "right" + part
+            if part == "Shoulder" and all(n in j and j[n][2] >= 0.5 for n in ("leftElbow", "rightElbow")): continue   # decided above
             if L in j and R in j and L in prev and R in prev:
                 keep = dist(P(j, L), P(prev, L)) + dist(P(j, R), P(prev, R))
                 swap = dist(P(j, L), P(prev, R)) + dist(P(j, R), P(prev, L))

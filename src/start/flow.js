@@ -36,6 +36,10 @@
   .sf-tag { color: var(--muted); font-size: 19px; margin: 0; }
   .sf-links { font-size: 14px; color: var(--muted); }
   .sf-links a { color: var(--muted); }
+  .sf-exit { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); z-index: 11;
+             font: 600 15px var(--f-name); letter-spacing: .05em; text-transform: uppercase; color: var(--ink); background: var(--panel);
+             border: 1px solid var(--line); border-radius: 5px; padding: 7px 12px; cursor: pointer; }
+  .sf-exit:focus-visible { outline: 2px solid var(--ball); outline-offset: 2px; }
   .sf-lockerdoor { display: grid; place-items: center; gap: 14px; padding: 34px 16px; background: var(--panel); border: 1px dashed var(--line); border-radius: 10px; text-align: center; }`;
   const style = document.createElement("style"); style.textContent = css; document.head.appendChild(style);
 
@@ -45,7 +49,7 @@
     { id: "hard",  name: "Hard", say: "Medium pace, true bounce. The all-rounder.", colors: ["#2b5c90", "#3f74a8"] },
   ];
   const choice = { bestOf: 3, tbTo: 7, surface: "hard", playerId: "sinner", firstServer: "0" };
-  let root, step = 0;
+  let root, step = 0, onResume = null;                   // onResume: set when a match is under way ("Back to match")
   const STEPS = ["MATCH", "COURT", "LOCKER ROOM"];
 
   function radio(group, opts, key, onPick) {
@@ -70,7 +74,7 @@
       v.innerHTML = `<div class="sf-welcome">
         <h1 class="sf-title">Tennis<em>101</em></h1>
         <p class="sf-tag">Play inside a real pro's body.</p>
-        <div><button class="btn primary big" type="button" data-go="next">Play →</button></div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">${onResume ? `<button class="btn primary big" type="button" id="sfResume">Back to match →</button>` : ""}<button class="btn ${onResume ? "" : "primary "}big" type="button" data-go="next">${onResume ? "New match" : "Play →"}</button></div>
         <p class="sf-links"><a href="presentation/">How it was built</a> · <a href="agents/dashboard.html">Agent Control Room</a></p></div>`;
     } else if (n === 1) {
       v.innerHTML = `${steps(0)}<div><h2>Choose your match</h2><p class="sub">How long do you want to play?</p></div>
@@ -105,8 +109,18 @@
         b.onclick = () => { choice.firstServer = b.dataset.fs; v.querySelectorAll("[data-fs]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); };
       });
     }
+    // EXIT on every screen: from a setup step back to the welcome page; from the welcome page back to the match (if one is on)
+    if (n > 0 || onResume) {
+      const x = document.createElement("button");
+      x.type = "button"; x.className = "sf-exit";
+      x.textContent = n > 0 ? "✕ Exit" : "✕ Close";
+      x.setAttribute("aria-label", n > 0 ? "Exit setup, back to the welcome page" : "Close the menu, back to the match");
+      x.onclick = () => (n > 0 ? show(0) : resume());
+      v.appendChild(x);
+    }
+    const r = v.querySelector("#sfResume"); if (r) r.onclick = resume;
     v.querySelectorAll("[data-go]").forEach(b => (b.onclick = () => go(b.dataset.go)));
-    const first = v.querySelector(n === 0 ? "[data-go=next]" : ".sf-opt, #sfEnter, .lr-card");
+    const first = v.querySelector(n === 0 ? "#sfResume, [data-go=next]" : ".sf-opt, #sfEnter, .lr-card");
     first && first.focus({ preventScroll: true });
     root.scrollTop = 0;
   }
@@ -115,13 +129,17 @@
     if (step === 4) { close(); window.startMatch({ ...choice }); return; }
     show(step + 1);
   }
-  function open() {
+  function resume() { const fn = onResume; close(); fn && fn(); }
+  // open(step, resumeFn): step 0 = welcome, 1 = match length. resumeFn is given when a match is under way.
+  function open(n = 0, resumeFn = null) {
     if (!root) {
       root = document.createElement("div"); root.className = "sf"; root.id = "startFlow";
       root.innerHTML = `<div class="sf-in"></div>`;
       document.body.appendChild(root);
+      root.addEventListener("keydown", e => { if (e.key === "Escape") { e.preventDefault(); step > 0 ? show(0) : onResume && resume(); } });
     }
-    root.hidden = false; show(0);
+    onResume = resumeFn;
+    root.hidden = false; show(n);
   }
   function close() { root.hidden = true; }
   const isOpen = () => !!root && !root.hidden;

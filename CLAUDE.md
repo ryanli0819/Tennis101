@@ -66,13 +66,17 @@ Sections in the script, top to bottom:
 - **While a point is being played the scoreboard goes semi-transparent (`.live` → opacity 0.34) but stays visible.** It returns to full opacity ~0.9 s after the point ends.
 
 ## Controls (temporary, for testing until real gameplay exists)
-- Space / "Play point": starts the point (serve is automatic for now).
+- Points serve **by themselves**: ~4 s after a point (`BETWEEN_POINTS`), with a 2 s READY countdown; 2.5 s after a fault or let. No key starts a point.
+- When **you** serve: first-person view at your eye height; A/D aim sideways, W/S depth (yellow cross in the box). `planServe` decides fault / net / let / ace; `ACE_CHANCE` stores the ace probability (perfect spot + receiver on the wrong side). Second serves use Sinner's real 2nd-serve motion.
+- **Esc** = pause (Resume / New match / Exit to home). Every screen has an exit (✕ Exit / ✕ Close, Back to match).
+- **Space** = slide in the direction you're moving (clay ~2.4 m, hard ~1.6 m, grass ~1.3 m; Agility adds a little; stamina cost, short recovery, cooldown).
 - **WASD** (W forward toward the net, S back, A left, D right), arrow keys, or drag on the court (touch/mouse): move your player. Speed comes from the body + the Speed skill.
 - Past the service line toward the net, the camera switches to the **net camera** (low, behind you) for volleys; it switches back when you retreat.
 - Shift / "Split step": split-step hop.
 - 1 / "Point <you>", 2 / "Point <opponent>": award a point manually (A and L now move the player).
 - Z / "Undo": restores the previous state (history stack of JSON snapshots).
-- "New match" and "← Home": reopen the start flow (match length + tiebreak, court surface, locker room: pick your pro and who serves first).
+- "New match" → start flow at match length; "← Home" → welcome page (with Back to match while a match is on).
+- Each surface has its own setting (`SCENES`): grass = summer afternoon, clay = warm late afternoon, hard = night under floodlights.
 
 ## Conventions
 - Units are metres and seconds everywhere in game logic.
