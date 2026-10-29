@@ -4,6 +4,13 @@ Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it 
 
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
 
+## v0.7.0 — Oct 28, 2026, 9 PM
+- Smoother serves: Sinner's captured serves are smoothed and drawn on a curve between video frames, and the computer's serve has a real racket drop behind the back: one flowing motion from toss to finish. (Oct 28, 9 PM · Claude for Ryan, 759639e)
+- More pixels on the players: Players and rackets are drawn at three times the court's pixel detail, so faces, hair, hands and the racket read clearly. (Oct 28, 9 PM · Claude for Ryan, 759639e)
+- A racket that swings on the beat: The takeback starts as the ball comes, the racket loops and swings forward at the last moment, meets the ball at its own height, then follows through. (Oct 28, 9 PM · Claude for Ryan, 759639e)
+- A slice you can read: The body tilts and the racket sweeps in one motion from about 2 o'clock (high, behind) to 4 o'clock for Sinner or 5 o'clock for Alcaraz (low, in front), with a faint trail. The computer decides early, so you can read its windup. (Oct 28, 9 PM · Claude for Ryan, 759639e)
+- Slices float slower: A slice travels at about half the speed of a drive (about 14 m/s against 29 m/s) and still bounces low. (Oct 28, 9 PM · Claude for Ryan, 759639e)
+
 ## v0.6.0 — Oct 28, 2026, 10 AM
 - Players run like players: Running frames: a 4-step run with swinging arms, a side-step shuffle, a back-pedal, a planted stance when changing direction, and a ready stance. (Oct 27, 10 PM · Claude for Ryan, direct commit)
 - Slice to pull your opponent in: Hold E (or tap Slice) as you hit for a short, low slice; your opponent has to run up toward the net. (Oct 27, 10 PM · Claude for Ryan, direct commit)

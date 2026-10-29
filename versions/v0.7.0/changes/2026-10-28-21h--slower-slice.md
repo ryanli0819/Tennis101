@@ -1,4 +1,4 @@
 # Slices float slower
 - Landed: Oct 28, 9 PM
-- Source: Claude for Ryan, direct commit
+- Source: Claude for Ryan, direct commit (759639e)
 - Change: A slice now travels at about half the speed of a drive (≈14 m/s against ≈29 m/s) and still bounces low.
