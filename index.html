@@ -614,7 +614,8 @@ function drawCapturedFigure(i, p, W) {
   const N = at("neck"), H = at("nose");
   if (N && H) {
     const r = Math.max(2, g.s * 0.12), hx = H.x, hy = H.y - g.s * 0.04, [hr, hrD, hrL] = HAIR[P.id] || [P.hair, P.hair, P.hair];
-    b.fillStyle = skin; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();
+    b.fillStyle = hrD; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();             // back of the head: hair, no face
+    b.fillStyle = skin; b.fillRect(q(hx - r * 1.08), q(hy), 1 / AS, q(r * 0.35)); b.fillRect(q(hx + r * 1.08) - 1 / AS, q(hy), 1 / AS, q(r * 0.35));   // ears
     b.fillStyle = hr; b.beginPath(); b.arc(hx, hy + r * 0.15, r * 0.98, Math.PI * 0.05, Math.PI * 0.95); b.fill();   // hair below the cap
     for (let k = -2; k <= 2; k++) { b.fillStyle = k % 2 ? hrL : hrD; b.fillRect(hx + k * r * 0.35 - 0.5 / AS, hy + r * 0.55, 1 / AS, r * 0.3); }  // curls
     b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.1, r * 0.98, Math.PI, Math.PI * 2); b.fill();     // cap crown
@@ -789,6 +790,17 @@ function drawPlayer(i, pos, swing) {
     Rr(fx - w * 0.19, fy - h * 0.058, w * 0.38, h * 0.045, P.shoes || "#f2f2f2");            // shoe upper
     Rr(fx - w * 0.2, fy - h * 0.016, w * 0.4, h * 0.016, shade(P.shoes || "#f2f2f2", -0.45)); // sole
     Rr(fx - w * 0.12, fy - h * 0.04, w * 0.22, 1 / AS, P.ui || "#d23a3a");                   // accent stripe
+    const sc = P.shoes || "#f2f2f2";
+    if (near) {                                                                              // from behind: the heel counter and pull tab
+      Rr(fx - w * 0.1, fy - h * 0.058, w * 0.2, h * 0.034, shade(sc, -0.35));
+      Rr(fx - w * 0.04, fy - h * 0.066, w * 0.08, h * 0.012, P.ui || "#d23a3a");
+      Rr(kx - w * 0.07, ky + h * 0.01, w * 0.14, 1 / AS, skinD);                            // the crease behind the knee
+    } else {                                                                                 // from the front: laces, a toe cap, kneecaps
+      Rr(fx - w * 0.07, fy - h * 0.058, w * 0.14, h * 0.026, "#ffffff");
+      for (let r = 0; r < 3; r++) Rr(fx - w * 0.07, fy - h * 0.055 + r * h * 0.009, w * 0.14, 1 / AS, shade(sc, -0.4));
+      Rr(fx - w * 0.17, fy - h * 0.03, w * 0.34, h * 0.014, shade(sc, -0.12));
+      Rr(kx - w * 0.05, ky - h * 0.012, w * 0.1, h * 0.022, skinL);
+    }
   }
   // SHORTS: waistband, shaded side, the split between the legs
   Rr(tx - w * 0.44, hipY - h * 0.06, w * 0.88, h * 0.16, P.shorts);
@@ -804,9 +816,17 @@ function drawPlayer(i, pos, swing) {
   Rr(tx - w * 0.5, shY + h * 0.03, w * 0.2, h * 0.28, shade(shirt, -0.16));
   Rr(tx + w * 0.3, shY + h * 0.04, w * 0.12, h * 0.24, shade(shirt, 0.1));
   Rr(tx - w * 0.46, hipY - h * 0.06, w * 0.92, h * 0.025, shade(shirt, -0.1));               // hem
-  if (near) Rr(tx - w * 0.14, shY, w * 0.28, h * 0.025, shade(shirt, -0.28));                // collar, from behind
+  if (near) {                                                                                // BACK of the jersey: plain, a spine seam, shoulder blades
+    Rr(tx - w * 0.14, shY, w * 0.28, h * 0.025, shade(shirt, -0.28));                        // collar, from behind
+    Rr(tx - 0.5 / AS, shY + h * 0.03, 1 / AS, h * 0.27, shade(shirt, -0.2));                  // spine seam
+    Rr(tx - w * 0.36, shY + h * 0.07, w * 0.26, h * 0.012, shade(shirt, -0.12));             // shoulder-blade folds
+    Rr(tx + w * 0.1, shY + h * 0.07, w * 0.26, h * 0.012, shade(shirt, -0.12));
+  }
   else { Ln(tx - w * 0.12, shY, tx, shY + h * 0.05, shade(shirt, -0.3), 1 / AS); Ln(tx + w * 0.12, shY, tx, shY + h * 0.05, shade(shirt, -0.3), 1 / AS);
-         Rr(tx + R * -w * 0.22, shY + h * 0.08, w * 0.1, h * 0.03, shade(shirt, shirt === "#f4f4f0" ? -0.25 : 0.55)); }   // chest logo
+         Rr(tx + R * -w * 0.22, shY + h * 0.08, w * 0.1, h * 0.03, shade(shirt, shirt === "#f4f4f0" ? -0.25 : 0.55));   // chest logo
+         Rr(tx - w * 0.07, shY, w * 0.14, h * 0.035, skin);                                   // FRONT: V-neck showing the throat
+         Rr(tx - 0.5 / AS, shY + h * 0.035, 1 / AS, h * 0.07, shade(shirt, -0.3));            // placket
+         Rr(tx + 1 / AS, shY + h * 0.05, 1 / AS, 1 / AS, "#f4f4ef"); Rr(tx + 1 / AS, shY + h * 0.085, 1 / AS, 1 / AS, "#f4f4ef"); }   // buttons
   // ARMS: sleeve, upper arm, forearm, wristband, hand. Racket arm reaches the grip; the other swings (or joins a backhand).
   const arm = (sx, sy, hx2, hy2, out) => {
     const ex = (sx + hx2) / 2 + out * w * 0.18, ey = (sy + hy2) / 2 + h * 0.02;
@@ -840,10 +860,10 @@ function drawPlayer(i, pos, swing) {
   };
   if (near) {                                                                                // seen from behind
     if (P.cap) {
-      strands(hx0 - 1 / AS, hy0 + hh * 0.42, hw + 2 / AS, hh * 0.34);                       // hair under the cap at the back of the head
+      strands(hx0 - 1 / AS, hy0 + hh * 0.42, hw + 2 / AS, hh * 0.5);                        // hair covers the whole back of the head under the cap
       for (let k = 0; k < 7; k++) {                                                          // curls: an uneven edge at the nape and sides
         const cx = hx0 - 1 / AS + (hw + 2 / AS) * k / 6, len = hh * (0.1 + 0.12 * ((k * 37) % 5) / 4);
-        Rr(cx - 0.5 / AS, hy0 + hh * 0.74, 1.5 / AS, len, k % 2 ? hair : hairD);
+        Rr(cx - 0.5 / AS, hy0 + hh * 0.88, 1.5 / AS, len, k % 2 ? hair : hairD);
       }
       Rr(hx0, hy0 - hh * 0.04, hw, hh * 0.55, P.cap);                                        // cap crown
       Rr(hx0, hy0 - hh * 0.04, hw * 0.2, hh * 0.55, shade(P.cap, -0.12));                    // crown shading
@@ -851,15 +871,21 @@ function drawPlayer(i, pos, swing) {
       Rr(tx - hw * 0.18, hy0 + hh * 0.42, hw * 0.36, hh * 0.1, hairD);                       // the strap opening, hair through it
       Rr(tx - hw * 0.22, hy0 + hh * 0.36, hw * 0.44, hh * 0.05, shade(P.cap, -0.3));         // strap
     } else {                                                                                 // a full head of hair: crown, shadow at the edge, a ragged nape
-      strands(hx0, hy0 - hh * 0.06, hw, hh * 0.82);
+      strands(hx0, hy0 - hh * 0.06, hw, hh * 0.98);
       Rr(hx0, hy0 - hh * 0.06, 1 / AS, hh * 0.82, hairD); Rr(hx0 + hw - 1 / AS, hy0 - hh * 0.06, 1 / AS, hh * 0.82, hairD);
-      for (let k = 0; k < 6; k++) Rr(hx0 + hw * k / 5 - 0.5 / AS, hy0 + hh * 0.72, 1.5 / AS, hh * (0.08 + 0.06 * (k % 3)), hairD);
+      for (let k = 0; k < 6; k++) Rr(hx0 + hw * k / 5 - 0.5 / AS, hy0 + hh * 0.86, 1.5 / AS, hh * (0.08 + 0.06 * (k % 3)), hairD);
     }
   } else {                                                                                   // seen from the front: a face
     if (P.cap) { Rr(hx0, hy0 - hh * 0.04, hw, hh * 0.4, P.cap); Rr(hx0 - hw * 0.1, hy0 + hh * 0.3, hw * 1.2, hh * 0.08, shade(P.cap, -0.25)); }   // cap + brim
     else { strands(hx0, hy0 - hh * 0.06, hw, hh * 0.38); Rr(hx0, hy0 + hh * 0.25, hw * 0.18, hh * 0.3, hair); Rr(hx0 + hw * 0.82, hy0 + hh * 0.25, hw * 0.18, hh * 0.3, hair); }
-    Rr(tx - hw * 0.26, hy0 + hh * 0.5, 1 / AS, 1 / AS, "#1b1b1f"); Rr(tx + hw * 0.18, hy0 + hh * 0.5, 1 / AS, 1 / AS, "#1b1b1f");   // eyes
-    Rr(tx - hw * 0.1, hy0 + hh * 0.78, hw * 0.2, 1 / AS, skinD);                             // mouth
+    const px = 1 / AS, eyeY = hy0 + hh * 0.5;
+    if (P.cap) Rr(hx0, hy0 + hh * 0.38, hw, hh * 0.08, skinD);                               // shadow under the brim
+    Rr(tx - hw * 0.34, eyeY - hh * 0.12, hw * 0.24, px, hairD); Rr(tx + hw * 0.1, eyeY - hh * 0.12, hw * 0.24, px, hairD);   // eyebrows
+    Rr(tx - hw * 0.32, eyeY, hw * 0.2, px * 2, "#f4f1ea"); Rr(tx + hw * 0.12, eyeY, hw * 0.2, px * 2, "#f4f1ea");           // whites of the eyes
+    Rr(tx - hw * 0.24, eyeY, px * 2, px * 2, "#1b1b1f"); Rr(tx + hw * 0.2, eyeY, px * 2, px * 2, "#1b1b1f");                 // pupils
+    Rr(tx - px * 0.5, eyeY + hh * 0.08, px, hh * 0.16, skinD); Rr(tx - px * 0.5, eyeY + hh * 0.24, px * 2, px, skinD);     // nose
+    Rr(tx - hw * 0.14, hy0 + hh * 0.8, hw * 0.28, px, "#a4574a");                             // mouth
+    Rr(hx0 + px, hy0 + hh * 0.66, px * 2, px * 2, shade(skin, -0.08)); Rr(hx0 + hw - px * 3, hy0 + hh * 0.66, px * 2, px * 2, shade(skin, -0.08));   // cheeks
   }
   if (!behind) drawRacket(rp.g, rp.u, rp.n, look, lx * 0.5, -hop + drop);
   if (rp.slice && !matchMedia("(prefers-reduced-motion: reduce)").matches) {   // SLICE TRAIL: the head's path, so the high-to-low sweep reads
