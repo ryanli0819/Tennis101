@@ -6,8 +6,8 @@ Mission: every player looks alive. Pixel-art animation frames for everything a p
   - a deceleration step into the plant, then a crossover or drop step out of it
   - turning the hips and shoulders toward the new direction
   - a few frames of acceleration lean before the full run
-- Racket poses are in `racketPose(i, p)` in `index.html`: ready (racket beside the body, other hand on the throat), backswing as the ball comes, contact, follow-through, two-handed backhand, a serve trophy pose and follow-through. They blend with `ease`. Move them into `src/animation/` with the stroke frames, and keep the 3D racket (`drawRacket`) as the way rackets are drawn.
-- Then add stroke animation: forehand and backhand (with the split-step before), slice (an open racket face, a high-to-low swing), volley (short punch) and the serve follow-through for sprite players.
+- Racket poses (`racketPose`, `poseTrack`, `drawRacket`) now belong to the **Racket Coach** (`src/racket/`). You own the body: use the `tilt` and `crouch` a racket pose returns to bend the body with the stroke.
+- Then add stroke animation: forehand and backhand (with the split-step before), slice body (lean and shoulder tilt; the Racket Coach does the 2 → 4/5 o'clock racket path), volley (short punch) and the serve follow-through for sprite players.
 - Rules:
   - Animation follows the physics and never drives it. Read `pos[i]` (velocity, `air`, `slide`, `plant`, `run`) and `swing[i]`; never change positions or speeds.
   - Frame timing scales with speed: faster means longer, quicker strides.

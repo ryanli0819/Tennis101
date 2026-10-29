@@ -228,6 +228,42 @@
       ],
       "contract": "Anim.frame(p, B, near)",
       "effort": "high"
+    },
+    {
+      "name": "footage-scout",
+      "title": "Footage Scout",
+      "order": 15,
+      "runsAt": 15,
+      "job": "Catalogs serve, forehand and backhand footage of the live ATP top 20, asks Ryan for the clips, and turns them into joints.",
+      "owns": [
+        "datasets/footage/"
+      ],
+      "feeds": [
+        "serve-analyst",
+        "racket-coach"
+      ],
+      "contract": "datasets/footage/top20.json",
+      "effort": "medium"
+    },
+    {
+      "name": "racket-coach",
+      "title": "Racket Coach",
+      "order": 16,
+      "runsAt": 16,
+      "job": "Learns the racket's path and how each pro carries it, and makes every swing, slice and serve move like the real one.",
+      "owns": [
+        "src/racket/",
+        "datasets/racket/"
+      ],
+      "reads": [
+        "datasets/footage/"
+      ],
+      "feeds": [
+        "animator",
+        "player-artist"
+      ],
+      "contract": "racketPose(i, p, ago) → { g, u, n, tilt, crouch, twoHands, slice }",
+      "effort": "high"
     }
   ]
 }

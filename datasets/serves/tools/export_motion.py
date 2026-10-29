@@ -15,7 +15,7 @@ The camera zoom and the player moving toward the camera are removed with the per
 Slow-motion clips are re-timed so toss release → contact takes the real-speed time (REAL_RELEASE_TO_CONTACT).
 Missing joints hold their last known position relative to the hips, so the figure never loses a limb.
 """
-import json, os
+import json, math, os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 OUT = os.path.join(ROOT, "src/serve/motion/sinner-serve.js")
@@ -78,7 +78,21 @@ def export(spec):
         for fr in frames:
             if j in fr["j"]: break
             if first: fr["j"][j] = first
-    return {"player": "sinner", "source": spec["src"] + " (clean)", "note": spec["note"], "timeScale": round(k, 3),
+    # SMOOTHING: the detector jitters a little frame to frame. A gentle Gaussian over time (sigma 35 ms of real
+    # time, after re-timing) removes the shake but keeps fast moves like the swing to contact.
+    SIG = 0.035
+    raw = [{n: tuple(v) for n, v in fr["j"].items()} for fr in frames]
+    for a, fr in enumerate(frames):
+        for n in fr["j"]:
+            wx = wy = ws = 0.0
+            for c in range(max(0, a - 12), min(len(frames), a + 13)):
+                if n not in raw[c]: continue
+                dt = frames[c]["t"] - fr["t"]
+                if abs(dt) > 3 * SIG: continue
+                wgt = math.exp(-0.5 * (dt / SIG) ** 2)
+                wx += raw[c][n][0] * wgt; wy += raw[c][n][1] * wgt; ws += wgt
+            fr["j"][n] = [round(wx / ws, 3), round(wy / ws, 3)]
+    return {"player": "sinner", "source": spec["src"] + " (clean)", "note": spec["note"], "timeScale": round(k, 3), "smoothed": f"gaussian {int(SIG*1000)} ms",
             "units": "body heights; x + = player's right, y = above the ground; seen from behind",
             "events": {n: round((t_of[v] - t0) * k, 3) for n, v in E.items()}, "frames": frames}
 

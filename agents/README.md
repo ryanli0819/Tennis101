@@ -1,6 +1,6 @@
 # Tennis101 agent team
 
-Fourteen agents build the game in parallel, one run each per night. Every agent:
+Sixteen agents build the game in parallel, one run each per night. Every agent:
 - reads `CLAUDE.md`, this file, and its own log `agents/<name>/LOG.md` first;
 - works only on its branch `agent/<name>` and opens or updates one PR to `main` (never pushes to `main`, never merges);
 - edits only the folders it owns below, plus the smallest possible hooks in `index.html`;
@@ -25,6 +25,8 @@ Each agent has its own folder: `agents/<name>/PROMPT.md` (instructions) and `age
 | 12 | Locker Room Designer | `agent/locker-room-designer` | `src/lockerroom/` | 12 PM |
 | 13 | First-Person Camera | `agent/pov-camera` | `src/camera/` | 1 PM |
 | 14 | Animator | `agent/animator` | `src/animation/` | 2 PM |
+| 15 | Footage Scout | `agent/footage-scout` | `datasets/footage/` | 3 PM |
+| 16 | Racket Coach | `agent/racket-coach` | `src/racket/`, `datasets/racket/` | 4 PM |
 
 Give any new agent a row here before it starts.
 
@@ -55,7 +57,11 @@ Keep these stable. Change one only in your own PR, and say so in its description
 
 **Animation (Animator).** `src/animation/run-cycle.js`: `Anim.frame(p, B, near)` → `{ kind, frame, bob, lean, crouch, feet, arms }`. `kind` is one of run / backpedal / shuffle / plant / ready / split / slide. `drawPlayer()` draws from it, and `moveBody()` sets `p.plant` on hard direction changes.
 
-**Shot types.** `planShot(..., type)` with `type` = `"drive"` or `"slice"`. You slice by holding **E** (or with the touch Slice button) as you hit; the computer slices sometimes, more when stretched. A slice lands short (2–4.8 m past the net), low and slow, and barely carries after the bounce, so the receiver has to come forward.
+**Racket (Racket Coach · first version in `index.html`).** `racketPose(i, p, ago)` → `{ g, u, n, tilt, crouch, twoHands, throat, slice }` in court space, drawn by `drawRacket`. Strokes are keyed to the time until contact and joined by `poseTrack` (Catmull-Rom). Slice: racket top from ~2 o'clock to `SLICE_END[id]` o'clock (Sinner 4, Alcaraz 5), mirrored on the backhand, with shoulder tilt and a head trail. The Animator owns body frames, the Racket Coach owns the racket path.
+
+**Footage (Footage Scout).** `datasets/footage/top20.json`: the live ATP top 20 (`rankedOn`) with clip links, strokes, views and time ranges. Links only; Ryan records clips locally (git-ignored).
+
+**Shot types.** `planShot(..., type)` with `type` = `"drive"` or `"slice"`. You slice by holding **E** (or with the touch Slice button) as you hit; the computer slices sometimes, more when stretched. A slice lands short (2–4.8 m past the net), low and clearly slower than a drive (≈11–15 m/s against 19–28), and barely carries after the bounce, so the receiver has to come forward.
 
 **Match setup (Start Page Builder).** `src/start/flow.js`: Welcome → Match (best of 3 / 5, tiebreak 7 / 10) → Court (grass / red clay / hard) → Locker room → `startMatch({ bestOf, tbTo, surface, playerId, firstServer })`. Add a `controls` field when the Controls Designer is ready.
 
