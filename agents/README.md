@@ -55,11 +55,11 @@ Keep these stable. Change one only in your own PR, and say so in its description
 
 **First person (First-Person Camera).** `CAMS.pov` and `povWanted()`: from your READY countdown to just after your contact, at eye height = 94% of `heightM`.
 
-**Animation (Animator).** `src/animation/run-cycle.js`: `Anim.frame(p, B, near)` → `{ kind, frame, bob, lean, crouch, feet, arms }`. `kind` is one of run / backpedal / shuffle / plant / ready / split / slide. `drawPlayer()` draws from it, and `moveBody()` sets `p.plant` on hard direction changes.
+**Animation (Animator).** `src/animation/run-cycle.js`: `Anim.frame(p, B, near, id)` → `{ kind, dir, frame, turn, bob, lean, crouch, feet:[{dx,dy,lift,sole}], knees:[{dx,dy}], arms }`. `kind` is one of run / backpedal / siderun / shuffle / plant / ready / split / slide; `dir` is away / toward / left / right on screen. Every moving kind is a **20-frame** stride cycle built per player from `Anim.GAIT[id]` (Sinner long and smooth, Alcaraz explosive and bouncy), tweened between frames. Side runs turn the body (narrower torso, profile head). `drawPlayer()` draws from it, and `moveBody()` sets `p.plant` on hard direction changes.
 
 **Racket (Racket Coach · first version in `index.html`).** `racketPose(i, p, ago)` → `{ g, u, n, tilt, crouch, twoHands, throat, slice }` in court space, drawn by `drawRacket`. Strokes are keyed to the time until contact and joined by `poseTrack` (Catmull-Rom). Slice: racket top from ~2 o'clock to `SLICE_END[id]` o'clock (Sinner 4, Alcaraz 5), mirrored on the backhand, with shoulder tilt and a head trail. The Animator owns body frames, the Racket Coach owns the racket path.
 
-**Footage (Footage Scout).** `datasets/footage/top20.json`: the live ATP top 20 (`rankedOn`) with clip links, strokes, views and time ranges. Links only; Ryan records clips locally (git-ignored).
+**Footage (Footage Scout).** Video goes in `datasets/video/<player>/{serve-first,serve-second,forehand,backhand,slice,running}/` (git-ignored, local only). `datasets/footage/top20.json`: the live ATP top 20 (`rankedOn`) with clip links, strokes, views and time ranges. Links only; Ryan records clips locally (git-ignored).
 
 **Shot types.** `planShot(..., type)` with `type` = `"drive"` or `"slice"`. You slice by holding **E** (or with the touch Slice button) as you hit; the computer slices sometimes, more when stretched. A slice lands short (2–4.8 m past the net), low and clearly slower than a drive (≈11–15 m/s against 19–28), and barely carries after the bounce, so the receiver has to come forward.
 
