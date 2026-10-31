@@ -4,6 +4,14 @@ Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it 
 
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
 
+## v0.8.0 — Oct 31, 2026, 6 PM
+- You can tell a player's front from their back: Seen from the front, a player has a face (eyebrows, eyes, nose, mouth, a shadow under the cap), a V-neck with buttons, kneecaps and laced shoes. Seen from behind there's no face at all: hair or the cap's strap, a plain jersey with a spine seam, the backs of the knees and heel tabs on the shoes. (Oct 28, 10 PM · Claude for Ryan, 1ca9e4d)
+- A different body for every direction: Running away shows the heels kicking up with the soles toward you; running toward you shows the knees driving; back-pedalling uses short, upright steps; running sideways turns the body so you see it in profile; short sideways moves are side-step shuffles. (Oct 29, 1 PM · Claude for Ryan, 2ced727)
+- Players run in 20 smooth frames: Every run is a 20-frame stride: the planted foot sweeps back, the heel kicks up, the knee drives through, the body bounces twice per stride and the arms pump opposite the legs. Sinner glides on long strides; Alcaraz runs lower, quicker and bouncier. (Oct 29, 1 PM · Claude for Ryan, 2ced727)
+- Smoother movement: When a player changes what they're doing (standing, side-stepping, running, planting, back-pedalling), the body blends into the new movement instead of snapping, and no longer flickers between standing and moving at walking pace. (Oct 31, 6 PM · Claude for Ryan, 0f4283b)
+- A real, round ball: The ball is round now, a bit bigger than life so you can follow it: optic-yellow felt lit on one side and shaded on the other, a white seam that spins, a fuzzy edge, and a short trail when it flies fast. (Oct 31, 6 PM · Claude for Ryan, 0f4283b)
+- Sunshine and shadows: Every player and the ball cast a shadow away from the light: long under the late-afternoon sun on clay, shorter under the summer sun on grass, four faint ones under the floodlights at night. The stands throw shade across part of the court, daytime courts get warm sunlight, and jerseys are lit on the sunny side. (Oct 31, 6 PM · Claude for Ryan, 0f4283b)
+
 ## v0.7.0 — Oct 28, 2026, 9 PM
 - Smoother serves: Sinner's captured serves are smoothed and drawn on a curve between video frames, and the computer's serve has a real racket drop behind the back: one flowing motion from toss to finish. (Oct 28, 9 PM · Claude for Ryan, 759639e)
 - More pixels on the players: Players and rackets are drawn at three times the court's pixel detail, so faces, hair, hands and the racket read clearly. (Oct 28, 9 PM · Claude for Ryan, 759639e)
