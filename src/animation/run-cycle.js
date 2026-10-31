@@ -115,7 +115,8 @@
       return still({ kind: "plant", dir: null, frame: 0, bob: -0.05, lean: back * 0.04, crouch: 0.06,
                feet: [{ dx: -0.42, lift: 0 }, { dx: 0.42, lift: 0 }], arms: [0.4, 0.4] });
     }
-    if (sp < 0.5) {                                        // ready position: feet apart, knees soft, a slow breath
+    p._still = p._still ? sp < 0.65 : sp < 0.35;         // hysteresis: no flicker between ready and moving at walking pace
+    if (p._still) {                                        // ready position: feet apart, knees soft, a slow breath
       const breathe = reduce() ? 0 : Math.sin(p.run * 2.2) * 0.006;
       return still({ kind: "ready", dir: null, frame: 0, bob: breathe, lean: 0, crouch: 0.025,
                feet: [{ dx: -0.26, lift: 0 }, { dx: 0.26, lift: 0 }], arms: [0.2, 0.2] });
@@ -147,14 +148,29 @@
     return Object.assign(fr, { kind, dir, frame: k });
   }
 
-  // Smooth changes between kinds (run → plant → side run): ease the turn and lean so the body rotates, not snaps.
+  // FLUENT TRANSITIONS. Inside a cycle the 20 frames are already tweened. When the movement changes kind
+  // (ready → shuffle → side run → plant → run …) the new pose is cross-faded from the last pose drawn over
+  // BLEND seconds, so feet, knees and arms travel to their new place instead of jumping. Turn and lean ease too.
+  const BLEND = 0.2;
   function frame(p, B, near, id) {
-    const fr = pick(p, B, near, id), s = p._animSmooth || (p._animSmooth = { turn: 0, lean: 0 });
-    const k = reduce() ? 1 : 0.22;
+    const fr = pick(p, B, near, id), now = performance.now() / 1000;
+    const s = p._animSmooth || (p._animSmooth = { turn: 0, lean: 0, kind: fr.kind, from: null, t: 9, last: null, at: now });
+    const dt = Math.min(0.1, Math.max(0, now - s.at)); s.at = now;
+    if (reduce()) { s.last = fr; s.kind = fr.kind; return fr; }
+    if (fr.kind !== s.kind || fr.dir !== s.dir) { s.from = s.last; s.t = 0; s.kind = fr.kind; s.dir = fr.dir; }
+    s.t += dt;
+    const k = 1 - Math.exp(-dt * 12);                      // time-based easing: the same feel at 30, 60 or 120 fps
     s.turn += (fr.turn - s.turn) * k; s.lean += (fr.lean - s.lean) * k;
-    fr.turn = s.turn; fr.lean = s.lean;
-    return fr;
+    let out = fr;
+    if (s.from && s.t < BLEND) {
+      const w = 1 - s.t / BLEND, e = w * w * (3 - 2 * w); // smoothstep from the old pose to the new one
+      out = Object.assign(tween(fr, s.from, e), { kind: fr.kind, dir: fr.dir, frame: fr.frame });
+    }
+    out.turn = s.turn; out.lean = s.lean;
+    s.last = out;
+    return out;
   }
+
 
   window.Anim = { frame, FRAMES: N, GAIT, framesFor };
 })();

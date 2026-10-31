@@ -81,6 +81,7 @@ Sections in the script, top to bottom:
 - Z / "Undo": restores the previous state (history stack of JSON snapshots).
 - "New match" → start flow at match length; "← Home" → welcome page (with Back to match while a match is on).
 - An oval stadium bowl surrounds the court, packed with people (`STADIUM`, `drawStadium`, `crowdPattern`); players animate from `src/animation/run-cycle.js`: a 20-frame stride cycle per player (`Anim.GAIT`) for each direction — run away, run toward, back-pedal, side run (body turned, profile) and side-step shuffle — plus plant, ready, split and slide.
+- Light: `LIGHTS[surface]` gives the shadow direction(s) (one sun by day, four floodlights at night), the stands' shade on the court and the sun glow; `drawShadows` casts body and ball shadows, `drawSunlight` adds the warm grade. The ball (`drawBall`, `BALL_R`) is round with felt, seam and highlight. `Anim.frame` cross-fades poses for 0.2 s when the movement changes.
 - Each surface has its own sky and light (`SCENES`): grass = summer afternoon, clay = warm late afternoon, hard = night under floodlights. Each pro wears an outfit per court (`ROSTER[].outfits`).
 
 ## Conventions

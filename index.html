@@ -227,9 +227,9 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <div class="toast" id="toast" hidden></div>
 
 <!-- Skill points (Skills Coach) and Sinner's real serve, captured from video (Serve Analyst) -->
-<script src="src/skills/skills.js?v=0.7.1"></script>
-<script src="src/animation/run-cycle.js?v=0.7.1"></script>
-<script src="src/serve/motion/sinner-serve.js?v=0.7.1"></script>
+<script src="src/skills/skills.js?v=0.7.2"></script>
+<script src="src/animation/run-cycle.js?v=0.7.2"></script>
+<script src="src/serve/motion/sinner-serve.js?v=0.7.2"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -462,6 +462,20 @@ const SCENES = {
            crowd: ["#3a4d74", "#5a3f55", "#2f5b5a", "#6b5a3e", "#4b3a6e", "#7a7f92", "#9a8a6e", "#c7c2b6"], skin: ["#b98d6c", "#a07656", "#cfa585", "#6a4532", "#4a3022"] },
 };
 const SCENE = () => SCENES[cfg.surface] || SCENES.hard;
+/* LIGHT. shadows: where a shadow falls on the ground, per metre of height (court x, y); a = darkness.
+   Daytime has one sun (grass: high summer sun from the left; clay: low late-afternoon sun from the right, long
+   shadows). The night match has four floodlights: four short, faint shadows. sun: where the sun glows on screen
+   (fractions of the width/height), warm: how golden the light is. stand: the part of the court in the stands' shade. */
+const LIGHTS = {
+  grass: { shadows: [{ x: 0.55, y: -0.32, a: 0.34 }], sun: { x: 0.06, y: 0.02 }, warm: 0.07, glow: 0.22,
+           stand: { x0: -14, x1: 14, y0: 7.5, y1: 20, a: 0.16 } },
+  clay:  { shadows: [{ x: -1.05, y: -0.5, a: 0.3 }], sun: { x: 0.96, y: 0.06 }, warm: 0.14, glow: 0.3,
+           stand: { x0: -14, x1: -3.2, y0: -20, y1: 20, a: 0.2 } },
+  hard:  { shadows: [{ x: 0.32, y: 0.3, a: 0.1 }, { x: -0.32, y: 0.3, a: 0.1 }, { x: 0.32, y: -0.3, a: 0.1 }, { x: -0.32, y: -0.3, a: 0.1 }],
+           sun: null, warm: 0, glow: 0, stand: null },
+};
+const LIGHT = () => LIGHTS[cfg.surface] || LIGHTS.hard;
+const litLeft = () => (LIGHT().shadows[0].x > 0);       // shadow falls right → the light comes from the left
 const STADIUM = { tiers: 16, segs: 72, a0: 12.6, b0: 20.6, wallH: 1.3, rise: 0.85, step: 1.0, aisleEvery: 9 };
 function ringPoint(k, j) {                               // tier k (0 = top of the back wall), angle slot j
   const S = STADIUM, ang = j / S.segs * Math.PI * 2;
@@ -556,6 +570,62 @@ function drawCourt() {
   const { L, DBL, SGL, SVC } = COURT;
   [[-DBL, -L, DBL, -L], [-DBL, L, DBL, L], [-DBL, -L, -DBL, L], [DBL, -L, DBL, L], [-SGL, -L, -SGL, L], [SGL, -L, SGL, L],
    [-SGL, -SVC, SGL, -SVC], [-SGL, SVC, SGL, SVC], [0, -SVC, 0, SVC], [0, -L, 0, -L + 0.2], [0, L, 0, L - 0.2]].forEach(l => line(...l));
+  const st = LIGHT().stand;
+  if (st) {                                               // the stands' shadow over part of the court, with a soft edge
+    const y0 = Math.max(st.y0, -CAM_BACK + 0.5), y1 = Math.max(y0 + 0.1, st.y1);
+    for (let k = 0; k < 3; k++) {
+      const g = k * 0.6, e = { x0: st.x0 === -14 ? st.x0 : st.x0 + g, x1: st.x1 === 14 ? st.x1 : st.x1 - g, y0: st.y0 === -20 ? y0 : y0 + g, y1 };
+      poly([proj(e.x0, e.y0), proj(e.x1, e.y0), proj(e.x1, e.y1), proj(e.x0, e.y1)], `rgba(10,14,30,${(st.a / 3).toFixed(3)})`);
+    }
+  }
+}
+
+/* CAST SHADOWS on the ground, from the light(s): a body-shaped silhouette from the feet away from each light,
+   long under a low sun, short and faint under floodlights. Drawn under everything on the actor layer. */
+function drawShadows() {
+  const L = LIGHT();
+  for (const i of [0, 1]) {
+    if (pos[i].motion && pos[i].motion.world) {           // captured serve: every bone casts its own shadow
+      const W = pos[i].motion.world, BONES = [["leftAnkle", "leftKnee"], ["leftKnee", "leftHip"], ["rightAnkle", "rightKnee"], ["rightKnee", "rightHip"],
+        ["leftHip", "rightHip"], ["root", "neck"], ["leftShoulder", "rightShoulder"], ["leftShoulder", "leftElbow"], ["leftElbow", "leftWrist"],
+        ["rightShoulder", "rightElbow"], ["rightElbow", "rightWrist"], ["neck", "nose"]];
+      for (const d of L.shadows) {
+        const at = n => W[n] && proj(W[n].x + d.x * W[n].z, W[n].y + d.y * W[n].z);
+        b.strokeStyle = `rgba(8,12,24,${d.a})`; b.lineCap = "round"; b.lineWidth = Math.max(1, proj(pos[i].x, pos[i].y).s * 0.16);
+        b.beginPath();
+        for (const [m, n] of BONES) { const A = at(m), C = at(n); if (A && C) { b.moveTo(A.x, A.y); b.lineTo(C.x, C.y); } }
+        b.stroke();
+      }
+      continue;
+    }
+    const p = pos[i], H = PLAYERS[i].heightM + (p.air > 0 ? 0.15 : 0);
+    // silhouette widths (metres) from the feet (t = 0) to the top of the head (t = 1)
+    const prof = [[0, 0.16], [0.28, 0.2], [0.5, 0.2], [0.62, 0.17], [0.78, 0.25], [0.84, 0.12], [0.9, 0.12], [0.96, 0.09], [1, 0.02]];
+    for (const d of L.shadows) {
+      const len = Math.hypot(d.x, d.y), ux = d.x / len, uy = d.y / len, nx = -uy, ny = ux;
+      const side = (sgn) => prof.map(([t, wd]) => proj(p.x + d.x * H * t + sgn * nx * wd, p.y + d.y * H * t + sgn * ny * wd));
+      const pts = side(1).concat(side(-1).reverse());
+      b.fillStyle = `rgba(8,12,24,${d.a})`; b.beginPath(); pts.forEach((v, k) => (k ? b.lineTo(v.x, v.y) : b.moveTo(v.x, v.y))); b.closePath(); b.fill();
+    }
+  }
+  if (ball) for (const d of L.shadows) {                  // the ball's shadow slides away from the light as it rises
+    const sx = ball.x + d.x * ball.z, sy = ball.y + d.y * ball.z, g = proj(sx, sy), r = Math.max(1.2, 0.1 * g.s);
+    b.fillStyle = `rgba(8,12,24,${Math.max(0.06, d.a * 1.2 - ball.z * 0.04).toFixed(3)})`;
+    b.beginPath(); b.ellipse(q(g.x), q(g.y), r, r * 0.42, 0, 0, Math.PI * 2); b.fill();
+  }
+}
+
+/* Sunshine: a warm grade over the whole picture and a soft glow from where the sun is (daytime courts only). */
+function drawSunlight() {
+  const L = LIGHT(); if (!L.sun) return;
+  const W = canvas.width, H = canvas.height;
+  ctx.save();
+  ctx.globalCompositeOperation = "soft-light"; ctx.fillStyle = `rgba(255,196,110,${L.warm})`; ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = "screen";
+  const sx = L.sun.x * W, sy = L.sun.y * H, g = ctx.createRadialGradient(sx, sy, 0, sx, sy, Math.max(W, H) * 0.75);
+  g.addColorStop(0, `rgba(255,244,214,${L.glow})`); g.addColorStop(0.35, `rgba(255,226,170,${L.glow * 0.35})`); g.addColorStop(1, "rgba(255,226,170,0)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.restore();
 }
 
 function drawNet() {
@@ -776,10 +846,11 @@ function drawPlayer(i, pos, swing) {
   const behind = rp.g.y + rp.u.y * RACKET.len * 0.7 > pos.y + 0.05;   // head farther than the body?
   const gs = proj(rp.g.x, rp.g.y, rp.g.z), grip = { x: gs.x + lx * 0.5, y: gs.y - hop + drop };
 
-  b.fillStyle = "rgba(0,0,0,0.32)"; b.beginPath(); b.ellipse(q(g.x), q(g.y), w * 0.95, Math.max(1 / AS, w * 0.3), 0, 0, Math.PI * 2); b.fill();
+  b.fillStyle = "rgba(0,0,0,0.22)"; b.beginPath(); b.ellipse(q(g.x), q(g.y), w * 0.7, Math.max(1 / AS, w * 0.22), 0, 0, Math.PI * 2); b.fill();   // contact shadow
   if (behind) drawRacket(rp.g, rp.u, rp.n, look, lx * 0.5, -hop + drop);
 
   const hipY = y - h * 0.5 + drop;
+  const lit = litLeft() ? -1 : 1;                          // which screen side faces the sun / main light
   // LEGS: thigh and shin (lit and shaded sides), white socks, shoes with a sole and an accent stripe
   const legOrder = [0, 1].sort((a, c) => (A.feet[c].dy || 0) - (A.feet[a].dy || 0));   // the farther leg first
   for (const k of legOrder) {
@@ -812,7 +883,7 @@ function drawPlayer(i, pos, swing) {
   // SHORTS: waistband, shaded side, the split between the legs
   Rr(tx - w * 0.44, hipY - h * 0.06, w * 0.88, h * 0.16, P.shorts);
   Rr(tx - w * 0.44, hipY - h * 0.06, w * 0.88, h * 0.022, shade(P.shorts, -0.22));
-  Rr(tx - w * 0.44, hipY - h * 0.04, w * 0.18, h * 0.14, shade(P.shorts, -0.12));
+  Rr(lit < 0 ? tx + w * 0.26 : tx - w * 0.44, hipY - h * 0.04, w * 0.18, h * 0.14, shade(P.shorts, -0.12));
   Rr(tx - 0.5 / AS, hipY + h * 0.05, 1 / AS, h * 0.05, shade(P.shorts, -0.3));
   // JERSEY: broad at the shoulders, shaded on one side, lit on the other; collar; chest logo seen from the front
   const shY = hipY - h * 0.36, shirt = P.shirt;
@@ -820,8 +891,8 @@ function drawPlayer(i, pos, swing) {
   const tR = R > 0 ? tiltR : -tiltR;                        // tilt seen on screen: right corner down by tR, left corner up
   b.moveTo(q(tx - w * 0.56), q(shY + h * 0.02 - tR)); b.lineTo(q(tx + w * 0.56), q(shY + h * 0.02 + tR));
   b.lineTo(q(tx + w * 0.46), q(hipY - h * 0.03)); b.lineTo(q(tx - w * 0.46), q(hipY - h * 0.03)); b.closePath(); b.fill();
-  Rr(tx - w * 0.5, shY + h * 0.03, w * 0.2, h * 0.28, shade(shirt, -0.16));
-  Rr(tx + w * 0.3, shY + h * 0.04, w * 0.12, h * 0.24, shade(shirt, 0.1));
+  Rr(tx - lit * w * 0.3 - (lit < 0 ? 0 : w * 0.2), shY + h * 0.03, w * 0.2, h * 0.28, shade(shirt, -0.18));   // side away from the light
+  Rr(tx + lit * w * 0.3 - (lit < 0 ? w * 0.12 : 0), shY + h * 0.04, w * 0.12, h * 0.24, shade(shirt, 0.14));  // side in the light
   Rr(tx - w * 0.46, hipY - h * 0.06, w * 0.92, h * 0.025, shade(shirt, -0.1));               // hem
   if (near) {                                                                                // BACK of the jersey: plain, a spine seam, shoulder blades
     Rr(tx - w * 0.14, shY, w * 0.28, h * 0.025, shade(shirt, -0.28));                        // collar, from behind
@@ -919,11 +990,29 @@ function drawPlayer(i, pos, swing) {
   }
 }
 
+/* THE BALL: round, optic yellow felt, lit from the light side and shaded on the other, a white seam that turns
+   with its spin, a fuzzy edge, and a faint trail when it flies fast. (Its shadow is drawn by drawShadows.) */
+const BALL_R = 0.1;                                      // drawn radius in metres: ~3× real, so it reads at any distance
 function drawBall(ball) {
-  const sh = proj(ball.x, ball.y, 0), p = proj(ball.x, ball.y, ball.z);
-  const r = Math.min(8, Math.max(1, 0.12 * p.s));        // capped: up close in first person the ball would fill the view
-  b.fillStyle = "rgba(0,0,0,0.35)"; b.fillRect(Math.round(sh.x - r), Math.round(sh.y), Math.ceil(r * 2), 1);
-  b.fillStyle = "#d8ee4c"; b.fillRect(Math.round(p.x - r), Math.round(p.y - r), Math.ceil(r * 2), Math.ceil(r * 2));
+  const p = proj(ball.x, ball.y, ball.z), r = Math.min(9, Math.max(2.2, BALL_R * p.s)), cx = q(p.x), cy = q(p.y);
+  const tr = ball._trail || (ball._trail = []);
+  const sp = tr.length ? Math.hypot(ball.x - tr[0].x, ball.y - tr[0].y, ball.z - tr[0].z) : 0;
+  if (sp > 0.12 && !matchMedia("(prefers-reduced-motion: reduce)").matches)      // moving fast: a short fading trail
+    tr.slice(0, 3).forEach((o, k) => { const t = proj(o.x, o.y, o.z);
+      b.fillStyle = `rgba(216,238,76,${0.22 - k * 0.06})`; b.beginPath(); b.arc(q(t.x), q(t.y), r * (0.9 - k * 0.15), 0, Math.PI * 2); b.fill(); });
+  tr.unshift({ x: ball.x, y: ball.y, z: ball.z }); tr.length = Math.min(tr.length, 4);
+  const lx = litLeft() ? -1 : 1, night = !LIGHT().sun;
+  b.save(); b.beginPath(); b.arc(cx, cy, r, 0, Math.PI * 2); b.clip();
+  b.fillStyle = "#a9c02c"; b.fillRect(cx - r, cy - r, r * 2, r * 2);                         // shaded side
+  b.fillStyle = "#d6ec3e"; b.beginPath(); b.arc(cx + lx * r * 0.28, cy - r * 0.24, r * 0.95, 0, Math.PI * 2); b.fill();   // lit felt
+  b.fillStyle = "#f2fb9a"; b.beginPath(); b.arc(cx + lx * r * 0.42, cy - r * 0.42, r * (night ? 0.24 : 0.32), 0, Math.PI * 2); b.fill();   // highlight
+  const th = (clock || gameT) * 11 + ball.x;                                               // the seam turns with the spin
+  b.strokeStyle = "rgba(250,250,238,0.95)"; b.lineWidth = Math.max(1 / AS, r * 0.16);
+  b.beginPath(); b.ellipse(cx - Math.cos(th) * r * 0.55, cy - Math.sin(th) * r * 0.55, r * 0.75, r * 0.5, th, -1.1, 1.1); b.stroke();
+  b.beginPath(); b.ellipse(cx + Math.cos(th) * r * 0.55, cy + Math.sin(th) * r * 0.55, r * 0.75, r * 0.5, th + Math.PI, -1.1, 1.1); b.stroke();
+  b.restore();
+  b.fillStyle = "rgba(226,244,120,0.55)";                                                  // felt fuzz around the edge
+  for (let k = 0; k < 10; k++) { const a = k * 0.628 + th * 0.2; b.fillRect(q(cx + Math.cos(a) * r) - 0.5 / AS, q(cy + Math.sin(a) * r) - 0.5 / AS, 1 / AS, 1 / AS); }
 }
 
 /* =====================================================================
@@ -1471,11 +1560,13 @@ function frame(now) {
   actx.setTransform(1, 0, 0, 1, 0, 0); actx.clearRect(0, 0, abuf.width, abuf.height);
   actx.setTransform(AS, 0, 0, AS, 0, 0); actx.imageSmoothingEnabled = false;
   b = actx;                                              // actors go on the finer layer, far to near
+  drawShadows();                                         // cast shadows first: everything stands on top of them
   items.sort((a, c) => c.y - a.y).forEach(it => it.draw());
   b = bMain;
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
   ctx.drawImage(abuf, 0, 0, canvas.width, canvas.height);
+  drawSunlight();
   renderHud();
   renderReady();
 }
@@ -1676,6 +1767,6 @@ canvas.addEventListener("pointercancel", endStick);
 resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
 </script>
 <!-- Locker room (Locker Room Designer) and the start flow (Start Page Builder) -->
-<script src="src/lockerroom/lockerroom.js?v=0.7.1"></script>
-<script src="src/start/flow.js?v=0.7.1"></script>
+<script src="src/lockerroom/lockerroom.js?v=0.7.2"></script>
+<script src="src/start/flow.js?v=0.7.2"></script>
 <script>StartFlow.open();</script>
