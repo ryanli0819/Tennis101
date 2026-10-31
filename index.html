@@ -227,9 +227,10 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <div class="toast" id="toast" hidden></div>
 
 <!-- Skill points (Skills Coach) and Sinner's real serve, captured from video (Serve Analyst) -->
-<script src="src/skills/skills.js?v=0.8.0"></script>
-<script src="src/animation/run-cycle.js?v=0.8.0"></script>
-<script src="src/serve/motion/sinner-serve.js?v=0.8.0"></script>
+<script src="src/skills/skills.js?v=0.8.1"></script>
+<script src="src/animation/run-cycle.js?v=0.8.1"></script>
+<script src="src/serve/motion/sinner-serve.js?v=0.8.1"></script>
+<script src="src/serve/motion/alcaraz-serve.js?v=0.8.1"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -684,6 +685,17 @@ function drawCapturedFigure(i, p, W) {
   const N = at("neck"), H = at("nose");
   if (N && H) {
     const r = Math.max(2, g.s * 0.12), hx = H.x, hy = H.y - g.s * 0.04, [hr, hrD, hrL] = HAIR[P.id] || [P.hair, P.hair, P.hair];
+    if (P.side !== "near") {                                                                 // FAR server, seen from the front: a face
+      const px = 1 / AS, skinD = shade(skin, -0.18);
+      b.fillStyle = skin; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();
+      b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.15, r * 1.0, Math.PI, Math.PI * 2); b.fill();   // hair / cap crown
+      if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(q(hx - r * 1.2), q(hy - r * 0.2), q(r * 2.4), Math.max(px, q(r * 0.18))); }   // brim
+      else { b.fillStyle = hr; b.fillRect(q(hx - r), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); b.fillRect(q(hx + r * 0.7), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); }
+      b.fillStyle = "#1b1b1f"; b.fillRect(q(hx - r * 0.45), q(hy + r * 0.1), px * 2, px * 2); b.fillRect(q(hx + r * 0.25), q(hy + r * 0.1), px * 2, px * 2);   // eyes
+      b.fillStyle = skinD; b.fillRect(q(hx - px * 0.5), q(hy + r * 0.3), px, q(r * 0.25));                                  // nose
+      b.fillStyle = "#a4574a"; b.fillRect(q(hx - r * 0.25), q(hy + r * 0.62), q(r * 0.5), px);                             // mouth
+      return;
+    }
     b.fillStyle = hrD; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();             // back of the head: hair, no face
     b.fillStyle = skin; b.fillRect(q(hx - r * 1.08), q(hy), 1 / AS, q(r * 0.35)); b.fillRect(q(hx + r * 1.08) - 1 / AS, q(hy), 1 / AS, q(r * 0.35));   // ears
     b.fillStyle = hr; b.beginPath(); b.arc(hx, hy + r * 0.15, r * 0.98, Math.PI * 0.05, Math.PI * 0.95); b.fill();   // hair below the cap
@@ -993,14 +1005,14 @@ function drawPlayer(i, pos, swing) {
 /* THE BALL: round, optic yellow felt, lit from the light side and shaded on the other, a white seam that turns
    with its spin, a fuzzy edge, and a faint trail when it flies fast. (Its shadow is drawn by drawShadows.) */
 const BALL_R = 0.1;                                      // drawn radius in metres: ~3× real, so it reads at any distance
-function drawBall(ball) {
+function drawBall(ball, inset = false) {
   const p = proj(ball.x, ball.y, ball.z), r = Math.min(9, Math.max(2.2, BALL_R * p.s)), cx = q(p.x), cy = q(p.y);
   const tr = ball._trail || (ball._trail = []);
   const sp = tr.length ? Math.hypot(ball.x - tr[0].x, ball.y - tr[0].y, ball.z - tr[0].z) : 0;
   if (sp > 0.12 && !matchMedia("(prefers-reduced-motion: reduce)").matches)      // moving fast: a short fading trail
     tr.slice(0, 3).forEach((o, k) => { const t = proj(o.x, o.y, o.z);
       b.fillStyle = `rgba(216,238,76,${0.22 - k * 0.06})`; b.beginPath(); b.arc(q(t.x), q(t.y), r * (0.9 - k * 0.15), 0, Math.PI * 2); b.fill(); });
-  tr.unshift({ x: ball.x, y: ball.y, z: ball.z }); tr.length = Math.min(tr.length, 4);
+  if (!inset) { tr.unshift({ x: ball.x, y: ball.y, z: ball.z }); tr.length = Math.min(tr.length, 4); }
   const lx = litLeft() ? -1 : 1, night = !LIGHT().sun;
   b.save(); b.beginPath(); b.arc(cx, cy, r, 0, Math.PI * 2); b.clip();
   b.fillStyle = "#a9c02c"; b.fillRect(cx - r, cy - r, r * 2, r * 2);                         // shaded side
@@ -1141,12 +1153,13 @@ function say(i, text) {
 }
 
 /* =====================================================================
-   CAPTURED SERVE — Sinner serves with his real motion (src/serve/motion/sinner-serve.js)
+   SERVE MOTIONS — every pro with a motion file serves his own way (src/serve/motion/<id>-serve.js):
+   Sinner from captured video, Alcaraz hand-keyed from analysis until his clips are captured.
    The file holds his joints frame by frame in body heights, taken from video and cleaned.
    ===================================================================== */
-const SINNER_SERVES = window.SERVE_MOTIONS?.sinner || null;               // { first, second } from his real serves
-const capturedServe = () => !!SINNER_SERVES?.first && PLAYERS[0].id === "sinner";   // only Sinner's serves are captured so far
-const motionFor = no => (no === 2 && SINNER_SERVES.second) || SINNER_SERVES.first;  // 2nd serve (after a fault) has its own motion
+const servesOf = i => window.SERVE_MOTIONS?.[PLAYERS[i].id] || null;          // { first, second } for player i
+const capturedServe = i => !!servesOf(i)?.first;                               // has his own serve motion
+const motionFor = (i, no) => (no === 2 && servesOf(i).second) || servesOf(i).first;   // 2nd serve (after a fault) has its own motion
 const RACKET_M = 0.68;                                   // racket length
 
 /* Pose at time t: a Catmull-Rom curve through the captured frames around t (smooth, no corners between frames).
@@ -1171,22 +1184,22 @@ function poseToWorld(i, p, pose) {
   for (const n in pose) w[n] = { x: p.x + pose[n][0] * h * right, y: p.y, z: Math.max(0, pose[n][1] * h) };
   return w;
 }
-/* Advance Sinner's captured motion. During the serve the ball rides in his tossing hand, is tossed
-   on one real throw that meets the racket at the captured contact moment, and is then struck. */
-function stepMotion(dt) {
-  const mo = pos[0].motion, m = mo.m, E = m.events;
+/* Advance player i's serve motion. During the serve the ball bounces in the routine, rides in the tossing hand,
+   is tossed on one real throw that meets the racket at the motion's contact moment, and is then struck. */
+function stepMotion(i, dt) {
+  const mo = pos[i].motion, m = mo.m, E = m.events, bouncesEnd = E.set ?? E.start;
   mo.t += dt;
-  const W = mo.world = poseToWorld(0, pos[0], motionPose(m, mo.t));
+  const W = mo.world = poseToWorld(i, pos[i], motionPose(m, mo.t));
   const sv = rally && rally.serve;
   if (sv) {
-    if (mo.t < E.start) {                                // ROUTINE: he bounces the ball ROUTINE.bounces times
-      const P = (E.start - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1, h = W.leftWrist;
+    if (mo.t < bouncesEnd) {                             // ROUTINE: he bounces the ball ROUTINE.bounces times
+      const P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1, h = W.leftWrist;
       Object.assign(ball, { x: h.x, y: h.y + 0.25, z: h.z * (2 * f - 1) ** 2 });   // hand → ground → hand
     } else if (mo.t < E.tossRelease) {
       Object.assign(ball, W.leftWrist);                  // ball in the tossing hand
     } else {
       if (!sv.release) {                                 // solve the toss once: release point → contact point
-        const C = poseToWorld(0, pos[0], motionPose(m, E.contact));
+        const C = poseToWorld(i, pos[i], motionPose(m, E.contact));
         const T = E.contact - E.tossRelease;
         sv.release = { ...W.leftWrist };
         sv.hit = { x: C.rightWrist.x, z: C.rightWrist.z + RACKET_M * 0.9 };
@@ -1194,12 +1207,12 @@ function stepMotion(dt) {
       }
       const tt = mo.t - E.tossRelease, u = Math.min(1, tt / (E.contact - E.tossRelease));
       ball.x = sv.release.x + (sv.hit.x - sv.release.x) * u;
-      ball.y = pos[0].y + 0.45 * u;                      // the toss drifts a little into the court
+      ball.y = pos[i].y - sideSign(i) * 0.45 * u;        // the toss drifts a little into the court
       ball.z = sv.release.z + sv.vz * tt - 0.5 * 9.81 * tt * tt;
-      if (mo.t >= E.contact) { rally.serve = null; hitBall(0, true); }   // contact: the serve leaves the racket
+      if (mo.t >= E.contact) { rally.serve = null; hitBall(i, true); }   // contact: the serve leaves the racket
     }
   }
-  if (mo.t >= E.finish) pos[0].motion = null;           // landing done: back to the normal sprite
+  if (mo.t >= E.finish) pos[i].motion = null;           // landing done: back to the normal sprite
 }
 
 /* =====================================================================
@@ -1428,19 +1441,19 @@ function startRally(no = 1) {                            // no = 1st or 2nd serv
   if (no === 1) pos.forEach(p => (p.stamAtStart = p.stam));
   clock = 0;
   rally = { shot: null, games: gamesPlayed(), sets: S.sets.length, serveNo: no, serve: { t: 0 } };   // every serve: routine → windup → contact
-  if (S.server === 0 && capturedServe()) {                 // Sinner serves with his real, captured motion (1st or 2nd)
-    const m = motionFor(no);
+  if (capturedServe(S.server)) {                           // the server plays his own serve motion (1st or 2nd)
+    const i = S.server, m = motionFor(i, no);
     // the 1st-serve clip includes his real routine; the 2nd doesn't, so he holds his stance while the ball bounces
     const t0 = m.events.routine != null ? m.events.routine : m.events.start - ROUTINE.seconds;
     rally.serve.captured = true;
-    pos[0].motion = { t: t0, m, t0 };
+    pos[i].motion = { t: t0, m, t0 };
   }
   bug.classList.add("live");                     // scoreboard fades while the point is live
   renderScore();
 }
 
 function stepRally(dt) {
-  if (pos[0].motion) stepMotion(dt);
+  pos.forEach((p, i) => { if (p.motion) stepMotion(i, dt); });
   if (!rally) return;
   if (rally.serve) {                                    // routine and windup: the server's feet are planted
     if (S.server === 0) steerAim(dt);                    // you can aim until contact
@@ -1567,8 +1580,47 @@ function frame(now) {
   ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
   ctx.drawImage(abuf, 0, 0, canvas.width, canvas.height);
   drawSunlight();
+  drawServeInset();
   renderHud();
   renderReady();
+}
+
+/* SERVE CAM INSET. While your opponent serves you'd only see a small figure at the far baseline, so a zoomed view
+   from your own position (a telephoto of the same camera) shows their whole motion: routine, toss, trophy, drop,
+   contact and landing. It shows from the routine until just after contact; the main view stays on your side so
+   you can still position for the return. */
+const inset = document.createElement("canvas"), ictx = inset.getContext("2d");
+function drawServeInset() {
+  const i = S.server;
+  const on = i === 1 && !S.over && rally && (rally.serve || (rally.shot && rally.shot.isServe && clock - (rally.serveClock || 0) < 0.5));
+  if (!on || camMode === "pov") return;
+  const IW = 60, IH = 78, p = pos[i];
+  if (inset.width !== IW * AS) { inset.width = IW * AS; inset.height = IH * AS; }
+  const keep = { BW, BH, F, HZ, CAM_X, b };
+  const d = p.y + CAM_BACK;
+  F = 0.86 * IH * d / 3.5;                               // frame 0 → 3.5 m: the toss and contact fit
+  BW = IW; BH = IH; CAM_X = p.x; HZ = IH * 0.93 - CAM_H * F / d;
+  b = ictx; ictx.setTransform(1, 0, 0, 1, 0, 0); ictx.clearRect(0, 0, inset.width, inset.height);
+  ictx.setTransform(AS, 0, 0, AS, 0, 0); ictx.imageSmoothingEnabled = false;
+  const su = SURF(), sc = SCENE();
+  b.fillStyle = sc.wall; b.fillRect(0, 0, IW, IH);                                       // the back wall behind the server
+  poly([proj(-30, 30), proj(30, 30), proj(30, COURT.L + 0.1), proj(-30, COURT.L + 0.1)], su.runoff);
+  poly([proj(-COURT.DBL, COURT.L), proj(COURT.DBL, COURT.L), proj(COURT.DBL, 0), proj(-COURT.DBL, 0)], su.court);
+  for (const x of [-COURT.DBL, -COURT.SGL, 0, COURT.SGL, COURT.DBL]) { const a = proj(x, COURT.L), c = proj(x, COURT.L - (x ? 6 : 0.2));
+    b.strokeStyle = "#f4f6f8"; b.lineWidth = 1 / AS; b.beginPath(); b.moveTo(a.x, a.y); b.lineTo(c.x, c.y); b.stroke(); }
+  { const a = proj(-COURT.DBL, COURT.L), c = proj(COURT.DBL, COURT.L); b.fillStyle = "#f4f6f8"; b.fillRect(a.x, a.y - 0.5, c.x - a.x, 1); }   // baseline
+  drawShadows();
+  drawPlayer(i, p, swing[i]);
+  if (ball) drawBall(ball, true);
+  BW = keep.BW; BH = keep.BH; F = keep.F; HZ = keep.HZ; CAM_X = keep.CAM_X; b = keep.b;
+  const W = canvas.width, H = canvas.height, ih = Math.round(Math.min(H * 0.36, W * 0.42)), iw = Math.round(ih * IW / IH);
+  const x0 = W - iw - 16, y0 = 16;
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = "rgba(8,12,24,0.85)"; ctx.fillRect(x0 - 3, y0 - 3, iw + 6, ih + 26);
+  ctx.drawImage(inset, x0, y0, iw, ih);
+  ctx.strokeStyle = "#d8ee4c"; ctx.lineWidth = 2; ctx.strokeRect(x0 - 1, y0 - 1, iw + 2, ih + 2);
+  ctx.fillStyle = "#d8ee4c"; ctx.font = "600 12px ui-monospace, Menlo, monospace"; ctx.textBaseline = "middle";
+  ctx.fillText(`${PLAYERS[i].last} · ${rally.serveNo === 2 ? "2ND" : "1ST"} SERVE`, x0 + 4, y0 + ih + 12);
 }
 
 /* Your serve target: a ball-yellow cross in the service box while you aim (and while the serve flies). */
@@ -1767,6 +1819,6 @@ canvas.addEventListener("pointercancel", endStick);
 resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
 </script>
 <!-- Locker room (Locker Room Designer) and the start flow (Start Page Builder) -->
-<script src="src/lockerroom/lockerroom.js?v=0.8.0"></script>
-<script src="src/start/flow.js?v=0.8.0"></script>
+<script src="src/lockerroom/lockerroom.js?v=0.8.1"></script>
+<script src="src/start/flow.js?v=0.8.1"></script>
 <script>StartFlow.open();</script>

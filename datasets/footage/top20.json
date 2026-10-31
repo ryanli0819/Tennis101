@@ -28,7 +28,43 @@
       "rank": null,
       "order": 3,
       "videoDir": "datasets/video/alcaraz/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://youtube.com/shorts/LaTVfSX76XE",
+          "source": "YouTube short (via Tennisplayer.net forum, Oct 2022)",
+          "stroke": "serve1",
+          "view": "front",
+          "speed": "slow",
+          "range": null,
+          "notes": "38 s, slow motion, straight-on view, Indian Wells. Best clip for the pose pipeline.",
+          "status": "to record"
+        },
+        {
+          "url": "https://youtube.com/shorts/5ei3oxeJbQY",
+          "source": "YouTube short (via Tennisplayer.net forum, Oct 2022)",
+          "stroke": "serve1",
+          "view": "side",
+          "speed": "slow",
+          "range": null,
+          "notes": "41 s stop-action, 24 stills, wide slice serve into the deuce court.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.tennistv.com/videos/3621253/toronto-2023-carlos-alcaraz-vs-holger-rune-court-level-practice-set",
+          "source": "Tennis TV",
+          "stroke": "serve1",
+          "view": "behind",
+          "speed": "real",
+          "range": null,
+          "notes": "Court-level practice set; serves from behind the baseline. Needs a Tennis TV login.",
+          "status": "to record"
+        }
+      ],
+      "serveMotion": {
+        "file": "src/serve/motion/alcaraz-serve.js",
+        "from": "datasets/serves/alcaraz/keyframes.json",
+        "status": "hand-keyed (provisional) until the clips are captured"
+      }
     },
     {
       "id": "shelton",
