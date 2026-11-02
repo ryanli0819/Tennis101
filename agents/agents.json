@@ -285,6 +285,29 @@
       ],
       "contract": "datasets/players/<id>/appearance.json",
       "effort": "medium"
+    },
+    {
+      "name": "biomechanics-coach",
+      "title": "Biomechanics Coach",
+      "order": 18,
+      "runsAt": 18,
+      "job": "Studies human anatomy and how joints move in tennis (serve, strokes, return stance, running, split step), measures it from video, and keeps every in-game pose anatomically real.",
+      "owns": [
+        "datasets/anatomy/",
+        "tests/anatomy.test.mjs"
+      ],
+      "reads": [
+        "datasets/serves/",
+        "datasets/video/"
+      ],
+      "feeds": [
+        "body-animator",
+        "animator",
+        "racket-coach",
+        "serve-analyst"
+      ],
+      "contract": "datasets/anatomy/joints.json · movements/<name>.json",
+      "effort": "high"
     }
   ]
 }

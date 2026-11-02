@@ -2,7 +2,7 @@
 // RUN CYCLE — picks the animation frame for a player from how they're moving. Owner: Animator (agents/animator/).
 //
 // Anim.frame(p, B, near, id) → { kind, dir, frame, turn, bob, lean, crouch, feet: [left, right], knees, arms }
-//   kind  : "ready" | "run" | "backpedal" | "siderun" | "shuffle" | "plant" | "split" | "slide"
+//   kind  : "ready" | "receive" | "run" | "backpedal" | "siderun" | "shuffle" | "plant" | "split" | "slide"
 //   dir   : where the body travels on screen: "away" (up the screen) | "toward" | "left" | "right" | null
 //   frame : 0..19 — every moving kind is a 20-frame cycle (one full stride: left step + right step)
 //   turn  : −1..1 how far the body is turned sideways toward screen left/right (side runs show the profile)
@@ -11,7 +11,7 @@
 //              of the shoe's sole faces the camera (a heel kick seen from behind)
 //   knees[k] : { dx, dy } extra knee drive (body widths / heights) on top of the hip–foot midpoint
 //   arms[k]  : swing −1..1, + = hand forward in the direction of travel, opposite to the same-side leg
-//   bob, lean (screen-x), crouch: heights
+//   bob, lean (screen-x), crouch, bend (upper body tipped forward: shoulders drop toward the hips): heights
 // Units are fractions of the sprite's height/width, so the same frames fit every player's real size.
 //
 // THE 20 FRAMES are built once per player and kind from a running gait model (stance ~38% of a step, a
@@ -91,7 +91,7 @@
   function tween(A, C, t) {                               // blend two frames (and two different kinds when changing direction)
     const mix = (a, c) => ({ dx: lerp(a.dx, c.dx, t), dy: lerp(a.dy || 0, c.dy || 0, t), lift: lerp(a.lift, c.lift, t), sole: lerp(a.sole || 0, c.sole || 0, t) });
     const km = (a, c) => ({ dx: lerp(a.dx, c.dx, t), dy: lerp(a.dy, c.dy, t) });
-    return { bob: lerp(A.bob, C.bob, t), lean: lerp(A.lean, C.lean, t), crouch: lerp(A.crouch, C.crouch, t), turn: lerp(A.turn, C.turn, t),
+    return { bob: lerp(A.bob, C.bob, t), lean: lerp(A.lean, C.lean, t), crouch: lerp(A.crouch, C.crouch, t), turn: lerp(A.turn, C.turn, t), bend: lerp(A.bend || 0, C.bend || 0, t),
              feet: [mix(A.feet[0], C.feet[0]), mix(A.feet[1], C.feet[1])], knees: [km(A.knees[0], C.knees[0]), km(A.knees[1], C.knees[1])],
              arms: [lerp(A.arms[0], C.arms[0], t), lerp(A.arms[1], C.arms[1], t)] };
   }
@@ -116,6 +116,11 @@
                feet: [{ dx: -0.42, lift: 0 }, { dx: 0.42, lift: 0 }], arms: [0.4, 0.4] });
     }
     p._still = p._still ? sp < 0.65 : sp < 0.35;         // hysteresis: no flicker between ready and moving at walking pace
+    if (p._still && p.receiving) {                         // RETURN STANCE: squat low, feet wide, bent forward over the knees,
+      const t = p.run;                                     // weight rocking side to side, a light bounce on the toes
+      return still({ kind: "receive", dir: null, frame: 0, bob: reduce() ? 0 : Math.abs(Math.sin(t * 5.2)) * 0.008, lean: reduce() ? 0 : Math.sin(t * 2.6) * 0.012,
+               crouch: 0.085, bend: 0.055, feet: [{ dx: -0.4, lift: 0 }, { dx: 0.4, lift: 0 }], arms: [0.3, 0.3] });
+    }
     if (p._still) {                                        // ready position: feet apart, knees soft, a slow breath
       const breathe = reduce() ? 0 : Math.sin(p.run * 2.2) * 0.006;
       return still({ kind: "ready", dir: null, frame: 0, bob: breathe, lean: 0, crouch: 0.025,

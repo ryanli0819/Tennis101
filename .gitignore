@@ -22,3 +22,6 @@ datasets/players/**/*.jpeg
 datasets/players/**/*.webp
 datasets/players/**/*.heic
 datasets/players/**/*.gif
+# intake inbox: media and local logs stay on the Mac
+datasets/inbox/*
+!datasets/inbox/.gitkeep

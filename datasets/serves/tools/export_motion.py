@@ -35,9 +35,14 @@ REAL_RELEASE_TO_CONTACT = 0.65          # seconds, measured in the real-speed fr
 # leadFrom: first frame of the lead-in (default: 0.3 s before "start"). clean: "light" = raw joints, confidence and spike filter.
 PLAYERS = {}
 PLAYERS["sinner"] = {
-    "first":  {"src": "datasets/serves/sinner/front.keypoints.json", "mirror": True, "calm": (0, 46),
+    # Nov 2, 2026: the 1st serve now comes from the slow-motion back-side clip (≈8× more frames per real second than the
+    # 30 fps front clip, and seen from behind like the game camera), so it plays fluently. The front clip is kept as "firstFront".
+    "first":  {"src": "datasets/serves/sinner/back-side.keypoints.json", "mirror": False, "calm": (0, 40), "clean": "light",
+               "events": {"start": 8, "tossRelease": 72, "trophy": 150, "contact": 240, "finish": 312},
+               "note": "1st serve, back-side view (slow motion, re-timed)"},
+    "firstFront": {"src": "datasets/serves/sinner/front.keypoints.json", "mirror": True, "calm": (0, 46),
                "events": {"start": 46, "tossRelease": 55, "trophy": 66, "contact": 74, "finish": 88},
-               "note": "1st serve, front view (real speed)"},
+               "note": "1st serve, front view (real speed, 30 fps)"},
     "second": {"src": "datasets/serves/sinner/back-close.keypoints.json", "mirror": False, "calm": (100, 200),
                "events": {"start": 250, "tossRelease": 266, "trophy": 300, "contact": 343, "finish": 365},
                "note": "2nd serve, back view, served after a fault (slow motion, re-timed)"},

@@ -227,10 +227,10 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <div class="toast" id="toast" hidden></div>
 
 <!-- Skill points (Skills Coach) and Sinner's real serve, captured from video (Serve Analyst) -->
-<script src="src/skills/skills.js?v=0.9.0"></script>
-<script src="src/animation/run-cycle.js?v=0.9.0"></script>
-<script src="src/serve/motion/sinner-serve.js?v=0.9.0"></script>
-<script src="src/serve/motion/alcaraz-serve.js?v=0.9.0"></script>
+<script src="src/skills/skills.js?v=0.9.1"></script>
+<script src="src/animation/run-cycle.js?v=0.9.1"></script>
+<script src="src/serve/motion/sinner-serve.js?v=0.9.1"></script>
+<script src="src/serve/motion/alcaraz-serve.js?v=0.9.1"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -814,7 +814,9 @@ function racketPose(i, p, ago = 0) {
   const hz = Math.max(0.45, Math.min(1.75, p.hitZ ?? 1.0));                              // contact height of the last ball
   const se = SLICE_END[PLAYERS[i].id] ?? 4.5;
   const POSE = {
-    ready:  { g: W(0.40, 0.18, 0.96), u: D(0.34, 0.30, 0.89), n: D(0.6, -0.8, 0), throat: true },    // head up beside the right side, strings toward the back
+    ready:  p.receiving
+          ? { g: W(0.22, 0.42, 0.8), u: D(0.12, 0.62, 0.78), n: D(0.9, 0, -0.1), throat: true }   // return stance: racket out in front, head up, both hands on it
+          : { g: W(0.40, 0.18, 0.96), u: D(0.34, 0.30, 0.89), n: D(0.6, -0.8, 0), throat: true },  // head up beside the right side, strings toward the back
     fhBack: { g: W(0.55, -0.15, 1.15), u: D(0.45, -0.55, 0.62), n: D(0, 1, 0.35) },
     fhLoop: { g: W(0.62, -0.25, 0.85), u: D(0.55, -0.70, -0.20), n: D(0, 1, 0.1) },                 // racket drops below the ball before the swing up
     fhHit:  { g: W(0.60, 0.40, hz), u: D(0.90, 0.45, 0.10), n: D(0, 1, 0) },
@@ -966,6 +968,46 @@ function drawPlayer(i, pos, swing) {
       Rr(kx - w * 0.05, ky - h * 0.012, w * 0.1, h * 0.022, skinL);
     }
   }
+  const shY = hipY - h * (0.36 - (A.bend || 0)), shirt = P.shirt;          // bend: tipped forward, shoulders lower
+  // ARMS: sleeve, upper arm, forearm, wristband, hand. Racket arm reaches the grip; the other swings (or joins a backhand).
+  const arm = (sx, sy, hx2, hy2, out, sleeve) => {
+    const ex = (sx + hx2) / 2 + out * w * 0.18, ey = (sy + hy2) / 2 + h * 0.02;
+    Ln(sx, sy, ex, ey, skin, w * 0.2); Ln(ex, ey, hx2, hy2, sleeve || skin, w * 0.17);         // forearm (or a compression sleeve over it)
+    Ln(sx, sy, sx + (ex - sx) * 0.45, sy + (ey - sy) * 0.45, shirt, w * 0.26);              // short sleeve
+    Ln(hx2 + (ex - hx2) * 0.22, hy2 + (ey - hy2) * 0.22, hx2 + (ex - hx2) * 0.08, hy2 + (ey - hy2) * 0.08, P.ui || "#f2f2f2", w * 0.2);  // wristband
+    Rr(hx2 - w * 0.08, hy2 - w * 0.08, w * 0.16, w * 0.16, skinL);                           // hand
+  };
+  const rS = { x: tx + R * w * 0.5 * tw, y: shY + h * 0.05 + tiltR }, lS = { x: tx - R * w * 0.5 * tw, y: shY + h * 0.05 - tiltR };
+  const swingDir = A.dir === "right" ? 1 : A.dir === "left" ? -1 : 0, swingUp = A.dir === "away" ? 1 : A.dir === "toward" ? -1 : 0;
+  let freeHand = { x: lS.x - R * w * 0.25 * tw + swingDir * A.arms[0] * w * 0.55,           // the free arm pumps with the legs
+                   y: shY + h * 0.33 + A.arms[0] * h * 0.05 - swingUp * A.arms[0] * h * 0.035 - Math.abs(swingDir * A.arms[0]) * h * 0.04 };
+  let freeOnThroat = false;
+  if (rp.twoHands) freeHand = { x: grip.x, y: grip.y + h * 0.02 };
+  else if (rp.throat && A.kind !== "run" && A.kind !== "backpedal") {   // ready: the other hand cradles the racket's throat
+    const t = RACKET.handle + 0.06, th = proj(rp.g.x + rp.u.x * t, rp.g.y + rp.u.y * t, rp.g.z + rp.u.z * t);
+    freeHand = { x: th.x + lx * 0.5, y: th.y - hop + drop }; freeOnThroat = true;
+  }
+  /* DEPTH: a hand in front of the body is hidden by the torso when he's seen from behind, and drawn over the torso
+     when he faces you; a hand behind the body is the other way round. So from behind you see his back and the
+     arms at his sides, never an arm painted across his back. */
+  // an arm that reaches across the body's middle always passes in front of the chest (shoulders can't cross behind the back)
+  const crosses = (S0, hand) => Math.sign(hand.x - tx) !== Math.sign(S0.x - tx) && Math.abs(hand.x - tx) > w * 0.08;
+  const racketFront = (rp.g.y - pos.y) * R > 0.02 || crosses(rS, grip);
+  const freeFront = rp.twoHands || freeOnThroat ? racketFront || crosses(lS, freeHand)
+                  : crosses(lS, freeHand) || ((A.kind === "run" || A.kind === "backpedal") && A.arms[0] > 0.2);
+  const stub = (S0, hx2, hy2, out, k) => {                   // the top of a hidden arm still shows at the shoulder
+    const ex = (S0.x + hx2) / 2 + out * w * 0.18, ey = (S0.y + hy2) / 2 + h * 0.02;
+    Ln(S0.x, S0.y, S0.x + (ex - S0.x) * k, S0.y + (ey - S0.y) * k, skin, w * 0.2);
+    Ln(S0.x, S0.y, S0.x + (ex - S0.x) * 0.45, S0.y + (ey - S0.y) * 0.45, shirt, w * 0.26);
+  };
+  const drawArms = (front) => {
+    const freeHidden = near ? freeFront : !freeFront, racketHidden = near ? racketFront : !racketFront;
+    if (freeHidden !== front) arm(lS.x, lS.y, freeHand.x, freeHand.y, -R);
+    else if (front && near) stub(lS, freeHand.x, freeHand.y, -R, 0.6);
+    if (racketHidden !== front) arm(rS.x, rS.y, grip.x, grip.y, R, P.sleeve);
+    else if (front && near) stub(rS, grip.x, grip.y, R, 0.6);
+  };
+  drawArms(false);                                                                           // arms hidden behind the torso first
   b.save(); b.translate(q(tx), 0); b.scale(tw, 1); b.translate(-q(tx), 0);               // turned sideways: the torso narrows
   // SHORTS: waistband, shaded side, the split between the legs
   Rr(tx - w * 0.44, hipY - h * 0.06, w * 0.88, h * 0.16, P.shorts);
@@ -973,7 +1015,6 @@ function drawPlayer(i, pos, swing) {
   Rr(lit < 0 ? tx + w * 0.26 : tx - w * 0.44, hipY - h * 0.04, w * 0.18, h * 0.14, shade(P.shorts, -0.12));
   Rr(tx - 0.5 / AS, hipY + h * 0.05, 1 / AS, h * 0.05, shade(P.shorts, -0.3));
   // JERSEY: broad at the shoulders, shaded on one side, lit on the other; collar; chest logo seen from the front
-  const shY = hipY - h * 0.36, shirt = P.shirt;
   b.fillStyle = shirt; b.beginPath();
   const tR = R > 0 ? tiltR : -tiltR;                        // tilt seen on screen: right corner down by tR, left corner up
   b.moveTo(q(tx - w * 0.56), q(shY + h * 0.02 - tR)); b.lineTo(q(tx + w * 0.56), q(shY + h * 0.02 + tR));
@@ -995,25 +1036,7 @@ function drawPlayer(i, pos, swing) {
          Rr(tx - 0.5 / AS, shY + h * 0.035, 1 / AS, h * 0.07, shade(shirt, -0.3));            // placket
          Rr(tx + 1 / AS, shY + h * 0.05, 1 / AS, 1 / AS, "#f4f4ef"); Rr(tx + 1 / AS, shY + h * 0.085, 1 / AS, 1 / AS, "#f4f4ef"); }   // buttons
   b.restore();
-  // ARMS: sleeve, upper arm, forearm, wristband, hand. Racket arm reaches the grip; the other swings (or joins a backhand).
-  const arm = (sx, sy, hx2, hy2, out, sleeve) => {
-    const ex = (sx + hx2) / 2 + out * w * 0.18, ey = (sy + hy2) / 2 + h * 0.02;
-    Ln(sx, sy, ex, ey, skin, w * 0.2); Ln(ex, ey, hx2, hy2, sleeve || skin, w * 0.17);         // forearm (or a compression sleeve over it)
-    Ln(sx, sy, sx + (ex - sx) * 0.45, sy + (ey - sy) * 0.45, shirt, w * 0.26);              // short sleeve
-    Ln(hx2 + (ex - hx2) * 0.22, hy2 + (ey - hy2) * 0.22, hx2 + (ex - hx2) * 0.08, hy2 + (ey - hy2) * 0.08, P.ui || "#f2f2f2", w * 0.2);  // wristband
-    Rr(hx2 - w * 0.08, hy2 - w * 0.08, w * 0.16, w * 0.16, skinL);                           // hand
-  };
-  const rS = { x: tx + R * w * 0.5 * tw, y: shY + h * 0.05 + tiltR }, lS = { x: tx - R * w * 0.5 * tw, y: shY + h * 0.05 - tiltR };
-  const swingDir = A.dir === "right" ? 1 : A.dir === "left" ? -1 : 0, swingUp = A.dir === "away" ? 1 : A.dir === "toward" ? -1 : 0;
-  let freeHand = { x: lS.x - R * w * 0.25 * tw + swingDir * A.arms[0] * w * 0.55,           // the free arm pumps with the legs
-                   y: shY + h * 0.33 + A.arms[0] * h * 0.05 - swingUp * A.arms[0] * h * 0.035 - Math.abs(swingDir * A.arms[0]) * h * 0.04 };
-  if (rp.twoHands) freeHand = { x: grip.x, y: grip.y + h * 0.02 };
-  else if (rp.throat && A.kind !== "run" && A.kind !== "backpedal") {   // ready: the other hand cradles the racket's throat
-    const t = RACKET.handle + 0.06, th = proj(rp.g.x + rp.u.x * t, rp.g.y + rp.u.y * t, rp.g.z + rp.u.z * t);
-    freeHand = { x: th.x + lx * 0.5, y: th.y - hop + drop };
-  }
-  arm(lS.x, lS.y, freeHand.x, freeHand.y, -R);
-  arm(rS.x, rS.y, grip.x, grip.y, R, P.sleeve);
+  drawArms(true);                                                                            // then the ones in front of it
   // HEAD: neck, ears, hair with strands (or cap with seams and the hair showing under it); face from the front
   const hw = w * 0.56 * (1 - 0.15 * Math.abs(turn)), hh = h * 0.15, hx0 = tx - hw / 2 + tR * 0.6 + turn * w * 0.06, hy0 = shY - hh - h * 0.015 + Math.abs(tiltR) * 0.3;
   const [hair, hairD, hairL] = HAIR[P.id] || [P.hair, shade(P.hair, -0.35), shade(P.hair, 0.25)];
@@ -1269,6 +1292,17 @@ function stepMotion(i, dt) {
   mo.t += dt;
   const W = mo.world = poseToWorld(i, pos[i], motionPose(m, mo.t));
   const sv = rally && rally.serve;
+  if (sv && mo.t < bouncesEnd) {                         // BOUNCING: the hand pushes the ball down and meets it coming back up
+    const H = PLAYERS[i].heightM, P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1;
+    const wgt = Math.min(1, (bouncesEnd - mo.t) / 0.2) * Math.min(1, (mo.t - mo.t0) / 0.2);   // ease in and out of the routine
+    const bump = (c, wd) => Math.exp(-((((f - c + 1.5) % 1) - 0.5) ** 2) / (2 * wd * wd));     // a soft pulse at phase c (wraps)
+    const push = 0.13 * bump(0.06, 0.06) + 0.06 * bump(0.96, 0.04);   // push down to release, then give a little on the catch
+    const lean = 0.045 * wgt;                                          // he bends forward over the ball while bouncing
+    for (const n of ["nose", "neck", "leftShoulder", "rightShoulder", "rightElbow", "rightWrist"]) if (W[n]) W[n].z -= lean * H;
+    if (W.leftElbow) W.leftElbow.z -= (lean + push * 0.45 * wgt) * H;
+    if (W.leftWrist) W.leftWrist.z -= (lean + push * wgt) * H;
+    for (const n of ["leftKnee", "rightKnee"]) if (W[n]) W[n].z -= 0.012 * H * wgt * (1 + bump(0.06, 0.08));   // a little knee give
+  }
   if (sv) {
     if (mo.t < bouncesEnd) {                             // ROUTINE: he bounces the ball ROUTINE.bounces times
       const P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1, h = W.leftWrist;
@@ -1632,6 +1666,8 @@ function frame(now) {
   requestAnimationFrame(frame);                          // schedule first, so one bad frame can't stop the game
   const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = Math.max(last, now);   // never step backwards in time
   if (!innerWidth || !innerHeight) return;              // hidden / zero-size window: nothing to draw
+  const serveComing = (nextServe && nextServe.ready && !rally) || (rally && (rally.serve || (rally.shot && rally.shot.isServe)));
+  pos.forEach((p, i) => { p.receiving = !!serveComing && i !== S.server && !S.over; });   // the receiver drops into the return stance
   if (canvas.width !== innerWidth || canvas.height !== innerHeight) resize();
   if (!paused) {                                          // a pause freezes the game clock, the rally and the serve timer
     gameT += dt; runTimers();
@@ -1897,6 +1933,6 @@ canvas.addEventListener("pointercancel", endStick);
 resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
 </script>
 <!-- Locker room (Locker Room Designer) and the start flow (Start Page Builder) -->
-<script src="src/lockerroom/lockerroom.js?v=0.9.0"></script>
-<script src="src/start/flow.js?v=0.9.0"></script>
+<script src="src/lockerroom/lockerroom.js?v=0.9.1"></script>
+<script src="src/start/flow.js?v=0.9.1"></script>
 <script>StartFlow.open();</script>
