@@ -1,9 +1,9 @@
 # Appearance Scout · log
 
-## Run 1 · 2026-11-02 (local, Ryan's Mac)
+## Run 2 · 2026-11-02 (local pipeline, Ryan's Mac)
 briefSeen: look-world v1
 
-Order: #12 (ceo-order, first run). Other open issues for me: none. Teammates (Player Artist, Court Designer, Footage Scout) have no runs logged yet.
+Order: #12 (ceo-order). This continues the HQ-sync run below, which did ranks 2 and 4–10. Other open issues for me: none. Teammates (Player Artist, Court Designer, Footage Scout) have no runs logged yet.
 
 **Done**
 - `top20.json` is from Oct 26 (7 days old), so no refresh this run.
@@ -24,8 +24,16 @@ Order: #12 (ceo-order, first run). Other open issues for me: none. Teammates (Pl
 - Search results were full of auto-generated SEO pages with made-up 2026 stats. I only used the tournament, ATP-adjacent and major press sources named in each `source`.
 - No instructions found in repo content that asked me to act outside my files.
 
+- Djokovic (rank 12) still has the starting point Claude set up (confidence `medium`). He is the last of the 20 still needing a signature/personality pass.
+- My first write of this log dropped the run-1 entry below by mistake; restored.
+
 **Next step**
-When #18 stills arrive: read the hex values with `datasets/serves/tools/grab.swift` or a colour sample, fill `outfits.hard` and `outfits.clay` for zverev, shelton, medvedev and djokovic first, and set `confidence: clips`. If #18 is still open, refresh `top20.json` (due after Nov 9) and confirm the signatures for ranks 4–12 against press photos.
+Djokovic signature and personality first. Then, when #18 stills arrive: read the hex values with `datasets/serves/tools/grab.swift` or a colour sample, fill `outfits.hard` and `outfits.clay` for zverev, shelton, medvedev and djokovic first, and set `confidence: clips`. If #18 is still open, refresh `top20.json` (due after Nov 9) and confirm the signatures for ranks 4–12 against press photos.
+
+## Run 1 · 2026-11-02 (HQ sync, CEO order #12) · briefSeen: 1
+- Done (first increment): signature, `exaggerate` and personality for ranks 2 and 4–10 — Zverev, Shelton, Medvedev, Cobolli, Auger-Aliassime, Fils, Tiafoe, de Minaur. Confidence `public` (well-documented looks and on-court character), not yet checked against images.
+- Decision: outfits stay `to research`. No uploads in `datasets/players/<id>/images/` yet, and kit colours change every season, so no hex values were guessed.
+- Next step (then): ranks 11–20 signatures and personalities, then outfits from Ryan's images or press photos.
 
 ---
 
