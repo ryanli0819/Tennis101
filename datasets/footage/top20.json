@@ -240,6 +240,15 @@
       "order": null,
       "videoDir": "datasets/video/ruud/",
       "clips": []
+    },
+    {
+      "id": "rublev",
+      "name": "Andrey Rublev",
+      "country": "RUS",
+      "rank": null,
+      "note": "outside the Oct 26 top 20; in Ryan's serve compilation",
+      "videoDir": "datasets/video/rublev/",
+      "clips": []
     }
   ]
 }

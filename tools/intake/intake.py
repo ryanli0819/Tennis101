@@ -54,6 +54,11 @@ def run(cmd):
     r = subprocess.run(cmd, capture_output=True, text=True)
     return r.returncode == 0
 
+if "--detect" in sys.argv:                                  # used by the Tennis101 Inbox app: which players does a name mention?
+    print(",".join(players_in(sys.argv[sys.argv.index("--detect") + 1]))); sys.exit(0)
+if "--players" in sys.argv:                                 # the list the app offers when a name mentions nobody
+    print("\n".join(f"{p['id']} — {p['name']}" for p in PEOPLE)); sys.exit(0)
+
 log_path = os.path.join(INBOX, "intake-log.json")
 log = json.load(open(log_path)) if os.path.exists(log_path) else []
 done = 0

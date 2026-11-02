@@ -1,5 +1,16 @@
 # Intake: get clips and photos into the project without sorting them by hand
 
+**Easiest: the Tennis101 Inbox app on the Desktop.** Drag any video (.mp4 / .mov / .m4v) or photo onto its icon.
+It copies the file into `datasets/inbox` (the original stays put), asks which player it shows if the name doesn't say,
+and starts the intake (filing + pose detection) in the background. Rebuild it with:
+
+    osacompile -o ~/Desktop/"Tennis101 Inbox.app" "tools/intake/Tennis101 Inbox.applescript"
+
+The first time, macOS asks whether the app may use your Documents folder: allow it.
+(The background watcher, `install-watcher.sh`, is blocked by macOS privacy protection on this Mac; the app replaces it.)
+
+## By hand
+
 1. **Record straight into the inbox.** Press ⌘⇧5 → Options → Save to → Other Location… → choose
    `Documents/Tennis101/datasets/inbox`. Every screen recording and screenshot now lands there.
 2. **Say who it is** in the file name or a folder: rename to e.g. `shelton serve.mov`, `zverev forehand side.mov`,
