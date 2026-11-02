@@ -1,36 +1,13 @@
 {
   "_about": "Footage Scout's catalog. Links and time ranges only, never video. Video goes in datasets/video/<id>/<stroke>/ (git-ignored).",
-  "rankedOn": "2026-10-26",
-  "source": "ATP list of Oct 26, 2026 as shown by TNT Sports and livetennis.io (checked Nov 1, 2026); places 1–13 match Ryan's screenshot.",
+  "rankedOn": "2026-11-02",
+  "source": "Official ATP singles rankings page (atptour.com/en/rankings/singles, list of Nov 2, 2026), read Nov 2, 2026.",
   "players": [
-    {
-      "id": "sinner",
-      "name": "Jannik Sinner",
-      "country": "ITA",
-      "rank": 1,
-      "videoDir": "datasets/video/sinner/",
-      "clips": [
-        {
-          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
-          "stroke": "serve1",
-          "view": "behind / behind-side",
-          "speed": "slow",
-          "range": [
-            18.95,
-            56.55
-          ],
-          "serves": 4,
-          "identified": "high",
-          "keypoints": "datasets/serves/sinner/compilation-11.keypoints.json",
-          "status": "keypoints extracted"
-        }
-      ]
-    },
     {
       "id": "zverev",
       "name": "Alexander Zverev",
       "country": "GER",
-      "rank": 2,
+      "rank": 1,
       "videoDir": "datasets/video/zverev/",
       "clips": [
         {
@@ -60,6 +37,119 @@
           "identified": "low",
           "keypoints": "datasets/serves/zverev/compilation-19.keypoints.json",
           "status": "keypoints extracted"
+        }
+      ]
+    },
+    {
+      "id": "sinner",
+      "name": "Jannik Sinner",
+      "country": "ITA",
+      "rank": 2,
+      "videoDir": "datasets/video/sinner/",
+      "clips": [
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            18.95,
+            56.55
+          ],
+          "serves": 4,
+          "identified": "high",
+          "keypoints": "datasets/serves/sinner/compilation-11.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=_wut0HlifLQ",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "World #1 Jannik Sinner's forehand backhand in 4K Slow Motion. Court level, 4K. Forehand part; view and range to set while recording.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=_wut0HlifLQ",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Same video as above, backhand part.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=ZU0tVNMI1qo",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Jannik Sinner Slow Motion - Forehand, Backhand & Serve. Has all three strokes; check for a behind-the-baseline angle.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=ZU0tVNMI1qo",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Same video, backhand part.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=ZU0tVNMI1qo",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "serve2",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Same video, serve part: look for a second (kick) serve; Sinner's 2nd serve has no capture yet.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=57YDEFal6-o",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Jannik Sinner Forehand [Slow Motion]. Forehand only, court level.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=-m_-3UcM8qE",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Jannik Sinner Forehand Technique [Slow Motion]. Forehand only.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=jjK_bJYdtCI",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Sinner & Berrettini Practice in Slow Motion, 2022, 4K 120fps. Rallies from court level; good for backhand at 120 fps.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=m7VvitGvm40",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "real",
+          "range": null,
+          "notes": "Sinner vs Cameron Norrie, court level practice, 4K 60fps. Real speed: useful for footwork between strokes.",
+          "status": "to record"
         }
       ]
     },
@@ -155,6 +245,56 @@
           "identified": "low",
           "keypoints": "datasets/serves/alcaraz/compilation-15.keypoints.json",
           "status": "keypoints extracted"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=-Eu80hGbgVA",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Carlos Alcaraz | Forehand & Backhand [Slow Motion 4K 120fps]. Indian Wells practice, court level. Forehand part.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=-Eu80hGbgVA",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Same video, backhand part.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=R2Ukue3bLGE",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "serve2",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Carlos Alcaraz | Serve Slow Motion [4K 120fps]. Practice serves: look for 2nd (kick) serves; his 2nd serve is still hand-keyed in the game.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=hgHebqz4rA8",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "slice",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Carlos Alcaraz - Forehand, Backhand, Volley, Drop Shot & Serve [Super Slow Motion] (2021). Drop shot part, for the slice/drop shot.",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=CRnR1ST14wA",
+          "source": "Volley Viper Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Carlos Alcaraz SMASHING Forehands in Slow Motion 4K. Forehand only.",
+          "status": "to record"
         }
       ],
       "serveMotion": {
@@ -246,18 +386,10 @@
       "clips": []
     },
     {
-      "id": "auger-aliassime",
-      "name": "Felix Auger-Aliassime",
-      "country": "CAN",
-      "rank": 7,
-      "videoDir": "datasets/video/auger-aliassime/",
-      "clips": []
-    },
-    {
       "id": "fils",
       "name": "Arthur Fils",
       "country": "FRA",
-      "rank": 8,
+      "rank": 7,
       "videoDir": "datasets/video/fils/",
       "clips": []
     },
@@ -265,7 +397,7 @@
       "id": "tiafoe",
       "name": "Frances Tiafoe",
       "country": "USA",
-      "rank": 9,
+      "rank": 8,
       "videoDir": "datasets/video/tiafoe/",
       "clips": []
     },
@@ -273,7 +405,7 @@
       "id": "de-minaur",
       "name": "Alex de Minaur",
       "country": "AUS",
-      "rank": 10,
+      "rank": 9,
       "videoDir": "datasets/video/de-minaur/",
       "clips": [
         {
@@ -324,7 +456,7 @@
       "id": "jodar",
       "name": "Rafael Jódar",
       "country": "ESP",
-      "rank": 11,
+      "rank": 10,
       "videoDir": "datasets/video/jodar/",
       "clips": []
     },
@@ -332,7 +464,7 @@
       "id": "djokovic",
       "name": "Novak Djokovic",
       "country": "SRB",
-      "rank": 12,
+      "rank": 11,
       "videoDir": "datasets/video/djokovic/",
       "clips": [
         {
@@ -369,7 +501,7 @@
       "id": "fritz",
       "name": "Taylor Fritz",
       "country": "USA",
-      "rank": 13,
+      "rank": 12,
       "videoDir": "datasets/video/fritz/",
       "clips": [
         {
@@ -431,6 +563,14 @@
       ]
     },
     {
+      "id": "auger-aliassime",
+      "name": "Felix Auger-Aliassime",
+      "country": "CAN",
+      "rank": 13,
+      "videoDir": "datasets/video/auger-aliassime/",
+      "clips": []
+    },
+    {
       "id": "paul",
       "name": "Tommy Paul",
       "country": "USA",
@@ -439,11 +579,11 @@
       "clips": []
     },
     {
-      "id": "davidovich-fokina",
-      "name": "Alejandro Davidovich Fokina",
-      "country": "ESP",
+      "id": "lehecka",
+      "name": "Jiri Lehecka",
+      "country": "CZE",
       "rank": 15,
-      "videoDir": "datasets/video/davidovich-fokina/",
+      "videoDir": "datasets/video/lehecka/",
       "clips": []
     },
     {
@@ -455,10 +595,18 @@
       "clips": []
     },
     {
+      "id": "davidovich-fokina",
+      "name": "Alejandro Davidovich Fokina",
+      "country": "ESP",
+      "rank": 17,
+      "videoDir": "datasets/video/davidovich-fokina/",
+      "clips": []
+    },
+    {
       "id": "nakashima",
       "name": "Brandon Nakashima",
       "country": "USA",
-      "rank": 17,
+      "rank": 18,
       "videoDir": "datasets/video/nakashima/",
       "clips": []
     },
@@ -466,7 +614,7 @@
       "id": "tien",
       "name": "Learner Tien",
       "country": "USA",
-      "rank": 18,
+      "rank": 19,
       "videoDir": "datasets/video/tien/",
       "clips": []
     },
@@ -474,16 +622,8 @@
       "id": "cerundolo",
       "name": "Francisco Cerúndolo",
       "country": "ARG",
-      "rank": 19,
-      "videoDir": "datasets/video/cerundolo/",
-      "clips": []
-    },
-    {
-      "id": "bublik",
-      "name": "Alexander Bublik",
-      "country": "KAZ",
       "rank": 20,
-      "videoDir": "datasets/video/bublik/",
+      "videoDir": "datasets/video/cerundolo/",
       "clips": []
     }
   ],
@@ -510,6 +650,15 @@
     }
   ],
   "extra": [
+    {
+      "id": "bublik",
+      "name": "Alexander Bublik",
+      "country": "KAZ",
+      "rank": null,
+      "videoDir": "datasets/video/bublik/",
+      "clips": [],
+      "note": "Rank 20 on Oct 26; outside the top 20 on Nov 2, 2026."
+    },
     {
       "id": "khachanov",
       "name": "Karen Khachanov",
