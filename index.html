@@ -231,6 +231,9 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/animation/run-cycle.js?v=0.10.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.10.0"></script>
 <script src="src/serve/motion/alcaraz-serve.js?v=0.10.0"></script>
+<script src="src/ball/surfaces.js?v=0.10.0"></script>
+<script src="src/ball/ball.js?v=0.10.0"></script>
+<script src="src/ball/shots.js?v=0.10.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -1504,6 +1507,7 @@ function planShot(hitter, isServe, q, out, sv = null, type = "drive") {
     if (Math.random() < 0.5) by = sign * rand(12.2, 13.4);
     else bx = Math.sign(bx || 1) * rand(4.25, 5.0);
   }
+  if (typeof PHYS_BALL !== "undefined" && PHYS_BALL) return physShot({ hitter, recv, from, bx, by, isServe, sv, q, out, type });   // real ball: src/ball/shots.js
   const cy = slice ? by + sign * rand(1.2, 2.6)          // a slice barely carries after the bounce: the receiver must come forward
                    : sign * rand(11.6, 13.0);           // ideal contact depth after the bounce
   const k = (cy - from.y) / (by - from.y);
@@ -1601,6 +1605,7 @@ function stepRally(dt) {
   moveBody(0, ui[0], ui[1], dt);
   moveBody(1, ain[0], ain[1], dt);
   swing = swing.map(v => Math.max(0, v - dt * 4));
+  if (sh.phys) return stepPhysShot(sh, dt);                // real ball (?ball=physics): src/ball/shots.js
 
   if (sh.t < sh.t1) {
     const u = sh.t / sh.t1;
