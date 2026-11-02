@@ -264,6 +264,27 @@
       ],
       "contract": "racketPose(i, p, ago) → { g, u, n, tilt, crouch, twoHands, slice }",
       "effort": "high"
+    },
+    {
+      "name": "appearance-scout",
+      "title": "Appearance Scout",
+      "order": 17,
+      "runsAt": 17,
+      "job": "Researches every top-20 player's signature look (exaggerated so it reads in pixels), outfits for Wimbledon, the US Open and clay, and on-court personality, from Ryan's uploads first.",
+      "owns": [
+        "datasets/players/"
+      ],
+      "reads": [
+        "datasets/serves/",
+        "datasets/video/",
+        "datasets/footage/"
+      ],
+      "feeds": [
+        "player-artist",
+        "animator"
+      ],
+      "contract": "datasets/players/<id>/appearance.json",
+      "effort": "medium"
     }
   ]
 }

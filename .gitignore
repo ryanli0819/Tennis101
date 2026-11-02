@@ -16,3 +16,9 @@ datasets/courts/**/*.webp
 
 # Pixel reference sprites cut from TV clips stay local
 datasets/players/**/*.png
+# player photos and stills stay local (people's likeness, TV footage)
+datasets/players/**/*.jpg
+datasets/players/**/*.jpeg
+datasets/players/**/*.webp
+datasets/players/**/*.heic
+datasets/players/**/*.gif

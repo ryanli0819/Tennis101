@@ -1,14 +1,13 @@
 {
   "_about": "Footage Scout's catalog. Links and time ranges only, never video. Video goes in datasets/video/<id>/<stroke>/ (git-ignored).",
-  "rankedOn": "2026-10-29",
-  "source": "Ryan's screenshots of the ATP rankings (Oct 29, 2026). The first list had no rank numbers, so 'order' is the order shown; ranks 14, 15, 19 and 20 were not in the screenshots. The Footage Scout should confirm against the live ATP list.",
+  "rankedOn": "2026-10-26",
+  "source": "ATP list of Oct 26, 2026 as shown by TNT Sports and livetennis.io (checked Nov 1, 2026); places 1–13 match Ryan's screenshot.",
   "players": [
     {
       "id": "sinner",
       "name": "Jannik Sinner",
       "country": "ITA",
-      "rank": null,
-      "order": 1,
+      "rank": 1,
       "videoDir": "datasets/video/sinner/",
       "clips": []
     },
@@ -16,8 +15,7 @@
       "id": "zverev",
       "name": "Alexander Zverev",
       "country": "GER",
-      "rank": null,
-      "order": 2,
+      "rank": 2,
       "videoDir": "datasets/video/zverev/",
       "clips": []
     },
@@ -25,8 +23,7 @@
       "id": "alcaraz",
       "name": "Carlos Alcaraz",
       "country": "ESP",
-      "rank": null,
-      "order": 3,
+      "rank": 3,
       "videoDir": "datasets/video/alcaraz/",
       "clips": [
         {
@@ -70,8 +67,7 @@
       "id": "shelton",
       "name": "Ben Shelton",
       "country": "USA",
-      "rank": null,
-      "order": 4,
+      "rank": 4,
       "videoDir": "datasets/video/shelton/",
       "clips": []
     },
@@ -79,8 +75,7 @@
       "id": "medvedev",
       "name": "Daniil Medvedev",
       "country": "RUS",
-      "rank": null,
-      "order": 5,
+      "rank": 5,
       "videoDir": "datasets/video/medvedev/",
       "clips": []
     },
@@ -88,8 +83,7 @@
       "id": "cobolli",
       "name": "Flavio Cobolli",
       "country": "ITA",
-      "rank": null,
-      "order": 6,
+      "rank": 6,
       "videoDir": "datasets/video/cobolli/",
       "clips": []
     },
@@ -97,8 +91,7 @@
       "id": "auger-aliassime",
       "name": "Felix Auger-Aliassime",
       "country": "CAN",
-      "rank": null,
-      "order": 7,
+      "rank": 7,
       "videoDir": "datasets/video/auger-aliassime/",
       "clips": []
     },
@@ -106,8 +99,7 @@
       "id": "fils",
       "name": "Arthur Fils",
       "country": "FRA",
-      "rank": null,
-      "order": 8,
+      "rank": 8,
       "videoDir": "datasets/video/fils/",
       "clips": []
     },
@@ -115,8 +107,7 @@
       "id": "tiafoe",
       "name": "Frances Tiafoe",
       "country": "USA",
-      "rank": null,
-      "order": 9,
+      "rank": 9,
       "videoDir": "datasets/video/tiafoe/",
       "clips": []
     },
@@ -124,17 +115,15 @@
       "id": "de-minaur",
       "name": "Alex de Minaur",
       "country": "AUS",
-      "rank": null,
-      "order": 10,
+      "rank": 10,
       "videoDir": "datasets/video/de-minaur/",
       "clips": []
     },
     {
       "id": "jodar",
-      "name": "Rafael Jodar",
+      "name": "Rafael Jódar",
       "country": "ESP",
-      "rank": null,
-      "order": 11,
+      "rank": 11,
       "videoDir": "datasets/video/jodar/",
       "clips": []
     },
@@ -142,8 +131,7 @@
       "id": "djokovic",
       "name": "Novak Djokovic",
       "country": "SRB",
-      "rank": null,
-      "order": 12,
+      "rank": 12,
       "videoDir": "datasets/video/djokovic/",
       "clips": []
     },
@@ -151,9 +139,24 @@
       "id": "fritz",
       "name": "Taylor Fritz",
       "country": "USA",
-      "rank": null,
-      "order": 13,
+      "rank": 13,
       "videoDir": "datasets/video/fritz/",
+      "clips": []
+    },
+    {
+      "id": "paul",
+      "name": "Tommy Paul",
+      "country": "USA",
+      "rank": 14,
+      "videoDir": "datasets/video/paul/",
+      "clips": []
+    },
+    {
+      "id": "davidovich-fokina",
+      "name": "Alejandro Davidovich Fokina",
+      "country": "ESP",
+      "rank": 15,
+      "videoDir": "datasets/video/davidovich-fokina/",
       "clips": []
     },
     {
@@ -161,7 +164,6 @@
       "name": "Jakub Mensik",
       "country": "CZE",
       "rank": 16,
-      "order": null,
       "videoDir": "datasets/video/mensik/",
       "clips": []
     },
@@ -170,7 +172,6 @@
       "name": "Brandon Nakashima",
       "country": "USA",
       "rank": 17,
-      "order": null,
       "videoDir": "datasets/video/nakashima/",
       "clips": []
     },
@@ -179,26 +180,23 @@
       "name": "Learner Tien",
       "country": "USA",
       "rank": 18,
-      "order": null,
       "videoDir": "datasets/video/tien/",
       "clips": []
     },
     {
-      "id": "khachanov",
-      "name": "Karen Khachanov",
-      "country": "RUS",
-      "rank": 24,
-      "order": null,
-      "videoDir": "datasets/video/khachanov/",
+      "id": "cerundolo",
+      "name": "Francisco Cerúndolo",
+      "country": "ARG",
+      "rank": 19,
+      "videoDir": "datasets/video/cerundolo/",
       "clips": []
     },
     {
-      "id": "ruud",
-      "name": "Casper Ruud",
-      "country": "NOR",
-      "rank": 25,
-      "order": null,
-      "videoDir": "datasets/video/ruud/",
+      "id": "bublik",
+      "name": "Alexander Bublik",
+      "country": "KAZ",
+      "rank": 20,
+      "videoDir": "datasets/video/bublik/",
       "clips": []
     }
   ],
@@ -221,6 +219,26 @@
       "pointsInScreenshot": 5305,
       "note": "From a separate table in Ryan's screenshot (not the current ATP list).",
       "videoDir": "datasets/video/federer/",
+      "clips": []
+    }
+  ],
+  "extra": [
+    {
+      "id": "khachanov",
+      "name": "Karen Khachanov",
+      "country": "RUS",
+      "rank": 24,
+      "order": null,
+      "videoDir": "datasets/video/khachanov/",
+      "clips": []
+    },
+    {
+      "id": "ruud",
+      "name": "Casper Ruud",
+      "country": "NOR",
+      "rank": 25,
+      "order": null,
+      "videoDir": "datasets/video/ruud/",
       "clips": []
     }
   ]

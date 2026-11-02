@@ -227,10 +227,10 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <div class="toast" id="toast" hidden></div>
 
 <!-- Skill points (Skills Coach) and Sinner's real serve, captured from video (Serve Analyst) -->
-<script src="src/skills/skills.js?v=0.8.1"></script>
-<script src="src/animation/run-cycle.js?v=0.8.1"></script>
-<script src="src/serve/motion/sinner-serve.js?v=0.8.1"></script>
-<script src="src/serve/motion/alcaraz-serve.js?v=0.8.1"></script>
+<script src="src/skills/skills.js?v=0.8.2"></script>
+<script src="src/animation/run-cycle.js?v=0.8.2"></script>
+<script src="src/serve/motion/sinner-serve.js?v=0.8.2"></script>
+<script src="src/serve/motion/alcaraz-serve.js?v=0.8.2"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -240,10 +240,17 @@ const ROSTER = [
     // outfit per court, from his clips (datasets/players/sinner/outfits.json); grass = all white (dress code)
     outfits: { clay:  { shirt: "#141418", shorts: "#1e1d22", cap: "#16161b", shoes: "#1c1b20" },
                hard:  { shirt: "#1f2f4a", shorts: "#f5f5f2", cap: "#f2f2ef", shoes: "#f0ece6" },
-               grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", cap: "#f4f4f0", shoes: "#f4f4f0" } } },
+               grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", cap: "#f4f4f0", shoes: "#f4f4f0" } },
+    // SIGNATURE (datasets/players/sinner/appearance.json, Ryan's call): the iconic cap, bright ginger curls flaring out under it
+    look: { style: "cap-curls" } },
   { id: "alcaraz", last: "ALCARAZ", first: "Carlos", code: "ESP", heightM: 1.83, weightKg: 74, shirt: "#e2544a", shorts: "#f1f1ec", hair: "#2a1c14", letRate: 0.03,
-    // no clips of him yet: his usual colours, and all white on grass (dress code). The Player Artist refines these.
-    outfits: { grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", shoes: "#f4f4f0" } } }
+    // outfits from Ryan's clips (datasets/players/alcaraz/appearance.json): US Open grey fade sleeveless top + black, a black arm sleeve;
+    // clay stands in with his orange kit until a clay clip exists; all white on grass (dress code)
+    outfits: { hard:  { shirt: "#3c3f45", shirtLow: "#a3a7ad", shorts: "#1f2024", shoes: "#1d1d20", socks: "#141416", sleeve: "#121214" },
+               clay:  { shirt: "#ef6a2c", shorts: "#f4f4f0", shoes: "#a6e04a" },
+               grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", shoes: "#f4f4f0" } },
+    // SIGNATURE (Ryan's call): his current look, long outgrown hair and a full beard, held back by a white hairband
+    look: { style: "long-band", band: "#f6f6f2", beard: true } }
 ];
 /* letRate = chance a serve that would land in clips the net cord first (a LET, served again). Estimates
    (lets happen on roughly 1–3% of pro serves); the Serve Analyst refines them from match data. */
@@ -644,6 +651,25 @@ function drawNet() {
 /* Pixel player sprite, scaled from real height. facing: 1 = back to camera (near), -1 = facing camera (far) */
 /* Draw a player from captured joints (court metres): pixel limbs, shirt, shorts, head and racket.
    Used while Sinner plays his real serve motion. Order = back to front as seen from behind. */
+/* The signature look on the serve-motion figure's round head (same idea as drawSignature on the sprite). */
+function sigHead(P, near, hx, hy, r, hr, hrD, hrL) {
+  const L = P.look; if (!L) return;
+  const R = (x, y, w, h, c) => { b.fillStyle = c; b.fillRect(q(x), q(y), Math.max(1 / AS, q(w)), Math.max(1 / AS, q(h))); };
+  if (L.style === "cap-curls") {
+    for (const sd of [-1, 1]) for (let k = 0; k < 3; k++) R(hx + sd * r * (1.0 + 0.12 * (k % 2)) - r * 0.18, hy + r * (0.0 + k * 0.32), r * 0.36, r * 0.3, k % 2 ? hrL : hr);
+    const cap = P.cap || "#f2f2ef";
+    b.fillStyle = cap; b.beginPath(); b.arc(hx, hy - r * 0.1, r * 1.18, Math.PI, Math.PI * 2); b.fill();   // oversized crown
+    if (!near) R(hx - r * 1.6, hy - r * 0.16, r * 3.2, r * 0.26, shade(cap, -0.2));                        // long brim toward you
+  }
+  if (L.style === "long-band") {
+    b.fillStyle = hr; b.beginPath(); b.arc(hx, hy - r * 0.35, r * 1.2, Math.PI, Math.PI * 2); b.fill();    // volume over the band
+    if (near) R(hx - r * 1.15, hy - r * 0.2, r * 2.3, r * 1.9, hr);                                         // long hair to the neck
+    else { R(hx - r * 1.25, hy - r * 0.2, r * 0.42, r * 1.6, hr); R(hx + r * 0.83, hy - r * 0.2, r * 0.42, r * 1.6, hr);
+           if (L.beard) { R(hx - r * 0.85, hy + r * 0.35, r * 1.7, r * 0.75, hrD); R(hx - r * 0.25, hy + r * 0.6, r * 0.5, 1 / AS, "#b8695a"); } }
+    R(hx - r * 1.2, hy - r * 0.45, r * 2.4, r * 0.3, L.band || "#f6f6f2");                                  // hairband
+  }
+}
+
 function drawCapturedFigure(i, p, W) {
   const P = PLAYERS[i], at = n => W[n] && proj(W[n].x, W[n].y, W[n].z);
   const g = proj(p.x, p.y), lw = Math.max(2 / AS, q(g.s * 0.12)), skin = "#e1b48b";
@@ -671,7 +697,7 @@ function drawCapturedFigure(i, p, W) {
   seg("leftHip", "rightHip", P.shorts, lw * 1.4);
   // arms, with short sleeves
   for (const s of ["left", "right"]) {
-    seg(s + "Shoulder", s + "Elbow", skin); seg(s + "Elbow", s + "Wrist", skin);
+    seg(s + "Shoulder", s + "Elbow", skin); seg(s + "Elbow", s + "Wrist", s === "right" && P.sleeve ? P.sleeve : skin);   // racket forearm: sleeve if he wears one
     seg(s + "Shoulder", mid(s + "Shoulder", s + "Elbow", 0.4), P.shirt, lw * 1.3);
     const wr = mid(s + "Wrist", s + "Elbow", 0.18); if (wr) seg(wr, mid(s + "Wrist", s + "Elbow", 0.05), P.ui || "#f2f2f2", lw * 1.1);   // wristband
   }
@@ -694,6 +720,7 @@ function drawCapturedFigure(i, p, W) {
       b.fillStyle = "#1b1b1f"; b.fillRect(q(hx - r * 0.45), q(hy + r * 0.1), px * 2, px * 2); b.fillRect(q(hx + r * 0.25), q(hy + r * 0.1), px * 2, px * 2);   // eyes
       b.fillStyle = skinD; b.fillRect(q(hx - px * 0.5), q(hy + r * 0.3), px, q(r * 0.25));                                  // nose
       b.fillStyle = "#a4574a"; b.fillRect(q(hx - r * 0.25), q(hy + r * 0.62), q(r * 0.5), px);                             // mouth
+      sigHead(P, false, hx, hy, r, hr, hrD, hrL);
       return;
     }
     b.fillStyle = hrD; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();             // back of the head: hair, no face
@@ -702,6 +729,7 @@ function drawCapturedFigure(i, p, W) {
     for (let k = -2; k <= 2; k++) { b.fillStyle = k % 2 ? hrL : hrD; b.fillRect(hx + k * r * 0.35 - 0.5 / AS, hy + r * 0.55, 1 / AS, r * 0.3); }  // curls
     b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.1, r * 0.98, Math.PI, Math.PI * 2); b.fill();     // cap crown
     if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(hx - 0.5 / AS, hy - r * 1.05, 1 / AS, r * 0.95); }  // seam
+    sigHead(P, true, hx, hy, r, hr, hrD, hrL);
   }
 }
 
@@ -709,7 +737,7 @@ function drawCapturedFigure(i, p, W) {
    PLAYER SPRITE (detailed, on the actor layer) + 3D RACKET
    Owners: Player Artist (looks), Animator (frames). Everything is sized from the sprite height h, so real heights show.
    ===================================================================== */
-const HAIR = { sinner: ["#c4672f", "#8e441e", "#e7914f"], alcaraz: ["#2a1c14", "#120b07", "#4d3626"] };   // base, shadow, highlight
+const HAIR = { sinner: ["#e0702a", "#a8461a", "#f7a35c"], alcaraz: ["#2a1c14", "#120b07", "#4d3626"] };   // base, shadow, highlight
 const RACKET_LOOK = { sinner: { frame: "#1d1d22", accent: "#f2f2ef" }, alcaraz: { frame: "#1d1d22", accent: "#e2544a" } };
 function shade(hex, amt) {                               // lighten (+) or darken (−) a #rrggbb colour
   const n = parseInt(hex.slice(1), 16), f = c => Math.max(0, Math.min(255, Math.round(c + (amt > 0 ? (255 - c) : c) * amt)));
@@ -839,6 +867,51 @@ function racketPose(i, p, ago = 0) {
   return out(POSE.ready, false);
 }
 
+/* SIGNATURE LOOKS (Appearance Scout → datasets/players/<id>/appearance.json; Ryan's calls for Sinner and Alcaraz).
+   The one feature that makes each pro recognisable, exaggerated so it reads even on a small pixel sprite.
+   "cap-curls" (Sinner): an oversized cap, bright ginger curls flaring out at the sides and the nape.
+   "long-band" (Alcaraz): long outgrown hair puffing up over a white hairband and falling to the neck; a full beard. */
+function drawSignature(P, near, H) {
+  const L = P.look; if (!L) return;
+  const { hx0, hy0, hw, hh, tx, turn, hair, hairD, hairL, skin, Rr, strands } = H, px = 1 / AS;
+  if (L.style === "cap-curls") {
+    const cap = P.cap || "#f2f2ef";
+    for (const sd of [-1, 1]) for (let k = 0; k < 4; k++) {                                  // curls flaring out under the cap, both sides
+      const x = sd < 0 ? hx0 - hw * (0.16 + 0.05 * (k % 2)) : hx0 + hw + hw * (0.04 - 0.05 * (k % 2)), y = hy0 + hh * (0.3 + k * 0.15);
+      Rr(x, y, hw * 0.14, hh * 0.13, k % 2 ? hairL : hair); Rr(x + (sd < 0 ? 0 : hw * 0.06), y + hh * 0.08, hw * 0.08, hh * 0.06, hairD);
+    }
+    if (near) for (let k = 0; k < 6; k++)                                                    // a thick curly nape
+      Rr(hx0 + hw * (k / 5) - hw * 0.08, hy0 + hh * (0.86 + 0.06 * (k % 2)), hw * 0.16, hh * 0.16, k % 2 ? hair : hairL);
+    Rr(hx0 - hw * 0.08, hy0 - hh * 0.16, hw * 1.16, hh * (near ? 0.6 : 0.54), cap);          // oversized crown
+    Rr(hx0 - hw * 0.08, hy0 - hh * 0.16, hw * 0.22, hh * (near ? 0.6 : 0.54), shade(cap, -0.12));
+    Rr(tx - px * 0.5, hy0 - hh * 0.16, px, hh * 0.5, shade(cap, -0.22));                     // seam
+    Rr(tx - px, hy0 - hh * 0.2, px * 2, px * 2, shade(cap, -0.3));                           // button on top
+    if (near) { Rr(tx - hw * 0.24, hy0 + hh * 0.34, hw * 0.48, hh * 0.06, shade(cap, -0.3)); Rr(tx - hw * 0.14, hy0 + hh * 0.4, hw * 0.28, hh * 0.08, hairD); }   // strap
+    else { Rr(hx0 - hw * 0.32 + turn * hw * 0.2, hy0 + hh * 0.34, hw * 1.64, hh * 0.12, shade(cap, -0.2));   // a long brim, pointing at you
+           Rr(hx0 - hw * 0.1, hy0 + hh * 0.46, hw * 1.2, px, shade(skin, -0.25)); }        // its shadow on the forehead
+  }
+  if (L.style === "long-band") {
+    const band = L.band || "#f6f6f2";
+    strands(hx0 - hw * 0.12, hy0 - hh * 0.3, hw * 1.24, hh * 0.42);                          // volume: hair puffing up over the band
+    if (near) {
+      strands(hx0 - hw * 0.14, hy0 + hh * 0.05, hw * 1.28, hh * 1.05);                       // the back of the head: long hair down to the neck
+      for (let k = 0; k < 7; k++) Rr(hx0 - hw * 0.14 + hw * 1.28 * k / 6 - px, hy0 + hh * 1.05, px * 3, hh * (0.12 + 0.1 * ((k * 3) % 4) / 3), k % 2 ? hairD : hair);   // wavy ends
+    } else {                                                                                  // front: hair framing the face to the jaw, a full beard
+      strands(hx0 - hw * 0.2, hy0 + hh * 0.05, hw * 0.26, hh * 0.95); strands(hx0 + hw * 0.94, hy0 + hh * 0.05, hw * 0.26, hh * 0.95);
+      if (L.beard) {
+        const fo = turn * hw * 0.22;
+        Rr(hx0 + fo, hy0 + hh * 0.62, hw, hh * 0.4, hairD);                                  // beard: cheeks, jaw and chin
+        Rr(hx0 + fo, hy0 + hh * 0.5, hw * 0.12, hh * 0.2, hairD); Rr(hx0 + hw * 0.88 + fo, hy0 + hh * 0.5, hw * 0.12, hh * 0.2, hairD);   // sideburns
+        Rr(tx - hw * 0.2 + fo, hy0 + hh * 0.7, hw * 0.4, px, hairD);                          // moustache
+        Rr(tx - hw * 0.12 + fo, hy0 + hh * 0.8, hw * 0.24, px, "#b8695a");                    // mouth through the beard
+        Rr(hx0 + hw * 0.1 + fo, hy0 + hh * 0.72, px, px, hairL); Rr(hx0 + hw * 0.8 + fo, hy0 + hh * 0.84, px, px, hairL);   // a little texture
+      }
+    }
+    Rr(hx0 - hw * 0.14, hy0 + hh * 0.06, hw * 1.28, hh * 0.14, band);                        // the hairband, right round the head
+    Rr(hx0 - hw * 0.14, hy0 + hh * 0.17, hw * 1.28, px, shade(band, -0.25));
+  }
+}
+
 function drawPlayer(i, pos, swing) {
   if (pos.motion && pos.motion.world) return drawCapturedFigure(i, pos, pos.motion.world);
   const P = PLAYERS[i], near = P.side === "near", R = near ? 1 : -1;
@@ -863,6 +936,8 @@ function drawPlayer(i, pos, swing) {
 
   const hipY = y - h * 0.5 + drop;
   const lit = litLeft() ? -1 : 1;                          // which screen side faces the sun / main light
+  const mixHex = (a, c, t) => { const A = parseInt(a.slice(1), 16), C = parseInt(c.slice(1), 16), m = sh => Math.round(((A >> sh) & 255) * (1 - t) + ((C >> sh) & 255) * t);
+    return "#" + [16, 8, 0].map(sh => m(sh).toString(16).padStart(2, "0")).join(""); };
   // LEGS: thigh and shin (lit and shaded sides), white socks, shoes with a sole and an accent stripe
   const legOrder = [0, 1].sort((a, c) => (A.feet[c].dy || 0) - (A.feet[a].dy || 0));   // the farther leg first
   for (const k of legOrder) {
@@ -871,7 +946,7 @@ function drawPlayer(i, pos, swing) {
     const kx = (hx + fx) / 2 + side * w * 0.06 * tw + kn.dx * w, ky = (hipY + fy) / 2 - f.lift * h * 0.6 - kn.dy * h * DEP * 1.6;
     Ln(hx, hipY, kx, ky, skin, w * 0.27); Ln(kx, ky, fx, fy - h * 0.06, skin, w * 0.22);
     Ln(kx + side * w * 0.06, ky, fx + side * w * 0.05, fy - h * 0.08, skinD, w * 0.07);       // calf shadow
-    Ln(fx, fy - h * 0.085, fx, fy - h * 0.05, "#f1f1ee", w * 0.21);                        // sock
+    Ln(fx, fy - h * 0.085, fx, fy - h * 0.05, P.socks || "#f1f1ee", w * 0.21);              // sock
     Rr(fx - w * 0.19, fy - h * 0.058, w * 0.38, h * 0.045, P.shoes || "#f2f2f2");            // shoe upper
     Rr(fx - w * 0.2, fy - h * 0.016, w * 0.4, h * 0.016, shade(P.shoes || "#f2f2f2", -0.45)); // sole
     Rr(fx - w * 0.12, fy - h * 0.04, w * 0.22, 1 / AS, P.ui || "#d23a3a");                   // accent stripe
@@ -905,7 +980,9 @@ function drawPlayer(i, pos, swing) {
   b.lineTo(q(tx + w * 0.46), q(hipY - h * 0.03)); b.lineTo(q(tx - w * 0.46), q(hipY - h * 0.03)); b.closePath(); b.fill();
   Rr(tx - lit * w * 0.3 - (lit < 0 ? 0 : w * 0.2), shY + h * 0.03, w * 0.2, h * 0.28, shade(shirt, -0.18));   // side away from the light
   Rr(tx + lit * w * 0.3 - (lit < 0 ? w * 0.12 : 0), shY + h * 0.04, w * 0.12, h * 0.24, shade(shirt, 0.14));  // side in the light
-  Rr(tx - w * 0.46, hipY - h * 0.06, w * 0.92, h * 0.025, shade(shirt, -0.1));               // hem
+  if (P.shirtLow) for (let k = 1; k <= 4; k++)                                                // a fade: dark at the shoulders, light at the waist
+    Rr(tx - w * (0.53 - k * 0.018), shY + h * (0.04 + k * 0.064), w * (1.06 - k * 0.036), h * 0.066, mixHex(shirt, P.shirtLow, k / 4));
+  Rr(tx - w * 0.46, hipY - h * 0.06, w * 0.92, h * 0.025, shade(P.shirtLow || shirt, -0.1));   // hem
   if (near) {                                                                                // BACK of the jersey: plain, a spine seam, shoulder blades
     Rr(tx - w * 0.14, shY, w * 0.28, h * 0.025, shade(shirt, -0.28));                        // collar, from behind
     Rr(tx - 0.5 / AS, shY + h * 0.03, 1 / AS, h * 0.27, shade(shirt, -0.2));                  // spine seam
@@ -919,9 +996,9 @@ function drawPlayer(i, pos, swing) {
          Rr(tx + 1 / AS, shY + h * 0.05, 1 / AS, 1 / AS, "#f4f4ef"); Rr(tx + 1 / AS, shY + h * 0.085, 1 / AS, 1 / AS, "#f4f4ef"); }   // buttons
   b.restore();
   // ARMS: sleeve, upper arm, forearm, wristband, hand. Racket arm reaches the grip; the other swings (or joins a backhand).
-  const arm = (sx, sy, hx2, hy2, out) => {
+  const arm = (sx, sy, hx2, hy2, out, sleeve) => {
     const ex = (sx + hx2) / 2 + out * w * 0.18, ey = (sy + hy2) / 2 + h * 0.02;
-    Ln(sx, sy, ex, ey, skin, w * 0.2); Ln(ex, ey, hx2, hy2, skin, w * 0.17);
+    Ln(sx, sy, ex, ey, skin, w * 0.2); Ln(ex, ey, hx2, hy2, sleeve || skin, w * 0.17);         // forearm (or a compression sleeve over it)
     Ln(sx, sy, sx + (ex - sx) * 0.45, sy + (ey - sy) * 0.45, shirt, w * 0.26);              // short sleeve
     Ln(hx2 + (ex - hx2) * 0.22, hy2 + (ey - hy2) * 0.22, hx2 + (ex - hx2) * 0.08, hy2 + (ey - hy2) * 0.08, P.ui || "#f2f2f2", w * 0.2);  // wristband
     Rr(hx2 - w * 0.08, hy2 - w * 0.08, w * 0.16, w * 0.16, skinL);                           // hand
@@ -936,7 +1013,7 @@ function drawPlayer(i, pos, swing) {
     freeHand = { x: th.x + lx * 0.5, y: th.y - hop + drop };
   }
   arm(lS.x, lS.y, freeHand.x, freeHand.y, -R);
-  arm(rS.x, rS.y, grip.x, grip.y, R);
+  arm(rS.x, rS.y, grip.x, grip.y, R, P.sleeve);
   // HEAD: neck, ears, hair with strands (or cap with seams and the hair showing under it); face from the front
   const hw = w * 0.56 * (1 - 0.15 * Math.abs(turn)), hh = h * 0.15, hx0 = tx - hw / 2 + tR * 0.6 + turn * w * 0.06, hy0 = shY - hh - h * 0.015 + Math.abs(tiltR) * 0.3;
   const [hair, hairD, hairL] = HAIR[P.id] || [P.hair, shade(P.hair, -0.35), shade(P.hair, 0.25)];
@@ -992,6 +1069,7 @@ function drawPlayer(i, pos, swing) {
       Rr(sd > 0 ? hx0 + hw : hx0 - 2 / AS, eyeY + hh * 0.06, 2 / AS, hh * 0.16, skin);
     }
   }
+  drawSignature(P, near, { hx0, hy0, hw, hh, tx, turn, hair, hairD, hairL, skin, Rr, strands });
   if (!behind) drawRacket(rp.g, rp.u, rp.n, look, lx * 0.5, -hop + drop);
   if (rp.slice && !matchMedia("(prefers-reduced-motion: reduce)").matches) {   // SLICE TRAIL: the head's path, so the high-to-low sweep reads
     for (let k = 1; k <= 5; k++) {
@@ -1819,6 +1897,6 @@ canvas.addEventListener("pointercancel", endStick);
 resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
 </script>
 <!-- Locker room (Locker Room Designer) and the start flow (Start Page Builder) -->
-<script src="src/lockerroom/lockerroom.js?v=0.8.1"></script>
-<script src="src/start/flow.js?v=0.8.1"></script>
+<script src="src/lockerroom/lockerroom.js?v=0.8.2"></script>
+<script src="src/start/flow.js?v=0.8.2"></script>
 <script>StartFlow.open();</script>

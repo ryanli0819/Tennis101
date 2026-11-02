@@ -1,0 +1,53 @@
+{
+  "player": "sinner",
+  "name": "Jannik Sinner",
+  "country": "ITA",
+  "rank": 1,
+  "rankedOn": "2026-10-26",
+  "signature": "his iconic cap with bright ginger curls flaring out from under it",
+  "exaggerate": [
+    "oversized cap with a long brim",
+    "big, bright-orange curls puffing out at the sides and the nape"
+  ],
+  "confidence": "Ryan",
+  "source": "Ryan's direction (Nov 1, 2026) + datasets/serves/sinner clips",
+  "outfits": {
+    "clay": {
+      "shirt": "#141418",
+      "shorts": "#1e1d22",
+      "cap": "#16161b",
+      "shoes": "#1c1b20",
+      "from": "Sinner serve(Front).mov",
+      "event": "Roland-Garros (red clay)"
+    },
+    "hard": {
+      "shirt": "#1f2f4a",
+      "shorts": "#f5f5f2",
+      "cap": "#f2f2ef",
+      "shoes": "#f0ece6",
+      "from": "close up jannik sinner back.mov",
+      "event": "US Open"
+    },
+    "grass": {
+      "shirt": "#f4f4f0",
+      "shorts": "#f4f4f0",
+      "cap": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "from": "grass-court dress code: predominantly white (no clip yet)",
+      "event": "Wimbledon"
+    }
+  },
+  "personality": {
+    "temperament": null,
+    "style": null,
+    "mannerisms": [],
+    "celebrations": [],
+    "notes": "to research"
+  },
+  "media": {
+    "images": "datasets/players/sinner/images/ (local only)",
+    "video": "datasets/players/sinner/video/ and datasets/video/sinner/ (local only)",
+    "serves": "datasets/serves/sinner/"
+  },
+  "outfits_detail": "datasets/players/sinner/outfits.json"
+}

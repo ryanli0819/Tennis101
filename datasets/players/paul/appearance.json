@@ -1,0 +1,40 @@
+{
+  "player": "paul",
+  "name": "Tommy Paul",
+  "country": "USA",
+  "rank": 14,
+  "rankedOn": "2026-10-26",
+  "signature": null,
+  "exaggerate": [],
+  "confidence": "to research",
+  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "outfits": {
+    "grass": {
+      "event": "Wimbledon",
+      "shirt": "#f4f4f0",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "notes": "all-white dress code; trim colours to research"
+    },
+    "hard": {
+      "event": "US Open",
+      "notes": "to research"
+    },
+    "clay": {
+      "event": "Roland-Garros (red clay)",
+      "notes": "to research"
+    }
+  },
+  "personality": {
+    "temperament": null,
+    "style": null,
+    "mannerisms": [],
+    "celebrations": [],
+    "notes": "to research"
+  },
+  "media": {
+    "images": "datasets/players/paul/images/ (local only)",
+    "video": "datasets/players/paul/video/ and datasets/video/paul/ (local only)",
+    "serves": "datasets/serves/paul/"
+  }
+}

@@ -1,6 +1,13 @@
-"""Turn cleaned serve clips into the game motion file the character plays.
+"""Turn cleaned serve clips into the game motion file each player plays.
 
-    python3 -I datasets/serves/tools/export_motion.py
+    python3 -I datasets/serves/tools/export_motion.py            # every player
+    python3 -I datasets/serves/tools/export_motion.py alcaraz    # one player
+
+Writes src/serve/motion/<player>-serve.js for every player in PLAYERS.
+Alcaraz (Nov 1, 2026): first = his real serve from "alcaraz serve back view.mov" (slow motion, front-side view,
+Indian Wells; the server is picked by pick_server.py, then a light clean: the Sinner-tuned clean_keypoints.py
+mistakes his raised toss arm for a misplaced neck in this side-on view). second = the hand-keyed kick serve from
+keyframes.json until a real second serve is captured.
 
 Reads the 'clean' joints of each clip in MOTIONS and writes src/serve/motion/sinner-serve.js:
   window.SERVE_MOTIONS.sinner.first   from the front clip   (front view, mirrored)
@@ -18,13 +25,16 @@ Missing joints hold their last known position relative to the hips, so the figur
 import json, math, os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-OUT = os.path.join(ROOT, "src/serve/motion/sinner-serve.js")
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 JOINTS = ["nose", "neck", "leftShoulder", "rightShoulder", "leftElbow", "rightElbow", "leftWrist", "rightWrist",
           "root", "leftHip", "rightHip", "leftKnee", "rightKnee", "leftAnkle", "rightAnkle"]
 REAL_RELEASE_TO_CONTACT = 0.65          # seconds, measured in the real-speed front clip
 
 # Events are frame numbers read off the key frames. The Serve Analyst can refine them.
-MOTIONS = {
+# leadFrom: first frame of the lead-in (default: 0.3 s before "start"). clean: "light" = raw joints, confidence and spike filter.
+PLAYERS = {}
+PLAYERS["sinner"] = {
     "first":  {"src": "datasets/serves/sinner/front.keypoints.json", "mirror": True, "calm": (0, 46),
                "events": {"start": 46, "tossRelease": 55, "trophy": 66, "contact": 74, "finish": 88},
                "note": "1st serve, front view (real speed)"},
@@ -32,9 +42,28 @@ MOTIONS = {
                "events": {"start": 250, "tossRelease": 266, "trophy": 300, "contact": 343, "finish": 365},
                "note": "2nd serve, back view, served after a fault (slow motion, re-timed)"},
 }
+PLAYERS["alcaraz"] = {
+    "first":  {"src": "datasets/serves/alcaraz/back.keypoints.json", "mirror": True, "calm": (82, 112), "clean": "light", "leadFrom": 112,
+               "events": {"set": 130, "start": 202, "tossRelease": 250, "trophy": 344, "contact": 416, "finish": 466},
+               "note": "1st serve, front-side view, Indian Wells (slow motion ~4.4x, re-timed). Ball raised to the chest before the toss (his 2026 start)."},
+    "second": {"keyframes": True},
+}
 
-def export(spec):
+def light_clean(d):
+    """Raw joints with confidence >= 0.3; a joint that jumps away from both neighbours (and they agree) is a spike: dropped."""
+    F = d["frames"]
+    for k, f in enumerate(F):
+        c = {}
+        for n, v in f["joints"].items():
+            if v[2] < 0.3: continue
+            a = F[k - 1]["joints"].get(n) if k else None; b = F[k + 1]["joints"].get(n) if k + 1 < len(F) else None
+            if a and b and math.dist(a[:2], b[:2]) < 0.04 and min(math.dist(v[:2], a[:2]), math.dist(v[:2], b[:2])) > 0.08: continue
+            c[n] = v
+        f["clean"], f["scale"] = c, 1.0
+
+def export(spec, player):
     d = json.load(open(os.path.join(ROOT, spec["src"])))
+    if spec.get("clean") == "light": light_clean(d)
     W, H, F = d["width"], d["height"], d["frames"]
     px = lambda v: (v[0] * W, v[1] * H)                   # normalized -> pixels (keeps the aspect right)
     E, (c0, c1) = spec["events"], spec["calm"]
@@ -56,7 +85,7 @@ def export(spec):
 
     t_of = {f["i"]: f["t"] for f in F}
     k = REAL_RELEASE_TO_CONTACT / (t_of[E["contact"]] - t_of[E["tossRelease"]])   # 1.0 for a real-speed clip
-    t0 = t_of[E["start"]] - 0.3                            # keep a little lead-in before the toss starts
+    t0 = t_of[spec["leadFrom"]] if "leadFrom" in spec else t_of[E["start"]] - 0.3   # keep a lead-in before the toss starts
     frames, last_rel = [], {}
     for f in F:
         if not (t0 <= f["t"] <= t_of[E["finish"]] + 0.15): continue
@@ -92,18 +121,26 @@ def export(spec):
                 wgt = math.exp(-0.5 * (dt / SIG) ** 2)
                 wx += raw[c][n][0] * wgt; wy += raw[c][n][1] * wgt; ws += wgt
             fr["j"][n] = [round(wx / ws, 3), round(wy / ws, 3)]
-    return {"player": "sinner", "source": spec["src"] + " (clean)", "note": spec["note"], "timeScale": round(k, 3), "smoothed": f"gaussian {int(SIG*1000)} ms",
+    return {"player": player, "source": spec["src"] + " (clean)", "note": spec["note"], "timeScale": round(k, 3), "smoothed": f"gaussian {int(SIG*1000)} ms",
             "units": "body heights; x + = player's right, y = above the ground; seen from behind",
             "events": {n: round((t_of[v] - t0) * k, 3) for n, v in E.items()}, "frames": frames}
 
-out = {name: export(spec) for name, spec in MOTIONS.items()}
-os.makedirs(os.path.dirname(OUT), exist_ok=True)
-with open(OUT, "w") as f:
-    f.write("// Generated by datasets/serves/tools/export_motion.py from Sinner's real serves (video, cleaned).\n"
-            "// first = his 1st serve (front clip), second = his 2nd serve after a fault (back close-up).\n"
-            "// Do not edit by hand: change the data or the script and re-run it. Owner: Serve Analyst.\n"
-            "window.SERVE_MOTIONS = window.SERVE_MOTIONS || {};\n"
-            f"window.SERVE_MOTIONS.sinner = {json.dumps(out, separators=(',', ':'))};\n")
-for n, m in out.items():
-    print(f"{n:6s}: {len(m['frames'])} frames, x{m['timeScale']} time, events {m['events']}")
-print(f"wrote {os.path.relpath(OUT, ROOT)} ({os.path.getsize(OUT) // 1024} KB)")
+for player in (sys.argv[1:] or list(PLAYERS)):
+    out = {}
+    for name, spec in PLAYERS[player].items():
+        if spec.get("keyframes"):
+            import keyframe_motion
+            out.update(keyframe_motion.load(player, (name,))[0])
+        else:
+            out[name] = export(spec, player)
+    OUT = os.path.join(ROOT, f"src/serve/motion/{player}-serve.js")
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
+    with open(OUT, "w") as f:
+        f.write(f"// Generated by datasets/serves/tools/export_motion.py from {player}'s real serves (video, cleaned).\n"
+                "// Each motion's 'source' says which clip (or keyframes) it came from.\n"
+                "// Do not edit by hand: change the data or the script and re-run it. Owner: Serve Analyst.\n"
+                "window.SERVE_MOTIONS = window.SERVE_MOTIONS || {};\n"
+                f"window.SERVE_MOTIONS.{player} = {json.dumps(out, separators=(',', ':'))};\n")
+    for n, m in out.items():
+        print(f"{player} {n:6s}: {len(m['frames'])} frames, x{m['timeScale']} time, events {m['events']}")
+    print(f"wrote {os.path.relpath(OUT, ROOT)} ({os.path.getsize(OUT) // 1024} KB)")

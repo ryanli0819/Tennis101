@@ -1,6 +1,6 @@
 # Tennis101 agent team
 
-Sixteen agents build the game in parallel, one run each per night. Every agent:
+Seventeen agents build the game in parallel, one run each per night. Every agent:
 - reads `CLAUDE.md`, this file, and its own log `agents/<name>/LOG.md` first;
 - works only on its branch `agent/<name>` and opens or updates one PR to `main` (never pushes to `main`, never merges);
 - edits only the folders it owns below, plus the smallest possible hooks in `index.html`;
@@ -27,6 +27,7 @@ Each agent has its own folder: `agents/<name>/PROMPT.md` (instructions) and `age
 | 14 | Animator | `agent/animator` | `src/animation/` | 2 PM |
 | 15 | Footage Scout | `agent/footage-scout` | `datasets/footage/` | 3 PM |
 | 16 | Racket Coach | `agent/racket-coach` | `src/racket/`, `datasets/racket/` | 4 PM |
+| 17 | Appearance Scout | `agent/appearance-scout` | `datasets/players/` | 5 PM |
 
 Give any new agent a row here before it starts.
 
@@ -60,6 +61,8 @@ Keep these stable. Change one only in your own PR, and say so in its description
 **Racket (Racket Coach · first version in `index.html`).** `racketPose(i, p, ago)` → `{ g, u, n, tilt, crouch, twoHands, throat, slice }` in court space, drawn by `drawRacket`. Strokes are keyed to the time until contact and joined by `poseTrack` (Catmull-Rom). Slice: racket top from ~2 o'clock to `SLICE_END[id]` o'clock (Sinner 4, Alcaraz 5), mirrored on the backhand, with shoulder tilt and a head trail. The Animator owns body frames, the Racket Coach owns the racket path.
 
 **Footage (Footage Scout).** Video goes in `datasets/video/<player>/{serve-first,serve-second,forehand,backhand,slice,running}/` (git-ignored, local only). `datasets/footage/top20.json`: the live ATP top 20 (`rankedOn`) with clip links, strokes, views and time ranges. Links only; Ryan records clips locally (git-ignored).
+
+**Appearance (Appearance Scout).** `datasets/players/<id>/appearance.json` for each top-20 player: `signature` (what makes him identifiable), `exaggerate` (how to make it obvious in pixels), `outfits` per court (`grass` Wimbledon, `hard` US Open, `clay` red clay; hex colours), `personality`, `confidence` and `source`. Photos and video in `datasets/players/<id>/{images,video}` stay local. The Player Artist turns it into `ROSTER[].look` and `outfits`.
 
 **Shot types.** `planShot(..., type)` with `type` = `"drive"` or `"slice"`. You slice by holding **E** (or with the touch Slice button) as you hit; the computer slices sometimes, more when stretched. A slice lands short (2–4.8 m past the net), low and clearly slower than a drive (≈11–15 m/s against 19–28), and barely carries after the bounce, so the receiver has to come forward.
 
