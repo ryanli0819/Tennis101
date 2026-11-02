@@ -4,6 +4,14 @@ Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it 
 
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
 
+## v0.10.0 — Nov 2, 2026, 10 AM
+- Arms in front of the body: Seen from behind, an arm that reaches in front of the body (to the racket's throat, across for a backhand, in the follow-through) is hidden by the torso, with only the top of the arm showing at the shoulder, instead of being painted across the player's back. (Nov 1, 7 PM · Claude for Ryan, 7c9c31b)
+- A real bounce routine: Before serving, the hand pushes the ball down and meets it on the way back up, the knees give a little and the body leans over the ball. (Nov 1, 7 PM · Claude for Ryan, 7c9c31b)
+- Sinner's serve, fluent: Sinner's first serve now comes from his slow-motion clip seen from behind: about nine times more frames per second than before and far less jitter, still at real speed. (Nov 1, 7 PM · Claude for Ryan, 7c9c31b)
+- A low return stance: While the opponent gets ready to serve, the receiver squats low with feet wide, bends forward over the knees with the racket out in front, and rocks gently from side to side. (Nov 1, 7 PM · Claude for Ryan, 7c9c31b)
+- The server faces the crowd on his side: On the deuce side the server's body turns toward the outside of the court, his nearest stands; on the ad side the whole serve motion is mirrored, so it no longer faces the same way from both sides. (Nov 2, 10 AM · Claude for Ryan, 088e113)
+- You can see the hand bounce the ball: Before serving, the player's hand snaps down at the wrist to push the ball into the ground and cocks back up to catch it, so it's clearly him bouncing the ball, not the ball bouncing by itself. (Nov 2, 10 AM · Claude for Ryan, 088e113)
+
 ## v0.9.0 — Nov 1, 2026, 7 PM
 - Alcaraz serves his own way: Alcaraz now has his own full serve, built from analysis of his technique: hands raised to the chest before the toss, a pinpoint stance, the racket head cocked up, a short hitch at the trophy, a deep racket drop and an upright landing. His second serve tosses over his head, arches more and falls a little left. Every pro with a serve file serves his own way, from either end. (Oct 31, 6 PM · Claude for Ryan, 3bb52f6)
 - The far server faces you: When the player at the far end serves with his own motion, you see him from the front, with his face, toss and racket on the correct sides. (Oct 31, 6 PM · Claude for Ryan, 3bb52f6)
