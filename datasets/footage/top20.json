@@ -9,7 +9,22 @@
       "country": "ITA",
       "rank": 1,
       "videoDir": "datasets/video/sinner/",
-      "clips": []
+      "clips": [
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            18.95,
+            56.55
+          ],
+          "serves": 4,
+          "identified": "high",
+          "keypoints": "datasets/serves/sinner/compilation-11.keypoints.json",
+          "status": "keypoints extracted"
+        }
+      ]
     },
     {
       "id": "zverev",
@@ -17,7 +32,36 @@
       "country": "GER",
       "rank": 2,
       "videoDir": "datasets/video/zverev/",
-      "clips": []
+      "clips": [
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            173.63,
+            190.67
+          ],
+          "serves": 2,
+          "identified": "high",
+          "keypoints": "datasets/serves/zverev/compilation-18.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            190.68,
+            213.15
+          ],
+          "serves": 2,
+          "identified": "low",
+          "keypoints": "datasets/serves/zverev/compilation-19.keypoints.json",
+          "status": "keypoints extracted"
+        }
+      ]
     },
     {
       "id": "alcaraz",
@@ -55,6 +99,62 @@
           "range": null,
           "notes": "Court-level practice set; serves from behind the baseline. Needs a Tennis TV login.",
           "status": "to record"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            56.57,
+            63.63
+          ],
+          "serves": 1,
+          "identified": "high",
+          "keypoints": "datasets/serves/alcaraz/compilation-12.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            63.65,
+            77.03
+          ],
+          "serves": 1,
+          "identified": "high",
+          "keypoints": "datasets/serves/alcaraz/compilation-13.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            77.05,
+            111.65
+          ],
+          "serves": 3,
+          "identified": "high",
+          "keypoints": "datasets/serves/alcaraz/compilation-14.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            111.67,
+            134.47
+          ],
+          "serves": 2,
+          "identified": "low",
+          "keypoints": "datasets/serves/alcaraz/compilation-15.keypoints.json",
+          "status": "keypoints extracted"
         }
       ],
       "serveMotion": {
@@ -69,7 +169,36 @@
       "country": "USA",
       "rank": 4,
       "videoDir": "datasets/video/shelton/",
-      "clips": []
+      "clips": [
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            290.27,
+            307.25
+          ],
+          "serves": 2,
+          "identified": "medium",
+          "keypoints": "datasets/serves/shelton/compilation-25.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            307.27,
+            329.05
+          ],
+          "serves": 2,
+          "identified": "medium",
+          "keypoints": "datasets/serves/shelton/compilation-26.keypoints.json",
+          "status": "keypoints extracted"
+        }
+      ]
     },
     {
       "id": "medvedev",
@@ -77,7 +206,36 @@
       "country": "RUS",
       "rank": 5,
       "videoDir": "datasets/video/medvedev/",
-      "clips": []
+      "clips": [
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            213.17,
+            230.45
+          ],
+          "serves": 2,
+          "identified": "high",
+          "keypoints": "datasets/serves/medvedev/compilation-20.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            230.47,
+            252.6
+          ],
+          "serves": 1,
+          "identified": "high",
+          "keypoints": "datasets/serves/medvedev/compilation-21.keypoints.json",
+          "status": "keypoints extracted"
+        }
+      ]
     },
     {
       "id": "cobolli",
@@ -117,7 +275,50 @@
       "country": "AUS",
       "rank": 10,
       "videoDir": "datasets/video/de-minaur/",
-      "clips": []
+      "clips": [
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            361.62,
+            368.18
+          ],
+          "serves": 1,
+          "identified": "high",
+          "keypoints": "datasets/serves/de-minaur/compilation-31.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            368.2,
+            380.85
+          ],
+          "serves": 1,
+          "identified": "high",
+          "keypoints": "datasets/serves/de-minaur/compilation-32.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            380.87,
+            401.38
+          ],
+          "serves": 2,
+          "identified": "medium",
+          "keypoints": "datasets/serves/de-minaur/compilation-33.keypoints.json",
+          "status": "keypoints extracted"
+        }
+      ]
     },
     {
       "id": "jodar",
@@ -133,7 +334,36 @@
       "country": "SRB",
       "rank": 12,
       "videoDir": "datasets/video/djokovic/",
-      "clips": []
+      "clips": [
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            134.48,
+            155.58
+          ],
+          "serves": 2,
+          "identified": "high",
+          "keypoints": "datasets/serves/djokovic/compilation-16.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            155.6,
+            173.62
+          ],
+          "serves": 2,
+          "identified": "low",
+          "keypoints": "datasets/serves/djokovic/compilation-17.keypoints.json",
+          "status": "keypoints extracted"
+        }
+      ]
     },
     {
       "id": "fritz",
@@ -141,7 +371,64 @@
       "country": "USA",
       "rank": 13,
       "videoDir": "datasets/video/fritz/",
-      "clips": []
+      "clips": [
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            329.07,
+            335.3
+          ],
+          "serves": 1,
+          "identified": "high",
+          "keypoints": "datasets/serves/fritz/compilation-27.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            335.32,
+            345.68
+          ],
+          "serves": 1,
+          "identified": "high",
+          "keypoints": "datasets/serves/fritz/compilation-28.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            345.7,
+            349.6
+          ],
+          "serves": 1,
+          "identified": "high",
+          "keypoints": "datasets/serves/fritz/compilation-29.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            349.62,
+            361.6
+          ],
+          "serves": 2,
+          "identified": "high",
+          "keypoints": "datasets/serves/fritz/compilation-30.keypoints.json",
+          "status": "keypoints extracted"
+        }
+      ]
     },
     {
       "id": "paul",
@@ -248,7 +535,98 @@
       "rank": null,
       "note": "outside the Oct 26 top 20; in Ryan's serve compilation",
       "videoDir": "datasets/video/rublev/",
-      "clips": []
+      "clips": [
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            252.62,
+            259.25
+          ],
+          "serves": 1,
+          "identified": "high",
+          "keypoints": "datasets/serves/rublev/compilation-22.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            259.27,
+            270.72
+          ],
+          "serves": 1,
+          "identified": "high",
+          "keypoints": "datasets/serves/rublev/compilation-23.keypoints.json",
+          "status": "keypoints extracted"
+        },
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            270.73,
+            290.25
+          ],
+          "serves": 2,
+          "identified": "low",
+          "keypoints": "datasets/serves/rublev/compilation-24.keypoints.json",
+          "status": "keypoints extracted"
+        }
+      ]
+    },
+    {
+      "id": "rune",
+      "name": "Holger Rune",
+      "country": "DEN",
+      "rank": null,
+      "note": "in Ryan's serve compilation",
+      "videoDir": "datasets/video/rune/",
+      "clips": [
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            401.4,
+            426.48
+          ],
+          "serves": 2,
+          "identified": "medium",
+          "keypoints": "datasets/serves/rune/compilation-34.keypoints.json",
+          "status": "keypoints extracted"
+        }
+      ]
+    },
+    {
+      "id": "tsitsipas",
+      "name": "Stefanos Tsitsipas",
+      "country": "GRE",
+      "rank": null,
+      "note": "in Ryan's serve compilation",
+      "videoDir": "datasets/video/tsitsipas/",
+      "clips": [
+        {
+          "source": "Ryan's serve compilation (slow motion, Indian Wells / Australian Open)",
+          "stroke": "serve1",
+          "view": "behind / behind-side",
+          "speed": "slow",
+          "range": [
+            426.5,
+            448.97
+          ],
+          "serves": 2,
+          "identified": "medium",
+          "keypoints": "datasets/serves/tsitsipas/compilation-35.keypoints.json",
+          "status": "keypoints extracted"
+        }
+      ]
     }
   ]
 }
