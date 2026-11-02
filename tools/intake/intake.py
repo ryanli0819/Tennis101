@@ -95,9 +95,14 @@ for dirpath, dirs, files in os.walk(INBOX):
             kp = base.replace(" ", "-") + ".keypoints.json"
             frames = os.path.join(ROOT, f"datasets/players/{pid}/images/stills/{os.path.basename(base)}") if len(found) == 1 \
                      else os.path.join(ROOT, f"datasets/video/_compilations/stills/{os.path.basename(base)}")
+            probe = "" if DRY else subprocess.run(["swift", os.path.join(TOOLS, "codec.swift"), dest], capture_output=True, text=True).stdout
+            if "decodable false" in probe:                   # e.g. AV1 from a YouTube download: Apple's decoder can't read it on M1/M2
+                entry["codec"] = probe.split()[1] if probe.split() else "?"
+                entry["note"] = f"can't decode {entry['codec']} on this Mac: re-download as H.264 (avc1) / 1080p, or convert it"
+                print("  ! " + entry["note"]); log.append(entry); done += 1; continue
             entry["pose"] = run(["swift", os.path.join(TOOLS, "pose.swift"), dest, kp, os.path.join(frames, "pose"), "1"])
             entry["keypoints"] = os.path.relpath(kp, ROOT)
-            if kind and kind.startswith("serve"):
+            if kind and kind.startswith("serve") and len(found) == 1:   # one server to pick (not in a compilation)
                 entry["server"] = run([sys.executable, "-I", os.path.join(TOOLS, "pick_server.py"), kp, pid, "unknown view"])
             entry["stills"] = run(["swift", os.path.join(TOOLS, "grab.swift"), dest, frames, "8"])
         log.append(entry); done += 1
