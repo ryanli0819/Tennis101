@@ -5,23 +5,24 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: a club scoreboard over a court plan — the CEO's order bar on top, one lane per supervisor
-   (its agents stacked below it, like players in a draw), and the order book / wiring on the side. */
+   (its agents stacked below it, like players in a draw), and the order book / wiring on the side.
+   Palette: light pink (blush) with sage green, calm and easy on the eyes; dusty rose marks the CEO. */
 :root {
-  --bg: #edf1f5; --panel: #ffffff; --sunk: #f6f8fb; --ink: #11213a; --muted: #5a6a80; --line: #d3dbe5;
-  --court: #1f5591; --court-soft: #e3edf8; --ball: #c9df1f; --ball-ink: #1d2a06;
-  --ceo: #b14d22; --ceo-soft: #f8e8df; --ok: #23824f; --warn: #a86b12; --bad: #b8322a; --idle: #7a8699;
+  --bg: #fbeef2; --panel: #fffafb; --sunk: #f7e7ec; --ink: #2f2a33; --muted: #7a6c76; --line: #ecd5dc;
+  --court: #4f8a72; --court-soft: #e3efe8; --ball: #9cc8b2; --ball-ink: #1f3a2e;
+  --ceo: #c0587a; --ceo-soft: #f9e0e8; --ok: #3f8f68; --warn: #b07a2a; --bad: #c0434f; --idle: #9a8b95;
   --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
   --body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0a1424; --panel: #111f35; --sunk: #0d192c; --ink: #e7eef7; --muted: #94a5bb; --line: #223652;
-  --court: #78aeea; --court-soft: #16304f; --ball: #d8ee4c; --ball-ink: #1d2a06;
-  --ceo: #ec8a5c; --ceo-soft: #3a2218; --ok: #4cc283; --warn: #e3a845; --bad: #f0675d; --idle: #8b98ab; color-scheme: dark } }
+  --bg: #1f1a1e; --panel: #2a2329; --sunk: #241e23; --ink: #f4eaef; --muted: #b9a8b2; --line: #3e333a;
+  --court: #8fc7ae; --court-soft: #22352d; --ball: #8fc7ae; --ball-ink: #13261d;
+  --ceo: #f0a0b8; --ceo-soft: #3f2732; --ok: #7fcfa5; --warn: #e6b56a; --bad: #f08a92; --idle: #a2939c; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #0a1424; --panel: #111f35; --sunk: #0d192c; --ink: #e7eef7; --muted: #94a5bb; --line: #223652;
-  --court: #78aeea; --court-soft: #16304f; --ball: #d8ee4c; --ball-ink: #1d2a06;
-  --ceo: #ec8a5c; --ceo-soft: #3a2218; --ok: #4cc283; --warn: #e3a845; --bad: #f0675d; --idle: #8b98ab; color-scheme: dark }
+  --bg: #1f1a1e; --panel: #2a2329; --sunk: #241e23; --ink: #f4eaef; --muted: #b9a8b2; --line: #3e333a;
+  --court: #8fc7ae; --court-soft: #22352d; --ball: #8fc7ae; --ball-ink: #13261d;
+  --ceo: #f0a0b8; --ceo-soft: #3f2732; --ok: #7fcfa5; --warn: #e6b56a; --bad: #f08a92; --idle: #a2939c; color-scheme: dark }
 
 * { box-sizing: border-box }
 body { background: var(--bg); color: var(--ink); font: 14px/1.45 var(--body); margin: 0;
@@ -136,6 +137,11 @@ form.mini { display: grid; gap: 6px }
 .node .who { font-size: 10.5px; color: var(--muted); line-height: 1.2 }
 .face { width: 64px; height: 64px; border-radius: 50%; background: var(--court-soft); image-rendering: pixelated; display: block; border: 2px solid var(--line) }
 .face.ceo { border-color: var(--ceo) }
+img.face { object-fit: cover; image-rendering: auto }
+.credits { font-size: 11.5px; color: var(--muted); margin-top: 10px; max-width: 760px; justify-self: center }
+.credits summary { cursor: pointer; text-align: center }
+.credits ul { columns: 2 220px; margin: 8px 0 0; padding-left: 18px }
+.credits a { color: var(--court) }
 .node .pill { font-size: 9.5px; padding: 3px 5px }
 .ceo-node .fn { color: var(--ceo); font-size: 18px }
 .stem { width: 2px; height: 22px; background: var(--line) }
@@ -301,7 +307,16 @@ form.mini { display: grid; gap: 6px }
     if (p.beard) { px(4, 10, 8, 3, hair); px(5, 13, 6, 1, hair); px(7, 11, 2, 1, skin); }                // beard, mouth through it
     else px(7, 11, 2, 1, line);
   }
-  const faceEl = (proId, cls = "face") => { const c = el("canvas", { class: cls, role: "img", "aria-label": (PROS[proId]?.name || "Player") + "'s face" }); drawFace(c, proId); return c; };
+  /* Real photos (Wikimedia Commons, free licences, credited below); the pixel portrait stands in where there is none. */
+  const PHOTOS = {"sinner": {"src": "/_blob/3b16b8a8d856e45cbc3fa1640a459733", "license": "Public domain", "author": "The White House", "page": "https://commons.wikimedia.org/wiki/File:Jannik_Sinner_2025_US_Open.jpg"}, "alcaraz": {"src": "/_blob/c0458cb8b00e9fbdc998da153c995048", "license": "CC BY-SA 4.0", "author": "Barcex", "page": "https://commons.wikimedia.org/wiki/File:25th_Laureus_World_Sports_Awards_-_Red_Carpet_-_Carlos_Alcaraz_-_240422_192324_(cropped).jpg"}, "djokovic": {"src": "/_blob/cbe5e9c15b5e9a327579f10f3da3b0c9", "license": "CC BY-SA 4.0", "author": "Andymiah", "page": "https://commons.wikimedia.org/wiki/File:Novak_Djokovic_Paris_2024_Olympic_Games_(cropped).jpg"}, "shelton": {"src": "/_blob/0dd24eab32eceef31e93864717f584ed", "license": "CC BY-SA 4.0", "author": "Peter Arnold", "page": "https://commons.wikimedia.org/wiki/File:Ben_Shelton,_media_conference,_Swiss_Indoors_Basel_2025_(cropped).jpg"}, "medvedev": {"src": "/_blob/eb269743217132ccad27c5b9d12272b3", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:Daniil_Medvedev_(2025_DC_Open)_05_(cropped).jpg"}, "fils": {"src": "/_blob/cc6543a8cedb3710cca11190379ec4a9", "license": "CC BY-SA 2.0", "author": "si.robi", "page": "https://commons.wikimedia.org/wiki/File:Fils_BOR22_(52083970501).jpg"}, "de-minaur": {"src": "/_blob/344313faba81d7605f57dcc17c567306", "license": "CC BY-SA 4.0", "author": "Barcex", "page": "https://commons.wikimedia.org/wiki/File:Alex_de_Minaur_2024.jpg"}, "tiafoe": {"src": "/_blob/c4d48d0e7430e19d2b3ef2e57a508e24", "license": "CC BY-SA 4.0", "author": "Rickmunroe01", "page": "https://commons.wikimedia.org/wiki/File:FrancesTiafo.jpg"}, "fritz": {"src": "/_blob/5baf72f7bfd645152c4960a0daf30fa9", "license": "CC BY-SA 4.0", "author": "Rickmunroe01", "page": "https://commons.wikimedia.org/wiki/File:Taylor_Fritz_-_Delray_Beach_Open_Final_Round_(cropped).jpg"}, "zverev": {"src": "/_blob/6d2d0c23c7db02fc090b1ac63e4d11ad", "license": "CC BY-SA 4.0", "author": "Rick Munroe", "page": "https://commons.wikimedia.org/wiki/File:Alexander_Zverev_(cropped).jpg"}, "auger-aliassime": {"src": "/_blob/e9c75721c8fe66dcb5d9276cfd2c9076", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:F%C3%A9lix_Auger-Aliassime_(2023_DC_Open)_01_(cropped).jpg"}, "cobolli": {"src": "/_blob/bcc9445a08a6ce2fdcf28030ae4076da", "license": "CC BY-SA 2.0", "author": "si.robi", "page": "https://commons.wikimedia.org/wiki/File:Cobolli_RGQ23_(52944096963).jpg"}, "paul": {"src": "/_blob/bac22ee7912eec8d4fe46a511456b1ad", "license": "CC BY-SA 4.0", "author": "Gatorfan252525", "page": "https://commons.wikimedia.org/wiki/File:Tommy_Paul_at_the_2026_Delray_Beach_Open.jpg"}, "mensik": {"src": "/_blob/ecf739accfcaa8ac8b4c8939990f47f3", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:Jakub_Men%C5%A1%C3%ADk_(2023_US_Open)_14_(cropped).jpg"}, "nakashima": {"src": "/_blob/a9701ee676ede2c204740e04d090d5aa", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:Brandon_Nakashima_(2024_DC_Open)_01_(cropped).jpg"}, "tien": {"src": "/_blob/748b0b8e8186a2f656e72967b1a8b9f5", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:Learner_Tien_(2024_US_Open)_04.jpg"}, "cerundolo": {"src": "/_blob/7099991de69d036a553e20d42f749569", "license": "CC BY-SA 2.0", "author": "si.robi", "page": "https://commons.wikimedia.org/wiki/File:Cerundolo_MCM23_(21)_(52883527185).jpg"}, "bublik": {"src": "/_blob/f7b2b2a62ceac66ea4144bff3597f024", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:Sascha_Bublik_(2023_DC_Open)_05_(cropped).jpg"}};
+  const faceEl = (proId, cls = "face") => {
+    const ph = PHOTOS[proId];
+    if (ph) { const i = el("img", { class: cls + " photo", src: ph.src, alt: (PROS[proId]?.name || "Player") + " (photo: " + ph.author + ", " + ph.license + ")", loading: "lazy", decoding: "async" });
+      i.addEventListener("error", () => { const c = el("canvas", { class: cls, role: "img", "aria-label": (PROS[proId]?.name || "Player") + "'s face" }); drawFace(c, proId); i.replaceWith(c); }); return i; }
+    const c = el("canvas", { class: cls, role: "img", "aria-label": (PROS[proId]?.name || "Player") + "'s face" }); drawFace(c, proId); return c; };
+  const credits = () => el("details", { class: "credits" }, el("summary", {}, "Photo credits"),
+    el("ul", {}, Object.entries(PHOTOS).sort((a, b) => (PROS[a[0]]?.name || a[0]).localeCompare(PROS[b[0]]?.name || b[0])).map(([k, ph]) =>
+      el("li", {}, (PROS[k]?.name || k) + ": ", el("a", { href: ph.page, target: "_blank", rel: "noopener" }, ph.author || "Wikimedia Commons"), " · " + ph.license))));
 
   /* ---------- family tree: CEO → supervisors → agents ---------- */
   function renderTree() {
@@ -324,12 +339,13 @@ form.mini { display: grid; gap: 6px }
       if (s) { const c = head.querySelector("canvas"), g = c.getContext("2d"); c.width = c.height = 16; g.fillStyle = css("--court"); g.fillRect(4, 4, 8, 8); g.fillStyle = css("--panel"); g.fillRect(5, 7, 6, 1); g.fillRect(7, 5, 2, 6); }
       const kids = el("div", { class: "kids" }, members.sort((a, b) => agentName(a).localeCompare(agentName(b))).map(id => { const a = S.agents[id], pro = PROS[a.face];
         return el("button", { class: "node", type: "button", onclick: () => openAgent(id), title: (a.job || "") },
-          faceEl(a.face), el("span", { class: "fn" }, a.title || id), el("span", { class: "who" }, (pro ? pro.name : "no face yet") + (pro && !pro.ok ? " · draft" : "")),
+          faceEl(a.face), el("span", { class: "fn" }, a.title || id), el("span", { class: "who" }, (pro ? pro.name : "no face yet")),
           el("span", { class: "pill " + (a.status || "idle") }, STATUS[a.status] || "Idle")); }));
       gen.append(el("div", { class: "branch" }, head, members.length ? kids : null));
     }
     inner.append(gen);
-    inner.append(el("div", { class: "legend" }, el("span", {}, "Names are each agent's job; the face is its tennis-pro mascot (pick another in the agent's panel)."), el("span", {}, "“draft” faces await the Appearance Scout.")));
+    inner.append(el("div", { class: "legend" }, el("span", {}, "Names are each agent's job; the face is its tennis-pro mascot (pick another in the agent's panel)."), el("span", {}, "Photos: Wikimedia Commons, free licences.")));
+    inner.append(credits());
     box.replaceChildren(inner);
     requestAnimationFrame(() => {                                                       // horizontal line spans first→last supervisor
       const bs = gen.querySelectorAll(":scope > .branch"); if (bs.length < 2) { gen.style.setProperty("--l", "50%"); gen.style.setProperty("--r", "50%"); return; }

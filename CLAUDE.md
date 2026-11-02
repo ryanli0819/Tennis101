@@ -97,6 +97,8 @@ Sections in the script, top to bottom:
 ## Agent team
 Nightly cloud agents build parts of the game in parallel. Each agent has a folder in `agents/` (instructions in `PROMPT.md`, running log in `LOG.md`). Ownership, branches, and shared contracts are in `agents/README.md`; read it before editing.
 
+In the Claude app the demo is also an artifact (Tennis101 Demo, https://claude.ai/artifact/7mjj7wfUN25EXyJAWnGEVb): after each release run `python3 -I tools/build_demo_artifact.py` and republish `build/demo/index.html` with the files in `build/demo/files.json`. The command center is Tennis101 HQ (https://claude.ai/artifact/T2eXNa7ibx52NiDNAo9GoF, source `agents/command-center/hq.html`; player photos from Wikimedia Commons, credited on the page).
+
 The game is published as a website by GitHub Pages straight from `main`: https://ryanli0819.github.io/Tennis101/ . Every push to `main` updates it within a minute or two, so `main` must always be playable.
 
 ## Next task for Claude Code

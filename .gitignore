@@ -27,3 +27,4 @@ datasets/inbox/*
 !datasets/inbox/.gitkeep
 # the converter's private Python environment (PyAV)
 tools/.venv/
+build/
