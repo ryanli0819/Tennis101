@@ -18,3 +18,9 @@ The agents run from the repo and GitHub, so a Claude session (ask "sync HQ") mov
    pipeline run is active in `.pipeline/`, review when a PR waits for Ryan, queued when issues are open, blocked when the
    log says so, idle otherwise), `task`, `progress`, `briefSeen` and `updatedAt`.
 5. Orders whose issue was closed by the agent are marked `done`. Add one line per change to `activity/feed`.
+
+## Automatic sync
+A scheduled task in the Claude app on Ryan's Mac, **Tennis101 HQ sync** (`tennis101-hq-sync`, every 30 minutes while the app
+is open), does steps 1–5 by itself. Each run also works on one open CEO order as the addressed agent: on `agent/<name>` in
+`.worktrees/<name>`, ending in a PR to `main` (never a push to `main`) that Ryan merges. The order gets `pr`, the agent
+shows `review` in HQ, and the order is marked done once the PR is merged or the issue closed.
