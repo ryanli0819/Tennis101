@@ -10,7 +10,7 @@
        python3 -I tools/intake/intake.py --dry-run   # see where everything would go
        python3 -I tools/intake/intake.py             # file it and run pose detection
 
-Files without a player name wait in `inbox/unsorted/`. Everything is logged in `inbox/intake-log.json`.
+Files without a player name wait in `inbox/unsorted/`. A file naming several players (a compilation) goes to `datasets/video/_compilations/` with pose data, to be split per player. Everything is logged in `inbox/intake-log.json`.
 Videos and photos never leave the Mac (git-ignored); only keypoints (numbers) are committed.
 
 Optional: `install-watcher.sh` makes macOS run the intake automatically whenever a file lands in the inbox.

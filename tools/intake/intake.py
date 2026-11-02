@@ -32,11 +32,12 @@ def names(p):
     return {p["id"], p["id"].replace("-", " "), full.split()[-1], full}
 KEYS = sorted(((n, p["id"]) for p in PEOPLE for n in names(p)), key=lambda k: -len(k[0]))
 
-def player_of(text):
+def players_in(text):
     t = text.lower().replace("_", " ").replace("-", " ")
+    found = []
     for n, pid in KEYS:
-        if re.search(r"\b" + re.escape(n.replace("-", " ")) + r"\b", t): return pid
-    return None
+        if pid not in found and re.search(r"\b" + re.escape(n.replace("-", " ")) + r"\b", t): found.append(pid)
+    return found
 
 def kind_of(text):
     t = text.lower()
@@ -63,9 +64,13 @@ for dirpath, dirs, files in os.walk(INBOX):
         if ext not in VIDEO | IMAGE: continue
         src = os.path.join(dirpath, f)
         context = os.path.relpath(src, INBOX)
-        pid, kind = player_of(context), kind_of(context)
-        entry = {"file": f, "at": time.strftime("%Y-%m-%d %H:%M"), "player": pid, "kind": kind}
-        if not pid:
+        found, kind = players_in(context), kind_of(context)
+        pid = found[0] if len(found) == 1 else None
+        entry = {"file": f, "at": time.strftime("%Y-%m-%d %H:%M"), "player": pid, "players": found, "kind": kind}
+        if len(found) > 1:                                   # a compilation: several players in one clip, split later by the agents
+            dest_dir = os.path.join(ROOT, "datasets/video/_compilations")
+            entry["note"] = "compilation of " + ", ".join(found) + ": split into one segment per player (Footage Scout / Serve Analyst)"
+        elif not pid:
             dest_dir = os.path.join(INBOX, "unsorted")
             entry["note"] = "no player name found: rename it (e.g. 'shelton serve.mov') or put it in inbox/<player>/"
         elif ext in IMAGE:
@@ -79,10 +84,12 @@ for dirpath, dirs, files in os.walk(INBOX):
         print(("[dry] " if DRY else "") + f"{context} → {entry['to']}")
         if not DRY:
             os.makedirs(dest_dir, exist_ok=True); shutil.move(src, dest)
-        if pid and ext in VIDEO:
+        if found and ext in VIDEO:
+            pid = pid or "_compilations"
             base = os.path.splitext(dest)[0]
             kp = base.replace(" ", "-") + ".keypoints.json"
-            frames = os.path.join(ROOT, f"datasets/players/{pid}/images/stills/{os.path.basename(base)}")
+            frames = os.path.join(ROOT, f"datasets/players/{pid}/images/stills/{os.path.basename(base)}") if len(found) == 1 \
+                     else os.path.join(ROOT, f"datasets/video/_compilations/stills/{os.path.basename(base)}")
             entry["pose"] = run(["swift", os.path.join(TOOLS, "pose.swift"), dest, kp, os.path.join(frames, "pose"), "1"])
             entry["keypoints"] = os.path.relpath(kp, ROOT)
             if kind and kind.startswith("serve"):

@@ -9,7 +9,7 @@ cat > "$PLIST" <<PL
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>com.tennis101.intake</string>
-  <key>ProgramArguments</key><array><string>/usr/bin/python3</string><string>-I</string><string>$ROOT/tools/intake/intake.py</string></array>
+  <key>ProgramArguments</key><array><string>/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3</string><string>-I</string><string>$ROOT/tools/intake/intake.py</string></array>
   <key>WatchPaths</key><array><string>$ROOT/datasets/inbox</string></array>
   <key>ThrottleInterval</key><integer>30</integer>
   <key>StandardOutPath</key><string>$ROOT/datasets/inbox/intake.out.log</string>
