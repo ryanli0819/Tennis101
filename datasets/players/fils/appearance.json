@@ -4,10 +4,13 @@
   "country": "FRA",
   "rank": 8,
   "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "signature": "explosive athlete with a muscular build and short dark hair",
+  "exaggerate": [
+    "muscular shoulders and arms",
+    "big jumping forehands"
+  ],
+  "confidence": "public",
+  "source": "widely documented public knowledge (ATP profile, broadcast coverage); not yet checked against Ryan's images — outfits wait on uploads",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,11 +29,15 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "fiery and expressive, loves the big stage",
+    "style": "power baseliner with an explosive forehand and big serve",
+    "mannerisms": [
+      "animated after winners"
+    ],
+    "celebrations": [
+      "flexes and shouts to the crowd"
+    ],
+    "notes": "public, general; confirm mannerisms from clips for the Animator"
   },
   "media": {
     "images": "datasets/players/fils/images/ (local only)",

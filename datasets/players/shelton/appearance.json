@@ -4,10 +4,14 @@
   "country": "USA",
   "rank": 4,
   "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "signature": "powerful left-hander with a huge serve; tall, athletic and broad-shouldered",
+  "exaggerate": [
+    "left-handed sprite",
+    "broad shoulders and a big service leap",
+    "explosive, bouncy body language"
+  ],
+  "confidence": "public",
+  "source": "widely documented public knowledge (ATP profile, broadcast coverage); not yet checked against Ryan's images — outfits wait on uploads",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,11 +30,17 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "energetic showman, feeds off the crowd",
+    "style": "lefty serve-plus-forehand power, comes forward to finish",
+    "mannerisms": [
+      "bounces on his toes between points",
+      "pumps up the crowd"
+    ],
+    "celebrations": [
+      "'hang up the phone' gesture after big wins",
+      "big fist pumps"
+    ],
+    "notes": "public, general; confirm mannerisms from clips for the Animator"
   },
   "media": {
     "images": "datasets/players/shelton/images/ (local only)",

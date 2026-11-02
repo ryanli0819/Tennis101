@@ -4,13 +4,14 @@
   "country": "GER",
   "rank": 2,
   "rankedOn": "2026-10-26",
-  "signature": "very tall (1.98 m) with light blond hair",
+  "signature": "very tall (1.98 m) and long-limbed, with light blond hair; often a white headband",
   "exaggerate": [
     "tallest sprite in the game",
-    "pale blond hair"
+    "pale blond hair, slightly long on top",
+    "long arms and a high service toss"
   ],
-  "confidence": "medium",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "confidence": "public",
+  "source": "widely documented public knowledge (ATP profile, broadcast coverage); not yet checked against Ryan's images — outfits wait on uploads",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -29,11 +30,16 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "intense, can get visibly frustrated, vocal with the umpire",
+    "style": "big first serve and solid two-handed backhand from the baseline; plays far behind the baseline in long rallies",
+    "mannerisms": [
+      "several bounces before serving",
+      "adjusts headband between points"
+    ],
+    "celebrations": [
+      "fist pump and a loud shout to his box"
+    ],
+    "notes": "public, general; confirm mannerisms from clips for the Animator"
   },
   "media": {
     "images": "datasets/players/zverev/images/ (local only)",
