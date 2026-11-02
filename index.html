@@ -701,6 +701,7 @@ function drawCapturedFigure(i, p, W) {
     seg(s + "Shoulder", mid(s + "Shoulder", s + "Elbow", 0.4), P.shirt, lw * 1.3);
     const wr = mid(s + "Wrist", s + "Elbow", 0.18); if (wr) seg(wr, mid(s + "Wrist", s + "Elbow", 0.05), P.ui || "#f2f2f2", lw * 1.1);   // wristband
   }
+  if (W.leftHand) seg("leftWrist", "leftHand", skin, lw * 1.15);   // the bouncing hand, flexing at the wrist
   // racket: a real 3D racket continuing the right forearm (the same drawRacket as every other stroke)
   if (W.rightElbow && W.rightWrist) {
     const e = W.rightElbow, r = W.rightWrist, u = V3.norm({ x: r.x - e.x, y: r.y - e.y, z: r.z - e.z });
@@ -1281,9 +1282,24 @@ function motionPose(m, t) {
 }
 /* Body heights → court metres for a player standing at p (scaled by their real height). */
 function poseToWorld(i, p, pose) {
-  const h = PLAYERS[i].heightM, right = PLAYERS[i].side === "near" ? 1 : -1, w = {};
+  const h = PLAYERS[i].heightM, right = (PLAYERS[i].side === "near" ? 1 : -1) * (p.motion ? p.motion.flip : 1), w = {};
   for (const n in pose) w[n] = { x: p.x + pose[n][0] * h * right, y: p.y, z: Math.max(0, pose[n][1] * h) };
   return w;
+}
+/* Which way a captured serve faces (+1 = toward the player's right): where the tossing hand reaches before the toss.
+   The server faces the outside of the court, toward the nearest stands: his right on the deuce side, his left on the
+   ad side, so the motion is mirrored when he switches sides (CEO order). */
+function motionFacing(m) {
+  if (m.facing == null) {
+    const E = m.events, a = E.routine ?? E.start - 0.3, z = E.tossRelease;
+    let sum = 0; for (const f of m.frames) if (f.t >= a && f.t <= z && f.j.leftWrist && f.j.root) sum += f.j.leftWrist[0] - f.j.root[0];
+    m.facing = sum < 0 ? -1 : 1;
+  }
+  return m.facing;
+}
+function serveFlip(i, m) {
+  const right = PLAYERS[i].side === "near" ? 1 : -1, deuce = pos[i].x * right >= 0;
+  return (deuce ? 1 : -1) * motionFacing(m);
 }
 /* Advance player i's serve motion. During the serve the ball bounces in the routine, rides in the tossing hand,
    is tossed on one real throw that meets the racket at the motion's contact moment, and is then struck. */
@@ -1296,17 +1312,22 @@ function stepMotion(i, dt) {
     const H = PLAYERS[i].heightM, P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1;
     const wgt = Math.min(1, (bouncesEnd - mo.t) / 0.2) * Math.min(1, (mo.t - mo.t0) / 0.2);   // ease in and out of the routine
     const bump = (c, wd) => Math.exp(-((((f - c + 1.5) % 1) - 0.5) ** 2) / (2 * wd * wd));     // a soft pulse at phase c (wraps)
-    const push = 0.13 * bump(0.06, 0.06) + 0.06 * bump(0.96, 0.04);   // push down to release, then give a little on the catch
+    const push = 0.16 * bump(0.06, 0.06) + 0.07 * bump(0.96, 0.04);   // push down to release, then give a little on the catch
     const lean = 0.045 * wgt;                                          // he bends forward over the ball while bouncing
     for (const n of ["nose", "neck", "leftShoulder", "rightShoulder", "rightElbow", "rightWrist"]) if (W[n]) W[n].z -= lean * H;
-    if (W.leftElbow) W.leftElbow.z -= (lean + push * 0.45 * wgt) * H;
+    if (W.leftElbow) W.leftElbow.z -= (lean + push * 0.5 * wgt) * H;
     if (W.leftWrist) W.leftWrist.z -= (lean + push * wgt) * H;
+    if (W.leftWrist) {                                   // WRIST: the hand snaps down to push the ball, then cocks back up to catch it
+      const out = (PLAYERS[i].side === "near" ? 1 : -1) * mo.flip * motionFacing(m);   // the hand points out in front of him
+      const a = (0.25 + 1.0 * bump(0.05, 0.07) - 0.35 * bump(0.93, 0.06)) * wgt, L = 0.085 * H;   // 0 = flat, + = palm down
+      W.leftHand = { x: W.leftWrist.x + out * Math.cos(a) * L, y: W.leftWrist.y, z: W.leftWrist.z - Math.sin(a) * L };
+    }
     for (const n of ["leftKnee", "rightKnee"]) if (W[n]) W[n].z -= 0.012 * H * wgt * (1 + bump(0.06, 0.08));   // a little knee give
   }
   if (sv) {
     if (mo.t < bouncesEnd) {                             // ROUTINE: he bounces the ball ROUTINE.bounces times
-      const P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1, h = W.leftWrist;
-      Object.assign(ball, { x: h.x, y: h.y + 0.25, z: h.z * (2 * f - 1) ** 2 });   // hand → ground → hand
+      const P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1, h = W.leftHand || W.leftWrist;
+      Object.assign(ball, { x: h.x, y: h.y + 0.25, z: Math.max(0, h.z - 0.035) * (2 * f - 1) ** 2 });   // under the palm → ground → palm
     } else if (mo.t < E.tossRelease) {
       Object.assign(ball, W.leftWrist);                  // ball in the tossing hand
     } else {
@@ -1558,7 +1579,7 @@ function startRally(no = 1) {                            // no = 1st or 2nd serv
     // the 1st-serve clip includes his real routine; the 2nd doesn't, so he holds his stance while the ball bounces
     const t0 = m.events.routine != null ? m.events.routine : m.events.start - ROUTINE.seconds;
     rally.serve.captured = true;
-    pos[i].motion = { t: t0, m, t0 };
+    pos[i].motion = { t: t0, m, t0, flip: serveFlip(i, m) };
   }
   bug.classList.add("live");                     // scoreboard fades while the point is live
   renderScore();
