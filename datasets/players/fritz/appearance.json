@@ -4,17 +4,21 @@
   "country": "USA",
   "rank": 13,
   "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "signature": "tall (1.96 m), broad-shouldered American with short light-brown hair and his signature headband",
+  "exaggerate": [
+    "tall, square-shouldered sprite",
+    "thick headband always on, a strong colour block across the forehead",
+    "big, upright service motion"
+  ],
+  "confidence": "public",
+  "source": "widely documented public knowledge (ATP profile, broadcast coverage, Nov 2 2026 web check); not yet checked against Ryan's images; outfits wait on uploads; headband: hitc.com (fans wearing his signature headband, Dallas 2026); Wimbledon walk-on suit: puntodebreak.com 2026-06-30, outlookindia.com (Fritz vs Lajovic, Wimbledon 2026 R1)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
       "shirt": "#f4f4f0",
       "shorts": "#f4f4f0",
       "shoes": "#f4f4f0",
-      "notes": "all-white dress code; trim colours to research"
+      "notes": "all-white dress code; Wimbledon 2026 he walked on in a custom all-white suit with quick-release trousers he tore off on court (a walk-on idle animation); trim colours to research"
     },
     "hard": {
       "event": "US Open",
@@ -26,11 +30,16 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "calm and low-key; calls himself low-key; rare outbursts",
+    "style": "big serve and flat first-strike forehand; takes the ball early from the baseline",
+    "mannerisms": [
+      "adjusts the headband between points",
+      "quick, businesslike serve routine (bounce count to confirm from clips)"
+    ],
+    "celebrations": [
+      "clenched fist and a short shout toward his box"
+    ],
+    "notes": "public, general; mannerisms to confirm from clips for the Animator"
   },
   "media": {
     "images": "datasets/players/fritz/images/ (local only)",

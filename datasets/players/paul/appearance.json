@@ -4,10 +4,14 @@
   "country": "USA",
   "rank": 14,
   "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
+  "signature": "compact, athletic and very quick, with short dark-brown hair; easy, relaxed body language",
+  "exaggerate": [
+    "stocky, muscular legs",
+    "springy run with long slides on clay",
+    "relaxed shoulders between points"
+  ],
   "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "source": "widely documented public knowledge (ATP profile, broadcast coverage, Nov 2 2026 web check); not yet checked against Ryan's images; outfits wait on uploads; headwear (cap/headband) not confirmed in any source",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,11 +30,16 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "laid-back and easygoing, but loud on big points",
+    "style": "athletic all-court player: great movement, heavy forehand, comfortable at the net",
+    "mannerisms": [
+      "unhurried walk back to the line",
+      "towel between most points (to confirm)"
+    ],
+    "celebrations": [
+      "roar and fist pump to the crowd on big points"
+    ],
+    "notes": "public, general; to confirm from images and clips"
   },
   "media": {
     "images": "datasets/players/paul/images/ (local only)",

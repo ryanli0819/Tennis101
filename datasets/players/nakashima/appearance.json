@@ -4,10 +4,14 @@
   "country": "USA",
   "rank": 17,
   "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
+  "signature": "lean, tall-ish American with short dark hair and a very quiet, composed manner",
+  "exaggerate": [
+    "slim, upright posture",
+    "neat short dark hair",
+    "stillness between points (very little movement)"
+  ],
   "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "source": "widely documented public knowledge (ATP profile, broadcast coverage, Nov 2 2026 web check); not yet checked against Ryan's images; outfits wait on uploads",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,11 +30,16 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "very calm and reserved; rarely shows emotion",
+    "style": "clean, flat baseline hitting from both wings, especially the backhand; solid serve",
+    "mannerisms": [
+      "short, steady routine",
+      "barely reacts after errors"
+    ],
+    "celebrations": [
+      "small fist clench, eyes down"
+    ],
+    "notes": "public, general; to confirm from clips"
   },
   "media": {
     "images": "datasets/players/nakashima/images/ (local only)",

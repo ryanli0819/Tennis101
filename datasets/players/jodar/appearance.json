@@ -4,10 +4,13 @@
   "country": "ESP",
   "rank": 11,
   "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "signature": "tall (about 1.91 m), slim Spanish teenager with short dark hair and a big forehand",
+  "exaggerate": [
+    "tall, light frame (about 70 kg)",
+    "big serve-forehand one-two"
+  ],
+  "confidence": "public",
+  "source": "widely documented public knowledge (ATP profile, broadcast coverage, Nov 2 2026 web check); not yet checked against Ryan's images; outfits wait on uploads; height 6'3\" / 70 kg: delraybeachopen.com player page (other sites say 1.85 to 1.91 m); style: tennis.com (Barcelona 2026: pace and topspin forehand, serve-forehand punch, flat and kick serves); Rolex since 2026: rolex.com; clay shoes/apparel listed by tennisexpress.com (retailer, undated)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,11 +29,16 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "intense and composed; fist clench on big points",
+    "style": "aggressive baseliner: flat-plus-topspin forehand, serve-forehand one-two, flat first and high kick second serve",
+    "mannerisms": [
+      "clenched-fist celebration between points",
+      "routine to confirm from clips"
+    ],
+    "celebrations": [
+      "clenched fist and a shout"
+    ],
+    "notes": "public; mannerisms to confirm from clips"
   },
   "media": {
     "images": "datasets/players/jodar/images/ (local only)",

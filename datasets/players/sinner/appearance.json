@@ -38,11 +38,17 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "ice-calm and composed; very little emotion shown between points",
+    "style": "flat, early, aggressive baseline hitting from both wings; big serve; relentless pace",
+    "mannerisms": [
+      "quick, efficient routine",
+      "rarely argues with the umpire",
+      "towel at the back between some points"
+    ],
+    "celebrations": [
+      "understated fist pump; a rare roar on the biggest points"
+    ],
+    "notes": "public, general (Nov 2 2026); bounce count to confirm from his clips"
   },
   "media": {
     "images": "datasets/players/sinner/images/ (local only)",
