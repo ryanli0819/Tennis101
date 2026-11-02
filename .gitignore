@@ -25,3 +25,5 @@ datasets/players/**/*.gif
 # intake inbox: media and local logs stay on the Mac
 datasets/inbox/*
 !datasets/inbox/.gitkeep
+# the converter's private Python environment (PyAV)
+tools/.venv/

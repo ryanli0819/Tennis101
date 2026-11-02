@@ -7,6 +7,11 @@ and starts the intake (filing + pose detection) in the background. Rebuild it wi
     osacompile -o ~/Desktop/"Tennis101 Inbox.app" "tools/intake/Tennis101 Inbox.applescript"
 
 The first time, macOS asks whether the app may use your Documents folder: allow it.
+
+AV1 videos (YouTube downloads at 1440p and up) can't be decoded by macOS on M1/M2 Macs; the intake converts a 1080p H.264
+copy automatically with `tools/intake/convert.py` (PyAV in `tools/.venv`, git-ignored). To recreate that environment:
+
+    python3 -m venv tools/.venv && tools/.venv/bin/python -m pip install "av==17.0.0"
 (The background watcher, `install-watcher.sh`, is blocked by macOS privacy protection on this Mac; the app replaces it.)
 
 ## By hand

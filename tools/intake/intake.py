@@ -10,7 +10,8 @@ What it does with each file in datasets/inbox/ (sub-folders too):
    footwork / movement, match, practice; photos are looks and outfits.
 3. Moves it: serves → datasets/serves/<id>/, other strokes → datasets/video/<id>/<stroke>/, matches →
    datasets/video/<id>/match/, photos → datasets/players/<id>/images/.
-4. Videos: runs pose.swift (every person, every frame) → <name>.keypoints.json next to the clip; for serve clips also
+4. Videos: if macOS can't decode the codec (AV1 from YouTube on M1/M2), converts a 1080p H.264 copy first
+   (tools/intake/convert.py, PyAV in tools/.venv). Then runs pose.swift (every person, every frame) → <name>.keypoints.json next to the clip; for serve clips also
    pick_server.py (keeps the server). Saves 8 stills for the Appearance Scout in datasets/players/<id>/images/stills/.
 5. Logs everything in datasets/inbox/intake-log.json (what moved where, what was analysed, what failed).
 
@@ -98,8 +99,14 @@ for dirpath, dirs, files in os.walk(INBOX):
             probe = "" if DRY else subprocess.run(["swift", os.path.join(TOOLS, "codec.swift"), dest], capture_output=True, text=True).stdout
             if "decodable false" in probe:                   # e.g. AV1 from a YouTube download: Apple's decoder can't read it on M1/M2
                 entry["codec"] = probe.split()[1] if probe.split() else "?"
-                entry["note"] = f"can't decode {entry['codec']} on this Mac: re-download as H.264 (avc1) / 1080p, or convert it"
-                print("  ! " + entry["note"]); log.append(entry); done += 1; continue
+                venv = os.path.join(ROOT, "tools/.venv/bin/python")
+                conv = base + "-h264.mp4"
+                if os.path.exists(venv) and run([venv, "-I", os.path.join(ROOT, "tools/intake/convert.py"), dest, conv, "1080"]):
+                    entry["converted"] = os.path.relpath(conv, ROOT); print(f"  converted {entry['codec']} → H.264: {entry['converted']}")
+                    dest = conv                               # analyse the converted copy (the original stays next to it)
+                else:
+                    entry["note"] = f"can't decode {entry['codec']} on this Mac and the converter (tools/.venv, PyAV) failed or is missing"
+                    print("  ! " + entry["note"]); log.append(entry); done += 1; continue
             entry["pose"] = run(["swift", os.path.join(TOOLS, "pose.swift"), dest, kp, os.path.join(frames, "pose"), "1"])
             entry["keypoints"] = os.path.relpath(kp, ROOT)
             if kind and kind.startswith("serve") and len(found) == 1:   # one server to pick (not in a compilation)
