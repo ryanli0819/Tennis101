@@ -4,6 +4,14 @@ Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it 
 
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
 
+## v0.9.0 — Nov 1, 2026, 7 PM
+- Alcaraz serves his own way: Alcaraz now has his own full serve, built from analysis of his technique: hands raised to the chest before the toss, a pinpoint stance, the racket head cocked up, a short hitch at the trophy, a deep racket drop and an upright landing. His second serve tosses over his head, arches more and falls a little left. Every pro with a serve file serves his own way, from either end. (Oct 31, 6 PM · Claude for Ryan, 3bb52f6)
+- The far server faces you: When the player at the far end serves with his own motion, you see him from the front, with his face, toss and racket on the correct sides. (Oct 31, 6 PM · Claude for Ryan, 3bb52f6)
+- Watch your opponent's whole serve: While you receive, a serve-cam window in the top-right corner zooms in on your opponent so you see the whole motion, from the bounces to the landing, while the main view stays on your side for the return. (Oct 31, 6 PM · Claude for Ryan, 3bb52f6)
+- Alcaraz's current look: Alcaraz has his long, outgrown hair held back by a white hairband and a full beard. At the US Open he wears the grey-fade sleeveless top, black shorts and shoes, and a black sleeve on his racket arm, as in Ryan's clips. (Nov 1, 7 PM · Claude for Ryan, 3aaee70)
+- Alcaraz's real serve: Alcaraz's first serve now comes from Ryan's video of him (Indian Wells, slow motion): the real toss, his feet coming together, the deep knee bend and a jump to contact at about 2.9 m. (Nov 1, 7 PM · Claude for Ryan, 3aaee70)
+- Sinner's signature look: Sinner wears an oversized cap with bright ginger curls flaring out at the sides and the back of his neck, so you know him at a glance. (Nov 1, 7 PM · Claude for Ryan, 3aaee70)
+
 ## v0.8.0 — Oct 31, 2026, 6 PM
 - You can tell a player's front from their back: Seen from the front, a player has a face (eyebrows, eyes, nose, mouth, a shadow under the cap), a V-neck with buttons, kneecaps and laced shoes. Seen from behind there's no face at all: hair or the cap's strap, a plain jersey with a spine seam, the backs of the knees and heel tabs on the shoes. (Oct 28, 10 PM · Claude for Ryan, 1ca9e4d)
 - A different body for every direction: Running away shows the heels kicking up with the soles toward you; running toward you shows the knees driving; back-pedalling uses short, upright steps; running sideways turns the body so you see it in profile; short sideways moves are side-step shuffles. (Oct 29, 1 PM · Claude for Ryan, 2ced727)
