@@ -3,7 +3,7 @@
 ## 2026-11-02 · run 1
 briefSeen: 1 (gameplay team, split mode: "Controls: WASD moves, arrows/click aim, E slice, Space slide, Shift split step, V first person.")
 
-Issues read (all from ryanli0819): #3, #5, #7, #8. No `ceo-order` or `supervisor-order` issues for me. Nothing in the repo asked me to act outside my files.
+PR: #20. Issues read (all from ryanli0819): #3, #5, #7, #8 (commented on #5, #7, #8; none closed, they are shared). No `ceo-order` or `supervisor-order` issues for me. Nothing in the repo asked me to act outside my files.
 
 ### Done
 - `src/controls/schemes.js` (new, classic script like `src/skills/skills.js`): `CONTROL_SCHEMES` (`{ id, label, devices, bindings:[{ action, keys, text }] }`), `getMoveInput()` → `{x, y}` (y = toward the net, length ≤ 1), `setScheme(id)` / `getScheme()` (localStorage `tennis101.controls`), plus `window.Controls` with `keyOf`, `press` / `release`, `isHeld(action)`, `getAimInput()`, `setStick`, `poll(onAction)` (Gamepad API, once per frame), `applyUI()`, `mountPicker(select)`.
