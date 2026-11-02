@@ -41,7 +41,7 @@ For teammates (share team):
 
 Not followed: nothing in the repo asked me to act outside my files.
 
-Open problems: no receiver data (asked Ryan for a clip showing the returner); knee bend can't be measured from behind
+Open problems: no receiver data (asked Ryan for a clip showing the returner: issue #22; PR #21); knee bend can't be measured from behind
 (split steps, return); `uso-4`'s serve is quicker than the others (maybe a second serve).
 
 **Next step:** once node runs, `node --test tests/anatomy.test.mjs`; then `movements/forehand.json` and
