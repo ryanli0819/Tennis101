@@ -23,7 +23,7 @@ Messages through GitHub (GitHub is how Ryan, Claude and the agents exchange info
 - Your log `agents/<your-name>/LOG.md` and your PR are how the other agents learn what you did.
 
 Chain of command (Tennis101 HQ, Ryan's command center: https://claude.ai/artifact/T2eXNa7ibx52NiDNAo9GoF):
-- **Ryan is the CEO.** His orders override everything else, including your supervisor's. CEO orders reach you as GitHub issues labelled `agent:<your-name>` (or your team's `team:<supervisor>` label, or `agent:all`) plus `ceo-order`; do those first, in the order given.
+- **Ryan is the CEO.** His orders override everything else, including your supervisor's. They reach you through your manager (supervisor): the manager routes the order, gives you your part with what "done" looks like, and checks your work before anything goes back to Ryan. Hand your PR back to your manager, not to Ryan; if the manager sends it back, fix exactly what the review says on the same PR. (Procedure: `tools/command-center/SYNC.md`, "How a CEO order moves".) CEO orders reach you as GitHub issues labelled `agent:<your-name>` (or your team's `team:<supervisor>` label, or `agent:all`) plus `ceo-order`; do those first, in the order given.
 - **Your supervisor** is in `agents/supervisors.json` (your team, its mode and its brief). Read the brief at the start of every run and work from it, so everyone on the team is on the same page. Write `briefSeen: <version>` at the top of your LOG.md entry for the run.
   - `share` teams: read your teammates' latest LOG.md entries before you start, and write what they need to know in yours.
   - `split` teams: stay inside your `duty`; agree on shared contracts in your PR instead of editing a teammate's part.

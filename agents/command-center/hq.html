@@ -99,6 +99,15 @@ input, select, textarea { background: var(--sunk); border: 1px solid var(--line)
 .order-line .who { font: 600 10px/1 var(--body); text-transform: uppercase; letter-spacing: .06em; padding: 3px 5px; border-radius: 3px; flex: none }
 .who.ceo { background: var(--ceo); color: #fff } .who.sup { background: var(--court); color: #fff }
 .struck { text-decoration: line-through; color: var(--muted) }
+/* an order's way through the chain: CEO → manager → agents → manager's review → back to the CEO */
+.stages { display: flex; flex-wrap: wrap; gap: 3px; font: 600 10px/1 var(--body); text-transform: uppercase; letter-spacing: .05em }
+.stages span { padding: 4px 6px; border-radius: 3px; background: var(--sunk); color: var(--muted); border: 1px solid var(--line) }
+.stages span.past { color: var(--court); border-color: color-mix(in srgb, var(--court) 40%, var(--line)) }
+.stages span.now { background: var(--court); border-color: var(--court); color: #fff }
+.stages span.now.redo { background: var(--warn); border-color: var(--warn) }
+.assign { display: grid; gap: 3px; font-size: 12px; border-left: 2px solid var(--line); padding-left: 8px }
+.assign a { color: var(--court) }
+.report { font-size: 13px; background: var(--court-soft); border: 1px solid color-mix(in srgb, var(--court) 30%, var(--line)); border-radius: 5px; padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere }
 .add-row { display: flex; flex-wrap: wrap; gap: 8px }
 
 /* side panels */
@@ -180,11 +189,11 @@ img.face { object-fit: cover; image-rendering: auto }
   <section class="ceo" aria-labelledby="ceoTitle">
     <div class="ceo-head">
       <h2 id="ceoTitle">CEO order</h2>
-      <span class="rule"><b>Chain of command:</b> CEO → supervisor → agent. A CEO order to an agent, its supervisor or everyone overrides any open supervisor order there.</span>
+      <span class="rule"><b>Chain of command:</b> your order goes to the right manager, who splits it among the agents on the team, checks every agent's work, and only reports it done to you once all of it is correct. Your orders override any open supervisor order.</span>
     </div>
     <form class="order-form" id="orderForm">
       <select id="orderTo" aria-label="Order to"></select>
-      <textarea id="orderText" placeholder="e.g. Racket Coach: move the racket code into src/racket/ before anything else." aria-label="Order"></textarea>
+      <textarea id="orderText" placeholder="e.g. Make the slice bounce lower on grass. The right manager picks it up and splits it among the team." aria-label="Order"></textarea>
       <button class="btn primary" id="orderSend" type="submit">Issue order</button>
     </form>
   </section>
@@ -361,11 +370,11 @@ img.face { object-fit: cover; image-rendering: auto }
   function ordersFor(id) {
     const sup = supOf(id);
     return Object.entries(S.cmds).map(([k, c]) => ({ id: k, ...c }))
-      .filter(c => c.to === "agent:" + id || (sup && c.to === "sup:" + sup) || c.to === "all")
+      .filter(c => c.to === "agent:" + id || (sup && c.to === "sup:" + sup) || c.to === "all" || (c.assignments || []).some(x => x.agent === id))
       .sort((a, b) => (b.from === "ceo") - (a.from === "ceo") || (b.createdAt || 0) - (a.createdAt || 0));
   }
-  const targetsOf = to => to === "all" ? Object.keys(S.agents) : to.startsWith("sup:") ? Object.keys(S.agents).filter(a => supOf(a) === to.slice(4)) : [to.slice(6)];
-  const toLabel = to => to === "all" ? "Everyone" : to.startsWith("sup:") ? (S.sups[to.slice(4)]?.name || to.slice(4)) + " team" : agentName(to.slice(6));
+  const targetsOf = to => to === "auto" ? [] : to === "all" ? Object.keys(S.agents) : to.startsWith("sup:") ? Object.keys(S.agents).filter(a => supOf(a) === to.slice(4)) : [to.slice(6)];
+  const toLabel = to => to === "auto" ? "Auto: the right manager" : to === "all" ? "Everyone" : to.startsWith("sup:") ? (S.sups[to.slice(4)]?.name || to.slice(4)) + " team" : agentName(to.slice(6));
   const fromLabel = f => f === "ceo" ? "CEO" : f.startsWith("sup:") ? (S.sups[f.slice(4)]?.name || "Supervisor") : f;
 
   async function logAct(text) {
@@ -382,7 +391,7 @@ img.face { object-fit: cover; image-rendering: auto }
   async function issueOrder(to, text) {
     const now = Date.now();
     const ok = await write(async () => {
-      const ref = await db.collection("commands").add({ from: "ceo", to, text, status: "open", createdAt: now });
+      const ref = await db.collection("commands").add({ from: "ceo", to, text, status: "open", stage: "routing", createdAt: now });
       // CEO overrides: any open supervisor order that reaches the same agents is superseded.
       const hit = new Set(targetsOf(to));
       for (const [k, c] of Object.entries(S.cmds)) {
@@ -411,9 +420,9 @@ img.face { object-fit: cover; image-rendering: auto }
   }
   function renderTargets() {
     const sel = $("#orderTo"), keep = sel.value;
-    sel.replaceChildren(el("option", { value: "all" }, "Everyone"),
-      el("optgroup", { label: "Supervisor teams" }, Object.entries(S.sups).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([k, s]) => el("option", { value: "sup:" + k }, s.name + " team"))),
-      el("optgroup", { label: "Agents" }, Object.entries(S.agents).sort((a, b) => agentName(a[0]).localeCompare(agentName(b[0]))).map(([k]) => el("option", { value: "agent:" + k }, agentName(k)))));
+    sel.replaceChildren(el("option", { value: "auto" }, "Auto: the right manager"), el("option", { value: "all" }, "Everyone (every manager)"),
+      el("optgroup", { label: "Managers" }, Object.entries(S.sups).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([k, s]) => el("option", { value: "sup:" + k }, s.name))),
+      el("optgroup", { label: "An agent, through its manager" }, Object.entries(S.agents).sort((a, b) => agentName(a[0]).localeCompare(agentName(b[0]))).map(([k]) => el("option", { value: "agent:" + k }, agentName(k)))));
     if ([...sel.options].some(o => o.value === keep)) sel.value = keep;
     for (const id of ["#linkA", "#linkB"]) { const s = $(id), k = s.value;
       s.replaceChildren(...Object.keys(S.agents).sort((a, b) => agentName(a).localeCompare(agentName(b))).map(a => el("option", { value: a }, agentName(a))));
@@ -460,6 +469,25 @@ img.face { object-fit: cover; image-rendering: auto }
       lanes.append(lane);
     }
   }
+  // Where an order is: routing → the manager assigns → agents work → the manager reviews (and sends back) → done, reported to you.
+  const STAGES = [["routing", "To manager"], ["assigned", "Assigned"], ["working", "Agents working"], ["review", "Manager review"], ["done", "Done"]];
+  function stageTrack(c) {
+    const cur = c.status === "done" ? "done" : c.stage === "changes" ? "working" : (c.stage || "routing"), at = STAGES.findIndex(s => s[0] === cur);
+    return el("div", { class: "stages", "aria-label": "Stage" }, STAGES.map(([k, label], n) => el("span", { class: n < at ? "past" : n === at ? "now" + (c.stage === "changes" ? " redo" : "") : "" },
+      n === at && c.stage === "changes" ? "Redoing (round " + ((c.round || 1) + 1) + ")" : label)));
+  }
+  const ASSIGN = { assigned: "assigned", working: "working", submitted: "handed in, manager checking", changes: "sent back by the manager", approved: "approved by the manager" };
+  function orderDetail(c) {
+    const out = [];
+    const sup = c.sup && S.sups[c.sup];
+    if (sup) out.push(el("div", { class: "note" }, "Manager: " + sup.name + (c.routedWhy ? " · " + c.routedWhy : "")));
+    for (const a of c.assignments || []) out.push(el("div", { class: "assign" },
+      el("span", {}, el("b", {}, agentName(a.agent)), " — " + (ASSIGN[a.state] || a.state || "assigned"), a.pr ? " · " : null, a.pr ? el("a", { href: a.pr, target: "_blank", rel: "noopener" }, "PR " + (a.pr.match(/\d+$/) || [""])[0]) : null),
+      a.task ? el("span", { class: "note" }, a.task) : null,
+      a.review ? el("span", { class: "note" }, "Manager: " + a.review) : null));
+    if (c.status === "done" && c.report) out.push(el("div", { class: "report" }, el("b", {}, (sup ? sup.name : "Manager") + " reports: "), c.report));
+    return out;
+  }
   function renderOrders() {
     const box = $("#orders"); box.replaceChildren();
     const list = Object.entries(S.cmds).map(([k, c]) => ({ k, ...c })).filter(c => orderFilter === "all" || c.status === "open")
@@ -468,11 +496,12 @@ img.face { object-fit: cover; image-rendering: auto }
     for (const c of list) box.append(el("div", { class: "item" },
       el("div", { class: "item-row" }, el("span", { class: "order-line" }, el("span", { class: "who " + (c.from === "ceo" ? "ceo" : "sup") }, fromLabel(c.from)), "→ " + toLabel(c.to)),
         el("span", { class: "mono note" }, ago(c.createdAt))),
-      el("div", { class: c.status === "open" ? "" : "struck" }, c.text),
+      el("div", { class: c.status === "open" || c.status === "done" ? "" : "struck" }, c.text),
+      c.status === "open" || c.status === "done" ? stageTrack(c) : null,
+      ...orderDetail(c),
       c.status === "overridden" ? el("div", { class: "chip ceo", style: "justify-self:start" }, "Overridden by a CEO order") :
-      c.status === "open" ? el("div", { class: "add-row" }, el("button", { class: "btn small", type: "button", onclick: () => closeOrder(c.k, "done") }, "Mark done"),
-        el("button", { class: "btn small ghost", type: "button", onclick: () => closeOrder(c.k, "withdrawn") }, "Withdraw")) :
-      el("div", { class: "note" }, c.status === "done" ? "Done" : "Withdrawn")));
+      c.status === "open" ? el("div", { class: "add-row" }, el("button", { class: "btn small ghost", type: "button", onclick: () => closeOrder(c.k, "withdrawn") }, "Withdraw")) :
+      c.status === "done" ? null : el("div", { class: "note" }, "Withdrawn")));
   }
   function renderLinks() {
     const box = $("#links"); box.replaceChildren();
