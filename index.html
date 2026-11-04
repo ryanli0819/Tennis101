@@ -231,6 +231,7 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/animation/run-cycle.js?v=0.10.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.10.0"></script>
 <script src="src/serve/motion/alcaraz-serve.js?v=0.10.0"></script>
+<script src="src/court/court.js?v=0.10.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -455,21 +456,8 @@ function proj(x, y, z = 0) {
   return { x: BW / 2 + (x - CAM_X) * F / d, y: HZ + (CAM_H - z) * F / d, s: F / d };
 }
 
-/* THE STADIUM: an oval bowl all around the court — a low back wall, TIERS rows of seating rising up and back,
-   a roof ring on top, sky above. Every tier is packed with people (a dense crowd texture of heads and shoulders,
-   not spaced dots), with aisles every few sections. Built in court metres and projected like everything else,
-   so it moves with the camera. Shapes and colours follow Ryan's stadium references (datasets/courts/grass/).
-   Each surface has its own light: grass = a summer afternoon, clay = a warm late afternoon, hard = a night
-   session under floodlights. No real venue names or logos. */
-const SCENES = {
-  grass: { sky: ["#c9d1d7", "#d8dee2", "#e6eaec", "#eef0f0"], roof: "#8d969c", stands: "#2b2627", stairs: "#4a4446", wall: "#1f4a2c", trim: "#2e6b3e", lights: false, shade: 0.28,
-           crowd: ["#e9e4dc", "#c9b8a6", "#7d6b62", "#3b3a44", "#b04a4a", "#4f6d8f", "#d8c27a", "#f2efe8", "#9aa7b6"], skin: ["#e1b48b", "#c99a72", "#f0c9a2", "#8a5a3c", "#5a3a2a"] },
-  clay:  { sky: ["#efcfa8", "#f3dcc0", "#f7e7d2", "#fbf2e6"], roof: "#b9a48e", stands: "#4a2f27", stairs: "#7a5848", wall: "#7a3a26", trim: "#a5523a", lights: false, shade: 0.22,
-           crowd: ["#f1e6d6", "#d7b98f", "#8f5b46", "#33343d", "#c9504a", "#5b7aa0", "#e7c46a", "#fdf6ea", "#6f8b5a"], skin: ["#e9bd94", "#d4a07a", "#f4d1ad", "#8a5a3c", "#5a3a2a"] },
-  hard:  { sky: ["#04070d", "#070c17", "#0a1120", "#0d172b"], roof: "#1a2440", stands: "#0b1222", stairs: "#1d2a46", wall: "#14254a", trim: "#24427c", lights: true, shade: 0.4,
-           crowd: ["#3a4d74", "#5a3f55", "#2f5b5a", "#6b5a3e", "#4b3a6e", "#7a7f92", "#9a8a6e", "#c7c2b6"], skin: ["#b98d6c", "#a07656", "#cfa585", "#6a4532", "#4a3022"] },
-};
-const SCENE = () => SCENES[cfg.surface] || SCENES.hard;
+/* Sky, stadium, crowd, court surface, lines, net and ball: Court Designer, src/court/court.js (SCENES, STADIUM,
+   drawCourt, drawNet, drawBall). Light and shadows stay here. */
 /* LIGHT. shadows: where a shadow falls on the ground, per metre of height (court x, y); a = darkness.
    Daytime has one sun (grass: high summer sun from the left; clay: low late-afternoon sun from the right, long
    shadows). The night match has four floodlights: four short, faint shadows. sun: where the sun glows on screen
@@ -484,74 +472,11 @@ const LIGHTS = {
 };
 const LIGHT = () => LIGHTS[cfg.surface] || LIGHTS.hard;
 const litLeft = () => (LIGHT().shadows[0].x > 0);       // shadow falls right → the light comes from the left
-const STADIUM = { tiers: 16, segs: 72, a0: 12.6, b0: 20.6, wallH: 1.3, rise: 0.85, step: 1.0, aisleEvery: 9 };
-function ringPoint(k, j) {                               // tier k (0 = top of the back wall), angle slot j
-  const S = STADIUM, ang = j / S.segs * Math.PI * 2;
-  const grow = k < 0 ? 0 : 0.6 + k * S.step;             // tiers step back as they rise
-  return { x: (S.a0 + grow) * Math.cos(ang), y: (S.b0 + grow) * Math.sin(ang), z: k < 0 ? 0 : S.wallH + k * S.rise };
-}
-/* Crowd textures: rows of people packed shoulder to shoulder. "big" for near tiers, "small" for far ones. */
-let crowdPatterns = {};
-function makeCrowd() { crowdPatterns = {}; }
-function crowdPattern(surface, big) {
-  const key = surface + (big ? "B" : "S");
-  if (crowdPatterns[key]) return crowdPatterns[key];
-  const sc = SCENES[surface], c = document.createElement("canvas");
-  const cw = big ? 3 : 2, ch = big ? 5 : 3, cols = 16, rows = 4;          // one person = cw × ch pixels
-  c.width = cw * cols; c.height = ch * rows;
-  const g = c.getContext("2d"); let seed = surface.length * 97 + (big ? 13 : 7);
-  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, pick = a => a[rnd() * a.length | 0];
-  g.fillStyle = sc.stands; g.fillRect(0, 0, c.width, c.height);
-  for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
-    const x = q * cw + (r % 2 ? 1 : 0), y = r * ch;                      // alternate rows sit offset, like real seats
-    g.fillStyle = pick(sc.crowd); g.fillRect(x, y + (big ? 2 : 1), cw, ch - (big ? 3 : 1));   // shoulders
-    g.fillStyle = rnd() < 0.25 ? pick(["#2a1c14", "#5a4232", "#c9b48a", "#1b1b1f"]) : pick(sc.skin);
-    g.fillRect(x + (big ? 1 : 0), y + (big ? 0 : 0), big ? 1 : 1, big ? 2 : 1);              // head (hair or skin)
-  }
-  return (crowdPatterns[key] = b.createPattern(c, "repeat"));
-}
-function drawStadium() {
-  const S = STADIUM, sc = SCENE(), quads = [];
-  const P = []; for (let k = -1; k <= S.tiers + 1; k++) { P[k] = []; for (let j = 0; j <= S.segs; j++) { const r = ringPoint(Math.min(k, S.tiers), j % S.segs);
-    if (k === S.tiers + 1) { r.x *= 1.06; r.y *= 1.04; r.z += 1.8; }      // the roof ring overhangs a little
-    P[k][j] = { ...r, d: r.y + CAM_BACK, s: proj(r.x, r.y, r.z) }; } }
-  for (let k = -1; k <= S.tiers; k++) for (let j = 0; j < S.segs; j++) {
-    const c = [P[k][j], P[k][j + 1], P[k + 1][j + 1], P[k + 1][j]];
-    if (c.some(v => v.d < 1.2)) continue;                // behind or right at the camera: not visible
-    quads.push({ c, k, j, d: (c[0].d + c[1].d + c[2].d + c[3].d) / 4 });
-  }
-  quads.sort((a, c) => c.d - a.d);                       // far to near
-  for (const q of quads) {
-    const pts = q.c.map(v => v.s);
-    if (q.k === -1) b.fillStyle = sc.wall;               // the back wall
-    else if (q.k === S.tiers) b.fillStyle = sc.roof;     // the roof ring
-    else if (q.j % S.aisleEvery === 0) b.fillStyle = sc.stairs;   // aisle steps
-    else b.fillStyle = crowdPattern(cfg.surface, q.d < 26);
-    b.beginPath(); pts.forEach((p, i) => (i ? b.lineTo(p.x, p.y) : b.moveTo(p.x, p.y))); b.closePath(); b.fill();
-    if (q.k >= 0 && q.k < S.tiers) {                     // upper tiers sit in shade; a dark line marks each row's front edge
-      b.fillStyle = `rgba(0,0,0,${(sc.shade * q.k / S.tiers).toFixed(3)})`; b.fill();
-      b.strokeStyle = "rgba(0,0,0,0.28)"; b.lineWidth = 1; b.beginPath(); b.moveTo(pts[0].x, pts[0].y); b.lineTo(pts[1].x, pts[1].y); b.stroke();
-    }
-    if (q.k === -1) { b.strokeStyle = sc.trim; b.lineWidth = 1; b.beginPath(); b.moveTo(pts[3].x, pts[3].y); b.lineTo(pts[2].x, pts[2].y); b.stroke(); }
-    if (q.k === S.tiers && sc.lights && q.j % 6 === 0) { // floodlights along the roof (night session)
-      const m = pts[3]; b.fillStyle = "#fff6c8"; b.fillRect(Math.round(m.x) - 2, Math.round(m.y) - 1, 4, 2);
-      b.fillStyle = "rgba(255,246,200,0.10)"; b.fillRect(Math.round(m.x) - 6, Math.round(m.y) - 3, 12, 6);
-    }
-  }
-}
-
 function poly(pts, color) {
   b.fillStyle = color; b.beginPath();
   pts.forEach((p, i) => i ? b.lineTo(p.x, p.y) : b.moveTo(p.x, p.y));
   b.closePath(); b.fill();
 }
-function line(x1, y1, x2, y2, w = 0.05) {
-  const a = proj(x1 - w, y1), c = proj(x2 + w, y2), a2 = proj(x1 + w, y1), c2 = proj(x2 - w, y2);
-  // draw as thin quad so far lines stay ~1px
-  const p1 = proj(x1, y1), p2 = proj(x2, y2);
-  b.strokeStyle = "#f4f6f8"; b.lineWidth = 1; b.beginPath(); b.moveTo(Math.round(p1.x) + .5, Math.round(p1.y) + .5); b.lineTo(Math.round(p2.x) + .5, Math.round(p2.y) + .5); b.stroke();
-}
-
 /* Court surfaces. Colours here; pace (ball speed after the bounce) and bounce height used by the point flow.
    The Court Designer owns the detailed look, the Ball Physicist the real bounce physics. */
 const SURFACES = {
@@ -560,34 +485,6 @@ const SURFACES = {
   grass: { runoff: "#7d9f4e", court: "#8fae5a", stripe: "#6f9446", worn: "#b9a36a", pace: 1.12, bounce: 0.78 },
 };
 const SURF = () => SURFACES[cfg.surface] || SURFACES.hard;
-function drawCourt() {
-  const sc = SCENE(), su = SURF();
-  // sky in flat pixel bands down to the horizon; ground below it; then the stadium bowl over both
-  const skyEnd = Math.max(1, Math.round(HZ));
-  sc.sky.forEach((c, k) => { b.fillStyle = c; b.fillRect(0, Math.floor(skyEnd * k / sc.sky.length), BW, Math.ceil(skyEnd / sc.sky.length) + 1); });
-  b.fillStyle = su.runoff; b.fillRect(0, skyEnd, BW, BH - skyEnd);
-  drawStadium();
-  poly([proj(-COURT.DBL, COURT.L), proj(COURT.DBL, COURT.L), proj(COURT.DBL, -COURT.L), proj(-COURT.DBL, -COURT.L)], su.court); // playing surface
-  if (su.stripe) {                                        // grass: mowing stripes across the court, worn patches behind the baselines
-    for (let y0 = -19.5, k = 0; y0 < 19.5; y0 += 1.5, k++) if (k % 2) {     // stays inside the bowl's back wall
-      const y1 = Math.max(y0 + 1.5, -CAM_BACK + 0.5), y0c = Math.max(y0, -CAM_BACK + 0.5);
-      poly([proj(-11, y0c), proj(11, y0c), proj(11, y1), proj(-11, y1)], su.stripe);
-    }
-    for (const sy of [-1, 1]) poly([proj(-2.6, sy * 10.9), proj(2.6, sy * 10.9), proj(2.2, sy * 13.2), proj(-2.2, sy * 13.2)], su.worn);
-  }
-  const { L, DBL, SGL, SVC } = COURT;
-  [[-DBL, -L, DBL, -L], [-DBL, L, DBL, L], [-DBL, -L, -DBL, L], [DBL, -L, DBL, L], [-SGL, -L, -SGL, L], [SGL, -L, SGL, L],
-   [-SGL, -SVC, SGL, -SVC], [-SGL, SVC, SGL, SVC], [0, -SVC, 0, SVC], [0, -L, 0, -L + 0.2], [0, L, 0, L - 0.2]].forEach(l => line(...l));
-  const st = LIGHT().stand;
-  if (st) {                                               // the stands' shadow over part of the court, with a soft edge
-    const y0 = Math.max(st.y0, -CAM_BACK + 0.5), y1 = Math.max(y0 + 0.1, st.y1);
-    for (let k = 0; k < 3; k++) {
-      const g = k * 0.6, e = { x0: st.x0 === -14 ? st.x0 : st.x0 + g, x1: st.x1 === 14 ? st.x1 : st.x1 - g, y0: st.y0 === -20 ? y0 : y0 + g, y1 };
-      poly([proj(e.x0, e.y0), proj(e.x1, e.y0), proj(e.x1, e.y1), proj(e.x0, e.y1)], `rgba(10,14,30,${(st.a / 3).toFixed(3)})`);
-    }
-  }
-}
-
 /* CAST SHADOWS on the ground, from the light(s): a body-shaped silhouette from the feet away from each light,
    long under a low sun, short and faint under floodlights. Drawn under everything on the actor layer. */
 function drawShadows() {
@@ -634,18 +531,6 @@ function drawSunlight() {
   g.addColorStop(0, `rgba(255,244,214,${L.glow})`); g.addColorStop(0.35, `rgba(255,226,170,${L.glow * 0.35})`); g.addColorStop(1, "rgba(255,226,170,0)");
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   ctx.restore();
-}
-
-function drawNet() {
-  const post = 6.4, hp = 1.07, hc = 0.914;
-  const lb = proj(-post, 0, 0), rb = proj(post, 0, 0), lt = proj(-post, 0, hp), rt = proj(post, 0, hp), ct = proj(0, 0, hc), cb = proj(0, 0, 0);
-  b.fillStyle = "rgba(20,26,36,0.62)";
-  b.beginPath(); b.moveTo(lb.x, lb.y); b.lineTo(lt.x, lt.y); b.lineTo(ct.x, ct.y); b.lineTo(rt.x, rt.y); b.lineTo(rb.x, rb.y); b.closePath(); b.fill();
-  b.strokeStyle = "rgba(200,210,225,0.18)"; b.lineWidth = 1;
-  for (let i = 1; i < 6; i++) { const t = i / 6; b.beginPath(); b.moveTo(lb.x, lb.y + (lt.y - lb.y) * t); b.lineTo(cb.x, cb.y + (ct.y - cb.y) * t); b.lineTo(rb.x, rb.y + (rt.y - rb.y) * t); b.stroke(); }
-  b.strokeStyle = "#f4f6f8"; b.lineWidth = 2;
-  b.beginPath(); b.moveTo(lt.x, lt.y); b.lineTo(ct.x, ct.y); b.lineTo(rt.x, rt.y); b.stroke();
-  b.fillStyle = "#c9ced8"; b.fillRect(lb.x - 1, lt.y, 2, lb.y - lt.y); b.fillRect(rb.x - 1, rt.y, 2, rb.y - rt.y);
 }
 
 /* Pixel player sprite, scaled from real height. facing: 1 = back to camera (near), -1 = facing camera (far) */
@@ -1104,30 +989,7 @@ function drawPlayer(i, pos, swing) {
   }
 }
 
-/* THE BALL: round, optic yellow felt, lit from the light side and shaded on the other, a white seam that turns
-   with its spin, a fuzzy edge, and a faint trail when it flies fast. (Its shadow is drawn by drawShadows.) */
-const BALL_R = 0.1;                                      // drawn radius in metres: ~3× real, so it reads at any distance
-function drawBall(ball, inset = false) {
-  const p = proj(ball.x, ball.y, ball.z), r = Math.min(9, Math.max(2.2, BALL_R * p.s)), cx = q(p.x), cy = q(p.y);
-  const tr = ball._trail || (ball._trail = []);
-  const sp = tr.length ? Math.hypot(ball.x - tr[0].x, ball.y - tr[0].y, ball.z - tr[0].z) : 0;
-  if (sp > 0.12 && !matchMedia("(prefers-reduced-motion: reduce)").matches)      // moving fast: a short fading trail
-    tr.slice(0, 3).forEach((o, k) => { const t = proj(o.x, o.y, o.z);
-      b.fillStyle = `rgba(216,238,76,${0.22 - k * 0.06})`; b.beginPath(); b.arc(q(t.x), q(t.y), r * (0.9 - k * 0.15), 0, Math.PI * 2); b.fill(); });
-  if (!inset) { tr.unshift({ x: ball.x, y: ball.y, z: ball.z }); tr.length = Math.min(tr.length, 4); }
-  const lx = litLeft() ? -1 : 1, night = !LIGHT().sun;
-  b.save(); b.beginPath(); b.arc(cx, cy, r, 0, Math.PI * 2); b.clip();
-  b.fillStyle = "#a9c02c"; b.fillRect(cx - r, cy - r, r * 2, r * 2);                         // shaded side
-  b.fillStyle = "#d6ec3e"; b.beginPath(); b.arc(cx + lx * r * 0.28, cy - r * 0.24, r * 0.95, 0, Math.PI * 2); b.fill();   // lit felt
-  b.fillStyle = "#f2fb9a"; b.beginPath(); b.arc(cx + lx * r * 0.42, cy - r * 0.42, r * (night ? 0.24 : 0.32), 0, Math.PI * 2); b.fill();   // highlight
-  const th = (clock || gameT) * 11 + ball.x;                                               // the seam turns with the spin
-  b.strokeStyle = "rgba(250,250,238,0.95)"; b.lineWidth = Math.max(1 / AS, r * 0.16);
-  b.beginPath(); b.ellipse(cx - Math.cos(th) * r * 0.55, cy - Math.sin(th) * r * 0.55, r * 0.75, r * 0.5, th, -1.1, 1.1); b.stroke();
-  b.beginPath(); b.ellipse(cx + Math.cos(th) * r * 0.55, cy + Math.sin(th) * r * 0.55, r * 0.75, r * 0.5, th + Math.PI, -1.1, 1.1); b.stroke();
-  b.restore();
-  b.fillStyle = "rgba(226,244,120,0.55)";                                                  // felt fuzz around the edge
-  for (let k = 0; k < 10; k++) { const a = k * 0.628 + th * 0.2; b.fillRect(q(cx + Math.cos(a) * r) - 0.5 / AS, q(cy + Math.sin(a) * r) - 0.5 / AS, 1 / AS, 1 / AS); }
-}
+/* THE BALL is drawn by drawBall in src/court/court.js. */
 
 /* =====================================================================
    FOOTWORK — player-controlled bodies (same physics for both players)
@@ -1618,6 +1480,7 @@ function stepRally(dt) {
   }
   if (!sh.bounced) {
     sh.bounced = true;
+    Court.markBounce(sh.bounce.x, sh.bounce.y);           // ball mark on clay, squash on every surface
     if (sh.serve) {
       if (sh.serve.fault) return rally.serveNo === 1 ? retakeServe(2, sh.serve.net ? "NET · FAULT" : "FAULT") : endPoint(sh.recv, "DOUBLE FAULT");
       if (sh.serve.let) return retakeServe(rally.serveNo, "LET · " + (rally.serveNo === 1 ? "FIRST" : "SECOND") + " SERVE");
@@ -1865,7 +1728,7 @@ function startMatch({ bestOf, tbTo, surface, playerId, firstServer }) {
   cfg.firstServer = firstServer === "r" ? (Math.random() < 0.5 ? 0 : 1) : +firstServer;
   S = freshState(); history = []; matchOn = true;
   rally = null; cancelServe(); setPaused(false);
-  resetBodies(); resetPositions(); renderScore();
+  resetBodies(); resetPositions(); renderScore(); Court.reset();
   if (firstServer === "r") toast(`Coin toss: ${PLAYERS[cfg.firstServer].last} serves first`);
   queueServe(READY + 1.0, 1);                            // the first serve comes by itself after a short READY
 }
