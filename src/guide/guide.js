@@ -10,9 +10,9 @@
 (function () {
   const FALLBACK_SCHEMES = [
     { id: "keyboard", label: "Keyboard", devices: ["keyboard"], bindings: [
-      { action: "moveForward", keys: ["W", "↑"], text: "Move toward the net" },
-      { action: "moveBack",    keys: ["S", "↓"], text: "Move back" },
-      { action: "moveLeft",    keys: ["A", "←"], text: "Move left" },
+      { action: "moveForward", keys: ["W"], text: "Move toward the net" },
+      { action: "moveBack",    keys: ["S"], text: "Move back" },
+      { action: "moveLeft",    keys: ["A"], text: "Move left" },
       { action: "moveRight",   keys: ["D"],      text: "Move right" },
       { action: "aim",         keys: ["←", "↑", "→", "↓"], text: "Aim your serve" },
       { action: "splitStep",   keys: ["Shift"],  text: "Split step" },
