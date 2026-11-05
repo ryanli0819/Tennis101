@@ -7,7 +7,7 @@ briefSeen: 1 (look-world)
 Issues for me (all from ryanli0819): #1 "Motion update: Sinner's first serve is now in the game", #7 (outfits + Sinner video detail), #9 (2× detail is the minimum, the racket must read from behind, no name tags). No `ceo-order`, `team:look-world` or `supervisor-order` issues for me. Teammates' logs: court-designer and footage-scout have had no runs. Appearance Scout's setup note confirms the looks I draw (Sinner: cap + ginger curls; Alcaraz: long hair, beard, hairband, US Open grey fade + black arm sleeve).
 **For my teammates:** the serve figure now draws `look.style`, `cap`, `band`, `beard`, `shirtLow`, `sleeve`, `socks` and `wristband` from the dressed player. A new look style or outfit field needs a line in `src/players/player-art.js` (`drawHead` / `portrait`), so tell me in your log. The scripts in supervisors.json didn't trigger this run.
 
-**Done (PR from `agent/player-artist`):**
+**Done (draft PR #28 from `agent/player-artist`; commented on issues #1 and #9):**
 - New `src/players/player-art.js` → `window.PlayerArt`:
   - `drawCapturedFigure(i, p, W)` moved out of `index.html` (with the old `sigHead`) and redrawn in detail on exactly the Serve Analyst's joints. It never moves a joint.
     - Tapered limbs with a shaded side (away from `litLeft()`'s light) and a lit edge.
