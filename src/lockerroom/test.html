@@ -1,0 +1,51 @@
+<!doctype html>
+<!-- Locker room tests. Run: python3 -m http.server (repo root), open /src/lockerroom/test.html.
+     The title turns to PASS or FAIL; each check is listed on the page. -->
+<meta charset="utf-8">
+<title>Locker room tests</title>
+<body style="background:#111;color:#eee;font:14px system-ui">
+<pre id="out"></pre>
+<div id="lr"></div>
+<script src="../skills/skills.js"></script>
+<script src="lockerroom.js"></script>
+<script>
+  const out = document.getElementById("out"), el = document.getElementById("lr");
+  let fails = 0;
+  const check = (ok, what) => { if (!ok) fails++; out.textContent += (ok ? "ok   " : "FAIL ") + what + "\n"; };
+  const bodyStats = P => ({ reach: 0.44 * P.heightM + 0.69, accel: 8.6 / (P.weightKg / 75) / Math.sqrt(P.heightM / 1.85) });
+  const roster = [
+    { id: "sinner",  last: "SINNER",  first: "Jannik", code: "ITA", heightM: 1.91, weightKg: 77, shirt: "#23b59c", shorts: "#11233a", hair: "#c4672f", look: { style: "cap-curls" } },
+    { id: "alcaraz", last: "ALCARAZ", first: "Carlos", code: "ESP", heightM: 1.83, weightKg: 74, shirt: "#e2544a", shorts: "#f1f1ec", hair: "#2a1c14", look: { style: "long-band", beard: true } },
+    // an extra pro the module has never heard of: must render with no code changes
+    { id: "testpro", last: "LEFTY", first: "Test", code: "TST", heightM: 1.98, weightKg: 90, shirt: "#4060c0", shorts: "#202020", hair: "#333", hand: "left", backhand: "one" },
+  ];
+  const picked = [];
+  Lockerroom.render(el, { roster, bodyStats, selected: "sinner", onSelect: id => picked.push(id) });
+  const cards = [...el.querySelectorAll('[role="radio"]')];
+
+  check(el.querySelector('[role="radiogroup"]'), "cards sit in a radio group");
+  check(cards.length === 3, "one card per roster pro, extra pro included");
+  check(cards.map(c => c.dataset.id).join() === "sinner,alcaraz,testpro", "cards in roster order");
+  check(cards[0].getAttribute("aria-checked") === "true" && cards[0].tabIndex === 0 && cards[1].tabIndex === -1, "selected card is checked and the only tab stop");
+  check(cards[2].textContent.includes("LEFT-HANDED") && cards[2].textContent.includes("ONE-HANDED BACKHAND"), "extra pro shows left hand, one-handed backhand");
+  check(cards[0].textContent.includes("RIGHT-HANDED"), "default hand is right");
+  check(cards[2].querySelectorAll(".lr-skill").length === SKILLS.length, "extra pro shows all skills (neutral 10 without defaults)");
+  check(cards[2].querySelector(".lr-body").textContent.includes("1.56"), "reach comes from bodyStats");
+  check(el.querySelector(".lr-vs").textContent.includes("CARLOS ALCARAZ"), "head to head: Sinner vs the next pro");
+
+  cards[2].click();
+  check(picked.at(-1) === "testpro", "click calls onSelect with the right id");
+  check(cards[2].getAttribute("aria-checked") === "true" && cards[0].getAttribute("aria-checked") === "false", "click moves the check");
+  check(el.querySelector(".lr-vs").textContent.includes("TEST LEFTY"), "head to head follows the pick");
+
+  cards[2].dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+  check(picked.at(-1) === "sinner" && document.activeElement === cards[0], "ArrowRight wraps to the first pro and focuses it");
+  cards[0].dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+  check(picked.at(-1) === "testpro", "End selects the last pro");
+
+  Lockerroom.render(el, { roster: roster.slice(0, 1), bodyStats, selected: "sinner", onSelect: () => {} });
+  check(el.querySelector(".lr-vs").hidden, "a one-pro roster hides the head to head");
+
+  document.title = fails ? `FAIL (${fails})` : "PASS";
+  out.textContent += fails ? `\n${fails} failed\n` : "\nall passed\n";
+</script>
