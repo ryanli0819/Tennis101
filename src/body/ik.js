@@ -4,7 +4,8 @@
    Why three.js (compared in agents/body-animator/LOG.md): it runs in the browser with no build step, works on
    plain Bone hierarchies (no mesh to draw), and has per-joint limits; cannon-es ragdolls would need tuned motors
    to keep a foot exactly on its plant.
-   The library loads in the background. Until it has loaded (or if it can't, e.g. offline), and whenever a CCD
+   The library loads in the background, and only with ?body=skeleton or ?body=ccd (normal play downloads nothing
+   and uses the exact solver). Until it has loaded (or if it can't, e.g. offline), and whenever a CCD
    answer misses the target or bends the wrong way, the exact two-bone solution below is used instead
    (law of cosines, same limits). Both return the same thing: { mid, end, flex, solver }. */
 (function (root) {

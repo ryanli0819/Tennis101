@@ -46,3 +46,9 @@ A CCD answer is used only if it lands within 1 cm, bends toward the pole and sta
 3. Agree with the Player Artist (in the PR) on drawing `drawPlayer` from `getPose(i)` behind a flag.
 
 **For teammates:** `getPose(i)` is live every frame (court metres, read-only). Player Artist and Animator: draw from it whenever you're ready. Racket Coach: the right hand follows your `g`, so a grip outside the arm's reach (~0.63 m from the shoulder for Sinner) leaves a gap. Serve Analyst: `playMotion` accepts your Motion objects as they are, with no conversion.
+
+## 2026-11-05 · round 2 (Motion & Body review, PR #26)
+- Fixed exactly the review note: three.js / CCDIKSolver is now imported only with `?body=skeleton` or `?body=ccd`. Normal play downloads nothing and solves knees/elbows with the exact two-bone IK (`BodyIK.engine` = "analytic two-bone"). `?body=analytic` is no longer needed (it is the default).
+- Rebased on origin/main (879fc0b). Updated `src/body/README.md`, the `ik.js` / `body.js` headers.
+- Checked: osascript `new Function` syntax check of body.js, ik.js, skeleton.js and index.html's inline scripts — all OK. In the browser (local server): plain page → 0 three.js requests, engine "analytic two-bone"; `?body=skeleton` → 2 three.js requests, engine "three@0.170.0 CCDIKSolver", debug on; no console errors.
+- Handed back to Motion & Body.

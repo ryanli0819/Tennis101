@@ -5,7 +5,7 @@ A jointed skeleton for each player, built every frame from the footwork. It neve
 | File | What |
 |---|---|
 | `skeleton.js` | `BodySkeleton`: `JOINTS`, `BONES`, `LIMITS` (knee 0–135°, elbow 0–150°), `segments(P)` (Drillis & Contini 1966 via Winter 2009, scaled to `heightM`; optional `armSpanM`), `flexion(a, b, c)` |
-| `ik.js` | `BodyIK`: one limb to a target. three.js `CCDIKSolver` (three@0.170.0, jsdelivr, loads in the background) with a hinge and the joint's range; the exact two-bone solution is the fallback and the check |
+| `ik.js` | `BodyIK`: one limb to a target. The exact two-bone solution on normal play (no download). With `?body=skeleton` or `?body=ccd` it loads three.js `CCDIKSolver` (three@0.170.0, jsdelivr) in the background, with a hinge and the joint's range, and the exact answer stays the fallback and the check |
 | `body.js` | `Body.update(dt, { pos, PLAYERS, racket })`, `getPose(i)`, `playMotion(i, frames, { loop, flip })`, `Body.drawDebug` |
 | `test/body.test.mjs` | `node src/body/test/body.test.mjs` |
 | `check/mirror.py` | `python3 -I src/body/check/mirror.py`: the same gait checks in Python, for machines with no JS runtime |
@@ -26,4 +26,4 @@ Treat it as read-only. It is ready after the frame's `Body.update`, so draw from
 - **Motions:** `playMotion` plays frames (`j: {name: [side, up]}` or `[side, fwd, up]`, or `joints: {name: {x, y, z}}`, in body heights) joint for joint. The body blends in over 0.2 s and out over 0.25 s. A serve the game is playing (`pos[i].motion.world`) is picked up the same way, and the feet re-plant where the motion left them.
 
 ## See it
-`?body=skeleton` draws the bones over the sprites (left blue, right orange, racket yellow, planted toes as dots). `?body=analytic` skips loading three.js.
+`?body=skeleton` draws the bones over the sprites (left blue, right orange, racket yellow, planted toes as dots) and loads three.js for the CCD solver. `?body=ccd` loads the CCD solver without drawing. With no flag nothing is downloaded and the exact two-bone IK is used.

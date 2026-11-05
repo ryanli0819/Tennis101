@@ -10,7 +10,7 @@
    - Lean: the trunk tilts by atan(a / g), the angle that keeps the ground force through the body as it
      speeds up or brakes, plus a forward bend in the return stance.
    - Split-step: a ballistic hop (height g·T²/8 for the air time T), feet spreading, a crouch on landing.
-   - Knees and elbows are solved by IK (src/body/ik.js: three.js CCDIKSolver, exact fallback) inside their
+   - Knees and elbows are solved by IK (src/body/ik.js: the exact two-bone solver; three.js CCDIKSolver only with ?body=skeleton or ?body=ccd) inside their
      ranges (src/body/skeleton.js). The racket hand holds the Racket Coach's grip; the shoulders turn only as far
      as the arm needs to reach it.
    - playMotion(i, motion) plays a keyframed motion (a serve from src/serve/motion/) joint for joint, and the
@@ -348,6 +348,6 @@
   if (typeof location !== "undefined" && typeof document !== "undefined") {
     const q = new URLSearchParams(location.search).get("body");
     api.debug = q === "skeleton";
-    if (q !== "analytic") IK.load();                                      // three.js CCDIKSolver, in the background
+    if (q === "skeleton" || q === "ccd") IK.load();                       // three.js only when asked for; normal play: exact two-bone IK
   }
 })(typeof window !== "undefined" ? window : globalThis);
