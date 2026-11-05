@@ -48,7 +48,8 @@
         "src/players/"
       ],
       "feeds": [
-        "locker-room-designer"
+        "locker-room-designer",
+        "pov-camera"
       ],
       "contract": "draws getPose(i) + racket",
       "effort": "high"
@@ -69,6 +70,7 @@
       "feeds": [
         "body-animator",
         "player-artist",
+        "pov-camera",
         "serve-controller"
       ],
       "contract": "SERVE_MOTIONS[player] = { first, second }",
@@ -85,7 +87,8 @@
         "src/profile/"
       ],
       "feeds": [
-        "guide-writer"
+        "guide-writer",
+        "pov-camera"
       ],
       "contract": "serve input → { toss, power, spin, target, sweetSpot }",
       "effort": "high"
@@ -115,6 +118,7 @@
         "src/body/"
       ],
       "feeds": [
+        "animator",
         "player-artist"
       ],
       "contract": "getPose(i) · playMotion(i, frames)",
@@ -196,6 +200,114 @@
       ],
       "contract": "Lockerroom.render(el, …)",
       "effort": "medium"
+    },
+    {
+      "name": "pov-camera",
+      "title": "First-Person Camera",
+      "order": 13,
+      "runsAt": 13,
+      "job": "Your serve through your own eyes at your pro's real eye height: toss, look up, contact.",
+      "owns": [
+        "src/camera/"
+      ],
+      "feeds": [],
+      "contract": "CAMS.pov · povWanted()",
+      "effort": "high"
+    },
+    {
+      "name": "animator",
+      "title": "Animator",
+      "order": 14,
+      "runsAt": 14,
+      "job": "Pixel animation frames: running, direction changes, shuffles, plants, strokes, chosen from how the body really moves.",
+      "owns": [
+        "src/animation/"
+      ],
+      "feeds": [
+        "player-artist"
+      ],
+      "contract": "Anim.frame(p, B, near)",
+      "effort": "high"
+    },
+    {
+      "name": "footage-scout",
+      "title": "Footage Scout",
+      "order": 15,
+      "runsAt": 15,
+      "job": "Catalogs serve, forehand and backhand footage of the live ATP top 20, asks Ryan for the clips, and turns them into joints.",
+      "owns": [
+        "datasets/footage/"
+      ],
+      "feeds": [
+        "serve-analyst",
+        "racket-coach"
+      ],
+      "contract": "datasets/footage/top20.json",
+      "effort": "medium"
+    },
+    {
+      "name": "racket-coach",
+      "title": "Racket Coach",
+      "order": 16,
+      "runsAt": 16,
+      "job": "Learns the racket's path and how each pro carries it, and makes every swing, slice and serve move like the real one.",
+      "owns": [
+        "src/racket/",
+        "datasets/racket/"
+      ],
+      "reads": [
+        "datasets/footage/"
+      ],
+      "feeds": [
+        "animator",
+        "player-artist"
+      ],
+      "contract": "racketPose(i, p, ago) → { g, u, n, tilt, crouch, twoHands, slice }",
+      "effort": "high"
+    },
+    {
+      "name": "appearance-scout",
+      "title": "Appearance Scout",
+      "order": 17,
+      "runsAt": 17,
+      "job": "Researches every top-20 player's signature look (exaggerated so it reads in pixels), outfits for Wimbledon, the US Open and clay, and on-court personality, from Ryan's uploads first.",
+      "owns": [
+        "datasets/players/"
+      ],
+      "reads": [
+        "datasets/serves/",
+        "datasets/video/",
+        "datasets/footage/"
+      ],
+      "feeds": [
+        "player-artist",
+        "animator"
+      ],
+      "contract": "datasets/players/<id>/appearance.json",
+      "effort": "medium"
+    },
+    {
+      "name": "biomechanics-coach",
+      "title": "Biomechanics Coach",
+      "order": 18,
+      "runsAt": 18,
+      "job": "Studies human anatomy and how joints move in tennis (serve, strokes, return stance, running, split step), measures it from video, and keeps every in-game pose anatomically real.",
+      "owns": [
+        "datasets/anatomy/",
+        "tests/anatomy.test.mjs"
+      ],
+      "reads": [
+        "datasets/serves/",
+        "datasets/video/"
+      ],
+      "feeds": [
+        "body-animator",
+        "animator",
+        "racket-coach",
+        "serve-analyst"
+      ],
+      "contract": "datasets/anatomy/joints.json · movements/<name>.json",
+      "effort": "high"
     }
   ]
 }

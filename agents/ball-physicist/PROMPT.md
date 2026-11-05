@@ -11,6 +11,7 @@ Mission: the ball must move and bounce like a real tennis ball. Use an establish
 - Export the Ball contract from agents/README.md (`launchBall`, `stepBall`, `getBall`, `onBounce`, `onNet`). Replace the scripted arc in `planShot` / `stepRally`.
 - Skill points: Strength and Serve add a constant ball speed per point (`BODY[i].shotBonus` / `serveBonus`, from `src/skills/skills.js`, which the Skills Coach owns). Keep that relationship true in the real physics, so one point means the same extra m/s off the racket. Agree any change with the Skills Coach on an issue labelled `agent:skills-coach` + `agent:ball-physicist`, and note it in both logs.
 - Surfaces: `index.html` has a placeholder `SURFACES` table (`pace`, `bounce`) for grass, red clay and hard. Replace it with your real bounce model.
+- A slice shot type exists (`type === "slice"` in `planShot`): low, short, backspin. Today it's faked with `arc`, `kick.up < 1` and a long `t2`. Model it with real backspin: a flatter trajectory, a low bounce that checks up on clay and skids on grass.
 - Aiming still works: `planShot` solves launch velocity and spin so the ball lands near the wanted bounce point.
 - Keep the point flow: first bounce in or out, second bounce ends the point, then `awardPoint(winner)` → `afterPoint()`. Do not touch the scoring code.
 - You only move the ball. Court Designer draws it.

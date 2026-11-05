@@ -1,0 +1,70 @@
+{
+  "player": "alcaraz",
+  "name": "Carlos Alcaraz",
+  "country": "ESP",
+  "rank": 3,
+  "rankedOn": "2026-10-26",
+  "signature": "his current look: long, outgrown dark hair and a full beard, held back with a hairband",
+  "exaggerate": [
+    "long wavy hair falling past the ears to the neck, puffing up over the band",
+    "a bright white hairband",
+    "a thick dark beard on the front view",
+    "a black sleeve on the racket forearm (US Open)"
+  ],
+  "confidence": "Ryan + clips",
+  "source": "Ryan's direction (Nov 1, 2026); US Open vs Shelton clips: long hair, beard, arm sleeve",
+  "outfits": {
+    "hard": {
+      "event": "US Open",
+      "shirt": "#3c3f45",
+      "shirtLow": "#a3a7ad",
+      "shorts": "#1f2024",
+      "shoes": "#1d1d20",
+      "socks": "#141416",
+      "sleeve": "#121214",
+      "notes": "sleeveless top fading from charcoal at the shoulders to light grey at the waist; black arm sleeve on the racket forearm",
+      "from": "alcaraz us open against ben shelton*.mov"
+    },
+    "clay": {
+      "event": "Roland-Garros (red clay)",
+      "shirt": "#ef6a2c",
+      "shorts": "#f4f4f0",
+      "shoes": "#a6e04a",
+      "notes": "no clay clip yet: his orange sleeveless kit with white shorts and neon-green shoes from the hard-court close-up clip stands in",
+      "from": "alcaraz serve sideview close up.mov"
+    },
+    "grass": {
+      "event": "Wimbledon",
+      "shirt": "#f4f4f0",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "notes": "all-white dress code"
+    },
+    "other_clips": [
+      {
+        "clip": "alcaraz serve back view.mov",
+        "shirt": "#3b2a24",
+        "shorts": "#18181b",
+        "notes": "dark brown practice shirt, black shorts (Indian Wells)"
+      },
+      {
+        "clip": "alcaraz serve  side back view.mov",
+        "shirt": "#d24fc2",
+        "shorts": "#2f86d6",
+        "notes": "pink shirt, blue shorts (Indian Wells)"
+      }
+    ]
+  },
+  "personality": {
+    "temperament": null,
+    "style": null,
+    "mannerisms": [],
+    "celebrations": [],
+    "notes": "to research"
+  },
+  "media": {
+    "images": "datasets/players/alcaraz/images/ (local only)",
+    "video": "datasets/players/alcaraz/video/ and datasets/video/alcaraz/ (local only)",
+    "serves": "datasets/serves/alcaraz/"
+  }
+}

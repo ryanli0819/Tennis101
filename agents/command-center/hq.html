@@ -1,0 +1,678 @@
+<title>Tennis101 HQ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a club scoreboard over a court plan — the CEO's order bar on top, one lane per supervisor
+   (its agents stacked below it, like players in a draw), and the order book / wiring on the side.
+   Palette: light pink (blush) with sage green, calm and easy on the eyes; dusty rose marks the CEO. */
+:root {
+  --bg: #fbeef2; --panel: #fffafb; --sunk: #f7e7ec; --ink: #2f2a33; --muted: #7a6c76; --line: #ecd5dc;
+  --court: #4f8a72; --court-soft: #e3efe8; --ball: #9cc8b2; --ball-ink: #1f3a2e;
+  --ceo: #c0587a; --ceo-soft: #f9e0e8; --ok: #3f8f68; --warn: #b07a2a; --bad: #c0434f; --idle: #9a8b95;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1f1a1e; --panel: #2a2329; --sunk: #241e23; --ink: #f4eaef; --muted: #b9a8b2; --line: #3e333a;
+  --court: #8fc7ae; --court-soft: #22352d; --ball: #8fc7ae; --ball-ink: #13261d;
+  --ceo: #f0a0b8; --ceo-soft: #3f2732; --ok: #7fcfa5; --warn: #e6b56a; --bad: #f08a92; --idle: #a2939c; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #1f1a1e; --panel: #2a2329; --sunk: #241e23; --ink: #f4eaef; --muted: #b9a8b2; --line: #3e333a;
+  --court: #8fc7ae; --court-soft: #22352d; --ball: #8fc7ae; --ball-ink: #13261d;
+  --ceo: #f0a0b8; --ceo-soft: #3f2732; --ok: #7fcfa5; --warn: #e6b56a; --bad: #f08a92; --idle: #a2939c; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 14px/1.45 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 18px 40px }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: .01em; margin: 0; text-wrap: balance }
+button, input, select, textarea { font: inherit; color: inherit }
+button { cursor: pointer }
+:focus-visible { outline: 2px solid var(--court); outline-offset: 2px }
+.wrap { max-width: 1480px; margin: 0 auto; display: grid; gap: 16px }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums }
+.muted { color: var(--muted) }
+.label { font: 600 11px/1 var(--body); text-transform: uppercase; letter-spacing: .09em; color: var(--muted) }
+
+/* header: the scoreboard */
+.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px }
+.brand h1 { font-size: 40px; line-height: .95 }
+.brand p { margin: 4px 0 0; color: var(--muted) }
+.board { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--panel) }
+.board div { padding: 8px 14px; border-right: 1px solid var(--line); min-width: 92px }
+.board div:last-child { border-right: 0 }
+.board b { display: block; font: 700 26px/1 var(--display); font-variant-numeric: tabular-nums }
+.board span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em }
+.live { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted) }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--idle) }
+.live.on i { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent) }
+.live.warn i { background: var(--warn) }
+
+/* the CEO's order bar */
+.ceo { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--ceo); border-radius: 6px; padding: 14px; display: grid; gap: 10px }
+.ceo-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between }
+.ceo-head h2 { font-size: 22px; color: var(--ceo) }
+.order-form { display: grid; grid-template-columns: minmax(150px, 220px) 1fr auto; gap: 8px }
+.order-form textarea { min-height: 42px; resize: vertical }
+@media (max-width: 720px) { .order-form { grid-template-columns: 1fr } }
+input, select, textarea { background: var(--sunk); border: 1px solid var(--line); border-radius: 5px; padding: 8px 10px; width: 100%; min-width: 0 }
+.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 5px; padding: 8px 12px; font-weight: 600; white-space: nowrap }
+.btn:hover { border-color: var(--court) }
+.btn.primary { background: var(--ceo); border-color: var(--ceo); color: #fff }
+.btn.court { background: var(--court); border-color: var(--court); color: #fff }
+.btn.small { padding: 4px 8px; font-size: 12px }
+.btn.ghost { background: transparent }
+.btn:disabled { opacity: .5; cursor: not-allowed }
+.rule { font-size: 12px; color: var(--muted) }
+.rule b { color: var(--ceo) }
+
+/* main: lanes + side */
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start }
+@media (max-width: 1100px) { .main { grid-template-columns: 1fr } }
+.lanes { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; align-items: start; min-width: 0 }
+.lane { display: grid; gap: 8px; min-width: 0 }
+.sup { background: var(--court-soft); border: 1px solid color-mix(in srgb, var(--court) 35%, var(--line)); border-radius: 6px; padding: 12px; display: grid; gap: 8px }
+.sup-head { display: flex; justify-content: space-between; gap: 8px; align-items: start }
+.sup h3 { font-size: 21px; color: var(--court) }
+.mode { font: 600 11px/1 var(--body); text-transform: uppercase; letter-spacing: .07em; border: 1px solid var(--court); color: var(--court); border-radius: 99px; padding: 4px 8px; background: transparent }
+.brief { background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 8px 10px; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere }
+.brief-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: space-between }
+.agent { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 6px; text-align: left; width: 100%; min-width: 0 }
+.agent:hover { border-color: var(--court) }
+.agent-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline }
+.agent-name { font: 700 17px/1.1 var(--display); letter-spacing: .01em }
+.agent .face { width: 30px; height: 30px; border-width: 1px; flex: none }
+.task { font-size: 13px; overflow-wrap: anywhere }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden }
+.bar i { display: block; height: 100%; background: var(--court) }
+.chips { display: flex; flex-wrap: wrap; gap: 4px }
+.chip { font-size: 11px; border-radius: 99px; padding: 2px 7px; border: 1px solid var(--line); color: var(--muted); background: var(--sunk); white-space: nowrap }
+.chip.ceo { border-color: var(--ceo); color: var(--ceo); background: var(--ceo-soft) }
+.chip.warn { border-color: var(--warn); color: var(--warn) }
+.chip.link { border-style: dashed }
+.pill { font: 600 11px/1 var(--body); text-transform: uppercase; letter-spacing: .06em; padding: 4px 7px; border-radius: 4px; white-space: nowrap; color: #fff; background: var(--idle) }
+.pill.running { background: var(--ok) } .pill.queued { background: var(--court) } .pill.review { background: var(--warn) }
+.pill.blocked { background: var(--bad) } .pill.done { background: color-mix(in srgb, var(--ok) 55%, var(--idle)) } .pill.new { background: var(--ceo) }
+.order-line { font-size: 12px; display: flex; gap: 6px; align-items: baseline; overflow-wrap: anywhere }
+.order-line .who { font: 600 10px/1 var(--body); text-transform: uppercase; letter-spacing: .06em; padding: 3px 5px; border-radius: 3px; flex: none }
+.who.ceo { background: var(--ceo); color: #fff } .who.sup { background: var(--court); color: #fff }
+.struck { text-decoration: line-through; color: var(--muted) }
+/* an order's way through the chain: CEO → manager → agents → manager's review → back to the CEO */
+.stages { display: flex; flex-wrap: wrap; gap: 3px; font: 600 10px/1 var(--body); text-transform: uppercase; letter-spacing: .05em }
+.stages span { padding: 4px 6px; border-radius: 3px; background: var(--sunk); color: var(--muted); border: 1px solid var(--line) }
+.stages span.past { color: var(--court); border-color: color-mix(in srgb, var(--court) 40%, var(--line)) }
+.stages span.now { background: var(--court); border-color: var(--court); color: #fff }
+.stages span.now.redo { background: var(--warn); border-color: var(--warn) }
+.assign { display: grid; gap: 3px; font-size: 12px; border-left: 2px solid var(--line); padding-left: 8px }
+.assign a { color: var(--court) }
+.rate { display: grid; grid-template-columns: 76px 1fr auto; gap: 6px; align-items: start }
+@media (max-width: 420px) { .rate { grid-template-columns: 1fr } }
+.score { font: 700 12px/1 var(--mono, monospace); border-radius: 4px; padding: 4px 6px; background: var(--ceo); color: #fff; white-space: nowrap }
+.report { font-size: 13px; background: var(--court-soft); border: 1px solid color-mix(in srgb, var(--court) 30%, var(--line)); border-radius: 5px; padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere }
+.add-row { display: flex; flex-wrap: wrap; gap: 8px }
+
+/* side panels */
+.side { display: grid; gap: 14px; min-width: 0 }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 10px; min-width: 0 }
+.panel h2 { font-size: 20px }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px }
+.list { display: grid; gap: 8px; max-height: 420px; overflow: auto; min-width: 0 }
+.item { border-top: 1px solid var(--line); padding-top: 8px; display: grid; gap: 4px; min-width: 0 }
+.item:first-child { border-top: 0; padding-top: 0 }
+.item-row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline }
+.empty { color: var(--muted); font-size: 13px; padding: 6px 0 }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap }
+.tab { border: 1px solid var(--line); background: var(--sunk); border-radius: 5px; padding: 5px 10px; font-weight: 600; font-size: 12px }
+.tab[aria-selected="true"] { background: var(--court); border-color: var(--court); color: #fff }
+form.mini { display: grid; gap: 6px }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 6px }
+.note { font-size: 12px; color: var(--muted) }
+.banner { border: 1px solid var(--warn); color: var(--ink); background: color-mix(in srgb, var(--warn) 12%, var(--panel)); border-radius: 6px; padding: 8px 12px; font-size: 13px }
+
+/* drawer for one agent / forms */
+.scrim { position: fixed; inset: 0; background: rgba(5, 10, 20, .45); z-index: 20 }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(480px, 100%); background: var(--panel); border-left: 1px solid var(--line); z-index: 21;
+  overflow: auto; padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) 16px; display: grid; gap: 12px; align-content: start }
+.drawer h2 { font-size: 28px }
+.field { display: grid; gap: 4px }
+/* view switch + family tree */
+.views { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--panel) }
+.views button { border: 0; background: transparent; padding: 7px 14px; font-weight: 600 }
+.views button[aria-pressed="true"] { background: var(--court); color: #fff }
+.tree { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 18px 14px; overflow-x: auto }
+.tree-inner { display: grid; justify-items: center; gap: 0; min-width: max-content }
+.node { display: grid; justify-items: center; gap: 4px; text-align: center; background: none; border: 0; padding: 4px; border-radius: 8px; color: inherit; width: 108px }
+.node:hover .face { outline: 2px solid var(--court) }
+.node .fn { font: 700 15px/1.05 var(--display); letter-spacing: .01em; text-wrap: balance }
+.node .who { font-size: 10.5px; color: var(--muted); line-height: 1.2 }
+.face { width: 64px; height: 64px; border-radius: 50%; background: var(--court-soft); image-rendering: pixelated; display: block; border: 2px solid var(--line) }
+.face.ceo { border-color: var(--ceo) }
+img.face { object-fit: cover; image-rendering: auto }
+.credits { font-size: 11.5px; color: var(--muted); margin-top: 10px; max-width: 760px; justify-self: center }
+.credits summary { cursor: pointer; text-align: center }
+.credits ul { columns: 2 220px; margin: 8px 0 0; padding-left: 18px }
+.credits a { color: var(--court) }
+.node .pill { font-size: 9.5px; padding: 3px 5px }
+.ceo-node .fn { color: var(--ceo); font-size: 18px }
+.stem { width: 2px; height: 22px; background: var(--line) }
+.gen { display: flex; gap: 22px; align-items: flex-start; position: relative; padding-top: 22px }
+.gen::before { content: ""; position: absolute; top: 0; height: 2px; background: var(--line); left: var(--l, 50%); right: var(--r, 50%) }
+.branch { display: grid; justify-items: center; position: relative }
+.branch::before { content: ""; position: absolute; top: -22px; left: 50%; width: 2px; height: 22px; background: var(--line) }
+.sup-node .fn { color: var(--court); font-size: 17px }
+.kids { display: grid; grid-template-columns: repeat(2, auto); gap: 10px 6px; justify-content: center; position: relative; padding-top: 22px; margin-top: 2px }
+.kids::before { content: ""; position: absolute; top: 0; left: 50%; width: 2px; height: 22px; background: var(--line) }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 12px; color: var(--muted); margin-top: 14px; justify-content: center }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 6px; z-index: 30; font-size: 13px }
+@media (prefers-reduced-motion: no-preference) { .agent, .btn { transition: border-color .15s } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Tennis101 HQ</h1>
+      <p>Your agent team, live. You are the CEO: your orders override every supervisor.</p>
+    </div>
+    <div style="display:grid;gap:6px;justify-items:end">
+      <span class="live" id="live"><i></i><span id="liveText">Connecting…</span></span>
+      <div class="board" aria-label="Team status">
+        <div><b id="nRunning">–</b><span>Running</span></div>
+        <div><b id="nQueued">–</b><span>Queued</span></div>
+        <div><b id="nReview">–</b><span>Need you</span></div>
+        <div><b id="nSync">–</b><span>Off brief</span></div>
+        <div><b id="nOrders">–</b><span>Open orders</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <section class="ceo" aria-labelledby="ceoTitle">
+    <div class="ceo-head">
+      <h2 id="ceoTitle">CEO order</h2>
+      <span class="rule"><b>Chain of command:</b> your order goes to the right manager, who splits it among the agents on the team and checks every agent's work. Once all of it is correct, the manager merges it to the site and reports to you. You test it and rate the merge and the manager 0–10. Your orders override any open supervisor order.</span>
+    </div>
+    <form class="order-form" id="orderForm">
+      <select id="orderTo" aria-label="Order to"></select>
+      <textarea id="orderText" placeholder="e.g. Make the slice bounce lower on grass. The right manager picks it up and splits it among the team." aria-label="Order"></textarea>
+      <button class="btn primary" id="orderSend" type="submit">Issue order</button>
+    </form>
+  </section>
+
+  <div class="main">
+    <div style="display:grid;gap:12px;min-width:0">
+      <div class="add-row" style="justify-content:space-between">
+        <div class="views" role="group" aria-label="View">
+          <button type="button" id="vBoard" aria-pressed="true">Board</button>
+          <button type="button" id="vTree" aria-pressed="false">Family tree</button>
+        </div>
+        <span class="add-row">
+        <button class="btn court" id="newAgent" type="button">+ New agent</button>
+        <button class="btn" id="newSup" type="button">+ New supervisor</button>
+        </span>
+      </div>
+      <div class="tree" id="tree" hidden></div>
+      <div class="lanes" id="lanes"><div class="empty">Loading the team…</div></div>
+    </div>
+
+    <aside class="side">
+      <section class="panel" aria-labelledby="ordersTitle">
+        <div class="panel-head"><h2 id="ordersTitle">Order book</h2>
+          <div class="tabs" role="tablist">
+            <button class="tab" role="tab" data-f="open" aria-selected="true" type="button">Open</button>
+            <button class="tab" role="tab" data-f="all" aria-selected="false" type="button">All</button>
+          </div></div>
+        <div class="list" id="orders"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="linksTitle">
+        <div class="panel-head"><h2 id="linksTitle">Correlations</h2><span class="note">who shares what with whom</span></div>
+        <div class="list" id="links"></div>
+        <form class="mini" id="linkForm">
+          <div class="two"><select id="linkA" aria-label="From agent"></select><select id="linkB" aria-label="To agent"></select></div>
+          <div class="two">
+            <select id="linkKind" aria-label="Kind">
+              <option value="feeds">feeds data to</option><option value="shares">shares everything with</option>
+              <option value="waits on">waits on</option><option value="reviews">reviews the work of</option><option value="must not overlap">must not overlap with</option>
+            </select>
+            <input id="linkNote" placeholder="what, e.g. serve keypoints" aria-label="Note">
+          </div>
+          <button class="btn small" type="submit">Add correlation</button>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="scriptsTitle">
+        <div class="panel-head"><h2 id="scriptsTitle">Scripts</h2><span class="note">standing rules: when … then …</span></div>
+        <div class="list" id="scripts"></div>
+        <form class="mini" id="scriptForm">
+          <input id="scriptWhen" placeholder="When… e.g. Serve Analyst exports a new motion" aria-label="When">
+          <input id="scriptThen" placeholder="Then… e.g. Racket Coach re-measures the racket path from it" aria-label="Then">
+          <button class="btn small" type="submit">Add script</button>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="actTitle">
+        <h2 id="actTitle">Activity</h2>
+        <div class="list" id="activity"></div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<div id="overlay" hidden><div class="scrim" id="scrim"></div><div class="drawer" id="drawer" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) { if (v == null || v === false) continue;
+      if (k === "class") n.className = v; else if (k.startsWith("on")) n.addEventListener(k.slice(2), v); else if (k === "text") n.textContent = v; else n.setAttribute(k, v === true ? "" : v); }
+    for (const k of kids.flat()) if (k != null) n.append(k.nodeType ? k : document.createTextNode(String(k)));
+    return n; };
+  const S = { agents: {}, sups: {}, cmds: {}, links: {}, scripts: {}, feed: [] };
+  let db = null, canWrite = true, orderFilter = "open";
+  const STATUS = { running: "Running", queued: "Queued", review: "Needs you", blocked: "Blocked", idle: "Idle", done: "Done", new: "New" };
+  const ago = t => { if (!t) return "—"; const s = (Date.now() - t) / 1000;
+    return s < 60 ? "just now" : s < 3600 ? Math.floor(s / 60) + " min ago" : s < 86400 ? Math.floor(s / 3600) + " h ago" : Math.floor(s / 86400) + " d ago"; };
+  const toast = m => { const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2600); };
+  const slug = s => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+  const agentName = id => S.agents[id]?.title || id;
+  const supOf = id => S.agents[id]?.supervisor || null;
+
+  /* ---------- faces: each agent wears a tennis pro's face (16×16 pixel portrait) ----------
+     Identity comes from hair, cap, hairband and beard, drawn two-tone in the page's colours (no guessed skin tones).
+     Hair colour only where it is part of the look. "draft" = the Appearance Scout still has to confirm it. */
+  const PROS = {
+    sinner:  { name: "Jannik Sinner", hair: "#e0702a", style: "cap", cap: "#f2f2ef", ok: true },
+    alcaraz: { name: "Carlos Alcaraz", hair: "#2a1c14", style: "band", band: "#f6f6f2", beard: true, ok: true },
+    zverev:  { name: "Alexander Zverev", hair: "#d9c27a", style: "swept" },
+    medvedev:{ name: "Daniil Medvedev", hair: "#6b4a2e", style: "short", long: true },
+    djokovic:{ name: "Novak Djokovic", hair: "#1e1a18", style: "short" },
+    shelton: { name: "Ben Shelton", style: "curly" }, fils: { name: "Arthur Fils", style: "short" },
+    "de-minaur": { name: "Alex de Minaur", style: "short" }, tiafoe: { name: "Frances Tiafoe", style: "short" },
+    fritz: { name: "Taylor Fritz", style: "swept" }, "auger-aliassime": { name: "Félix Auger-Aliassime", style: "band" },
+    cobolli: { name: "Flavio Cobolli", style: "curly" }, paul: { name: "Tommy Paul", style: "swept" },
+    mensik: { name: "Jakub Mensik", style: "short" }, nakashima: { name: "Brandon Nakashima", style: "short" },
+    tien: { name: "Learner Tien", style: "short" }, cerundolo: { name: "Francisco Cerúndolo", style: "short" },
+    bublik: { name: "Alexander Bublik", style: "short" }, rublev: { name: "Andrey Rublev", style: "short" },
+  };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  function drawFace(cv, proId) {
+    const p = PROS[proId] || { style: "short" }, g = cv.getContext("2d"), S = 16;
+    cv.width = S; cv.height = S; g.clearRect(0, 0, S, S);
+    const skin = css("--panel"), line = css("--ink"), hair = p.hair || css("--muted"), px = (x, y, w = 1, h = 1, c) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
+    px(4, 5, 8, 8, skin); px(5, 13, 6, 1, skin); px(3, 8, 1, 2, skin); px(12, 8, 1, 2, skin);             // face, chin, ears
+    px(6, 14, 4, 2, skin);                                                                              // neck
+    if (p.style === "cap") {                                                                            // Sinner: oversized cap, ginger curls flaring out
+      px(2, 6, 2, 3, hair); px(12, 6, 2, 3, hair); px(1, 7, 1, 1, hair); px(14, 7, 1, 1, hair); px(3, 9, 1, 2, hair); px(12, 9, 1, 2, hair);
+      px(3, 2, 10, 4, p.cap); px(2, 5, 13, 1, css("--muted")); px(7, 1, 2, 1, p.cap);
+    } else if (p.style === "band") {                                                                    // long hair held by a hairband
+      px(3, 2, 10, 3, hair); px(2, 4, 2, 8, hair); px(12, 4, 2, 8, hair); px(3, 5, 10, 1, p.band || css("--ball"));
+    } else if (p.style === "curly") {
+      for (let x = 3; x < 13; x += 2) px(x, 2, 2, 2, hair); px(3, 4, 10, 1, hair); px(3, 3, 1, 4, hair); px(12, 3, 1, 4, hair);
+    } else if (p.style === "swept") { px(4, 3, 8, 2, hair); px(9, 2, 4, 1, hair); px(3, 4, 1, 3, hair); px(12, 4, 1, 2, hair); }
+    else { px(4, 3, 8, 2, hair); px(3, 4, 1, p.long ? 3 : 2, hair); px(12, 4, 1, p.long ? 3 : 2, hair); }
+    px(6, 8, 1, 1, line); px(9, 8, 1, 1, line);                                                         // eyes
+    if (p.beard) { px(4, 10, 8, 3, hair); px(5, 13, 6, 1, hair); px(7, 11, 2, 1, skin); }                // beard, mouth through it
+    else px(7, 11, 2, 1, line);
+  }
+  /* Real photos (Wikimedia Commons, free licences, credited below); the pixel portrait stands in where there is none. */
+  const PHOTOS = {"sinner": {"src": "/_blob/3b16b8a8d856e45cbc3fa1640a459733", "license": "Public domain", "author": "The White House", "page": "https://commons.wikimedia.org/wiki/File:Jannik_Sinner_2025_US_Open.jpg"}, "alcaraz": {"src": "/_blob/c0458cb8b00e9fbdc998da153c995048", "license": "CC BY-SA 4.0", "author": "Barcex", "page": "https://commons.wikimedia.org/wiki/File:25th_Laureus_World_Sports_Awards_-_Red_Carpet_-_Carlos_Alcaraz_-_240422_192324_(cropped).jpg"}, "djokovic": {"src": "/_blob/cbe5e9c15b5e9a327579f10f3da3b0c9", "license": "CC BY-SA 4.0", "author": "Andymiah", "page": "https://commons.wikimedia.org/wiki/File:Novak_Djokovic_Paris_2024_Olympic_Games_(cropped).jpg"}, "shelton": {"src": "/_blob/0dd24eab32eceef31e93864717f584ed", "license": "CC BY-SA 4.0", "author": "Peter Arnold", "page": "https://commons.wikimedia.org/wiki/File:Ben_Shelton,_media_conference,_Swiss_Indoors_Basel_2025_(cropped).jpg"}, "medvedev": {"src": "/_blob/eb269743217132ccad27c5b9d12272b3", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:Daniil_Medvedev_(2025_DC_Open)_05_(cropped).jpg"}, "fils": {"src": "/_blob/cc6543a8cedb3710cca11190379ec4a9", "license": "CC BY-SA 2.0", "author": "si.robi", "page": "https://commons.wikimedia.org/wiki/File:Fils_BOR22_(52083970501).jpg"}, "de-minaur": {"src": "/_blob/344313faba81d7605f57dcc17c567306", "license": "CC BY-SA 4.0", "author": "Barcex", "page": "https://commons.wikimedia.org/wiki/File:Alex_de_Minaur_2024.jpg"}, "tiafoe": {"src": "/_blob/c4d48d0e7430e19d2b3ef2e57a508e24", "license": "CC BY-SA 4.0", "author": "Rickmunroe01", "page": "https://commons.wikimedia.org/wiki/File:FrancesTiafo.jpg"}, "fritz": {"src": "/_blob/5baf72f7bfd645152c4960a0daf30fa9", "license": "CC BY-SA 4.0", "author": "Rickmunroe01", "page": "https://commons.wikimedia.org/wiki/File:Taylor_Fritz_-_Delray_Beach_Open_Final_Round_(cropped).jpg"}, "zverev": {"src": "/_blob/6d2d0c23c7db02fc090b1ac63e4d11ad", "license": "CC BY-SA 4.0", "author": "Rick Munroe", "page": "https://commons.wikimedia.org/wiki/File:Alexander_Zverev_(cropped).jpg"}, "auger-aliassime": {"src": "/_blob/e9c75721c8fe66dcb5d9276cfd2c9076", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:F%C3%A9lix_Auger-Aliassime_(2023_DC_Open)_01_(cropped).jpg"}, "cobolli": {"src": "/_blob/bcc9445a08a6ce2fdcf28030ae4076da", "license": "CC BY-SA 2.0", "author": "si.robi", "page": "https://commons.wikimedia.org/wiki/File:Cobolli_RGQ23_(52944096963).jpg"}, "paul": {"src": "/_blob/bac22ee7912eec8d4fe46a511456b1ad", "license": "CC BY-SA 4.0", "author": "Gatorfan252525", "page": "https://commons.wikimedia.org/wiki/File:Tommy_Paul_at_the_2026_Delray_Beach_Open.jpg"}, "mensik": {"src": "/_blob/ecf739accfcaa8ac8b4c8939990f47f3", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:Jakub_Men%C5%A1%C3%ADk_(2023_US_Open)_14_(cropped).jpg"}, "nakashima": {"src": "/_blob/a9701ee676ede2c204740e04d090d5aa", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:Brandon_Nakashima_(2024_DC_Open)_01_(cropped).jpg"}, "tien": {"src": "/_blob/748b0b8e8186a2f656e72967b1a8b9f5", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:Learner_Tien_(2024_US_Open)_04.jpg"}, "cerundolo": {"src": "/_blob/7099991de69d036a553e20d42f749569", "license": "CC BY-SA 2.0", "author": "si.robi", "page": "https://commons.wikimedia.org/wiki/File:Cerundolo_MCM23_(21)_(52883527185).jpg"}, "bublik": {"src": "/_blob/f7b2b2a62ceac66ea4144bff3597f024", "license": "CC BY-SA 4.0", "author": "Hameltion", "page": "https://commons.wikimedia.org/wiki/File:Sascha_Bublik_(2023_DC_Open)_05_(cropped).jpg"}};
+  const faceEl = (proId, cls = "face") => {
+    const ph = PHOTOS[proId];
+    if (ph) { const i = el("img", { class: cls + " photo", src: ph.src, alt: (PROS[proId]?.name || "Player") + " (photo: " + ph.author + ", " + ph.license + ")", loading: "lazy", decoding: "async" });
+      i.addEventListener("error", () => { const c = el("canvas", { class: cls, role: "img", "aria-label": (PROS[proId]?.name || "Player") + "'s face" }); drawFace(c, proId); i.replaceWith(c); }); return i; }
+    const c = el("canvas", { class: cls, role: "img", "aria-label": (PROS[proId]?.name || "Player") + "'s face" }); drawFace(c, proId); return c; };
+  const credits = () => el("details", { class: "credits" }, el("summary", {}, "Photo credits"),
+    el("ul", {}, Object.entries(PHOTOS).sort((a, b) => (PROS[a[0]]?.name || a[0]).localeCompare(PROS[b[0]]?.name || b[0])).map(([k, ph]) =>
+      el("li", {}, (PROS[k]?.name || k) + ": ", el("a", { href: ph.page, target: "_blank", rel: "noopener" }, ph.author || "Wikimedia Commons"), " · " + ph.license))));
+
+  /* ---------- family tree: CEO → supervisors → agents ---------- */
+  function renderTree() {
+    const box = $("#tree"); if (box.hidden) return;
+    const inner = el("div", { class: "tree-inner" });
+    const ceoFace = el("canvas", { class: "face ceo", role: "img", "aria-label": "CEO" });
+    { const g = ceoFace.getContext("2d"); ceoFace.width = ceoFace.height = 16; g.fillStyle = css("--ceo"); [[3,6,10,6],[3,3,2,3],[7,2,2,4],[11,3,2,3],[3,12,10,1]].forEach(r => g.fillRect(...r)); g.fillStyle = css("--ball"); g.fillRect(7, 8, 2, 2); }
+    inner.append(el("div", { class: "node ceo-node" }, ceoFace, el("span", { class: "fn" }, "CEO"), el("span", { class: "who" }, "Ryan · orders override all")));
+    inner.append(el("div", { class: "stem" }));
+    const supIds = Object.keys(S.sups).sort((a, b) => S.sups[a].name.localeCompare(S.sups[b].name));
+    const groups = supIds.map(sid => [sid, Object.keys(S.agents).filter(a => S.agents[a].supervisor === sid)]);
+    const loose = Object.keys(S.agents).filter(a => !S.agents[a].supervisor || !S.sups[S.agents[a].supervisor]);
+    if (loose.length) groups.push([null, loose]);
+    const gen = el("div", { class: "gen" });
+    for (const [sid, members] of groups) {
+      const s = sid && S.sups[sid];
+      const head = s ? el("button", { class: "node sup-node", type: "button", onclick: () => openSup(sid) },
+          el("canvas", { class: "face", role: "img", "aria-label": "Supervisor" }), el("span", { class: "fn" }, s.name), el("span", { class: "who" }, `Supervisor · ${s.mode === "split" ? "split duties" : "share all"}`))
+        : el("div", { class: "node sup-node" }, el("span", { class: "fn", style: "color:var(--muted)" }, "Reports to CEO"));
+      if (s) { const c = head.querySelector("canvas"), g = c.getContext("2d"); c.width = c.height = 16; g.fillStyle = css("--court"); g.fillRect(4, 4, 8, 8); g.fillStyle = css("--panel"); g.fillRect(5, 7, 6, 1); g.fillRect(7, 5, 2, 6); }
+      const kids = el("div", { class: "kids" }, members.sort((a, b) => agentName(a).localeCompare(agentName(b))).map(id => { const a = S.agents[id], pro = PROS[a.face];
+        return el("button", { class: "node", type: "button", onclick: () => openAgent(id), title: (a.job || "") },
+          faceEl(a.face), el("span", { class: "fn" }, a.title || id), el("span", { class: "who" }, (pro ? pro.name : "no face yet")),
+          el("span", { class: "pill " + (a.status || "idle") }, STATUS[a.status] || "Idle")); }));
+      gen.append(el("div", { class: "branch" }, head, members.length ? kids : null));
+    }
+    inner.append(gen);
+    inner.append(el("div", { class: "legend" }, el("span", {}, "Names are each agent's job; the face is its tennis-pro mascot (pick another in the agent's panel)."), el("span", {}, "Photos: Wikimedia Commons, free licences.")));
+    inner.append(credits());
+    box.replaceChildren(inner);
+    requestAnimationFrame(() => {                                                       // horizontal line spans first→last supervisor
+      const bs = gen.querySelectorAll(":scope > .branch"); if (bs.length < 2) { gen.style.setProperty("--l", "50%"); gen.style.setProperty("--r", "50%"); return; }
+      const gr = gen.getBoundingClientRect(), f = bs[0].getBoundingClientRect(), l = bs[bs.length - 1].getBoundingClientRect();
+      gen.style.setProperty("--l", (f.left + f.width / 2 - gr.left) + "px"); gen.style.setProperty("--r", (gr.right - (l.left + l.width / 2)) + "px"); });
+  }
+  const setView = v => { const tree = v === "tree"; $("#tree").hidden = !tree; $("#lanes").hidden = tree;
+    $("#vTree").setAttribute("aria-pressed", String(tree)); $("#vBoard").setAttribute("aria-pressed", String(!tree));
+    try { localStorage.setItem("hq.view", v); } catch (e) {} if (tree) renderTree(); };
+
+  /* ---------- orders and the chain of command ---------- */
+  // Which open orders apply to an agent: sent to it, to its supervisor's team, or to everyone.
+  function ordersFor(id) {
+    const sup = supOf(id);
+    return Object.entries(S.cmds).map(([k, c]) => ({ id: k, ...c }))
+      .filter(c => c.to === "agent:" + id || (sup && c.to === "sup:" + sup) || c.to === "all" || (c.assignments || []).some(x => x.agent === id))
+      .sort((a, b) => (b.from === "ceo") - (a.from === "ceo") || (b.createdAt || 0) - (a.createdAt || 0));
+  }
+  const targetsOf = to => to === "auto" ? [] : to === "all" ? Object.keys(S.agents) : to.startsWith("sup:") ? Object.keys(S.agents).filter(a => supOf(a) === to.slice(4)) : [to.slice(6)];
+  const toLabel = to => to === "auto" ? "Auto: the right manager" : to === "all" ? "Everyone" : to.startsWith("sup:") ? (S.sups[to.slice(4)]?.name || to.slice(4)) + " team" : agentName(to.slice(6));
+  const fromLabel = f => f === "ceo" ? "CEO" : f.startsWith("sup:") ? (S.sups[f.slice(4)]?.name || "Supervisor") : f;
+
+  async function logAct(text) {
+    if (!db) return;
+    const feed = [{ t: Date.now(), text }, ...S.feed].slice(0, 120);
+    try { await db.doc("activity/feed").set({ entries: feed }); } catch (e) { /* the order itself is what matters */ }
+  }
+  async function write(fn, ok) {
+    if (!db) { toast("Not connected: changes can't be saved here."); return false; }
+    try { await fn(); if (ok) toast(ok); return true; }
+    catch (e) { if (e && e.code === "invalid_argument" && canWrite === null) { canWrite = false; render(); }
+      toast(e && e.code === "quota_exceeded" ? "The team's storage is full: delete old orders first." : "Couldn't save: " + (e?.message || "try again")); return false; }
+  }
+  async function issueOrder(to, text) {
+    const now = Date.now();
+    const ok = await write(async () => {
+      const ref = await db.collection("commands").add({ from: "ceo", to, text, status: "open", stage: "routing", createdAt: now });
+      // CEO overrides: any open supervisor order that reaches the same agents is superseded.
+      const hit = new Set(targetsOf(to));
+      for (const [k, c] of Object.entries(S.cmds)) {
+        if (c.status !== "open" || c.from === "ceo") continue;
+        if (targetsOf(c.to).some(a => hit.has(a))) await db.doc("commands/" + k).update({ status: "overridden", overriddenBy: ref.id, closedAt: now });
+      }
+    }, "Order issued");
+    if (ok) logAct(`CEO → ${toLabel(to)}: ${text}`);
+    return ok;
+  }
+  const closeOrder = (k, status) => write(() => db.doc("commands/" + k).update({ status, closedAt: Date.now() }), status === "done" ? "Marked done" : "Order withdrawn")
+    .then(ok => ok && logAct(`${status === "done" ? "Done" : "Withdrawn"}: ${S.cmds[k]?.text || ""}`));
+
+  /* ---------- render ---------- */
+  function render() {
+    const agents = Object.entries(S.agents).map(([id, a]) => ({ id, ...a }));
+    const openCmds = Object.values(S.cmds).filter(c => c.status === "open");
+    const offBrief = agents.filter(a => a.supervisor && S.sups[a.supervisor] && (a.briefSeen || 0) < (S.sups[a.supervisor].briefVersion || 0));
+    $("#nRunning").textContent = agents.filter(a => a.status === "running").length;
+    $("#nQueued").textContent = agents.filter(a => a.status === "queued").length;
+    $("#nReview").textContent = agents.filter(a => a.status === "review" || a.status === "blocked").length;
+    $("#nSync").textContent = offBrief.length;
+    $("#nOrders").textContent = openCmds.length;
+    renderTargets(); renderLanes(agents); renderTree(); renderOrders(); renderLinks(); renderScripts(); renderActivity();
+    for (const b of document.querySelectorAll("form button, #newAgent, #newSup")) b.disabled = canWrite === false || !db;
+  }
+  function renderTargets() {
+    const sel = $("#orderTo"), keep = sel.value;
+    sel.replaceChildren(el("option", { value: "auto" }, "Auto: the right manager"), el("option", { value: "all" }, "Everyone (every manager)"),
+      el("optgroup", { label: "Managers" }, Object.entries(S.sups).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([k, s]) => el("option", { value: "sup:" + k }, s.name))),
+      el("optgroup", { label: "An agent, through its manager" }, Object.entries(S.agents).sort((a, b) => agentName(a[0]).localeCompare(agentName(b[0]))).map(([k]) => el("option", { value: "agent:" + k }, agentName(k)))));
+    if ([...sel.options].some(o => o.value === keep)) sel.value = keep;
+    for (const id of ["#linkA", "#linkB"]) { const s = $(id), k = s.value;
+      s.replaceChildren(...Object.keys(S.agents).sort((a, b) => agentName(a).localeCompare(agentName(b))).map(a => el("option", { value: a }, agentName(a))));
+      if (k) s.value = k; }
+  }
+  function agentCard(a) {
+    const sup = a.supervisor && S.sups[a.supervisor];
+    const behind = sup && (a.briefSeen || 0) < (sup.briefVersion || 0);
+    const ords = ordersFor(a.id).filter(c => c.status === "open").slice(0, 2);
+    const links = Object.values(S.links).filter(l => l.a === a.id || l.b === a.id);
+    return el("button", { class: "agent", type: "button", onclick: () => openAgent(a.id), "aria-label": "Open " + (a.title || a.id) },
+      el("div", { class: "agent-top" }, el("span", { style: "display:flex;gap:8px;align-items:center;min-width:0" }, a.face ? faceEl(a.face, "face") : null, el("span", { class: "agent-name" }, a.title || a.id)), el("span", { class: "pill " + (a.status || "idle") }, STATUS[a.status] || a.status || "Idle")),
+      el("div", { class: "task" }, a.task || el("span", { class: "muted" }, "No task yet")),
+      a.progress ? el("div", { class: "bar", "aria-label": a.progress + "% done" }, el("i", { style: `width:${Math.max(0, Math.min(100, a.progress))}%` })) : null,
+      ords.map(c => el("div", { class: "order-line" }, el("span", { class: "who " + (c.from === "ceo" ? "ceo" : "sup") }, c.from === "ceo" ? "CEO" : "SUP"), c.text)),
+      el("div", { class: "chips" },
+        sup && sup.mode === "split" && a.duty ? el("span", { class: "chip" }, "Duty: " + a.duty) : null,
+        behind ? el("span", { class: "chip warn" }, `Behind brief v${sup.briefVersion}`) : null,
+        links.slice(0, 3).map(l => el("span", { class: "chip link" }, (l.a === a.id ? "→ " + agentName(l.b) : "← " + agentName(l.a)))),
+        el("span", { class: "chip" }, "Updated " + ago(a.updatedAt))));
+  }
+  function renderLanes(agents) {
+    const lanes = $("#lanes"); lanes.replaceChildren();
+    if (!db && !agents.length) { lanes.append(el("div", { class: "empty" }, "The live team can't be loaded in this view.")); return; }
+    if (!agents.length && !Object.keys(S.sups).length) { lanes.append(el("div", { class: "empty" }, "No agents yet. Add your first one with “+ New agent”, or ask Claude to sync the team from GitHub.")); return; }
+    const supIds = Object.keys(S.sups).sort((a, b) => S.sups[a].name.localeCompare(S.sups[b].name));
+    for (const sid of [...supIds, null]) {
+      const members = agents.filter(a => (a.supervisor || null) === sid && (sid === null || S.sups[sid])).concat(sid === null ? agents.filter(a => a.supervisor && !S.sups[a.supervisor]) : [])
+        .sort((x, y) => (x.title || x.id).localeCompare(y.title || y.id));
+      if (sid === null && !members.length) continue;
+      const lane = el("section", { class: "lane", "aria-label": sid ? S.sups[sid].name : "Unassigned" });
+      if (sid) {
+        const s = S.sups[sid], synced = members.filter(m => (m.briefSeen || 0) >= (s.briefVersion || 0)).length;
+        lane.append(el("div", { class: "sup" },
+          el("div", { class: "sup-head" }, el("div", {}, el("div", { class: "label" }, "Manager"), el("h3", {}, s.name),
+              (r => r ? el("span", { class: "note", title: "Your average rating of this manager's merges" }, `Your rating ${r.avg.toFixed(1)}/10 · ${r.n} merge${r.n > 1 ? "s" : ""}`) : null)(supRating(sid))),
+            el("button", { class: "mode", type: "button", title: "Share: the team shares all information. Split: each agent keeps its own duty.", onclick: () => setMode(sid) }, s.mode === "split" ? "Split duties" : "Share all")),
+          s.mission ? el("div", { class: "note" }, s.mission) : null,
+          el("div", { class: "brief" }, s.brief || el("span", { class: "muted" }, "No team brief yet. Write one so the whole team works from the same page.")),
+          el("div", { class: "brief-meta" }, el("span", { class: "mono note" }, `Brief v${s.briefVersion || 0} · ${synced}/${members.length} on it`),
+            el("span", { class: "add-row" }, el("button", { class: "btn small", type: "button", onclick: () => openSup(sid) }, "Edit"),
+              el("button", { class: "btn small", type: "button", disabled: !members.length || synced === members.length, onclick: () => syncTeam(sid) }, "Sync team")))));
+      } else lane.append(el("div", { class: "sup", style: "background:var(--sunk)" }, el("div", { class: "label" }, "No supervisor"), el("h3", { style: "color:var(--muted)" }, "Reports to the CEO")));
+      for (const m of members) lane.append(agentCard(m));
+      lanes.append(lane);
+    }
+  }
+  // Where an order is: routing → the manager assigns → agents work → the manager reviews (and sends back) → done, reported to you.
+  // After the review the manager merges the work (the site updates), then the CEO tests it and rates it 0–10.
+  const STAGES = [["routing", "To manager"], ["assigned", "Assigned"], ["working", "Agents working"], ["review", "Manager review"], ["done", "Merged · live"], ["rated", "Rated by you"]];
+  function stageTrack(c) {
+    const cur = c.rating ? "rated" : c.status === "done" ? "done" : c.stage === "changes" ? "working" : (c.stage || "routing"), at = STAGES.findIndex(s => s[0] === cur);
+    return el("div", { class: "stages", "aria-label": "Stage" }, STAGES.map(([k, label], n) => el("span", { class: n < at ? "past" : n === at ? "now" + (c.stage === "changes" ? " redo" : "") : "" },
+      n === at && c.stage === "changes" ? "Redoing (round " + ((c.round || 1) + 1) + ")" : label)));
+  }
+  const ASSIGN = { assigned: "assigned", working: "working", submitted: "handed in, manager checking", changes: "sent back by the manager", approved: "approved by the manager" };
+  function orderDetail(c) {
+    const out = [];
+    const sup = c.sup && S.sups[c.sup];
+    if (sup) out.push(el("div", { class: "note" }, "Manager: " + sup.name + (c.routedWhy ? " · " + c.routedWhy : "")));
+    for (const a of c.assignments || []) out.push(el("div", { class: "assign" },
+      el("span", {}, el("b", {}, agentName(a.agent)), " — " + (ASSIGN[a.state] || a.state || "assigned"), a.pr ? " · " : null, a.pr ? el("a", { href: a.pr, target: "_blank", rel: "noopener" }, "PR " + (a.pr.match(/\d+$/) || [""])[0]) : null),
+      a.task ? el("span", { class: "note" }, a.task) : null,
+      a.review ? el("span", { class: "note" }, "Manager: " + a.review) : null));
+    if (c.status === "done" && c.report) out.push(el("div", { class: "report" }, el("b", {}, (sup ? sup.name : "Manager") + " reports: "), c.report));
+    if (c.status === "done" && c.rating && !reRating.has(c.k)) out.push(el("div", { class: "order-line" }, el("span", { class: "score" }, c.rating.score + "/10"),
+      el("span", {}, c.rating.feedback || el("span", { class: "muted" }, "No feedback")), el("button", { class: "btn small ghost", type: "button", onclick: () => { reRating.add(c.k); renderOrders(); } }, "Edit")));
+    else if (c.status === "done" && c.sup) out.push(rateForm(c));
+    return out;
+  }
+  // Your score for the merge: how well it works and how well the manager ran it. Managers read these before every order.
+  const reRating = new Set();
+  function rateForm(c) {
+    const score = el("select", { "aria-label": "Rating, 0 to 10" }, el("option", { value: "" }, "Rate…"),
+      Array.from({ length: 11 }, (_, n) => el("option", { value: String(10 - n) }, (10 - n) + " / 10")));
+    const fb = el("textarea", { rows: 2, placeholder: "Feedback for " + (S.sups[c.sup]?.name || "the manager") + ": what works, what doesn't", "aria-label": "Feedback" });
+    if (c.rating) { score.value = String(c.rating.score); fb.value = c.rating.feedback || ""; }
+    const form = el("form", { class: "rate", onsubmit: async e => { e.preventDefault();
+      if (score.value === "") { score.focus(); return; }
+      const rating = { score: +score.value, feedback: fb.value.trim(), at: Date.now() };
+      if (await write(() => db.doc("commands/" + c.k).update({ rating, stage: "rated" }), "Rating saved")) { reRating.delete(c.k);
+        logAct(`CEO rated ${S.sups[c.sup]?.name || "the manager"} ${rating.score}/10: ${c.text.slice(0, 80)}${rating.feedback ? " — " + rating.feedback : ""}`); } } },
+      score, fb, el("button", { class: "btn primary small", type: "submit" }, "Save"));
+    return form;
+  }
+  const supRating = sid => { const r = Object.values(S.cmds).filter(c => c.sup === sid && c.rating).map(c => c.rating.score);
+    return r.length ? { avg: r.reduce((a, b) => a + b, 0) / r.length, n: r.length } : null; };
+  function renderOrders() {
+    const box = $("#orders"); box.replaceChildren();
+    const list = Object.entries(S.cmds).map(([k, c]) => ({ k, ...c })).filter(c => orderFilter === "all" || c.status === "open")
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 80);
+    if (!list.length) { box.append(el("div", { class: "empty" }, orderFilter === "open" ? "No open orders. Issue one above." : "No orders yet.")); return; }
+    for (const c of list) box.append(el("div", { class: "item" },
+      el("div", { class: "item-row" }, el("span", { class: "order-line" }, el("span", { class: "who " + (c.from === "ceo" ? "ceo" : "sup") }, fromLabel(c.from)), "→ " + toLabel(c.to)),
+        el("span", { class: "mono note" }, ago(c.createdAt))),
+      el("div", { class: c.status === "open" || c.status === "done" ? "" : "struck" }, c.text),
+      c.status === "open" || c.status === "done" ? stageTrack(c) : null,
+      ...orderDetail(c),
+      c.status === "overridden" ? el("div", { class: "chip ceo", style: "justify-self:start" }, "Overridden by a CEO order") :
+      c.status === "open" ? el("div", { class: "add-row" }, el("button", { class: "btn small ghost", type: "button", onclick: () => closeOrder(c.k, "withdrawn") }, "Withdraw")) :
+      c.status === "done" ? null : el("div", { class: "note" }, "Withdrawn")));
+  }
+  function renderLinks() {
+    const box = $("#links"); box.replaceChildren();
+    const list = Object.entries(S.links);
+    if (!list.length) box.append(el("div", { class: "empty" }, "No correlations yet. Link two agents that should share data or wait on each other."));
+    for (const [k, l] of list) box.append(el("div", { class: "item" }, el("div", { class: "item-row" },
+      el("span", {}, el("b", {}, agentName(l.a)), " " + l.kind + " ", el("b", {}, agentName(l.b))),
+      el("button", { class: "btn small ghost", type: "button", "aria-label": "Remove correlation", onclick: () => write(() => db.doc("links/" + k).delete(), "Correlation removed") }, "✕")),
+      l.note ? el("div", { class: "note" }, l.note) : null));
+  }
+  function renderScripts() {
+    const box = $("#scripts"); box.replaceChildren();
+    const list = Object.entries(S.scripts).sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0));
+    if (!list.length) box.append(el("div", { class: "empty" }, "No scripts yet. Add a standing rule the team follows on every run."));
+    for (const [k, s] of list) box.append(el("div", { class: "item" },
+      el("div", { class: "item-row" }, el("span", { class: s.enabled === false ? "struck" : "" }, el("b", {}, "When "), s.when),
+        el("span", { class: "add-row" },
+          el("button", { class: "btn small", type: "button", onclick: () => write(() => db.doc("scripts/" + k).update({ enabled: s.enabled === false }), s.enabled === false ? "Script on" : "Script paused") }, s.enabled === false ? "Turn on" : "Pause"),
+          el("button", { class: "btn small ghost", type: "button", "aria-label": "Delete script", onclick: () => write(() => db.doc("scripts/" + k).delete(), "Script deleted") }, "✕"))),
+      el("div", { class: s.enabled === false ? "struck" : "" }, el("b", {}, "Then "), s.then)));
+  }
+  function renderActivity() {
+    const box = $("#activity"); box.replaceChildren();
+    if (!S.feed.length) { box.append(el("div", { class: "empty" }, "Nothing has happened yet.")); return; }
+    for (const e of S.feed.slice(0, 40)) box.append(el("div", { class: "item" }, el("div", {}, e.text), el("span", { class: "mono note" }, ago(e.t))));
+  }
+
+  /* ---------- drawer: one agent, new agent, supervisor ---------- */
+  const overlay = $("#overlay"), drawer = $("#drawer");
+  const closeDrawer = () => { overlay.hidden = true; drawer.replaceChildren(); };
+  $("#scrim").onclick = closeDrawer;
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !overlay.hidden) closeDrawer(); });
+  const field = (label, input) => el("label", { class: "field" }, el("span", { class: "label" }, label), input);
+  const supSelect = (val) => el("select", { id: "fSup" }, el("option", { value: "" }, "No supervisor (reports to CEO)"),
+    Object.entries(S.sups).map(([k, s]) => el("option", { value: k, selected: k === val }, s.name)));
+
+  function openAgent(id) {
+    const a = S.agents[id]; if (!a) return;
+    const status = el("select", { id: "fStatus" }, Object.entries(STATUS).map(([k, v]) => el("option", { value: k, selected: k === (a.status || "idle") }, v)));
+    const task = el("textarea", { id: "fTask", rows: 3 }); task.value = a.task || "";
+    const prog = el("input", { id: "fProg", type: "number", min: 0, max: 100, value: a.progress || 0 });
+    const duty = el("input", { id: "fDuty", value: a.duty || "", placeholder: "this agent's own share of the team's work" });
+    const sup = supSelect(a.supervisor || "");
+    const face = el("select", { id: "fFace" }, el("option", { value: "" }, "No face"), Object.entries(PROS).map(([k, p]) => el("option", { value: k, selected: k === a.face }, p.name)));
+    const order = el("textarea", { id: "fOrder", rows: 2, placeholder: "A direct CEO order to " + (a.title || id) });
+    const ords = ordersFor(id);
+    drawer.replaceChildren(
+      el("div", { class: "item-row" }, el("div", { style: "display:flex;gap:12px;align-items:center" }, a.face ? faceEl(a.face) : null, el("div", {}, el("div", { class: "label" }, "Agent · " + (PROS[a.face]?.name || id)), el("h2", {}, a.title || id))), el("button", { class: "btn small", type: "button", onclick: closeDrawer }, "Close")),
+      a.job ? el("div", { class: "note" }, a.job) : null,
+      el("div", { class: "chips" }, a.branch ? el("span", { class: "chip mono" }, a.branch) : null, a.issue ? el("a", { class: "chip", href: a.issue, target: "_blank", rel: "noopener" }, "GitHub issue") : null,
+        el("span", { class: "chip" }, "Updated " + ago(a.updatedAt))),
+      el("form", { class: "mini", onsubmit: async e => { e.preventDefault(); if (!order.value.trim()) return; if (await issueOrder("agent:" + id, order.value.trim())) closeDrawer(); } },
+        field("Direct order (CEO)", order), el("button", { class: "btn primary", type: "submit" }, "Issue order")),
+      el("h3", { style: "font-size:20px" }, "Orders"),
+      el("div", { class: "list" }, ords.length ? ords.map(c => el("div", { class: "item" }, el("div", { class: "order-line" }, el("span", { class: "who " + (c.from === "ceo" ? "ceo" : "sup") }, fromLabel(c.from)),
+        el("span", { class: c.status === "open" ? "" : "struck" }, c.text)), el("span", { class: "note" }, `${c.status} · to ${toLabel(c.to)} · ${ago(c.createdAt)}`))) : el("div", { class: "empty" }, "No orders.")),
+      el("h3", { style: "font-size:20px" }, "Status"),
+      el("form", { class: "mini", onsubmit: async e => { e.preventDefault();
+        const moved = (sup.value || null) !== (a.supervisor || null);
+        const body = { face: face.value || null, status: status.value, task: task.value.trim(), progress: Math.max(0, Math.min(100, +prog.value || 0)), duty: duty.value.trim(), supervisor: sup.value || null, updatedAt: Date.now(), source: "ceo" };
+        if (moved) body.briefSeen = 0;
+        if (await write(() => db.doc("agents/" + id).update(body), "Saved")) { logAct(`${a.title || id}: ${STATUS[body.status]}${moved ? " · moved to " + (S.sups[body.supervisor]?.name || "the CEO") : ""}`); closeDrawer(); } } },
+        el("div", { class: "two" }, field("Status", status), field("Progress %", prog)), field("Current task", task), field("Supervisor", sup), field("Duty (split teams)", duty), field("Face (tennis-pro mascot)", face),
+        el("div", { class: "add-row" }, el("button", { class: "btn court", type: "submit" }, "Save"),
+          el("button", { class: "btn ghost", type: "button", onclick: async () => { if (drawer.dataset.confirm !== id) { drawer.dataset.confirm = id; toast("Press Remove again to delete " + (a.title || id)); return; }
+            if (await write(() => db.doc("agents/" + id).delete(), "Agent removed")) { logAct("Removed agent " + (a.title || id)); closeDrawer(); } } }, "Remove agent"))));
+    overlay.hidden = false; order.focus();
+  }
+  function openNewAgent() {
+    const title = el("input", { id: "nTitle", placeholder: "e.g. Net Play Coach", required: true });
+    const job = el("textarea", { id: "nJob", rows: 3, placeholder: "What this agent is responsible for" });
+    const sup = supSelect("");
+    drawer.replaceChildren(el("div", { class: "item-row" }, el("h2", {}, "New agent"), el("button", { class: "btn small", type: "button", onclick: closeDrawer }, "Close")),
+      el("div", { class: "note" }, "It appears here right away as New. Claude sets up its folder, instructions and GitHub label at the next sync."),
+      el("form", { class: "mini", onsubmit: async e => { e.preventDefault(); const t = title.value.trim(); const id = slug(t); if (!id) return;
+        if (S.agents[id]) { toast("An agent called " + t + " already exists"); return; }
+        if (await write(() => db.doc("agents/" + id).set({ title: t, job: job.value.trim(), supervisor: sup.value || null, status: "new", task: "Set up: folder, PROMPT.md and label (next sync)", progress: 0, briefSeen: 0, updatedAt: Date.now(), source: "ceo" }), "Agent created")) {
+          logAct("CEO created agent " + t); closeDrawer(); } } },
+        field("Name", title), field("Job", job), field("Supervisor", sup), el("button", { class: "btn court", type: "submit" }, "Create agent")));
+    overlay.hidden = false; title.focus();
+  }
+  function openSup(sid) {
+    const s = sid ? S.sups[sid] : null;
+    const name = el("input", { id: "sName", value: s?.name || "", placeholder: "e.g. Motion & Body", required: true });
+    const mission = el("input", { id: "sMission", value: s?.mission || "", placeholder: "What this team owns" });
+    const mode = el("select", { id: "sMode" }, el("option", { value: "share", selected: s?.mode !== "split" }, "Share all: the team shares every finding"),
+      el("option", { value: "split", selected: s?.mode === "split" }, "Split duties: each agent keeps its own part"));
+    const brief = el("textarea", { id: "sBrief", rows: 7, placeholder: "The team brief: goals, decisions and shared facts every member must work from." }); brief.value = s?.brief || "";
+    drawer.replaceChildren(el("div", { class: "item-row" }, el("h2", {}, s ? s.name : "New supervisor"), el("button", { class: "btn small", type: "button", onclick: closeDrawer }, "Close")),
+      el("div", { class: "note" }, "A supervisor keeps its agents on the same page: when the brief changes its version goes up, and every member shows as behind until it has synced."),
+      el("form", { class: "mini", onsubmit: async e => { e.preventDefault(); const n = name.value.trim(); if (!n) return;
+        const id = sid || slug(n); if (!sid && S.sups[id]) { toast("That supervisor already exists"); return; }
+        const changed = !s || (brief.value.trim() !== (s.brief || ""));
+        const body = { name: n, mission: mission.value.trim(), mode: mode.value, brief: brief.value.trim(), briefVersion: (s?.briefVersion || 0) + (changed && brief.value.trim() ? 1 : 0), updatedAt: Date.now() };
+        if (await write(() => db.doc("supervisors/" + id).set(body), s ? "Supervisor saved" : "Supervisor created")) {
+          logAct(s ? `${n}: brief ${changed ? "updated to v" + body.briefVersion : "saved"}` : "CEO created supervisor " + n); closeDrawer(); } } },
+        field("Name", name), field("Mission", mission), field("How the team works", mode), field("Team brief", brief),
+        el("div", { class: "add-row" }, el("button", { class: "btn court", type: "submit" }, s ? "Save" : "Create supervisor"),
+          s ? el("button", { class: "btn ghost", type: "button", onclick: async () => { if (drawer.dataset.confirm !== sid) { drawer.dataset.confirm = sid; toast("Press Delete again: its agents will report to the CEO"); return; }
+            if (await write(async () => { for (const [k, a] of Object.entries(S.agents)) if (a.supervisor === sid) await db.doc("agents/" + k).update({ supervisor: null });
+              await db.doc("supervisors/" + sid).delete(); }, "Supervisor deleted")) { logAct("Deleted supervisor " + s.name); closeDrawer(); } } }, "Delete") : null)));
+    overlay.hidden = false; name.focus();
+  }
+  async function setMode(sid) { const s = S.sups[sid]; const m = s.mode === "split" ? "share" : "split";
+    if (await write(() => db.doc("supervisors/" + sid).update({ mode: m, updatedAt: Date.now() }), m === "split" ? "Team now splits duties" : "Team now shares everything")) logAct(`${s.name}: ${m === "split" ? "split duties" : "share all"}`); }
+  async function syncTeam(sid) { const v = S.sups[sid].briefVersion || 0;
+    if (await write(async () => { for (const [k, a] of Object.entries(S.agents)) if (a.supervisor === sid && (a.briefSeen || 0) < v) await db.doc("agents/" + k).update({ briefSeen: v }); }, "Team synced to brief v" + v))
+      logAct(`${S.sups[sid].name}: CEO synced the team to brief v${v}`); }
+
+  /* ---------- wiring ---------- */
+  $("#orderForm").addEventListener("submit", async e => { e.preventDefault(); const t = $("#orderText").value.trim(); if (!t) { $("#orderText").focus(); return; }
+    if (await issueOrder($("#orderTo").value, t)) $("#orderText").value = ""; });
+  $("#linkForm").addEventListener("submit", async e => { e.preventDefault(); const a = $("#linkA").value, b = $("#linkB").value;
+    if (!a || !b || a === b) { toast("Pick two different agents"); return; }
+    const body = { a, b, kind: $("#linkKind").value, note: $("#linkNote").value.trim(), createdAt: Date.now() };
+    if (await write(() => db.collection("links").add(body), "Correlation added")) { logAct(`${agentName(a)} ${body.kind} ${agentName(b)}${body.note ? " (" + body.note + ")" : ""}`); $("#linkNote").value = ""; } });
+  $("#scriptForm").addEventListener("submit", async e => { e.preventDefault(); const w = $("#scriptWhen").value.trim(), t = $("#scriptThen").value.trim();
+    if (!w || !t) { toast("Fill in both When and Then"); return; }
+    if (await write(() => db.collection("scripts").add({ when: w, then: t, enabled: true, createdAt: Date.now() }), "Script added")) { logAct(`Script: when ${w} → ${t}`); $("#scriptWhen").value = ""; $("#scriptThen").value = ""; } });
+  for (const b of document.querySelectorAll(".tab")) b.addEventListener("click", () => { orderFilter = b.dataset.f;
+    for (const x of document.querySelectorAll(".tab")) x.setAttribute("aria-selected", String(x === b)); renderOrders(); });
+  $("#newAgent").addEventListener("click", openNewAgent);
+  $("#vBoard").addEventListener("click", () => setView("board"));
+  $("#vTree").addEventListener("click", () => setView("tree"));
+  try { if (localStorage.getItem("hq.view") === "tree") setView("tree"); } catch (e) {}
+  matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => render());
+  $("#newSup").addEventListener("click", () => openSup(null));
+  setInterval(() => { if (overlay.hidden) render(); }, 30000);   // keep the "x min ago" labels fresh (render only, no writes)
+
+  const setLive = (cls, text) => { const l = $("#live"); l.className = "live " + cls; $("#liveText").textContent = text; };
+  render();
+  (async () => {
+    db = await window.claude?.use?.("db") ?? null;
+    const user = await window.claude?.use?.("user") ?? null;
+    if (!db) { setLive("warn", "Offline"); const b = $("#banner"); b.hidden = false; b.textContent = "Live team data isn't available in this view. Open it on claude.ai while signed in."; render(); return; }
+    canWrite = user ? await user.can("data.write") : null;
+    if (canWrite === false) { const b = $("#banner"); b.hidden = false; b.textContent = "You can watch the team here, but only the owner (the CEO) can give orders."; }
+    let first = 0; const want = 5;
+    const timer = setTimeout(() => setLive("warn", "Can't reach live data yet"), 10000);
+    const ready = () => { if (++first === want) { clearTimeout(timer); setLive("on", "Live"); } };
+    const fail = e => { clearTimeout(timer); setLive("warn", e?.code === "revoked" ? "Access ended" : "Live updates stopped"); };
+    const watch = (path, key) => { let seen = false; db.collection(path).onSnapshot(snap => {
+      S[key] = Object.fromEntries(snap.docs.map(d => [d.id, d.data()])); if (!seen && !snap.metadata.fromCache) { seen = true; ready(); } if (overlay.hidden) render(); }, fail); };
+    watch("agents", "agents"); watch("supervisors", "sups"); watch("commands", "cmds"); watch("links", "links"); watch("scripts", "scripts");
+    db.doc("activity/feed").onSnapshot(d => { S.feed = d.exists ? (d.data().entries || []) : []; if (overlay.hidden) renderActivity(); }, () => {});
+    render();
+  })();
+})();
+</script>

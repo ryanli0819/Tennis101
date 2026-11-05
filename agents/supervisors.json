@@ -1,0 +1,276 @@
+{
+  "_about": "Mirror of Tennis101 HQ (https://claude.ai/artifact/T2eXNa7ibx52NiDNAo9GoF), written by Claude when it syncs HQ (tools/command-center/SYNC.md). The CEO's orders override supervisors'. Don't edit by hand: change it in HQ.",
+  "ceo": "ryanli0819",
+  "supervisors": {
+    "motion-body": {
+      "name": "Motion & Body",
+      "mode": "share",
+      "members": [
+        "serve-analyst",
+        "body-animator",
+        "animator",
+        "racket-coach",
+        "biomechanics-coach"
+      ],
+      "mission": "How every body and racket moves: captured serves, joints, frames, racket paths, anatomy.",
+      "brief": "Shared facts for every member:\n• Serve motions: SERVE_MOTIONS[id] = {first, second}, joints in body heights, seen from behind (src/serve/motion/).\n• Sinner's 1st serve comes from the slow-motion back-side clip; Alcaraz's 1st from his Indian Wells clip; his 2nd is still hand-keyed.\n• Arms are drawn in depth order: a hand in front of a body seen from behind is hidden by the torso.\n• Return stance: Anim kind “receive” (low, wide, bent forward).\n• Anatomy data: datasets/anatomy/ (US Open Alcaraz vs Shelton pose).",
+      "briefVersion": 1
+    },
+    "look-world": {
+      "name": "Look & World",
+      "mode": "share",
+      "members": [
+        "player-artist",
+        "court-designer",
+        "appearance-scout",
+        "footage-scout"
+      ],
+      "mission": "What the game looks like: players, outfits, signature looks, courts, and the footage behind them.",
+      "brief": "Shared facts for every member:\n• Signature looks are exaggerated on purpose: Sinner = oversized cap + ginger curls; Alcaraz = long hair, white hairband, beard.\n• Outfits per court: grass (Wimbledon), hard (US Open), clay (Roland-Garros); hex colours in datasets/players/<id>/appearance.json.\n• Video and photos never leave Ryan's Mac; new media arrives through the Tennis101 Inbox app (datasets/inbox).\n• No brand logos or trademarked kit designs.",
+      "briefVersion": 1
+    },
+    "gameplay": {
+      "name": "Gameplay & Physics",
+      "mode": "split",
+      "members": [
+        "ball-physicist",
+        "serve-controller",
+        "controls-designer",
+        "skills-coach",
+        "pov-camera"
+      ],
+      "mission": "How the game plays: ball physics, serving, controls, skills and cameras. Each agent keeps its own part.",
+      "brief": "Each agent owns one part; agree on the contracts in agents/README.md before changing a shared one.\n• Skill points: one point = one constant step (src/skills/skills.js).\n• Slice: about half a drive's speed, low bounce.\n• Controls: WASD moves, arrows/click aim, E slice, Space slide, Shift split step, V first person.",
+      "briefVersion": 1
+    },
+    "product": {
+      "name": "Product & Release",
+      "mode": "split",
+      "members": [
+        "start-page-builder",
+        "locker-room-designer",
+        "guide-writer",
+        "version-keeper"
+      ],
+      "mission": "Everything around the match: start flow, locker room, guide and versions. Each agent keeps its own part.",
+      "brief": "• main must always be playable (GitHub Pages deploys it).\n• A version is published only when 5+ changes wait in contemporary/.\n• Exit buttons only on side screens (locker room, help), never on the welcome page or during a match.",
+      "briefVersion": 1
+    }
+  },
+  "links": [
+    {
+      "a": "ball-physicist",
+      "b": "court-designer",
+      "kind": "feeds",
+      "note": "launchBall · stepBall · onBounce · onNet"
+    },
+    {
+      "a": "ball-physicist",
+      "b": "serve-controller",
+      "kind": "feeds",
+      "note": "launchBall · stepBall · onBounce · onNet"
+    },
+    {
+      "a": "court-designer",
+      "b": "start-page-builder",
+      "kind": "feeds",
+      "note": "drawCourt(surface) · drawNet · drawBall"
+    },
+    {
+      "a": "player-artist",
+      "b": "locker-room-designer",
+      "kind": "feeds",
+      "note": "draws getPose(i) + racket"
+    },
+    {
+      "a": "player-artist",
+      "b": "pov-camera",
+      "kind": "feeds",
+      "note": "draws getPose(i) + racket"
+    },
+    {
+      "a": "serve-analyst",
+      "b": "body-animator",
+      "kind": "feeds",
+      "note": "SERVE_MOTIONS[player] = { first, second }"
+    },
+    {
+      "a": "serve-analyst",
+      "b": "player-artist",
+      "kind": "feeds",
+      "note": "SERVE_MOTIONS[player] = { first, second }"
+    },
+    {
+      "a": "serve-analyst",
+      "b": "pov-camera",
+      "kind": "feeds",
+      "note": "SERVE_MOTIONS[player] = { first, second }"
+    },
+    {
+      "a": "serve-analyst",
+      "b": "serve-controller",
+      "kind": "feeds",
+      "note": "SERVE_MOTIONS[player] = { first, second }"
+    },
+    {
+      "a": "serve-controller",
+      "b": "guide-writer",
+      "kind": "feeds",
+      "note": "serve input → { toss, power, spin, target, sweetSpot }"
+    },
+    {
+      "a": "serve-controller",
+      "b": "pov-camera",
+      "kind": "feeds",
+      "note": "serve input → { toss, power, spin, target, sweetSpot }"
+    },
+    {
+      "a": "body-animator",
+      "b": "animator",
+      "kind": "feeds",
+      "note": "getPose(i) · playMotion(i, frames)"
+    },
+    {
+      "a": "body-animator",
+      "b": "player-artist",
+      "kind": "feeds",
+      "note": "getPose(i) · playMotion(i, frames)"
+    },
+    {
+      "a": "controls-designer",
+      "b": "start-page-builder",
+      "kind": "feeds",
+      "note": "CONTROL_SCHEMES · getMoveInput()"
+    },
+    {
+      "a": "controls-designer",
+      "b": "guide-writer",
+      "kind": "feeds",
+      "note": "CONTROL_SCHEMES · getMoveInput()"
+    },
+    {
+      "a": "controls-designer",
+      "b": "serve-controller",
+      "kind": "feeds",
+      "note": "CONTROL_SCHEMES · getMoveInput()"
+    },
+    {
+      "a": "guide-writer",
+      "b": "start-page-builder",
+      "kind": "feeds",
+      "note": "How to play"
+    },
+    {
+      "a": "skills-coach",
+      "b": "locker-room-designer",
+      "kind": "feeds",
+      "note": "getSkills(id) · applySkills(body, skills)"
+    },
+    {
+      "a": "skills-coach",
+      "b": "serve-controller",
+      "kind": "feeds",
+      "note": "getSkills(id) · applySkills(body, skills)"
+    },
+    {
+      "a": "skills-coach",
+      "b": "ball-physicist",
+      "kind": "feeds",
+      "note": "getSkills(id) · applySkills(body, skills)"
+    },
+    {
+      "a": "locker-room-designer",
+      "b": "start-page-builder",
+      "kind": "feeds",
+      "note": "Lockerroom.render(el, …)"
+    },
+    {
+      "a": "animator",
+      "b": "player-artist",
+      "kind": "feeds",
+      "note": "Anim.frame(p, B, near)"
+    },
+    {
+      "a": "footage-scout",
+      "b": "serve-analyst",
+      "kind": "feeds",
+      "note": "datasets/footage/top20.json"
+    },
+    {
+      "a": "footage-scout",
+      "b": "racket-coach",
+      "kind": "feeds",
+      "note": "datasets/footage/top20.json"
+    },
+    {
+      "a": "racket-coach",
+      "b": "animator",
+      "kind": "feeds",
+      "note": "racketPose(i, p, ago) → { g, u, n, tilt, crouch, twoHands, slice }"
+    },
+    {
+      "a": "racket-coach",
+      "b": "player-artist",
+      "kind": "feeds",
+      "note": "racketPose(i, p, ago) → { g, u, n, tilt, crouch, twoHands, slice }"
+    },
+    {
+      "a": "appearance-scout",
+      "b": "player-artist",
+      "kind": "feeds",
+      "note": "datasets/players/<id>/appearance.json"
+    },
+    {
+      "a": "appearance-scout",
+      "b": "animator",
+      "kind": "feeds",
+      "note": "datasets/players/<id>/appearance.json"
+    },
+    {
+      "a": "biomechanics-coach",
+      "b": "body-animator",
+      "kind": "feeds",
+      "note": "datasets/anatomy/joints.json · movements/<name>.json"
+    },
+    {
+      "a": "biomechanics-coach",
+      "b": "animator",
+      "kind": "feeds",
+      "note": "datasets/anatomy/joints.json · movements/<name>.json"
+    },
+    {
+      "a": "biomechanics-coach",
+      "b": "racket-coach",
+      "kind": "feeds",
+      "note": "datasets/anatomy/joints.json · movements/<name>.json"
+    },
+    {
+      "a": "biomechanics-coach",
+      "b": "serve-analyst",
+      "kind": "feeds",
+      "note": "datasets/anatomy/joints.json · movements/<name>.json"
+    }
+  ],
+  "scripts": [
+    {
+      "when": "A change lands on main",
+      "then": "The Version Keeper records it in contemporary/; at 5 waiting changes it publishes a new version",
+      "enabled": true
+    },
+    {
+      "when": "The Serve Analyst exports a new serve motion",
+      "then": "The Racket Coach and the Biomechanics Coach check the racket path and joint angles against it",
+      "enabled": true
+    },
+    {
+      "when": "A scout needs footage that isn't on the Mac",
+      "then": "It opens a GitHub issue labelled needs:ryan listing the exact clips to record",
+      "enabled": true
+    },
+    {
+      "when": "Ryan drops a clip on the Tennis101 Inbox app",
+      "then": "The intake files it by player and runs pose detection; the Footage Scout catalogs it",
+      "enabled": true
+    }
+  ]
+}

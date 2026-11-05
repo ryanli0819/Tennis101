@@ -1,0 +1,25 @@
+{
+  "player": "sinner",
+  "how": "Pose from Apple Vision (datasets/serves/tools/pose.swift); the tossed ball found by its colour in each frame; toss apex compared with the head. A second serve (kick) is tossed over the head; a first serve out to the right (into the court) for a right-hander. Two serves seconds apart in one clip = the first was a fault.",
+  "serves": [
+    {"clip": "close up jannik sinner back.mov", "keypoints": "back-close.keypoints.json", "view": "back", "t": "0.2–0.9 s",
+     "serve": "first", "confidence": "high", "toss_apex_vs_head": "+2.9 shoulder widths (out to his right)",
+     "why": "toss well right of the head; he serves again ~9 s later, so this one was a fault"},
+    {"clip": "close up jannik sinner back.mov", "keypoints": "back-close.keypoints.json", "view": "back", "t": "7.9–11.6 s (slow motion ~4×)",
+     "serve": "second", "confidence": "high", "toss_apex_vs_head": "−0.3 shoulder widths (over the head)",
+     "frames": {"start": 250, "tossRelease": 266, "trophy": 300, "contact": 343, "finish": 365}, "used_in_game": "SERVE_MOTIONS.sinner.second",
+     "why": "served right after a fault; toss over the head (kick)"},
+    {"clip": "jannik sinner back side.mov", "keypoints": "back-side.keypoints.json", "view": "back, angled, slow motion", "t": "≈5.7 s toss apex",
+     "serve": "first", "confidence": "medium", "toss_apex_vs_head": "+1.1 shoulder widths (to his right)",
+     "why": "toss to the right like the known first serve; one serve only, no fault context"},
+    {"clip": "Sinner serve(Front).mov", "keypoints": "front.keypoints.json", "view": "front", "t": "1.3–2.7 s",
+     "serve": "first", "confidence": "low", "used_in_game": "SERVE_MOTIONS.sinner.first",
+     "why": "assumed first (single serve, real speed); the camera angle doesn't allow a reliable toss comparison"},
+    {"clip": "jannik sinner front.mov", "keypoints": "front2.keypoints.json", "view": "front, oblique", "t": "≈5.6 s toss apex",
+     "serve": "unknown", "confidence": "low", "why": "oblique front camera: toss side can't be compared with the back-view references"},
+    {"clip": "jannik sinner left side.mov", "keypoints": "left.keypoints.json", "view": "left side", "t": "≈4.2–5.3 s",
+     "serve": "unknown", "confidence": "low", "why": "side view can't show the sideways toss; shows the bouncing routine"}
+  ],
+  "routine": {"bounces": "not counted yet: the ball isn't tracked during bouncing (Serve Analyst: count from front2/left clips)",
+              "seen_in": ["jannik sinner front.mov", "jannik sinner left side.mov", "close up jannik sinner back.mov"]}
+}

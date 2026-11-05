@@ -1,0 +1,11 @@
+{
+  "surface": "grass",
+  "from": "4 broadcast screenshots of a grass-court final (front, side, ground views). The images stay on Ryan's Mac (not in git); these notes are what the game uses.",
+  "time_of_day": "daytime, soft overcast light",
+  "court": { "light_stripe": "#8fae5a", "dark_stripe": "#6f9446", "worn_baseline": "#b9a36a", "lines": "#f4f4ee",
+             "notes": "mowing stripes run across the court (parallel to the baseline); the grass wears to sandy brown behind each baseline and around the service line" },
+  "surround": { "back_wall": "#1f4a2c", "wall_trim": "#2e6b3e", "stands_shadow": "#2b2627", "crowd_mix": ["#e9e4dc", "#c9b8a6", "#7d6b62", "#3b3a44", "#b04a4a", "#4f6d8f", "#d8c27a"],
+              "notes": "very tall, steep stands packed to the top; a roof edge over the top of the stands; officials in cream and green stand along the back wall" },
+  "sky": { "top": "#cfd6dc", "bottom": "#eef0f0" },
+  "avoid": "no tournament names, logos, crests or trademarked colour schemes (no purple)"
+}

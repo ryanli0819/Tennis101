@@ -1,6 +1,6 @@
 # Tennis101 agent team
 
-Twelve cloud agents build the game in parallel, one run each per night. Every agent:
+Eighteen agents build the game in parallel, one run each per night. Every agent:
 - reads `CLAUDE.md`, this file, and its own log `agents/<name>/LOG.md` first;
 - works only on its branch `agent/<name>` and opens or updates one PR to `main` (never pushes to `main`, never merges);
 - edits only the folders it owns below, plus the smallest possible hooks in `index.html`;
@@ -23,6 +23,12 @@ Each agent has its own folder: `agents/<name>/PROMPT.md` (instructions) and `age
 | 10 | Guide Writer | `agent/guide-writer` | `src/guide/` | 9 AM |
 | 11 | Skills Coach | `agent/skills-coach` | `src/skills/` | 10 AM |
 | 12 | Locker Room Designer | `agent/locker-room-designer` | `src/lockerroom/` | 12 PM |
+| 13 | First-Person Camera | `agent/pov-camera` | `src/camera/` | 1 PM |
+| 14 | Animator | `agent/animator` | `src/animation/` | 2 PM |
+| 15 | Footage Scout | `agent/footage-scout` | `datasets/footage/` | 3 PM |
+| 16 | Racket Coach | `agent/racket-coach` | `src/racket/`, `datasets/racket/` | 4 PM |
+| 17 | Appearance Scout | `agent/appearance-scout` | `datasets/players/` | 5 PM |
+| 18 | Biomechanics Coach | `agent/biomechanics-coach` | `datasets/anatomy/`, `tests/anatomy.test.mjs` | 6 PM |
 
 Give any new agent a row here before it starts.
 
@@ -46,6 +52,24 @@ Keep these stable. Change one only in your own PR, and say so in its description
 **Skills (Skills Coach).** `src/skills/skills.js` exports `SKILLS` (8 skills, each with its constant `step` per point), `getSkills(id)` (1–20, 10 = neutral, saved overrides in `tennis101.profile`) and `applySkills(body, skills)`. That adds to the body: `top`, `accel`, `brake`, `drain`, `recoverMul`, `shotBonus` / `serveBonus` (m/s, shared with the Ball Physicist), `errMul`, `aimBonus`, `splitPerfect` / `splitGood`, `reactionCut`, `volleyReach`, `volleyErrMul`. The game uses these in `BODY[i]`.
 
 **Locker room (Locker Room Designer).** `Lockerroom.render(el, { roster, bodyStats, selected, onSelect })`, called by the start flow after the match and court choices.
+
+**Serving (Serve Controller · first version in `index.html`).** The game serves by itself about 4 s after each point (`BETWEEN_POINTS`), with a 2 s READY countdown (`READY`), and 2.5 s after a fault or let. `planServe(server, no)` returns `{ land, target, fault, net, let, ace }`. `ACE_CHANCE` stores the last serve's ace probability: near zero unless the placement is perfect (within 45 cm of a line), and much higher when the receiver is on the wrong side. Per-player `letRate` is in `ROSTER`. Second serves use `SERVE_MOTIONS.sinner.second`.
+
+**First person (First-Person Camera).** `CAMS.pov` and `povWanted()`: from your READY countdown to just after your contact, at eye height = 94% of `heightM`.
+
+**Animation (Animator).** `src/animation/run-cycle.js`: `Anim.frame(p, B, near, id)` → `{ kind, dir, frame, turn, bob, lean, crouch, feet:[{dx,dy,lift,sole}], knees:[{dx,dy}], arms }`. `kind` is one of run / backpedal / siderun / shuffle / plant / ready / split / slide; `dir` is away / toward / left / right on screen. Every moving kind is a **20-frame** stride cycle built per player from `Anim.GAIT[id]` (Sinner long and smooth, Alcaraz explosive and bouncy), tweened between frames. Side runs turn the body (narrower torso, profile head). `drawPlayer()` draws from it, and `moveBody()` sets `p.plant` on hard direction changes.
+
+**Racket (Racket Coach · first version in `index.html`).** `racketPose(i, p, ago)` → `{ g, u, n, tilt, crouch, twoHands, throat, slice }` in court space, drawn by `drawRacket`. Strokes are keyed to the time until contact and joined by `poseTrack` (Catmull-Rom). Slice: racket top from ~2 o'clock to `SLICE_END[id]` o'clock (Sinner 4, Alcaraz 5), mirrored on the backhand, with shoulder tilt and a head trail. The Animator owns body frames, the Racket Coach owns the racket path.
+
+**Footage (Footage Scout).** Video goes in `datasets/video/<player>/{serve-first,serve-second,forehand,backhand,slice,running}/` (git-ignored, local only). `datasets/footage/top20.json`: the live ATP top 20 (`rankedOn`) with clip links, strokes, views and time ranges. Links only; Ryan records clips locally (git-ignored).
+
+**Appearance (Appearance Scout).** `datasets/players/<id>/appearance.json` for each top-20 player: `signature` (what makes him identifiable), `exaggerate` (how to make it obvious in pixels), `outfits` per court (`grass` Wimbledon, `hard` US Open, `clay` red clay; hex colours), `personality`, `confidence` and `source`. Photos and video in `datasets/players/<id>/{images,video}` stay local. The Player Artist turns it into `ROSTER[].look` and `outfits`.
+
+**Anatomy (Biomechanics Coach).** `datasets/anatomy/joints.json` (ranges of motion) and `movements/<name>.json` (timing, angles, kinetic chain, where each arm is relative to the body). Raw pose of Alcaraz vs Shelton at the US Open: `datasets/anatomy/uso/`.
+
+**Intake (everyone).** New clips and photos go into `datasets/inbox/`; `python3 -I tools/intake/intake.py` files them by player and type and runs the pose pipeline (see `tools/intake/README.md`).
+
+**Shot types.** `planShot(..., type)` with `type` = `"drive"` or `"slice"`. You slice by holding **E** (or with the touch Slice button) as you hit; the computer slices sometimes, more when stretched. A slice lands short (2–4.8 m past the net), low and clearly slower than a drive (≈11–15 m/s against 19–28), and barely carries after the bounce, so the receiver has to come forward.
 
 **Match setup (Start Page Builder).** `src/start/flow.js`: Welcome → Match (best of 3 / 5, tiebreak 7 / 10) → Court (grass / red clay / hard) → Locker room → `startMatch({ bestOf, tbTo, surface, playerId, firstServer })`. Add a `controls` field when the Controls Designer is ready.
 

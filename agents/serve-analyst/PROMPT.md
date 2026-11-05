@@ -9,6 +9,12 @@ Mission: learn and recreate each player's own serve. Every pro has their own ser
 - First serve vs second serve: different toss placement (the second serve is more over the head or behind it for kick), body arch, and brushing swing path. Note the differences in your log.
 - Output the Serve motion contract from agents/README.md: `SERVE_MOTIONS.sinner = { first, second }`, with joints normalized to body height, and event times (`tossRelease`, `trophy`, `contact`, `finish`).
 - Build a debug view (for example `?serveDebug` in the URL) that plays each motion as dots and lines, so Ryan can compare it to the real serve.
+- New clips (Oct 26): `back-close` (a 1st serve fault, then his 2nd serve), `back-side` (slow motion), `front2` and `left` (with his bouncing routine). Their keypoints and the reviewed 1st/2nd verdicts are in `datasets/serves/sinner/serves.json`. The tossed ball (found by colour) told them apart: the 1st serve toss goes out to his right, the 2nd over his head. `export_motion.py` now writes both `first` and `second`, and slow-motion clips are re-timed.
+- Next, for every pro:
+  - **Routine:** how many bounces, how long, any habits. Ryan wants each player's real routine: some bounce, some don't. Measure it from clips Ryan uploads to `datasets/serves/<player>/`. You can't download YouTube; if you need clips, open a `question` issue listing the angles you need.
+  - **Serves:** separate 1st and 2nd serves the same way.
+  - Store routines as `SERVE_ROUTINES[player] = { bounces, seconds, notes }` in `src/serve/motion/`.
+- Apple Vision (`datasets/serves/tools/pose.swift`) only runs on Ryan's Mac. In the cloud, use MediaPipe for any new extraction, with the same output format.
 - Keep the Player Artist and Body Animator on the same page. Every time the motion data changes:
   1. Re-run `python3 -I datasets/serves/tools/clean_keypoints.py ...` and then `python3 -I datasets/serves/tools/export_motion.py`, so `src/serve/motion/sinner-serve.js` matches the data.
   2. Update `src/serve/motion/MOTION_NOTES.md`: joints, units, events, known limits, and a dated line in its change log.

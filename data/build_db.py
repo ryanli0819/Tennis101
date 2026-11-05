@@ -16,11 +16,17 @@ path = lambda *p: os.path.join(ROOT, *p)
 CLIPS = [
     ("sinner-front", "sinner", "front", "datasets/serves/sinner/front.keypoints.json"),
     ("sinner-overhead", "sinner", "overhead", "datasets/serves/sinner/birdseye.keypoints.json"),
+    ("sinner-back-close", "sinner", "back", "datasets/serves/sinner/back-close.keypoints.json"),
+    ("sinner-back-side", "sinner", "back-angled", "datasets/serves/sinner/back-side.keypoints.json"),
+    ("sinner-front2", "sinner", "front-oblique", "datasets/serves/sinner/front2.keypoints.json"),
+    ("sinner-left", "sinner", "left-side", "datasets/serves/sinner/left.keypoints.json"),
 ]
 # ---- serve phases, labelled by watching the 20 key frames of the front clip ----
 PHASES = {
     "sinner-front": [("setup", 0, 45), ("toss", 46, 58), ("trophy", 59, 68),
                      ("racket drop", 69, 72), ("contact", 73, 75), ("landing", 76, 88)],
+    # his 2nd serve (served right after a fault), slow motion
+    "sinner-back-close": [("toss", 250, 299), ("trophy", 300, 316), ("racket drop", 317, 336), ("contact", 337, 346), ("landing", 347, 365)],
 }
 PHASE_LABELLER = "Claude, by eye from the 20 key frames (Serve Analyst may refine)"
 

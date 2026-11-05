@@ -7,3 +7,24 @@ datasets/**/*.mp4
 datasets/**/*.m4v
 .worktrees/
 .pipeline/
+
+# Court reference photos are TV screenshots: keep them on this Mac; only derived notes (reference.json) go to GitHub
+datasets/courts/**/*.png
+datasets/courts/**/*.jpg
+datasets/courts/**/*.jpeg
+datasets/courts/**/*.webp
+
+# Pixel reference sprites cut from TV clips stay local
+datasets/players/**/*.png
+# player photos and stills stay local (people's likeness, TV footage)
+datasets/players/**/*.jpg
+datasets/players/**/*.jpeg
+datasets/players/**/*.webp
+datasets/players/**/*.heic
+datasets/players/**/*.gif
+# intake inbox: media and local logs stay on the Mac
+datasets/inbox/*
+!datasets/inbox/.gitkeep
+# the converter's private Python environment (PyAV)
+tools/.venv/
+build/

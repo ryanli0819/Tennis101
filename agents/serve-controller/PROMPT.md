@@ -8,6 +8,13 @@ Mission: let the player hit their own serve with one continuous motion: toss, th
 - Ace chance: only when the requirements are met (a good toss, contact in the sweet spot, and high power, or a well-brushed kick or slice) does the serve get a chance to be an ace. The percentage depends on the player's serve skill points.
 - Skill points persist outside the current match: store them in `src/profile/` (localStorage `tennis101.profile`, for example `{ players: { sinner: { serve: { skill } } } }`). Show them where useful, and make the effect of skill on ace chance clear and tunable in one place.
 - The serve skill now lives with the Skills Coach: use `getSkills(id).serve` (1–20, 10 neutral) for ace chance instead of keeping your own number, and `BODY[i].serveBonus` for speed.
+- A first version is already in `index.html`; move it into `src/serve/control/` and improve it. What's there:
+  - automatic serving rhythm (~4 s between points, 2 s READY countdown, no key to press)
+  - aiming during READY and the toss: A/D sideways, W/S depth, a yellow cross in the box
+  - `planServe` (spread from Control; net, fault, let; second serves safer and slower)
+  - `ACE_CHANCE` (perfect spot + receiver on the wrong side)
+  - double faults
+  Keep `ACE_CHANCE` as the stored probability (Ryan asked for it). Its current numbers come from simulation: about 25% first-serve faults, 3% second-serve faults, about 6% aces and 2% lets. Tune them to real stats, and keep each player's `letRate` realistic.
 - Faults: a missed target or net is a fault. After a first-serve fault, use the second-serve motion (Serve Analyst) and second-serve rules. A double fault awards the point to the receiver through the existing `awardPoint`.
 - Output the Serve control contract from agents/README.md, play the motion through Body Animator's `playMotion`, and launch the ball with Ball Physicist's `launchBall`. Use fallbacks until those are on `main`.
 - Controls: define the serve actions for every scheme (keyboard, touch, gamepad) and add them to `CONTROL_SCHEMES` through Controls Designer's contract, coordinating in your PR.

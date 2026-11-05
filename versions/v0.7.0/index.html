@@ -1,0 +1,1633 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tennis101 Match Court</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Silkscreen&display=swap">
+<style>
+/* Layout: full-bleed pixel night-session court canvas; broadcast scorebug pinned bottom-left, raised 1/8 of the screen height; match controls along the bottom edge. Single dark look by choice (night match). */
+:root {
+  --night: #0a1120;
+  --panel: #0e1729;
+  --panel-2: #16233c;
+  --line: #2a3b5e;
+  --ink: #eef3fb;
+  --muted: #8b9cbc;
+  --ball: #d8ee4c;
+  --chip-ink: #0a1120;
+  --sinner: #23b59c;
+  --alcaraz: #e2544a;
+  --f-name: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --f-pix: "Silkscreen", "Courier New", monospace;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--night); color: var(--ink); font-family: var(--f-name); overflow: hidden; }
+#court { position: fixed; inset: 0; width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+
+/* ---------- Scoreboard (bottom-left, 1/8 above the bottom) ---------- */
+.scorebug {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left, 0px));
+  bottom: calc(12.5% + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  min-width: 260px;
+  max-width: calc(100% - 32px);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / .45);
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity .35s ease;
+}
+.scorebug.live { opacity: .34; }
+.sb-head {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 5px 10px; background: var(--panel-2);
+  font-family: var(--f-pix); font-size: 9px; letter-spacing: .06em; color: var(--muted);
+}
+.sb-head .tag-tb { color: var(--ball); }
+.sb-grid { display: grid; align-items: stretch; font-variant-numeric: tabular-nums; }
+.sb-cell { display: flex; align-items: center; justify-content: center; height: 34px; }
+.sb-row + .sb-row { border-top: 1px solid var(--line); }
+.sb-serve { width: 22px; }
+.sb-serve i { width: 9px; height: 9px; border-radius: 50%; background: var(--ball); box-shadow: 0 0 0 2px rgb(216 238 76 / .18); }
+.sb-name { justify-content: flex-start; gap: 7px; padding-right: 14px; min-width: 0; }
+.sb-name .stripe { width: 4px; height: 18px; border-radius: 1px; }
+.sb-name b { font-size: 21px; font-weight: 700; letter-spacing: .02em; line-height: 1; white-space: nowrap; }
+.sb-name small { font-family: var(--f-pix); font-size: 8px; color: var(--muted); letter-spacing: .08em; }
+.sb-set { width: 26px; font-family: var(--f-num); font-size: 16px; color: var(--muted); }
+.sb-set.won { color: var(--ink); font-weight: 600; }
+.sb-set sup { font-size: 9px; margin-left: 1px; transform: translateY(-4px); }
+.sb-cur { width: 30px; font-family: var(--f-num); font-size: 17px; font-weight: 600; background: var(--panel-2); }
+.sb-pts { width: 46px; font-family: var(--f-num); font-size: 17px; font-weight: 600; background: var(--ink); color: var(--chip-ink); }
+.sb-pts.adv { background: var(--ball); }
+.sb-call {
+  padding: 5px 10px; border-top: 1px solid var(--line);
+  font-family: var(--f-pix); font-size: 10px; letter-spacing: .06em; color: var(--ink);
+  display: flex; justify-content: space-between; gap: 10px;
+}
+.sb-call span:last-child { color: var(--muted); }
+
+/* ---------- Bottom controls ---------- */
+.controls {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px calc(10px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px;
+  pointer-events: none;
+}
+.controls > * { pointer-events: auto; }
+.btn {
+  font-family: var(--f-name); font-size: 15px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 5px;
+  padding: 7px 12px; cursor: pointer; display: inline-flex; gap: 7px; align-items: center;
+}
+.btn:hover { background: var(--panel-2); }
+.btn:focus-visible { outline: 2px solid var(--ball); outline-offset: 2px; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn kbd { font-family: var(--f-pix); font-size: 8px; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 1px 4px; }
+.btn.primary { background: var(--ball); color: var(--chip-ink); border-color: var(--ball); }
+.btn.primary kbd { color: var(--chip-ink); border-color: rgb(10 17 32 / .35); }
+.btn .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.home-btn { position: fixed; z-index: 6; top: calc(12px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); }
+.cam-tag {
+  position: fixed; z-index: 6; left: 50%; transform: translateX(-50%); top: calc(14px + env(safe-area-inset-top, 0px));
+  font-family: var(--f-pix); font-size: 9px; letter-spacing: .1em; color: var(--chip-ink); background: var(--ball); border-radius: 4px; padding: 5px 8px;
+}
+.ready {
+  position: fixed; z-index: 6; left: 50%; top: 22%; transform: translateX(-50%); text-align: center; pointer-events: none;
+  font-family: var(--f-pix); color: var(--ink); text-shadow: 0 3px 0 rgb(0 0 0 / .45);
+}
+.ready b { display: block; font-size: clamp(28px, 6vw, 54px); font-weight: 400; letter-spacing: .06em; color: var(--ball); }
+.ready span { display: block; font-size: 10px; letter-spacing: .1em; margin-top: 8px; }
+.pause-actions { display: grid; gap: 8px; }
+.pause-actions .btn { justify-content: center; font-size: 17px; padding: 10px; }
+.x-btn { position: absolute; top: 14px; right: 14px; font-family: var(--f-name); font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 5px 10px; cursor: pointer; }
+.x-btn:focus-visible { outline: 2px solid var(--ball); outline-offset: 2px; }
+.card { position: relative; }
+.toast {
+  position: fixed; z-index: 8; left: 50%; top: 30%; transform: translateX(-50%);
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 7px 12px;
+  font-family: var(--f-pix); font-size: 10px; letter-spacing: .05em; max-width: calc(100% - 32px);
+}
+
+/* ---------- Match setup / result overlay ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
+  background: rgb(6 10 20 / .72);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px;
+}
+.card {
+  width: min(420px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 22px; display: grid; gap: 18px;
+}
+.card h1 { margin: 0; font-size: 34px; line-height: 1; font-weight: 700; letter-spacing: .01em; text-wrap: balance; }
+.card h1 em { font-style: normal; color: var(--muted); font-weight: 500; }
+.eyebrow { font-family: var(--f-pix); font-size: 9px; letter-spacing: .1em; color: var(--ball); margin: 0 0 8px; }
+.field { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+.field legend { font-family: var(--f-pix); font-size: 9px; letter-spacing: .08em; color: var(--muted); padding: 0; margin-bottom: 8px; }
+.seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; }
+.seg label { position: relative; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; inset: 0; }
+.seg span {
+  display: grid; gap: 2px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 5px; background: var(--panel-2);
+  font-size: 18px; font-weight: 600;
+}
+.seg span small { font-family: var(--f-name); font-size: 13px; font-weight: 500; color: var(--muted); }
+.seg input:checked + span { border-color: var(--ball); box-shadow: inset 0 0 0 1px var(--ball); }
+.seg input:focus-visible + span { outline: 2px solid var(--ball); outline-offset: 2px; }
+.card .btn.primary { justify-content: center; font-size: 18px; padding: 11px; }
+.result-line { font-family: var(--f-num); font-size: 18px; margin: 0; }
+
+/* ---------- Body HUD (top-right): stamina, speed, split-step feedback ---------- */
+.stamina { position: fixed; z-index: 5; top: calc(14px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px));
+  width: 120px; display: grid; gap: 4px; pointer-events: none; }
+.stamina-label { font-family: var(--f-pix); font-size: 7px; letter-spacing: .1em; color: rgb(238 243 251 / .75); text-shadow: 0 1px 0 rgb(0 0 0 / .5); }
+.bar { position: relative; height: 5px; background: rgb(14 23 41 / .65); border-radius: 2px; overflow: hidden; }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; }
+.bar .cap { position: absolute; top: 0; bottom: 0; width: 2px; background: rgb(238 243 251 / .7); }
+.callout { position: fixed; z-index: 6; left: 50%; transform: translateX(-50%); bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  font-family: var(--f-pix); font-size: 10px; letter-spacing: .08em; color: var(--ball); text-shadow: 0 2px 0 rgb(0 0 0 / .55);
+  pointer-events: none; white-space: nowrap; }
+.stick {
+  position: fixed; z-index: 7; width: 96px; height: 96px; margin: -48px 0 0 -48px;
+  border-radius: 50%; border: 1px solid rgb(238 243 251 / .35); pointer-events: none;
+}
+.stick i { position: absolute; left: 50%; top: 50%; width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%; background: rgb(238 243 251 / .3); }
+#court { touch-action: none; }
+
+@media (max-width: 480px) {
+  .cam-tag { top: calc(56px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); transform: none; font-size: 8px; }
+  .sb-name b { font-size: 18px; }
+  .sb-cell { height: 30px; }
+  .btn { font-size: 13px; padding: 6px 9px; }
+  .btn kbd { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .scorebug { transition: none; } }
+</style>
+
+<canvas id="court" aria-label="Pixel tennis court: Jannik Sinner near side, Carlos Alcaraz far side"></canvas>
+
+
+<!-- Stamina only (no box, no heights or weights: Ryan's call). Messages (split-step, slide, ace chance) pop up above the buttons. -->
+<div class="stamina" aria-label="Stamina">
+  <span class="stamina-label">STAMINA</span>
+  <div class="bar"><i id="st0" style="background:var(--sinner)"></i><span class="cap" id="cap0"></span></div>
+  <div class="bar"><i id="st1" style="background:var(--alcaraz)"></i><span class="cap" id="cap1"></span></div>
+</div>
+<div class="callout" id="hudMsg" aria-live="polite"></div>
+<div class="stick" id="stick" hidden><i id="knob"></i></div>
+<div class="cam-tag" id="camTag" hidden>NET CAM · VOLLEY</div>
+<div class="ready" id="ready" hidden aria-live="polite"><b id="readyBig">READY</b><span id="readySmall"></span></div>
+
+<section class="scorebug" id="scorebug" aria-live="polite" aria-label="Scoreboard"></section>
+
+<div class="controls">
+  <button class="btn primary" id="pauseBtn" type="button">Pause <kbd>ESC</kbd></button>
+  <button class="btn" id="slideBtn" type="button">Slide <kbd>SPACE</kbd></button>
+  <button class="btn" id="splitBtn" type="button">Split step <kbd>SHIFT</kbd></button>
+  <button class="btn" id="sliceBtn" type="button" aria-pressed="false">Slice <kbd>E</kbd></button>
+  <button class="btn" id="ptA" type="button"><span class="dot" id="dotA" style="background:var(--sinner)"></span><span id="lblA">Point Sinner</span> <kbd>1</kbd></button>
+  <button class="btn" id="ptB" type="button"><span class="dot" id="dotB" style="background:var(--alcaraz)"></span><span id="lblB">Point Alcaraz</span> <kbd>2</kbd></button>
+  <button class="btn" id="undoBtn" type="button">Undo <kbd>Z</kbd></button>
+  <button class="btn" id="newBtn" type="button">New match</button>
+</div>
+
+<div class="overlay" id="result" hidden>
+  <div class="card">
+    <div>
+      <p class="eyebrow">GAME, SET AND MATCH</p>
+      <h1 id="resultName">Sinner</h1>
+    </div>
+    <p class="result-line" id="resultLine"></p>
+    <button class="btn primary" type="button" id="againBtn">New match</button>
+  </div>
+</div>
+
+<div class="overlay" id="pause" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div><p class="eyebrow">MATCH PAUSED</p><h1 id="pauseTitle">Paused</h1></div>
+    <p class="muted" id="pauseScore" style="margin:0;color:var(--muted)"></p>
+    <div class="pause-actions">
+      <button class="btn primary" type="button" id="resumeBtn">Resume <kbd>ESC</kbd></button>
+      <button class="btn" type="button" id="pauseNew">New match</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<!-- Skill points (Skills Coach) and Sinner's real serve, captured from video (Serve Analyst) -->
+<script src="src/skills/skills.js?v=0.7.0"></script>
+<script src="src/animation/run-cycle.js?v=0.7.0"></script>
+<script src="src/serve/motion/sinner-serve.js?v=0.7.0"></script>
+<script>
+/* =====================================================================
+   PLAYERS — real measurements drive sprite height (and later, physics)
+   ===================================================================== */
+const ROSTER = [
+  { id: "sinner",  last: "SINNER",  first: "Jannik", code: "ITA", heightM: 1.91, weightKg: 77, shirt: "#23b59c", shorts: "#11233a", hair: "#c4672f", letRate: 0.02,
+    // outfit per court, from his clips (datasets/players/sinner/outfits.json); grass = all white (dress code)
+    outfits: { clay:  { shirt: "#141418", shorts: "#1e1d22", cap: "#16161b", shoes: "#1c1b20" },
+               hard:  { shirt: "#1f2f4a", shorts: "#f5f5f2", cap: "#f2f2ef", shoes: "#f0ece6" },
+               grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", cap: "#f4f4f0", shoes: "#f4f4f0" } } },
+  { id: "alcaraz", last: "ALCARAZ", first: "Carlos", code: "ESP", heightM: 1.83, weightKg: 74, shirt: "#e2544a", shorts: "#f1f1ec", hair: "#2a1c14", letRate: 0.03,
+    // no clips of him yet: his usual colours, and all white on grass (dress code). The Player Artist refines these.
+    outfits: { grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", shoes: "#f4f4f0" } } }
+];
+/* letRate = chance a serve that would land in clips the net cord first (a LET, served again). Estimates
+   (lets happen on roughly 1–3% of pro serves); the Serve Analyst refines them from match data. */
+/* PLAYERS[0] = you (near court), PLAYERS[1] = your opponent (far court). Filled by choosePlayers(). */
+const PLAYERS = [];
+
+/* Body-driven movement numbers, relative to a 1.85 m / 75 kg reference athlete.
+   Every trait is a trade-off: height buys stride (top speed) and reach but costs first-step quickness. */
+function bodyStats(P) {
+  const h = P.heightM / 1.85, w = P.weightKg / 75;
+  return {
+    top: 6.6 * Math.sqrt(h) / Math.pow(w, 0.25),   // m/s: longer stride raises top speed, mass lowers it (raised from 5.3: Ryan wanted faster)
+    accel: 8.6 / w / Math.sqrt(h),                 // m/s²: lighter and shorter = quicker first step (was 7.0)
+    brake: 11.0 / w,                               // m/s²: stopping or changing direction fights your own mass (was 9.0)
+    reach: 0.44 * P.heightM + 0.69,                // m: arm + racket from body centre
+    drain: w                                       // heavier body spends more stamina per effort
+  };
+}
+let BODY = [];
+/* You pick a pro in the locker room: they go to the near court, the other pro is your opponent.
+   Each body = height/weight physics (bodyStats) + skill points (src/skills/skills.js). */
+function choosePlayers(youId, surface = "hard") {
+  const you = ROSTER.find(r => r.id === youId) || ROSTER[0], opp = ROSTER.find(r => r !== you);
+  const dress = P => ({ ...P, ui: P.shirt, ...(P.outfits && P.outfits[surface] || {}) });   // outfit for this court; ui keeps the signature colour for the HUD
+  PLAYERS.splice(0, 2, { ...dress(you), side: "near" }, { ...dress(opp), side: "far" });
+  BODY = PLAYERS.map(P => applySkills(bodyStats(P), getSkills(P.id)));
+}
+choosePlayers("sinner");
+window.ROSTER = ROSTER;
+
+/* =====================================================================
+   SCORING ENGINE — pure state, no drawing
+   ===================================================================== */
+const cfg = { bestOf: 3, tbTo: 7, firstServer: 0, surface: "hard" };
+const setsToWin = () => (cfg.bestOf === 5 ? 3 : 2);
+
+function freshState() {
+  return { sets: [], setsWon: [0, 0], games: [0, 0], points: [0, 0],
+           tb: false, tbStarter: null, server: cfg.firstServer, over: false, winner: null };
+}
+let S = freshState();
+let history = [];
+
+function awardPoint(p) {
+  if (S.over) return;
+  history.push(JSON.stringify(S));
+  const o = 1 - p;
+  S.points[p]++;
+  if (S.tb) {
+    if (S.points[p] >= cfg.tbTo && S.points[p] - S.points[o] >= 2) {
+      S.games[p]++;
+      finishSet(p);
+    } else if ((S.points[0] + S.points[1]) % 2 === 1) {
+      S.server = 1 - S.server;          // tiebreak: change after point 1, then every 2 points
+    }
+  } else if (S.points[p] >= 4 && S.points[p] - S.points[o] >= 2) {
+    finishGame(p);
+  }
+}
+
+function finishGame(p) {
+  const o = 1 - p;
+  S.games[p]++;
+  S.points = [0, 0];
+  S.server = 1 - S.server;              // serve alternates every game
+  if (S.games[p] >= 6 && S.games[p] - S.games[o] >= 2) {
+    finishSet(p);                         // 6-0..6-4, or 7-5
+  } else if (S.games[0] === 6 && S.games[1] === 6) {
+    S.tb = true;
+    S.tbStarter = S.server;               // whoever is due to serve starts the tiebreak
+  }
+}
+
+function finishSet(p) {
+  S.sets.push({ g: [...S.games], tb: S.tb ? [...S.points] : null, winner: p });
+  S.setsWon[p]++;
+  if (S.tb) S.server = 1 - S.tbStarter;  // receiver of the first tiebreak point serves the next set
+  S.tb = false; S.tbStarter = null;
+  S.games = [0, 0]; S.points = [0, 0];
+  if (S.setsWon[p] === setsToWin()) { S.over = true; S.winner = p; }
+}
+
+function pointLabels() {
+  const [a, b] = S.points;
+  if (S.tb) return [String(a), String(b)];
+  if (a >= 3 && b >= 3) {
+    if (a === b) return ["40", "40"];
+    return a > b ? ["AD", ""] : ["", "AD"];
+  }
+  const m = ["0", "15", "30", "40"];
+  return [m[a], m[b]];
+}
+
+/* Umpire's call: server's score first, as said on court */
+function umpireCall() {
+  if (S.over) return "GAME, SET AND MATCH";
+  const s = S.server, r = 1 - s, ps = S.points[s], pr = S.points[r];
+  if (S.tb) return ps === pr ? `${ps} ALL` : `${ps}–${pr}`;
+  if (ps >= 3 && pr >= 3) return ps === pr ? "DEUCE" : (ps > pr ? "AD IN" : "AD OUT");
+  const w = ["LOVE", "15", "30", "40"];
+  if (ps === pr) return ps === 0 ? "LOVE ALL" : `${w[ps]} ALL`;
+  return `${w[ps]}–${w[pr]}`;
+}
+
+/* =====================================================================
+   SCOREBOARD RENDER
+   ===================================================================== */
+const bug = document.getElementById("scorebug");
+function renderScore() {
+  const setNo = S.sets.length + 1;
+  const cols = ["22px", "1fr", ...S.sets.map(() => "26px"), S.over ? null : "30px", S.over ? null : "46px"].filter(Boolean);
+  const pts = pointLabels();
+  const head = S.over
+    ? `<span>FINAL</span><span>BEST OF ${cfg.bestOf}</span>`
+    : `<span>${S.tb ? `<span class="tag-tb">TIEBREAK · FIRST TO ${cfg.tbTo}</span>` : `SET ${setNo}`}</span><span>BEST OF ${cfg.bestOf}</span>`;
+  const rows = [0, 1].map(i => {
+    const P = PLAYERS[i];
+    const serving = !S.over && S.server === i;
+    const setCells = S.sets.map(st => {
+      const won = st.winner === i;
+      const tbSup = st.tb && !won ? `<sup>${st.tb[i]}</sup>` : "";
+      return `<div class="sb-cell sb-set${won ? " won" : ""}">${st.g[i]}${tbSup}</div>`;
+    }).join("");
+    const live = S.over ? "" :
+      `<div class="sb-cell sb-cur">${S.games[i]}</div>` +
+      `<div class="sb-cell sb-pts${pts[i] === "AD" ? " adv" : ""}">${pts[i]}</div>`;
+    return `<div class="sb-grid sb-row" style="grid-template-columns:${cols.join(" ")}">
+      <div class="sb-cell sb-serve">${serving ? '<i title="Serving" aria-label="Serving"></i>' : ""}</div>
+      <div class="sb-cell sb-name"><span class="stripe" style="background:${P.ui || P.shirt}"></span><b>${P.last}</b><small>${P.code}</small></div>
+      ${setCells}${live}
+    </div>`;
+  }).join("");
+  const serverName = PLAYERS[S.server].first + " " + PLAYERS[S.server].last.charAt(0) + PLAYERS[S.server].last.slice(1).toLowerCase();
+  const callRight = S.over ? `${PLAYERS[S.winner].last} WINS` : `${PLAYERS[S.server].last} TO SERVE`;
+  bug.innerHTML = `<div class="sb-head">${head}</div>${rows}<div class="sb-call"><span>${umpireCall()}</span><span>${callRight}</span></div>`;
+  bug.setAttribute("aria-label", `Scoreboard. ${umpireCall()}. ${serverName} serving.`);
+  document.getElementById("undoBtn").disabled = history.length === 0;
+  ["ptA", "ptB"].forEach(id => document.getElementById(id).disabled = S.over || rally !== null);
+}
+
+/* =====================================================================
+   COURT + CAMERA (broadcast view from behind Sinner; pixel buffer)
+   Court units are metres. x: left/right, y: along court (near baseline -11.885, far +11.885), z: height.
+   ===================================================================== */
+const canvas = document.getElementById("court");
+const ctx = canvas.getContext("2d");
+const buf = document.createElement("canvas");
+const bMain = buf.getContext("2d");
+let b = bMain;                                           // the context every draw call uses (switched for the actor layer)
+/* ACTOR LAYER: players, rackets, net and ball are drawn at AS× the court's pixel resolution, so characters get
+   real detail while the world keeps its chunky pixel look. Same coordinates (scaled by a transform). */
+const AS = 3;
+const abuf = document.createElement("canvas"), actx = abuf.getContext("2d");
+const q = v => Math.round(v * AS) / AS;                  // snap to the actor layer's finer pixel grid
+let BW = 320, BH = 200, F = 150, HZ = 60;
+const COURT = { L: 11.885, DBL: 5.485, SGL: 4.115, SVC: 6.40 };
+/* Camera. BROADCAST = high behind the baseline. When you cross the NET_LINE toward the net, the camera
+   moves in low behind you for volleys (NET), and moves back when you retreat past NET_EXIT. */
+const CAMS = {
+  broadcast: () => ({ back: 19, h: 5, x: 0, anchor: -COURT.L }),
+  net:       () => ({ back: 5.2 - pos[0].y, h: 2.7, x: pos[0].x * 0.55, anchor: pos[0].y }),
+  // SERVE CAM: close behind you, so you watch your whole routine and windup while you aim
+  serve:     () => ({ back: 4.6 - pos[0].y, h: 2.4, x: pos[0].x * 0.8, anchor: pos[0].y }),
+  // FIRST PERSON (press V): your own eyes (eye height ≈ 94% of your real height), looking down the court
+  pov:       () => ({ back: 0.35 - pos[0].y, h: PLAYERS[0].heightM * 0.94, x: pos[0].x, anchor: null }),
+};
+/* You're serving: from the start of your routine until just after your racket meets the ball. */
+const serveCamWanted = () => S.server === 0 && !S.over && !!rally &&
+  (!!rally.serve || (rally.shot && rally.shot.isServe && clock - (rally.serveClock || 0) < 0.35));
+const povWanted = () => serveCamWanted() && firstPersonServe;
+const NET_LINE = -COURT.SVC + 0.4, NET_EXIT = -COURT.SVC - 0.8;   // enter just inside the service line
+let CAM_BACK = 19, CAM_H = 5, CAM_X = 0, camMode = "broadcast";
+const horizonFor = t => t.anchor === null ? BH * 0.45 : BH * 0.76 - F * t.h / (t.anchor + t.back) * 0.97;   // eye level in first person
+function setHorizon() { HZ = horizonFor(CAMS[camMode]()); }
+function updateCamera(dt) {
+  const y = pos[0].y;
+  if (serveCamWanted()) camMode = firstPersonServe ? "pov" : "serve";
+  else if (camMode === "pov" || camMode === "serve") camMode = "broadcast";
+  else if (camMode === "broadcast" && rally && y > NET_LINE) camMode = "net";
+  else if (camMode === "net" && (!rally || y < NET_EXIT)) camMode = "broadcast";
+  const tag = document.getElementById("camTag");
+  tag.hidden = camMode === "broadcast";
+  tag.textContent = camMode === "net" ? "NET CAM · VOLLEY" : camMode === "pov" ? "FIRST PERSON · V TO SWITCH" : "SERVE CAM · V FOR FIRST PERSON";
+  const t = CAMS[camMode](), k = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 1 - Math.exp(-dt * 5);
+  CAM_BACK += (t.back - CAM_BACK) * k; CAM_H += (t.h - CAM_H) * k; CAM_X += (t.x - CAM_X) * k;
+  HZ += (horizonFor(t) - HZ) * k;
+}
+
+function resize() {
+  const W = innerWidth, H = innerHeight;
+  const px = W < 700 ? 2 : 3;               // size of one "pixel"
+  canvas.width = W; canvas.height = H;
+  BW = Math.ceil(W / px); BH = Math.ceil(H / px);
+  buf.width = BW; buf.height = BH;
+  abuf.width = BW * AS; abuf.height = BH * AS;
+  F = Math.min(BW * 0.63, BH * 0.95);
+  setHorizon();
+  makeCrowd();
+}
+function proj(x, y, z = 0) {
+  const d = Math.max(0.4, y + CAM_BACK);             // distance from the camera (never behind it)
+  return { x: BW / 2 + (x - CAM_X) * F / d, y: HZ + (CAM_H - z) * F / d, s: F / d };
+}
+
+/* THE STADIUM: an oval bowl all around the court — a low back wall, TIERS rows of seating rising up and back,
+   a roof ring on top, sky above. Every tier is packed with people (a dense crowd texture of heads and shoulders,
+   not spaced dots), with aisles every few sections. Built in court metres and projected like everything else,
+   so it moves with the camera. Shapes and colours follow Ryan's stadium references (datasets/courts/grass/).
+   Each surface has its own light: grass = a summer afternoon, clay = a warm late afternoon, hard = a night
+   session under floodlights. No real venue names or logos. */
+const SCENES = {
+  grass: { sky: ["#c9d1d7", "#d8dee2", "#e6eaec", "#eef0f0"], roof: "#8d969c", stands: "#2b2627", stairs: "#4a4446", wall: "#1f4a2c", trim: "#2e6b3e", lights: false, shade: 0.28,
+           crowd: ["#e9e4dc", "#c9b8a6", "#7d6b62", "#3b3a44", "#b04a4a", "#4f6d8f", "#d8c27a", "#f2efe8", "#9aa7b6"], skin: ["#e1b48b", "#c99a72", "#f0c9a2", "#8a5a3c", "#5a3a2a"] },
+  clay:  { sky: ["#efcfa8", "#f3dcc0", "#f7e7d2", "#fbf2e6"], roof: "#b9a48e", stands: "#4a2f27", stairs: "#7a5848", wall: "#7a3a26", trim: "#a5523a", lights: false, shade: 0.22,
+           crowd: ["#f1e6d6", "#d7b98f", "#8f5b46", "#33343d", "#c9504a", "#5b7aa0", "#e7c46a", "#fdf6ea", "#6f8b5a"], skin: ["#e9bd94", "#d4a07a", "#f4d1ad", "#8a5a3c", "#5a3a2a"] },
+  hard:  { sky: ["#04070d", "#070c17", "#0a1120", "#0d172b"], roof: "#1a2440", stands: "#0b1222", stairs: "#1d2a46", wall: "#14254a", trim: "#24427c", lights: true, shade: 0.4,
+           crowd: ["#3a4d74", "#5a3f55", "#2f5b5a", "#6b5a3e", "#4b3a6e", "#7a7f92", "#9a8a6e", "#c7c2b6"], skin: ["#b98d6c", "#a07656", "#cfa585", "#6a4532", "#4a3022"] },
+};
+const SCENE = () => SCENES[cfg.surface] || SCENES.hard;
+const STADIUM = { tiers: 16, segs: 72, a0: 12.6, b0: 20.6, wallH: 1.3, rise: 0.85, step: 1.0, aisleEvery: 9 };
+function ringPoint(k, j) {                               // tier k (0 = top of the back wall), angle slot j
+  const S = STADIUM, ang = j / S.segs * Math.PI * 2;
+  const grow = k < 0 ? 0 : 0.6 + k * S.step;             // tiers step back as they rise
+  return { x: (S.a0 + grow) * Math.cos(ang), y: (S.b0 + grow) * Math.sin(ang), z: k < 0 ? 0 : S.wallH + k * S.rise };
+}
+/* Crowd textures: rows of people packed shoulder to shoulder. "big" for near tiers, "small" for far ones. */
+let crowdPatterns = {};
+function makeCrowd() { crowdPatterns = {}; }
+function crowdPattern(surface, big) {
+  const key = surface + (big ? "B" : "S");
+  if (crowdPatterns[key]) return crowdPatterns[key];
+  const sc = SCENES[surface], c = document.createElement("canvas");
+  const cw = big ? 3 : 2, ch = big ? 5 : 3, cols = 16, rows = 4;          // one person = cw × ch pixels
+  c.width = cw * cols; c.height = ch * rows;
+  const g = c.getContext("2d"); let seed = surface.length * 97 + (big ? 13 : 7);
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, pick = a => a[rnd() * a.length | 0];
+  g.fillStyle = sc.stands; g.fillRect(0, 0, c.width, c.height);
+  for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
+    const x = q * cw + (r % 2 ? 1 : 0), y = r * ch;                      // alternate rows sit offset, like real seats
+    g.fillStyle = pick(sc.crowd); g.fillRect(x, y + (big ? 2 : 1), cw, ch - (big ? 3 : 1));   // shoulders
+    g.fillStyle = rnd() < 0.25 ? pick(["#2a1c14", "#5a4232", "#c9b48a", "#1b1b1f"]) : pick(sc.skin);
+    g.fillRect(x + (big ? 1 : 0), y + (big ? 0 : 0), big ? 1 : 1, big ? 2 : 1);              // head (hair or skin)
+  }
+  return (crowdPatterns[key] = b.createPattern(c, "repeat"));
+}
+function drawStadium() {
+  const S = STADIUM, sc = SCENE(), quads = [];
+  const P = []; for (let k = -1; k <= S.tiers + 1; k++) { P[k] = []; for (let j = 0; j <= S.segs; j++) { const r = ringPoint(Math.min(k, S.tiers), j % S.segs);
+    if (k === S.tiers + 1) { r.x *= 1.06; r.y *= 1.04; r.z += 1.8; }      // the roof ring overhangs a little
+    P[k][j] = { ...r, d: r.y + CAM_BACK, s: proj(r.x, r.y, r.z) }; } }
+  for (let k = -1; k <= S.tiers; k++) for (let j = 0; j < S.segs; j++) {
+    const c = [P[k][j], P[k][j + 1], P[k + 1][j + 1], P[k + 1][j]];
+    if (c.some(v => v.d < 1.2)) continue;                // behind or right at the camera: not visible
+    quads.push({ c, k, j, d: (c[0].d + c[1].d + c[2].d + c[3].d) / 4 });
+  }
+  quads.sort((a, c) => c.d - a.d);                       // far to near
+  for (const q of quads) {
+    const pts = q.c.map(v => v.s);
+    if (q.k === -1) b.fillStyle = sc.wall;               // the back wall
+    else if (q.k === S.tiers) b.fillStyle = sc.roof;     // the roof ring
+    else if (q.j % S.aisleEvery === 0) b.fillStyle = sc.stairs;   // aisle steps
+    else b.fillStyle = crowdPattern(cfg.surface, q.d < 26);
+    b.beginPath(); pts.forEach((p, i) => (i ? b.lineTo(p.x, p.y) : b.moveTo(p.x, p.y))); b.closePath(); b.fill();
+    if (q.k >= 0 && q.k < S.tiers) {                     // upper tiers sit in shade; a dark line marks each row's front edge
+      b.fillStyle = `rgba(0,0,0,${(sc.shade * q.k / S.tiers).toFixed(3)})`; b.fill();
+      b.strokeStyle = "rgba(0,0,0,0.28)"; b.lineWidth = 1; b.beginPath(); b.moveTo(pts[0].x, pts[0].y); b.lineTo(pts[1].x, pts[1].y); b.stroke();
+    }
+    if (q.k === -1) { b.strokeStyle = sc.trim; b.lineWidth = 1; b.beginPath(); b.moveTo(pts[3].x, pts[3].y); b.lineTo(pts[2].x, pts[2].y); b.stroke(); }
+    if (q.k === S.tiers && sc.lights && q.j % 6 === 0) { // floodlights along the roof (night session)
+      const m = pts[3]; b.fillStyle = "#fff6c8"; b.fillRect(Math.round(m.x) - 2, Math.round(m.y) - 1, 4, 2);
+      b.fillStyle = "rgba(255,246,200,0.10)"; b.fillRect(Math.round(m.x) - 6, Math.round(m.y) - 3, 12, 6);
+    }
+  }
+}
+
+function poly(pts, color) {
+  b.fillStyle = color; b.beginPath();
+  pts.forEach((p, i) => i ? b.lineTo(p.x, p.y) : b.moveTo(p.x, p.y));
+  b.closePath(); b.fill();
+}
+function line(x1, y1, x2, y2, w = 0.05) {
+  const a = proj(x1 - w, y1), c = proj(x2 + w, y2), a2 = proj(x1 + w, y1), c2 = proj(x2 - w, y2);
+  // draw as thin quad so far lines stay ~1px
+  const p1 = proj(x1, y1), p2 = proj(x2, y2);
+  b.strokeStyle = "#f4f6f8"; b.lineWidth = 1; b.beginPath(); b.moveTo(Math.round(p1.x) + .5, Math.round(p1.y) + .5); b.lineTo(Math.round(p2.x) + .5, Math.round(p2.y) + .5); b.stroke();
+}
+
+/* Court surfaces. Colours here; pace (ball speed after the bounce) and bounce height used by the point flow.
+   The Court Designer owns the detailed look, the Ball Physicist the real bounce physics. */
+const SURFACES = {
+  hard:  { runoff: "#3f74a8", court: "#2b5c90", pace: 1.0,  bounce: 1.0 },
+  clay:  { runoff: "#b5583a", court: "#c2603d", pace: 0.88, bounce: 1.2 },
+  grass: { runoff: "#7d9f4e", court: "#8fae5a", stripe: "#6f9446", worn: "#b9a36a", pace: 1.12, bounce: 0.78 },
+};
+const SURF = () => SURFACES[cfg.surface] || SURFACES.hard;
+function drawCourt() {
+  const sc = SCENE(), su = SURF();
+  // sky in flat pixel bands down to the horizon; ground below it; then the stadium bowl over both
+  const skyEnd = Math.max(1, Math.round(HZ));
+  sc.sky.forEach((c, k) => { b.fillStyle = c; b.fillRect(0, Math.floor(skyEnd * k / sc.sky.length), BW, Math.ceil(skyEnd / sc.sky.length) + 1); });
+  b.fillStyle = su.runoff; b.fillRect(0, skyEnd, BW, BH - skyEnd);
+  drawStadium();
+  poly([proj(-COURT.DBL, COURT.L), proj(COURT.DBL, COURT.L), proj(COURT.DBL, -COURT.L), proj(-COURT.DBL, -COURT.L)], su.court); // playing surface
+  if (su.stripe) {                                        // grass: mowing stripes across the court, worn patches behind the baselines
+    for (let y0 = -19.5, k = 0; y0 < 19.5; y0 += 1.5, k++) if (k % 2) {     // stays inside the bowl's back wall
+      const y1 = Math.max(y0 + 1.5, -CAM_BACK + 0.5), y0c = Math.max(y0, -CAM_BACK + 0.5);
+      poly([proj(-11, y0c), proj(11, y0c), proj(11, y1), proj(-11, y1)], su.stripe);
+    }
+    for (const sy of [-1, 1]) poly([proj(-2.6, sy * 10.9), proj(2.6, sy * 10.9), proj(2.2, sy * 13.2), proj(-2.2, sy * 13.2)], su.worn);
+  }
+  const { L, DBL, SGL, SVC } = COURT;
+  [[-DBL, -L, DBL, -L], [-DBL, L, DBL, L], [-DBL, -L, -DBL, L], [DBL, -L, DBL, L], [-SGL, -L, -SGL, L], [SGL, -L, SGL, L],
+   [-SGL, -SVC, SGL, -SVC], [-SGL, SVC, SGL, SVC], [0, -SVC, 0, SVC], [0, -L, 0, -L + 0.2], [0, L, 0, L - 0.2]].forEach(l => line(...l));
+}
+
+function drawNet() {
+  const post = 6.4, hp = 1.07, hc = 0.914;
+  const lb = proj(-post, 0, 0), rb = proj(post, 0, 0), lt = proj(-post, 0, hp), rt = proj(post, 0, hp), ct = proj(0, 0, hc), cb = proj(0, 0, 0);
+  b.fillStyle = "rgba(20,26,36,0.62)";
+  b.beginPath(); b.moveTo(lb.x, lb.y); b.lineTo(lt.x, lt.y); b.lineTo(ct.x, ct.y); b.lineTo(rt.x, rt.y); b.lineTo(rb.x, rb.y); b.closePath(); b.fill();
+  b.strokeStyle = "rgba(200,210,225,0.18)"; b.lineWidth = 1;
+  for (let i = 1; i < 6; i++) { const t = i / 6; b.beginPath(); b.moveTo(lb.x, lb.y + (lt.y - lb.y) * t); b.lineTo(cb.x, cb.y + (ct.y - cb.y) * t); b.lineTo(rb.x, rb.y + (rt.y - rb.y) * t); b.stroke(); }
+  b.strokeStyle = "#f4f6f8"; b.lineWidth = 2;
+  b.beginPath(); b.moveTo(lt.x, lt.y); b.lineTo(ct.x, ct.y); b.lineTo(rt.x, rt.y); b.stroke();
+  b.fillStyle = "#c9ced8"; b.fillRect(lb.x - 1, lt.y, 2, lb.y - lt.y); b.fillRect(rb.x - 1, rt.y, 2, rb.y - rt.y);
+}
+
+/* Pixel player sprite, scaled from real height. facing: 1 = back to camera (near), -1 = facing camera (far) */
+/* Draw a player from captured joints (court metres): pixel limbs, shirt, shorts, head and racket.
+   Used while Sinner plays his real serve motion. Order = back to front as seen from behind. */
+function drawCapturedFigure(i, p, W) {
+  const P = PLAYERS[i], at = n => W[n] && proj(W[n].x, W[n].y, W[n].z);
+  const g = proj(p.x, p.y), lw = Math.max(2 / AS, q(g.s * 0.12)), skin = "#e1b48b";
+  const seg = (a, c, col, w = lw) => {
+    const A = typeof a === "string" ? at(a) : a, C = typeof c === "string" ? at(c) : c;
+    if (!A || !C) return;
+    b.strokeStyle = col; b.lineWidth = w; b.lineCap = "round";
+    b.beginPath(); b.moveTo(q(A.x), q(A.y)); b.lineTo(q(C.x), q(C.y)); b.stroke();
+  };
+  const mid = (a, c, u) => { const A = at(a), C = at(c); return A && C ? { x: A.x + (C.x - A.x) * u, y: A.y + (C.y - A.y) * u } : null; };
+  const quad = (pts, col) => { if (!pts.every(Boolean)) return; b.fillStyle = col; b.beginPath(); pts.forEach((v, k) => (k ? b.lineTo(v.x, v.y) : b.moveTo(v.x, v.y))); b.closePath(); b.fill(); };
+  b.fillStyle = "rgba(0,0,0,0.32)"; b.beginPath(); b.ellipse(Math.round(g.x), Math.round(g.y), g.s * 0.32, Math.max(1, g.s * 0.09), 0, 0, Math.PI * 2); b.fill();
+  // legs, shoes, shorts
+  for (const s of ["left", "right"]) {
+    seg(s + "Hip", s + "Knee", skin); seg(s + "Knee", s + "Ankle", skin);
+    const Kn = at(s + "Knee"), A0 = at(s + "Ankle");
+    if (Kn && A0) seg({ x: A0.x + (Kn.x - A0.x) * 0.18, y: A0.y + (Kn.y - A0.y) * 0.18 }, A0, "#f1f1ee", lw * 1.05);   // sock
+    const A = at(s + "Ankle"); if (A) { b.fillStyle = shade(P.shoes || "#f2f2f2", -0.45); b.fillRect(Math.round(A.x - lw * 0.75), Math.round(A.y + lw * 0.35), Math.ceil(lw * 1.6), Math.max(1, Math.ceil(lw * 0.3))); b.fillStyle = P.shoes || "#f2f2f2"; b.fillRect(Math.round(A.x - lw * 0.7), Math.round(A.y - lw * 0.4), Math.ceil(lw * 1.5), Math.ceil(lw * 0.8)); }
+    seg(s + "Hip", mid(s + "Hip", s + "Knee", 0.42), P.shorts, lw * 1.5);
+  }
+  // torso (shirt) between shoulders and hips
+  quad([at("leftShoulder"), at("rightShoulder"), at("rightHip"), at("leftHip")], P.shirt);
+  { const ls = at("leftShoulder"), lh = at("leftHip"), rs = at("rightShoulder"), rh = at("rightHip");   // shaded side of the jersey
+    if (ls && lh && rs && rh) quad([ls, { x: ls.x + (rs.x - ls.x) * 0.28, y: ls.y + (rs.y - ls.y) * 0.28 }, { x: lh.x + (rh.x - lh.x) * 0.28, y: lh.y + (rh.y - lh.y) * 0.28 }, lh], shade(P.shirt, -0.16)); }
+  seg("leftHip", "rightHip", P.shorts, lw * 1.4);
+  // arms, with short sleeves
+  for (const s of ["left", "right"]) {
+    seg(s + "Shoulder", s + "Elbow", skin); seg(s + "Elbow", s + "Wrist", skin);
+    seg(s + "Shoulder", mid(s + "Shoulder", s + "Elbow", 0.4), P.shirt, lw * 1.3);
+    const wr = mid(s + "Wrist", s + "Elbow", 0.18); if (wr) seg(wr, mid(s + "Wrist", s + "Elbow", 0.05), P.ui || "#f2f2f2", lw * 1.1);   // wristband
+  }
+  // racket: a real 3D racket continuing the right forearm (the same drawRacket as every other stroke)
+  if (W.rightElbow && W.rightWrist) {
+    const e = W.rightElbow, r = W.rightWrist, u = V3.norm({ x: r.x - e.x, y: r.y - e.y, z: r.z - e.z });
+    const n = V3.norm({ x: 0, y: u.z, z: -u.y });          // face square to the forearm, toward the net
+    drawRacket(r, u, n, RACKET_LOOK[P.id] || RACKET_LOOK.sinner);
+  }
+  // head (seen from behind: cap or hair with strands) between the neck and the nose
+  const N = at("neck"), H = at("nose");
+  if (N && H) {
+    const r = Math.max(2, g.s * 0.12), hx = H.x, hy = H.y - g.s * 0.04, [hr, hrD, hrL] = HAIR[P.id] || [P.hair, P.hair, P.hair];
+    b.fillStyle = skin; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();
+    b.fillStyle = hr; b.beginPath(); b.arc(hx, hy + r * 0.15, r * 0.98, Math.PI * 0.05, Math.PI * 0.95); b.fill();   // hair below the cap
+    for (let k = -2; k <= 2; k++) { b.fillStyle = k % 2 ? hrL : hrD; b.fillRect(hx + k * r * 0.35 - 0.5 / AS, hy + r * 0.55, 1 / AS, r * 0.3); }  // curls
+    b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.1, r * 0.98, Math.PI, Math.PI * 2); b.fill();     // cap crown
+    if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(hx - 0.5 / AS, hy - r * 1.05, 1 / AS, r * 0.95); }  // seam
+  }
+}
+
+/* =====================================================================
+   PLAYER SPRITE (detailed, on the actor layer) + 3D RACKET
+   Owners: Player Artist (looks), Animator (frames). Everything is sized from the sprite height h, so real heights show.
+   ===================================================================== */
+const HAIR = { sinner: ["#c4672f", "#8e441e", "#e7914f"], alcaraz: ["#2a1c14", "#120b07", "#4d3626"] };   // base, shadow, highlight
+const RACKET_LOOK = { sinner: { frame: "#1d1d22", accent: "#f2f2ef" }, alcaraz: { frame: "#1d1d22", accent: "#e2544a" } };
+function shade(hex, amt) {                               // lighten (+) or darken (−) a #rrggbb colour
+  const n = parseInt(hex.slice(1), 16), f = c => Math.max(0, Math.min(255, Math.round(c + (amt > 0 ? (255 - c) : c) * amt)));
+  return "#" + [f(n >> 16), f((n >> 8) & 255), f(n & 255)].map(v => v.toString(16).padStart(2, "0")).join("");
+}
+const V3 = { norm: v => { const l = Math.hypot(v.x, v.y, v.z) || 1; return { x: v.x / l, y: v.y / l, z: v.z / l }; },
+             lerp: (a, c, t) => ({ x: a.x + (c.x - a.x) * t, y: a.y + (c.y - a.y) * t, z: a.z + (c.z - a.z) * t }) };
+const ease = t => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
+
+/* The racket is a real object in court space: grip point, shaft direction u, string-face normal n.
+   Projected like the court, so its length, angle and how "open" the face looks are right from any camera:
+   face-on = a full oval with strings, edge-on = a thin line. (ox, oy) shifts it with the body's bob/crouch. */
+const RACKET = { len: 0.685, handle: 0.2, headL: 0.33, headW: 0.26 };
+function drawRacket(grip, u, n, look, ox = 0, oy = 0) {
+  const at = t => ({ x: grip.x + u.x * t, y: grip.y + u.y * t, z: grip.z + u.z * t });
+  const pp = w => { const r = proj(w.x, w.y, w.z); return { x: r.x + ox, y: r.y + oy, s: r.s }; };
+  const c = at(RACKET.len - RACKET.headL / 2), top = pp(at(RACKET.len)), bot = pp(at(RACKET.len - RACKET.headL)), hc = pp(c);
+  const g0 = pp(at(-0.03)), g1 = pp(at(RACKET.handle)), s = hc.s;
+  const camz = { x: CAM_X, y: -CAM_BACK, z: CAM_H }, vd = V3.norm({ x: c.x - camz.x, y: c.y - camz.y, z: c.z - camz.z });
+  const open = Math.abs(n.x * vd.x + n.y * vd.y + n.z * vd.z);          // 1 = strings face the camera, 0 = edge-on
+  const major = Math.max(1 / AS, Math.hypot(top.x - bot.x, top.y - bot.y) / 2);
+  const minor = Math.max(0.6 / AS, RACKET.headW / 2 * s * open);
+  const rot = Math.atan2(top.y - bot.y, top.x - bot.x), lw = Math.max(1 / AS, 0.024 * s);
+  b.lineCap = "round";
+  b.strokeStyle = "#2b2b31"; b.lineWidth = Math.max(1 / AS, 0.04 * s);  // grip (tape)
+  b.beginPath(); b.moveTo(g0.x, g0.y); b.lineTo(g1.x, g1.y); b.stroke();
+  b.fillStyle = look.accent; b.fillRect(q(g0.x) - 0.5 / AS, q(g0.y) - 0.5 / AS, 1 / AS, 1 / AS);   // butt cap
+  const nx = Math.cos(rot + Math.PI / 2) * minor * 0.8, ny = Math.sin(rot + Math.PI / 2) * minor * 0.8;
+  b.strokeStyle = look.frame; b.lineWidth = lw;                          // throat: the open V into the head
+  b.beginPath(); b.moveTo(g1.x, g1.y); b.lineTo(bot.x + nx, bot.y + ny); b.moveTo(g1.x, g1.y); b.lineTo(bot.x - nx, bot.y - ny); b.stroke();
+  b.save(); b.translate(hc.x, hc.y); b.rotate(rot);
+  b.beginPath(); b.ellipse(0, 0, major, minor, 0, 0, Math.PI * 2);
+  if (minor > 1.5 / AS) {                                                // strings: a pale bed with a cross-hatch
+    b.fillStyle = "rgba(236,236,226,0.22)"; b.fill();
+    b.save(); b.clip(); b.strokeStyle = "rgba(246,246,238,0.6)"; b.lineWidth = 1 / AS; b.beginPath();
+    for (let k = -3; k <= 3; k++) { const yy = k * minor / 3.6; b.moveTo(-major, yy); b.lineTo(major, yy); }
+    for (let k = -4; k <= 4; k++) { const xx = k * major / 4.6; b.moveTo(xx, -minor); b.lineTo(xx, minor); }
+    b.stroke(); b.restore();
+  }
+  b.strokeStyle = look.frame; b.lineWidth = lw; b.beginPath(); b.ellipse(0, 0, major, minor, 0, 0, Math.PI * 2); b.stroke();
+  b.strokeStyle = look.accent; b.lineWidth = Math.max(1 / AS, lw * 0.5);  // a painted accent along the top of the frame
+  b.beginPath(); b.ellipse(0, 0, major, minor, 0, -0.55, 0.55); b.stroke();
+  b.restore();
+}
+
+/* Where the racket is: ready position, backswing as the ball comes, contact, follow-through; forehand on the
+   racket side, two-handed backhand on the other; overhead for a serve; SLICE high-back to low-front.
+   In player space: dx = to their right, dy = forward (toward the net), z = height.
+   Owners: Racket Coach (agents/racket-coach/) for the swing paths, Animator for the body.
+   TIMING: the swing is keyed to the time until contact (ttc), so the racket meets the ball on the beat:
+   unit turn ~1.1 s out, racket back by ~0.45 s, forward swing in the last ~0.2 s, contact, follow-through.
+   Poses are joined by a Catmull-Rom spline (pose track), so a stroke is one flowing motion, not stop-start blends.
+   SLICE CLOCK (seen from behind the player): the racket top starts at ~2 o'clock (high and back) and finishes
+   at SLICE_END o'clock (low and in front), 10 → 8/7 on the backhand side; shoulders tilt with the swing. */
+const SLICE_END = { sinner: 4, alcaraz: 5 };              // Sinner finishes higher and shorter, Alcaraz lower and longer
+function poseTrack(keys, t) {                              // keys: [[time, pose], ...] sorted by time
+  const n = keys.length;
+  if (t <= keys[0][0]) return keys[0][1];
+  if (t >= keys[n - 1][0]) return keys[n - 1][1];
+  let k = 0; while (t > keys[k + 1][0]) k++;
+  const u = (t - keys[k][0]) / (keys[k + 1][0] - keys[k][0]);
+  const P = [keys[Math.max(0, k - 1)][1], keys[k][1], keys[k + 1][1], keys[Math.min(n - 1, k + 2)][1]];
+  const cr = (a, b1, c, d) => 0.5 * (2 * b1 + (c - a) * u + (2 * a - 5 * b1 + 4 * c - d) * u * u + (3 * b1 - a - 3 * c + d) * u * u * u);
+  const v = f => ({ x: cr(...P.map(p => p[f].x)), y: cr(...P.map(p => p[f].y)), z: cr(...P.map(p => p[f].z)) });
+  const num = f => cr(...P.map(p => p[f] || 0));
+  return { g: v("g"), u: V3.norm(v("u")), n: V3.norm(v("n")), tilt: num("tilt"), crouch: num("crouch"),
+           throat: u < 0.5 ? P[1].throat : P[2].throat, slice: P[1].slice || P[2].slice };
+}
+function racketPose(i, p, ago = 0) {
+  const R = PLAYERS[i].side === "near" ? 1 : -1;        // near player's right is +x and forward is +y; far is the mirror
+  const W = (dx, dy, z) => ({ x: p.x + R * dx, y: p.y + R * dy, z });
+  const D = (dx, dy, dz) => V3.norm({ x: R * dx, y: R * dy, z: dz });
+  const clk = (c, fwd) => D(Math.sin(c * Math.PI / 6), fwd, Math.cos(c * Math.PI / 6));   // racket top pointing at c o'clock
+  const hz = Math.max(0.45, Math.min(1.75, p.hitZ ?? 1.0));                              // contact height of the last ball
+  const se = SLICE_END[PLAYERS[i].id] ?? 4.5;
+  const POSE = {
+    ready:  { g: W(0.40, 0.18, 0.96), u: D(0.34, 0.30, 0.89), n: D(0.6, -0.8, 0), throat: true },    // head up beside the right side, strings toward the back
+    fhBack: { g: W(0.55, -0.15, 1.15), u: D(0.45, -0.55, 0.62), n: D(0, 1, 0.35) },
+    fhLoop: { g: W(0.62, -0.25, 0.85), u: D(0.55, -0.70, -0.20), n: D(0, 1, 0.1) },                 // racket drops below the ball before the swing up
+    fhHit:  { g: W(0.60, 0.40, hz), u: D(0.90, 0.45, 0.10), n: D(0, 1, 0) },
+    fhEnd:  { g: W(-0.35, 0.15, 1.55), u: D(-0.35, -0.60, 0.72), n: D(0.7, 0, 0.3) },
+    bhBack: { g: W(-0.50, -0.10, 1.15), u: D(-0.50, -0.55, 0.62), n: D(0, 1, 0.35) },
+    bhLoop: { g: W(-0.58, -0.22, 0.85), u: D(-0.55, -0.70, -0.20), n: D(0, 1, 0.1) },
+    bhHit:  { g: W(-0.55, 0.40, hz), u: D(-0.90, 0.45, 0.10), n: D(0, 1, 0) },
+    bhEnd:  { g: W(0.35, 0.15, 1.55), u: D(0.35, -0.60, 0.72), n: D(-0.7, 0, 0.3) },
+    // SLICE: open face (strings tilted up), high back → contact → low in front, shoulders tilting through it
+    fsBack: { g: W(0.50, -0.20, 1.50), u: clk(2, -0.08), n: D(0, 0.55, 0.85), tilt: -0.06, crouch: 0.01, slice: true },
+    fsHit:  { g: W(0.60, 0.40, hz), u: clk(3, 0.12), n: D(0, 0.6, 0.8), tilt: 0.025, crouch: 0.045, slice: true },
+    fsEnd:  { g: W(0.30, 0.70, Math.max(0.55, hz - 0.35)), u: clk(se, 0.08), n: D(0, 0.3, 0.95), tilt: 0.07, crouch: 0.07, slice: true },
+    bsBack: { g: W(-0.50, -0.20, 1.50), u: clk(10, -0.08), n: D(0, 0.55, 0.85), tilt: 0.06, crouch: 0.01, slice: true },
+    bsHit:  { g: W(-0.60, 0.40, hz), u: clk(9, 0.12), n: D(0, 0.6, 0.8), tilt: -0.025, crouch: 0.045, slice: true },
+    bsEnd:  { g: W(-0.30, 0.70, Math.max(0.55, hz - 0.35)), u: clk(12 - se, 0.08), n: D(0, 0.3, 0.95), tilt: -0.07, crouch: 0.07, slice: true },
+    // SERVE: trophy (racket up behind), racket drop (head down the back), contact high, follow through across
+    trophy: { g: W(0.40, -0.10, 1.50), u: D(0.25, -0.45, -0.55), n: D(1, 0, 0), tilt: -0.04 },
+    drop:   { g: W(0.30, -0.20, 1.70), u: D(0.15, -0.35, -0.92), n: D(1, 0, 0), tilt: -0.05, crouch: 0.03 },
+    srvHit: { g: W(0.15, 0.25, 2.30), u: D(0.05, 0.25, 0.97), n: D(0, 1, 0.1), tilt: -0.02 },
+    srvEnd: { g: W(-0.30, 0.25, 0.85), u: D(-0.35, -0.20, -0.90), n: D(0.8, 0, 0.2), tilt: 0.03, crouch: 0.05 },
+  };
+  const out = (pose, twoHands) => ({ ...pose, twoHands, throat: !twoHands && !!pose.throat });
+  const tt = (rally ? clock - (p.hitT ?? -9) : 9) - ago, fh = (p.strokeSide || 1) > 0;
+  if (rally && rally.serve && S.server === i && !rally.serve.captured) {          // serve routine: bounce, toss, trophy, drop, hit
+    const k = (rally.serve.t - ago - ROUTINE.seconds) / ROUTINE.toss;
+    return out(poseTrack([[0, POSE.ready], [0.55, POSE.trophy], [0.86, POSE.drop], [1, POSE.srvHit]], k), false);
+  }
+  if (p.hitServe && tt >= 0 && tt < 0.8)                                          // serve: contact up high, follow through down across
+    return out(poseTrack([[0, POSE.srvHit], [0.3, POSE.srvEnd], [0.8, POSE.ready]], tt), false);
+  if (p.strokeType === "slice" && tt >= 0 && tt < 1.0)                            // slice: one long readable sweep, held a moment
+    return out(poseTrack(fh ? [[0, POSE.fsHit], [0.36, POSE.fsEnd], [0.52, POSE.fsEnd], [1.0, POSE.ready]]
+                            : [[0, POSE.bsHit], [0.36, POSE.bsEnd], [0.52, POSE.bsEnd], [1.0, POSE.ready]], tt), false);
+  const [H, E] = fh ? [POSE.fhHit, POSE.fhEnd] : [POSE.bhHit, POSE.bhEnd];
+  if (tt >= 0 && tt < 0.8)                                                        // just hit: contact → follow-through → back to ready
+    return out(poseTrack([[0, H], [0.26, E], [0.8, POSE.ready]], tt), !fh);
+  const sh = rally && rally.shot;
+  if (sh && sh.recv === i && !rally.serve && ball) {                              // the ball is coming: swing on the beat of its arrival
+    const ttc = sh.t1 + 0.85 * sh.t2 - sh.t + ago;                                // ≈ time left until contact
+    const side = (sh.end.x - p.x) * R >= 0;                                       // forehand if it comes to the racket side
+    const slice = i === 0 ? (input.keys.has("e") || input.slice) : !!p.planSlice; // you hold E; the computer decided early
+    const zc = Math.max(0.45, Math.min(1.75, sh.end.z));
+    const set = (pz) => ({ ...pz, g: { ...pz.g, z: zc } });                       // aim the contact pose at the ball's height
+    const keys = slice
+      ? (side ? [[-1.1, POSE.ready], [-0.45, POSE.fsBack], [-0.2, POSE.fsBack], [0, set(POSE.fsHit)]]
+              : [[-1.1, POSE.ready], [-0.45, POSE.bsBack], [-0.2, POSE.bsBack], [0, set(POSE.bsHit)]])
+      : (side ? [[-1.1, POSE.ready], [-0.45, POSE.fhBack], [-0.18, POSE.fhLoop], [0, set(POSE.fhHit)]]
+              : [[-1.1, POSE.ready], [-0.45, POSE.bhBack], [-0.18, POSE.bhLoop], [0, set(POSE.bhHit)]]);
+    return out(poseTrack(keys, -Math.max(-0.02, ttc)), !side && !slice);
+  }
+  return out(POSE.ready, false);
+}
+
+function drawPlayer(i, pos, swing) {
+  if (pos.motion && pos.motion.world) return drawCapturedFigure(i, pos, pos.motion.world);
+  const P = PLAYERS[i], near = P.side === "near", R = near ? 1 : -1;
+  const g = proj(pos.x, pos.y), s = g.s;
+  const h = Math.max(6, P.heightM * s), w = h * 0.30, skin = "#e1b48b", skinD = shade(skin, -0.18), skinL = shade(skin, 0.12);
+  const A = window.Anim ? Anim.frame(pos, BODY[i], near)
+    : { bob: 0, lean: 0, crouch: 0.02, feet: [{ dx: -0.26, lift: 0 }, { dx: 0.26, lift: 0 }], arms: [0, 0] };
+  const look = RACKET_LOOK[P.id] || RACKET_LOOK.sinner;
+  const rp = racketPose(i, pos);
+  const hop = pos.air > 0 ? h * 0.07 : 0, drop = (A.crouch + (rp.crouch || 0) - A.bob) * h;
+  const tiltR = (rp.tilt || 0) * h;                         // + = racket shoulder lower (a slice finishing low), − = higher
+  const x = g.x, y = g.y - hop, lx = A.lean * h, tx = x + lx;
+  const Rr = (rx, ry, rw, rh, c) => { b.fillStyle = c; b.fillRect(q(rx), q(ry), Math.max(1 / AS, q(rw)), Math.max(1 / AS, q(rh))); };
+  const Ln = (x1, y1, x2, y2, c, lw) => { b.strokeStyle = c; b.lineWidth = Math.max(1 / AS, lw); b.lineCap = "round";
+    b.beginPath(); b.moveTo(q(x1), q(y1)); b.lineTo(q(x2), q(y2)); b.stroke(); };
+  const behind = rp.g.y + rp.u.y * RACKET.len * 0.7 > pos.y + 0.05;   // head farther than the body?
+  const gs = proj(rp.g.x, rp.g.y, rp.g.z), grip = { x: gs.x + lx * 0.5, y: gs.y - hop + drop };
+
+  b.fillStyle = "rgba(0,0,0,0.32)"; b.beginPath(); b.ellipse(q(g.x), q(g.y), w * 0.95, Math.max(1 / AS, w * 0.3), 0, 0, Math.PI * 2); b.fill();
+  if (behind) drawRacket(rp.g, rp.u, rp.n, look, lx * 0.5, -hop + drop);
+
+  const hipY = y - h * 0.5 + drop;
+  // LEGS: thigh and shin (lit and shaded sides), white socks, shoes with a sole and an accent stripe
+  for (const k of [0, 1]) {
+    const side = k ? 1 : -1, f = A.feet[k];
+    const hx = x + side * w * 0.2 + lx * 0.3, fx = x + f.dx * w + lx * 0.1, fy = y - f.lift * h;
+    const kx = (hx + fx) / 2 + side * w * 0.06, ky = (hipY + fy) / 2 - f.lift * h * 0.6;
+    Ln(hx, hipY, kx, ky, skin, w * 0.27); Ln(kx, ky, fx, fy - h * 0.06, skin, w * 0.22);
+    Ln(kx + side * w * 0.06, ky, fx + side * w * 0.05, fy - h * 0.08, skinD, w * 0.07);       // calf shadow
+    Ln(fx, fy - h * 0.085, fx, fy - h * 0.05, "#f1f1ee", w * 0.21);                        // sock
+    Rr(fx - w * 0.19, fy - h * 0.058, w * 0.38, h * 0.045, P.shoes || "#f2f2f2");            // shoe upper
+    Rr(fx - w * 0.2, fy - h * 0.016, w * 0.4, h * 0.016, shade(P.shoes || "#f2f2f2", -0.45)); // sole
+    Rr(fx - w * 0.12, fy - h * 0.04, w * 0.22, 1 / AS, P.ui || "#d23a3a");                   // accent stripe
+  }
+  // SHORTS: waistband, shaded side, the split between the legs
+  Rr(tx - w * 0.44, hipY - h * 0.06, w * 0.88, h * 0.16, P.shorts);
+  Rr(tx - w * 0.44, hipY - h * 0.06, w * 0.88, h * 0.022, shade(P.shorts, -0.22));
+  Rr(tx - w * 0.44, hipY - h * 0.04, w * 0.18, h * 0.14, shade(P.shorts, -0.12));
+  Rr(tx - 0.5 / AS, hipY + h * 0.05, 1 / AS, h * 0.05, shade(P.shorts, -0.3));
+  // JERSEY: broad at the shoulders, shaded on one side, lit on the other; collar; chest logo seen from the front
+  const shY = hipY - h * 0.36, shirt = P.shirt;
+  b.fillStyle = shirt; b.beginPath();
+  const tR = R > 0 ? tiltR : -tiltR;                        // tilt seen on screen: right corner down by tR, left corner up
+  b.moveTo(q(tx - w * 0.56), q(shY + h * 0.02 - tR)); b.lineTo(q(tx + w * 0.56), q(shY + h * 0.02 + tR));
+  b.lineTo(q(tx + w * 0.46), q(hipY - h * 0.03)); b.lineTo(q(tx - w * 0.46), q(hipY - h * 0.03)); b.closePath(); b.fill();
+  Rr(tx - w * 0.5, shY + h * 0.03, w * 0.2, h * 0.28, shade(shirt, -0.16));
+  Rr(tx + w * 0.3, shY + h * 0.04, w * 0.12, h * 0.24, shade(shirt, 0.1));
+  Rr(tx - w * 0.46, hipY - h * 0.06, w * 0.92, h * 0.025, shade(shirt, -0.1));               // hem
+  if (near) Rr(tx - w * 0.14, shY, w * 0.28, h * 0.025, shade(shirt, -0.28));                // collar, from behind
+  else { Ln(tx - w * 0.12, shY, tx, shY + h * 0.05, shade(shirt, -0.3), 1 / AS); Ln(tx + w * 0.12, shY, tx, shY + h * 0.05, shade(shirt, -0.3), 1 / AS);
+         Rr(tx + R * -w * 0.22, shY + h * 0.08, w * 0.1, h * 0.03, shade(shirt, shirt === "#f4f4f0" ? -0.25 : 0.55)); }   // chest logo
+  // ARMS: sleeve, upper arm, forearm, wristband, hand. Racket arm reaches the grip; the other swings (or joins a backhand).
+  const arm = (sx, sy, hx2, hy2, out) => {
+    const ex = (sx + hx2) / 2 + out * w * 0.18, ey = (sy + hy2) / 2 + h * 0.02;
+    Ln(sx, sy, ex, ey, skin, w * 0.2); Ln(ex, ey, hx2, hy2, skin, w * 0.17);
+    Ln(sx, sy, sx + (ex - sx) * 0.45, sy + (ey - sy) * 0.45, shirt, w * 0.26);              // short sleeve
+    Ln(hx2 + (ex - hx2) * 0.22, hy2 + (ey - hy2) * 0.22, hx2 + (ex - hx2) * 0.08, hy2 + (ey - hy2) * 0.08, P.ui || "#f2f2f2", w * 0.2);  // wristband
+    Rr(hx2 - w * 0.08, hy2 - w * 0.08, w * 0.16, w * 0.16, skinL);                           // hand
+  };
+  const rS = { x: tx + R * w * 0.5, y: shY + h * 0.05 + tiltR }, lS = { x: tx - R * w * 0.5, y: shY + h * 0.05 - tiltR };
+  let freeHand = { x: lS.x - R * w * 0.25, y: shY + h * 0.33 + A.arms[0] * h * 0.05 };
+  if (rp.twoHands) freeHand = { x: grip.x, y: grip.y + h * 0.02 };
+  else if (rp.throat && A.kind !== "run" && A.kind !== "backpedal") {   // ready: the other hand cradles the racket's throat
+    const t = RACKET.handle + 0.06, th = proj(rp.g.x + rp.u.x * t, rp.g.y + rp.u.y * t, rp.g.z + rp.u.z * t);
+    freeHand = { x: th.x + lx * 0.5, y: th.y - hop + drop };
+  }
+  arm(lS.x, lS.y, freeHand.x, freeHand.y, -R);
+  arm(rS.x, rS.y, grip.x, grip.y, R);
+  // HEAD: neck, ears, hair with strands (or cap with seams and the hair showing under it); face from the front
+  const hw = w * 0.56, hh = h * 0.15, hx0 = tx - hw / 2 + tR * 0.6, hy0 = shY - hh - h * 0.015 + Math.abs(tiltR) * 0.3;
+  const [hair, hairD, hairL] = HAIR[P.id] || [P.hair, shade(P.hair, -0.35), shade(P.hair, 0.25)];
+  Rr(tx - w * 0.12, shY - h * 0.03, w * 0.24, h * 0.04, skinD);                              // neck
+  Rr(hx0, hy0, hw, hh, skin);                                                                // head
+  Rr(hx0 - 1 / AS, hy0 + hh * 0.4, 1 / AS, hh * 0.25, skinD); Rr(hx0 + hw, hy0 + hh * 0.4, 1 / AS, hh * 0.25, skinD);   // ears
+  const strands = (x0, y0, ww, hh2) => {                                                     // hair texture: base, shadow, highlights
+    Rr(x0, y0, ww, hh2, hair);
+    const step = 1 / AS;
+    for (let yy = 0; yy < hh2; yy += step) for (let xx = 0; xx < ww; xx += step) {
+      const v = (Math.sin((xx * 7.3 + yy * 3.1) * AS) + Math.sin((xx * 2.7 - yy * 5.9) * AS)) * 0.5;
+      if (v > 0.78) Rr(x0 + xx, y0 + yy, step, step, hairL); else if (v < -0.72) Rr(x0 + xx, y0 + yy, step, step, hairD);
+    }
+  };
+  if (near) {                                                                                // seen from behind
+    if (P.cap) {
+      strands(hx0 - 1 / AS, hy0 + hh * 0.42, hw + 2 / AS, hh * 0.34);                       // hair under the cap at the back of the head
+      for (let k = 0; k < 7; k++) {                                                          // curls: an uneven edge at the nape and sides
+        const cx = hx0 - 1 / AS + (hw + 2 / AS) * k / 6, len = hh * (0.1 + 0.12 * ((k * 37) % 5) / 4);
+        Rr(cx - 0.5 / AS, hy0 + hh * 0.74, 1.5 / AS, len, k % 2 ? hair : hairD);
+      }
+      Rr(hx0, hy0 - hh * 0.04, hw, hh * 0.55, P.cap);                                        // cap crown
+      Rr(hx0, hy0 - hh * 0.04, hw * 0.2, hh * 0.55, shade(P.cap, -0.12));                    // crown shading
+      Rr(tx - 0.5 / AS, hy0 - hh * 0.04, 1 / AS, hh * 0.55, shade(P.cap, -0.22));            // centre seam
+      Rr(tx - hw * 0.18, hy0 + hh * 0.42, hw * 0.36, hh * 0.1, hairD);                       // the strap opening, hair through it
+      Rr(tx - hw * 0.22, hy0 + hh * 0.36, hw * 0.44, hh * 0.05, shade(P.cap, -0.3));         // strap
+    } else {                                                                                 // a full head of hair: crown, shadow at the edge, a ragged nape
+      strands(hx0, hy0 - hh * 0.06, hw, hh * 0.82);
+      Rr(hx0, hy0 - hh * 0.06, 1 / AS, hh * 0.82, hairD); Rr(hx0 + hw - 1 / AS, hy0 - hh * 0.06, 1 / AS, hh * 0.82, hairD);
+      for (let k = 0; k < 6; k++) Rr(hx0 + hw * k / 5 - 0.5 / AS, hy0 + hh * 0.72, 1.5 / AS, hh * (0.08 + 0.06 * (k % 3)), hairD);
+    }
+  } else {                                                                                   // seen from the front: a face
+    if (P.cap) { Rr(hx0, hy0 - hh * 0.04, hw, hh * 0.4, P.cap); Rr(hx0 - hw * 0.1, hy0 + hh * 0.3, hw * 1.2, hh * 0.08, shade(P.cap, -0.25)); }   // cap + brim
+    else { strands(hx0, hy0 - hh * 0.06, hw, hh * 0.38); Rr(hx0, hy0 + hh * 0.25, hw * 0.18, hh * 0.3, hair); Rr(hx0 + hw * 0.82, hy0 + hh * 0.25, hw * 0.18, hh * 0.3, hair); }
+    Rr(tx - hw * 0.26, hy0 + hh * 0.5, 1 / AS, 1 / AS, "#1b1b1f"); Rr(tx + hw * 0.18, hy0 + hh * 0.5, 1 / AS, 1 / AS, "#1b1b1f");   // eyes
+    Rr(tx - hw * 0.1, hy0 + hh * 0.78, hw * 0.2, 1 / AS, skinD);                             // mouth
+  }
+  if (!behind) drawRacket(rp.g, rp.u, rp.n, look, lx * 0.5, -hop + drop);
+  if (rp.slice && !matchMedia("(prefers-reduced-motion: reduce)").matches) {   // SLICE TRAIL: the head's path, so the high-to-low sweep reads
+    for (let k = 1; k <= 5; k++) {
+      const o = racketPose(i, pos, k * 0.035), hd = proj(o.g.x + o.u.x * (RACKET.len - 0.16), o.g.y + o.u.y * (RACKET.len - 0.16), o.g.z + o.u.z * (RACKET.len - 0.16));
+      b.fillStyle = `rgba(236,240,226,${0.42 - k * 0.07})`; const r = Math.max(1 / AS, 0.05 * s);
+      b.fillRect(q(hd.x + lx * 0.5 - r), q(hd.y - hop + drop - r), q(r * 2) || 1 / AS, q(r * 2) || 1 / AS);
+    }
+  }
+}
+
+function drawBall(ball) {
+  const sh = proj(ball.x, ball.y, 0), p = proj(ball.x, ball.y, ball.z);
+  const r = Math.min(8, Math.max(1, 0.12 * p.s));        // capped: up close in first person the ball would fill the view
+  b.fillStyle = "rgba(0,0,0,0.35)"; b.fillRect(Math.round(sh.x - r), Math.round(sh.y), Math.ceil(r * 2), 1);
+  b.fillStyle = "#d8ee4c"; b.fillRect(Math.round(p.x - r), Math.round(p.y - r), Math.ceil(r * 2), Math.ceil(r * 2));
+}
+
+/* =====================================================================
+   FOOTWORK — player-controlled bodies (same physics for both players)
+   ===================================================================== */
+const newBody = (y) => ({ x: 0, y, vx: 0, vy: 0, run: 0, moving: false,
+  stam: 100, cap: 100, stamAtStart: 100,      // stamina now / ceiling it can recover to / at point start
+  air: 0, boost: 0, boostMul: 1,              // split-step: time left in the air, first-step boost after landing
+  landT: -9, contactT: -9, contactId: 0, gradedFor: -1,
+  slide: 0, slideV: { x: 0, y: 0 }, slideCD: 0, slideRec: 0 });   // slide: time left, its velocity, cooldown, recovery
+const pos = [newBody(-12.4), newBody(12.4)];
+let ball = null;          // {x,y,z}
+let rally = null;
+let swing = [0, 0];
+let clock = 0;            // rally time in seconds
+const SPLIT_AIR = 0.22;   // seconds a split-step hop keeps you off the ground
+const input = { keys: new Set(), stick: { x: 0, y: 0 }, slice: false };   // slice: the touch Slice button is armed
+const ai = { target: null, at: 0 };
+
+/* One physics step for a body. ix/iy is the wanted direction (-1..1) in court axes. */
+function moveBody(i, ix, iy, dt) {
+  const p = pos[i], B = BODY[i];
+  if (!Number.isFinite(p.stam)) p.stam = p.cap || 100;   // safety: a broken stamina value must never freeze the player
+  const tire = 0.62 + 0.38 * p.stam / 100;          // tired legs: slower and less explosive
+  const m = Math.hypot(ix, iy); if (m > 1) { ix /= m; iy /= m; }
+  let used = 0;
+  p.slideCD = Math.max(0, p.slideCD - dt); p.slideRec = Math.max(0, p.slideRec - dt); p.plant = Math.max(0, (p.plant || 0) - dt);
+  if (p.slide > 0) {                                  // sliding: the body glides and slows down; no new push-off
+    p.slide = Math.max(0, p.slide - dt);
+    const k = p.slide / SLIDE.dur;                    // speed falls linearly to zero over the slide
+    p.vx = p.slideV.x * k; p.vy = p.slideV.y * k;
+    if (p.slide === 0) p.slideRec = SLIDE.recover;    // you have to plant and recover after a slide
+  } else if (p.air > 0) {                             // airborne: no push-off, momentum carries you
+    p.air -= dt;
+    if (p.air <= 0) { p.landT = clock; gradeSplit(i); }
+  } else {
+    const dx = ix * B.top * tire - p.vx, dy = iy * B.top * tire - p.vy, dl = Math.hypot(dx, dy);
+    if (dl > 1e-4) {
+      const braking = dx * p.vx + dy * p.vy < 0;      // fighting your own momentum
+      if (braking && Math.hypot(p.vx, p.vy) > 2.4 && dl > B.top * 0.9) p.plant = 0.16;   // a hard change of direction: plant (animation)
+      const rate = (braking ? B.brake : B.accel * (p.boost > 0 ? p.boostMul : 1)) * tire * (p.slideRec > 0 ? 0.4 : 1);
+      const dv = Math.min(dl, rate * dt);
+      p.vx += dx / dl * dv; p.vy += dy / dl * dv;
+      used = dv / dt;
+    }
+  }
+  p.boost = Math.max(0, p.boost - dt);
+  p.x += p.vx * dt; p.y += p.vy * dt;
+  // stay in your own half, inside the stadium
+  const s = sideSign(i), yMin = s < 0 ? -16 : 0.8, yMax = s < 0 ? -0.8 : 16;
+  if (p.x < -8 || p.x > 8) { p.x = Math.max(-8, Math.min(8, p.x)); p.vx = 0; }
+  if (p.y < yMin || p.y > yMax) { p.y = Math.max(yMin, Math.min(yMax, p.y)); p.vy = 0; }
+  const sp = Math.hypot(p.vx, p.vy);
+  p.moving = sp > 0.4; p.run += dt * (0.4 + sp / 3);
+  // stamina: running fast costs, changing speed costs more
+  p.stam = Math.max(0, p.stam - dt * B.drain * (0.9 * (sp / B.top) ** 2 + 1.6 * used / B.accel));
+}
+
+/* Slide: a burst that carries you a set distance in the direction you're pushing (or already running).
+   Clay lets you slide furthest, grass least; Agility adds a little. Costs stamina, then a short
+   recovery (slower first step) and a cooldown before the next one. */
+const SLIDE = { dur: 0.32, recover: 0.25, cooldown: 0.8, stamina: 3,
+                dist: { clay: 2.4, hard: 1.6, grass: 1.3 } };   // metres
+function slide(i) {
+  const p = pos[i], B = BODY[i];
+  if (!rally || rally.serve || p.slide > 0 || p.slideCD > 0 || p.air > 0) return;
+  let [dx, dy] = i === 0 ? userInput() : [0, 0];
+  if (!dx && !dy) { dx = p.vx; dy = p.vy; }           // no key held: slide the way you're running
+  const m = Math.hypot(dx, dy); if (m < 0.1) return;
+  const dist = (SLIDE.dist[cfg.surface] || 1.6) * (1 + 0.03 * ((getSkills(PLAYERS[i].id).agility || 10) - 10));
+  const v0 = 2 * dist / SLIDE.dur;                    // linear slow-down: distance = v0 × dur / 2
+  p.slideV = { x: dx / m * v0, y: dy / m * v0 };
+  p.slide = SLIDE.dur; p.slideCD = SLIDE.cooldown;
+  p.stam = Math.max(0, p.stam - SLIDE.stamina * B.drain);
+  say(i, "SLIDE");
+}
+
+/* Split-step: a small hop timed to land as the opponent strikes the ball. */
+function splitStep(i) {
+  const p = pos[i];
+  if (!rally || p.air > 0) return;
+  p.air = SPLIT_AIR;
+}
+function gradeSplit(i) {
+  const p = pos[i];
+  if (p.gradedFor === p.contactId || p.air > 0) return;
+  const d = p.landT - p.contactT;                     // + = landed after the opponent's contact
+  if (Math.abs(d) > 0.3) return;                      // hop unrelated to this shot
+  p.gradedFor = p.contactId;
+  const a = Math.abs(d);
+  if (a <= BODY[i].splitPerfect) { p.boost = 0.5; p.boostMul = 1.8; say(i, "PERFECT SPLIT"); }   // windows widen with Reflexes
+  else if (a <= BODY[i].splitGood) { p.boost = 0.4; p.boostMul = 1.45; say(i, "GOOD SPLIT"); }
+  else say(i, d < 0 ? "EARLY SPLIT" : "LATE SPLIT");
+}
+
+/* Opponent AI drives the same body: steer to a target, brake in time to stop on it. */
+function aiInput() {
+  const p = pos[1], t = ai.target;
+  if (!t) return [0, 0];
+  const dx = t.x - p.x, dy = t.y - p.y, d = Math.hypot(dx, dy);
+  const v = Math.hypot(p.vx, p.vy);
+  if (d < 0.15 || d <= v * v / (2 * BODY[1].brake) + 0.1) return [0, 0];
+  return [dx / d, dy / d];
+}
+/* MOVEMENT is always WASD: W = forward (toward the net), S = back, A = left, D = right (or drag on touch).
+   How fast you then move comes from moveBody(): body + Speed skill, not from the key. */
+function userInput() {
+  const k = input.keys;
+  let x = (k.has("d") ? 1 : 0) - (k.has("a") ? 1 : 0);
+  let y = (k.has("w") ? 1 : 0) - (k.has("s") ? 1 : 0);
+  if (!x && !y) { x = input.stick.x; y = input.stick.y; }
+  return [x, y];
+}
+/* AIMING your serve is separate: arrow keys (← → sideways, ↑ ↓ deeper / shorter), or click / tap the box. */
+function aimInput() {
+  const k = input.keys;
+  return [(k.has("ArrowRight") ? 1 : 0) - (k.has("ArrowLeft") ? 1 : 0), (k.has("ArrowUp") ? 1 : 0) - (k.has("ArrowDown") ? 1 : 0)];
+}
+
+let msgTimer;
+function say(i, text) {
+  if (i !== 0) return;                                // only the user's body talks to the HUD
+  const el = document.getElementById("hudMsg");
+  el.textContent = text;
+  clearTimeout(msgTimer); msgTimer = setTimeout(() => (el.textContent = ""), 1100);
+}
+
+/* =====================================================================
+   CAPTURED SERVE — Sinner serves with his real motion (src/serve/motion/sinner-serve.js)
+   The file holds his joints frame by frame in body heights, taken from video and cleaned.
+   ===================================================================== */
+const SINNER_SERVES = window.SERVE_MOTIONS?.sinner || null;               // { first, second } from his real serves
+const capturedServe = () => !!SINNER_SERVES?.first && PLAYERS[0].id === "sinner";   // only Sinner's serves are captured so far
+const motionFor = no => (no === 2 && SINNER_SERVES.second) || SINNER_SERVES.first;  // 2nd serve (after a fault) has its own motion
+const RACKET_M = 0.68;                                   // racket length
+
+/* Pose at time t: a Catmull-Rom curve through the captured frames around t (smooth, no corners between frames).
+   Returns { joint: [x, up] } in body heights. */
+function motionPose(m, t) {
+  const fr = m.frames;
+  let k = 1;
+  while (k < fr.length - 1 && fr[k].t < t) k++;
+  const a = fr[k - 1], c = fr[k], a0 = fr[Math.max(0, k - 2)], c1 = fr[Math.min(fr.length - 1, k + 1)];
+  const u = Math.max(0, Math.min(1, (t - a.t) / ((c.t - a.t) || 1)));
+  const cr = (p0, p1, p2, p3) => 0.5 * (2 * p1 + (p2 - p0) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (3 * p1 - p0 - 3 * p2 + p3) * u * u * u);
+  const out = {};
+  for (const n in c.j) {
+    const p1 = a.j[n] || c.j[n], p2 = c.j[n], p0 = a0.j[n] || p1, p3 = c1.j[n] || p2;
+    out[n] = [cr(p0[0], p1[0], p2[0], p3[0]), cr(p0[1], p1[1], p2[1], p3[1])];
+  }
+  return out;
+}
+/* Body heights → court metres for a player standing at p (scaled by their real height). */
+function poseToWorld(i, p, pose) {
+  const h = PLAYERS[i].heightM, right = PLAYERS[i].side === "near" ? 1 : -1, w = {};
+  for (const n in pose) w[n] = { x: p.x + pose[n][0] * h * right, y: p.y, z: Math.max(0, pose[n][1] * h) };
+  return w;
+}
+/* Advance Sinner's captured motion. During the serve the ball rides in his tossing hand, is tossed
+   on one real throw that meets the racket at the captured contact moment, and is then struck. */
+function stepMotion(dt) {
+  const mo = pos[0].motion, m = mo.m, E = m.events;
+  mo.t += dt;
+  const W = mo.world = poseToWorld(0, pos[0], motionPose(m, mo.t));
+  const sv = rally && rally.serve;
+  if (sv) {
+    if (mo.t < E.start) {                                // ROUTINE: he bounces the ball ROUTINE.bounces times
+      const P = (E.start - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1, h = W.leftWrist;
+      Object.assign(ball, { x: h.x, y: h.y + 0.25, z: h.z * (2 * f - 1) ** 2 });   // hand → ground → hand
+    } else if (mo.t < E.tossRelease) {
+      Object.assign(ball, W.leftWrist);                  // ball in the tossing hand
+    } else {
+      if (!sv.release) {                                 // solve the toss once: release point → contact point
+        const C = poseToWorld(0, pos[0], motionPose(m, E.contact));
+        const T = E.contact - E.tossRelease;
+        sv.release = { ...W.leftWrist };
+        sv.hit = { x: C.rightWrist.x, z: C.rightWrist.z + RACKET_M * 0.9 };
+        sv.vz = (sv.hit.z - sv.release.z + 0.5 * 9.81 * T * T) / T;   // z(T) = hit height under gravity
+      }
+      const tt = mo.t - E.tossRelease, u = Math.min(1, tt / (E.contact - E.tossRelease));
+      ball.x = sv.release.x + (sv.hit.x - sv.release.x) * u;
+      ball.y = pos[0].y + 0.45 * u;                      // the toss drifts a little into the court
+      ball.z = sv.release.z + sv.vz * tt - 0.5 * 9.81 * tt * tt;
+      if (mo.t >= E.contact) { rally.serve = null; hitBall(0, true); }   // contact: the serve leaves the racket
+    }
+  }
+  if (mo.t >= E.finish) pos[0].motion = null;           // landing done: back to the normal sprite
+}
+
+/* =====================================================================
+   SERVING — the rhythm between points, aiming, faults, lets and aces
+   The game serves by itself: ~4 s after a point (BETWEEN_POINTS), with a READY countdown at the end.
+   During READY the server aims (A/D sideways, W/S depth) and the receiver moves into position.
+   ===================================================================== */
+/* Rhythm: point ends → 0.9 s → players reset → GET SET (POSITION s: move with WASD, aim) → the serve sequence:
+   ball bounces (routine), toss and windup, contact. Contact lands ~4 s after the previous point ended. */
+const BETWEEN_POINTS = 2.0, POSITION = 1.1, BETWEEN_SERVES = 1.6;   // seconds until the serve sequence starts
+const READY = POSITION;                                              // (old name, still used by the start of a match)
+const ROUTINE = { bounces: 2, seconds: 1.3, toss: 0.8 };             // serve routine when no captured motion exists
+let firstPersonServe = false;                                        // V toggles: watch your windup, or serve through your own eyes
+let gameT = 0, paused = false;                          // game clock (stops while paused)
+const timers = [];
+function after(sec, fn) { timers.push({ at: gameT + sec, fn }); }
+function runTimers() {
+  for (let k = timers.length - 1; k >= 0; k--) if (timers[k].at <= gameT) timers.splice(k, 1)[0].fn();
+}
+let nextServe = null;                                    // { at, no, ready } — the serve that's coming up
+function queueServe(delay, no = 1) { nextServe = { at: gameT + delay, no, ready: false }; }
+function cancelServe() { nextServe = null; timers.length = 0; }
+const clamp = (v, a, c) => Math.max(Math.min(a, c), Math.min(Math.max(a, c), v));
+const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) * 1.41;   // ≈ normal, sd 1
+
+/* The service box the server must hit: cross-court from where they stand. */
+function serviceBox(server) {
+  const sy = sideSign(1 - server), side = Math.sign(pos[server].x) || 1;
+  const wide = -side * COURT.SGL;                        // the singles sideline of that box
+  return { xlo: Math.min(wide, 0), xhi: Math.max(wide, 0), ylo: Math.min(0, sy * COURT.SVC), yhi: Math.max(0, sy * COURT.SVC),
+           wide, t: 0, back: sy * COURT.SVC, sy, mid: wide / 2 };
+}
+/* Your aim, while you serve. Starts in the middle of the box; A/D move it sideways, W/S deeper or shorter. */
+const aim = { x: 0, y: 0 };
+function resetAim() { const bx = serviceBox(0); aim.x = bx.mid; aim.y = bx.back * 0.8; }
+function steerAim(dt) {
+  const [x, y] = aimInput(), bx = serviceBox(0);
+  aim.x = clamp(aim.x + x * 3.2 * dt, bx.xlo + 0.05, bx.xhi - 0.05);
+  aim.y = clamp(aim.y + y * 2.4 * dt * bx.sy, bx.sy * 1.5, bx.sy * (COURT.SVC - 0.05));
+}
+/* The computer server picks wide, body or down the T; second serves stay safer. */
+function aiAim(bx, second) {
+  const r = Math.random(), safe = second ? 0.55 : 0.85;
+  const x = r < 0.4 ? bx.wide * safe : r < 0.7 ? bx.mid : bx.wide * (1 - safe) + 0.001;
+  return { x, y: bx.back * (second ? 0.72 : 0.86) };
+}
+/* ACE_CHANCE holds the probability that the last serve was an ace, and why. An ace needs a near-perfect
+   placement (within 45 cm of the T, the sideline or the service line); it's far likelier when the
+   receiver is on the wrong side. Serve skill adds a constant step per point; second serves rarely ace. */
+let ACE_CHANCE = { chance: 0, perfect: false, wrongSide: false };
+function planServe(server, no) {
+  const B = BODY[server], bx = serviceBox(server), second = no === 2, r = pos[1 - server];
+  const target = server === 0 ? { ...aim } : aiAim(bx, second);
+  const sd = (second ? 0.65 : 1.35) * B.errMul;           // Control tightens the spread; a 2nd serve plays safe (tuned: ~35% 1st-serve faults, few double faults)
+  const land = { x: target.x + gauss() * sd, y: target.y + gauss() * sd * 0.8 };
+  const net = Math.random() < (second ? 0.04 : 0.09) * B.errMul;
+  const inBox = land.x >= bx.xlo && land.x <= bx.xhi && land.y >= bx.ylo && land.y <= bx.yhi;
+  const fault = net || !inBox;
+  const isLet = !fault && Math.random() < (PLAYERS[server].letRate || 0.02);
+  const edge = Math.min(Math.abs(land.x - bx.wide), Math.abs(land.x - bx.t), Math.abs(land.y - bx.back));
+  const perfect = !fault && edge < 0.45;
+  const wrongSide = Math.sign(land.x - bx.mid) !== Math.sign(r.x - bx.mid) && Math.abs(land.x - r.x) > 1.4;
+  const skill = (getSkills(PLAYERS[server].id).serve || 10) - 10;
+  let chance = perfect ? (wrongSide ? 0.22 + 0.012 * skill : 0.04 + 0.004 * skill) : 0;   // never extreme: the receiver still gets a racket on most
+  if (second) chance *= 0.3;
+  chance = clamp(chance, 0, 0.4);
+  ACE_CHANCE = window.ACE_CHANCE = { server, no, chance: +chance.toFixed(3), perfect, wrongSide, land, target };
+  return { no, land, target, fault, net, let: isLet, ace: !isLet && Math.random() < chance };
+}
+/* The READY time before a serve: the server aims, the receiver gets into position. */
+function readyStep(dt) {
+  if (!nextServe || rally || S.over) return;
+  const left = nextServe.at - gameT;
+  if (left <= POSITION && !nextServe.ready) {            // GET SET starts: set up once
+    nextServe.ready = true;
+    if (S.server === 0) {
+      resetAim();
+      const bx = serviceBox(0);                          // the computer receiver stands mid-box, leaning a little one way
+      ai.target = { x: bx.mid + (Math.random() < 0.5 ? -1 : 1) * Math.abs(bx.wide) * 0.25, y: sideSign(1) * 12.4 };
+    }
+  }
+  if (nextServe.ready) {
+    const u = userInput(); moveBody(0, u[0], u[1], dt);  // WASD: you walk to your spot (serving or receiving)
+    if (S.server === 0) { keepServeStance(0); steerAim(dt); const a = aiInput(); moveBody(1, a[0], a[1], dt); }
+  }
+  if (left <= 0) { const no = nextServe.no; nextServe = null; startRally(no); }
+}
+/* A server must stand behind the baseline, between the centre mark and the singles sideline, on the correct side. */
+function keepServeStance(i) {
+  const p = pos[i], side = Math.sign(startPositions()[i].x) || 1, s = sideSign(i);
+  p.x = side > 0 ? clamp(p.x, 0.2, COURT.SGL) : clamp(p.x, -COURT.SGL, -0.2);
+  p.y = s < 0 ? clamp(p.y, -14, -COURT.L - 0.05) : clamp(p.y, COURT.L + 0.05, 14);
+}
+
+/* Serve routine for players without a captured motion: bounce the ball, toss it, hit it at the top of their reach. */
+function stepRoutineServe(dt) {
+  const sv = rally.serve, i = S.server, p = pos[i], P = PLAYERS[i], near = P.side === "near";
+  sv.t += dt;
+  const hand = { x: p.x + (near ? -0.3 : 0.3), y: p.y + (near ? 0.25 : -0.25), z: 1.0 };
+  if (sv.t < ROUTINE.seconds) {
+    const f = (sv.t / (ROUTINE.seconds / ROUTINE.bounces)) % 1;
+    Object.assign(ball, { x: hand.x, y: hand.y, z: hand.z * (2 * f - 1) ** 2 });
+    return;
+  }
+  const tt = sv.t - ROUTINE.seconds, T = ROUTINE.toss, hitZ = P.heightM * 1.22 + 0.6;   // toss → contact at the top of the reach
+  const vz = (hitZ - hand.z + 4.905 * T * T) / T;
+  Object.assign(ball, { x: hand.x + (p.x + (near ? 0.25 : -0.25) - hand.x) * Math.min(1, tt / T), y: hand.y, z: hand.z + vz * tt - 4.905 * tt * tt });
+  swing[i] = Math.max(swing[i], tt > T * 0.7 ? 0.6 : 0);
+  if (tt >= T) { rally.serve = null; hitBall(i, true); }
+}
+
+/* =====================================================================
+   POINT FLOW — serve, contact, out / unreturned
+   ===================================================================== */
+
+const sideSign = i => (PLAYERS[i].side === "near" ? -1 : 1);   // which half a player lives in
+function startPositions() {
+  const pts = S.points[0] + S.points[1];
+  const deuce = pts % 2 === 0;
+  const s = S.server, r = 1 - s;
+  // deuce court = server's right. Near player's right is +x, far player's right is -x.
+  const right = i => (PLAYERS[i].side === "near" ? 1 : -1);
+  const sx = (deuce ? 1 : -1) * right(s) * 0.9;
+  return {
+    [s]: { x: sx, y: sideSign(s) * 12.2 },
+    [r]: { x: -sx * 3.0, y: sideSign(r) * 12.6 }
+  };
+}
+function resetPositions() {
+  const sp = startPositions();
+  [0, 1].forEach(i => Object.assign(pos[i], sp[i], { vx: 0, vy: 0, air: 0, boost: 0, moving: false, motion: null }));
+  ball = { x: pos[S.server].x + 0.35, y: pos[S.server].y, z: 1.0 };
+}
+function resetBodies() {
+  pos.forEach(p => Object.assign(p, { stam: 100, cap: 100, stamAtStart: 100 }));
+}
+
+const rand = (a, c) => a + Math.random() * (c - a);
+/* q (0..1) = how well-set the hitter was: better footwork → faster, wider ball. out = the shot misses. */
+function planShot(hitter, isServe, q, out, sv = null, type = "drive") {
+  const slice = !isServe && type === "slice";            // SLICE / drop shot: short, low, dies after the bounce
+  const recv = 1 - hitter, sign = sideSign(recv);
+  // every serve now starts where the racket met the toss (captured or routine); rally shots where the ball was hit
+  const from = { x: ball.x, y: ball.y, z: isServe ? Math.max(2.4, ball.z) : Math.max(0.6, ball.z) };
+  let bx, by;
+  if (isServe) {
+    bx = sv.land.x; by = sv.land.y;                     // where the serve lands (planServe)
+    if (sv.net) by = sideSign(hitter) * 0.3;            // into the net: drops on the server's side
+  }
+  else {
+    const away = -Math.sign(pos[recv].x || (Math.random() - 0.5));   // aim away from where the opponent stands
+    bx = (Math.random() < 0.6 ? away : -away) * rand(0.3, 2.6 + 1.3 * q + BODY[hitter].aimBonus);   // Control: sharper angles
+    by = slice ? sign * rand(2.0, 4.8) : sign * rand(6.5, 10.8);   // a slice lands short, near the service line or closer
+  }
+  if (out && !isServe) {
+    if (Math.random() < 0.5) by = sign * rand(12.2, 13.4);
+    else bx = Math.sign(bx || 1) * rand(4.25, 5.0);
+  }
+  const cy = slice ? by + sign * rand(1.2, 2.6)          // a slice barely carries after the bounce: the receiver must come forward
+                   : sign * rand(11.6, 13.0);           // ideal contact depth after the bounce
+  const k = (cy - from.y) / (by - from.y);
+  const cx = Math.max(-6.5, Math.min(6.5, from.x + (bx - from.x) * k));
+  const dist = Math.hypot(bx - from.x, by - from.y);
+  // Strength / Serve skills add a constant m/s per point (shared with the Ball Physicist)
+  const speed = isServe ? (sv.no === 2 ? 32 : 40) + BODY[hitter].serveBonus
+              : slice ? 10.5 + 2.5 * q + rand(0, 1.5) + BODY[hitter].shotBonus * 0.3   // a slice is clearly slower than a drive: it floats
+              : 19 + 6 * q + rand(0, 3) + BODY[hitter].shotBonus;               // 2nd serves are slower, safer
+  /* CURVE. arc = how much the ball rises above a straight line (net clearance); curve = sideways bend in flight.
+     1st serve: flat-slice — low over the net, bending toward the sideline it's aimed at, skidding low.
+     2nd serve: kick — a high, safe arc over the net, bending the other way and jumping up after the bounce.
+     Rally shots: topspin — a higher arc and a little sideways drift. */
+  const toWide = Math.sign(bx - from.x) || 1;
+  const arc = isServe ? (sv.no === 2 ? 2.7 : 1.25) : slice ? 2.4 : 6;   // slice: low over the net (backspin)
+  const curve = isServe ? (sv.no === 2 ? -toWide * rand(0.2, 0.35) : toWide * rand(0.35, 0.6)) : slice ? toWide * rand(0.2, 0.45) : rand(-0.35, 0.35);
+  const kick = isServe ? (sv.no === 2 ? { up: 1.45, side: -toWide * 0.45 } : { up: 0.8, side: toWide * 0.25 })
+             : slice ? { up: 0.4, side: 0 } : { up: 1, side: 0 };   // backspin: the slice stays low and stops
+  return { hitter, recv, from, bounce: { x: bx, y: by }, end: { x: cx, y: cy, z: slice ? 0.45 : 1.0 }, isServe, serve: sv, arc, curve, kick, type,
+           t1: dist / speed, t2: (0.42 - 0.08 * q) / SURF().pace * (slice ? 1.5 : 1), t: 0, out, bounced: false, prevD: Infinity, prevV: Infinity };
+}
+
+/* Player i strikes the ball. Placeholder hitting (step 4 adds timing + contact point). */
+function hitBall(i, isServe, volley = false) {
+  const p = pos[i], B = BODY[i];
+  let q = 1, err = 0;
+  if (!isServe) {
+    const reach = B.reach * (volley ? B.volleyReach : 1);
+    const sp = Math.hypot(p.vx, p.vy), stretch = Math.hypot(ball.x - p.x, ball.y - p.y) / reach;
+    q = Math.max(0, 1 - Math.max(0, sp / B.top - 0.25) * 1.3) * (stretch > 0.8 ? 0.5 : 1);   // feet set + ball in the zone
+    err = (0.04 + (1 - q) * 0.22 + (1 - p.stam / 100) * 0.12) * B.errMul * (volley ? B.volleyErrMul : 1);
+    if (volley) say(i, "VOLLEY");
+  }
+  // SHOT TYPE: you slice by holding E (or the Slice button) as you hit; the computer slices now and then,
+  // more when it's stretched. A slice is a touch shot: a bit riskier.
+  const type = isServe ? "drive" : (i === 0 ? (input.keys.has("e") || input.slice) : p.planSlice || (q < 0.6 && Math.random() < 0.12)) ? "slice" : "drive";
+  p.planSlice = false;
+  if (type === "slice") { err *= 1.25; if (i === 0) say(0, "SLICE"); }
+  if (i === 0 && input.slice) { input.slice = false; sliceBtn.setAttribute("aria-pressed", "false"); sliceBtn.classList.remove("primary"); }
+  swing[i] = 1;
+  const Rs = PLAYERS[i].side === "near" ? 1 : -1;
+  Object.assign(p, { hitT: clock, hitServe: isServe, strokeType: type, hitZ: ball.z, strokeSide: Math.sign((ball.x - p.x) * Rs) || 1 });   // racket follow-through
+  if (isServe) {
+    const sv = planServe(i, rally.serveNo);
+    rally.shot = planShot(i, true, 1, sv.fault, sv);
+    rally.serveClock = clock;
+    if (i === 0 && ACE_CHANCE.chance > 0) say(0, `${ACE_CHANCE.perfect ? "PERFECT SPOT · " : ""}ACE CHANCE ${Math.round(ACE_CHANCE.chance * 100)}%`);
+  } else rally.shot = planShot(i, isServe, q, Math.random() < err, null, type);
+  const o = 1 - i, op = pos[o];
+  op.contactT = clock; op.contactId++;
+  if (o === 1) op.planSlice = !isServe && Math.random() < 0.15;    // the computer picks a slice early, so you can read its windup
+  gradeSplit(o);
+  if (o === 0) {
+    if (Math.abs(op.vx) > 1.6 && op.vx * (rally.shot.end.x - op.x) < 0) say(0, "WRONG-FOOTED");
+    ai.target = { x: 0, y: 12.2 }; ai.at = 0;         // AI recovers to the middle
+  } else {
+    const read = isServe ? rand(0.05, 0.12) : rand(0.12, 0.26);    // a returner reads the toss, so reacts sooner to a serve
+    ai.target = null; ai.at = clock + Math.max(0.04, read - BODY[o].reactionCut);   // AI reaction time (Reflexes)
+    if (Math.random() < 0.6) { op.boost = 0.45; op.boostMul = 1.5; }   // AI's own split-step
+  }
+}
+
+function startRally(no = 1) {                            // no = 1st or 2nd serve
+  if (S.over || rally) return;
+  const sp = pos[S.server];
+  Object.assign(sp, { vx: 0, vy: 0, slide: 0 });
+  ball = { x: sp.x + 0.35, y: sp.y, z: 1.0 };
+  if (no === 1) pos.forEach(p => (p.stamAtStart = p.stam));
+  clock = 0;
+  rally = { shot: null, games: gamesPlayed(), sets: S.sets.length, serveNo: no, serve: { t: 0 } };   // every serve: routine → windup → contact
+  if (S.server === 0 && capturedServe()) {                 // Sinner serves with his real, captured motion (1st or 2nd)
+    const m = motionFor(no);
+    // the 1st-serve clip includes his real routine; the 2nd doesn't, so he holds his stance while the ball bounces
+    const t0 = m.events.routine != null ? m.events.routine : m.events.start - ROUTINE.seconds;
+    rally.serve.captured = true;
+    pos[0].motion = { t: t0, m, t0 };
+  }
+  bug.classList.add("live");                     // scoreboard fades while the point is live
+  renderScore();
+}
+
+function stepRally(dt) {
+  if (pos[0].motion) stepMotion(dt);
+  if (!rally) return;
+  if (rally.serve) {                                    // routine and windup: the server's feet are planted
+    if (S.server === 0) steerAim(dt);                    // you can aim until contact
+    else { const u = userInput(); moveBody(0, u[0], u[1], dt); }   // receiving: you can still move
+    if (rally.serve && !rally.serve.captured) stepRoutineServe(dt);
+    return;
+  }
+  const sh = rally.shot; if (!sh) return;               // (guard: a point always has a ball in flight here)
+  sh.t += dt;
+  if (ai.at && clock >= ai.at) { ai.target = { x: sh.end.x, y: sh.end.y }; ai.at = 0; }
+  const ui = userInput(), ain = aiInput();
+  moveBody(0, ui[0], ui[1], dt);
+  moveBody(1, ain[0], ain[1], dt);
+  swing = swing.map(v => Math.max(0, v - dt * 4));
+
+  if (sh.t < sh.t1) {
+    const u = sh.t / sh.t1;
+    ball.x = sh.from.x + (sh.bounce.x - sh.from.x) * u + sh.curve * Math.sin(Math.PI * u);   // bends in flight, lands on target
+    ball.y = sh.from.y + (sh.bounce.y - sh.from.y) * u;
+    ball.z = sh.from.z * (1 - u) + sh.arc * u * (1 - u);
+    // VOLLEY: once the ball has crossed the net, the receiver may take it out of the air (never a serve)
+    const r = pos[sh.recv], B = BODY[sh.recv];
+    if (!sh.isServe && Math.sign(ball.y) === sideSign(sh.recv) && ball.z > 0.2 && ball.z < PLAYERS[sh.recv].heightM * 1.25) {
+      const d = Math.hypot(ball.x - r.x, ball.y - r.y), passing = d > sh.prevV;
+      sh.prevV = d;
+      if (d <= B.reach * B.volleyReach && (passing || d < 0.5 * B.reach)) return hitBall(sh.recv, false, true);
+    }
+    return;
+  }
+  if (!sh.bounced) {
+    sh.bounced = true;
+    if (sh.serve) {
+      if (sh.serve.fault) return rally.serveNo === 1 ? retakeServe(2, sh.serve.net ? "NET · FAULT" : "FAULT") : endPoint(sh.recv, "DOUBLE FAULT");
+      if (sh.serve.let) return retakeServe(rally.serveNo, "LET · " + (rally.serveNo === 1 ? "FIRST" : "SECOND") + " SERVE");
+    }
+    if (sh.out) return endPoint(sh.recv, "OUT");
+  }
+  const u = (sh.t - sh.t1) / sh.t2;               // past 1 the ball keeps travelling
+  ball.x = sh.bounce.x + (sh.end.x - sh.bounce.x) * u + sh.kick.side * u;   // a kick serve jumps sideways after the bounce
+  ball.y = sh.bounce.y + (sh.end.y - sh.bounce.y) * u;
+  ball.z = Math.max(0, sh.end.z * u + 3.6 * SURF().bounce * sh.kick.up * u * (1 - u));   // clay higher, grass lower; kick jumps up, slice skids
+  if (u >= 0.3 && !(sh.serve && sh.serve.ace)) {          // an ace is out of reach by definition
+    // contact: in reach, and either at the ideal point or the ball is starting to pass you
+    const r = pos[sh.recv], d = Math.hypot(ball.x - r.x, ball.y - r.y);
+    const passing = d > sh.prevD;
+    sh.prevD = d;
+    const reach = BODY[sh.recv].reach * (sh.isServe ? 1.15 : 1);    // returners stretch further for a serve
+    if (d <= reach && (u >= 0.95 || passing)) return hitBall(sh.recv, false);
+  }
+  if (u >= 1.28) {                                 // second bounce
+    const who = PLAYERS[sh.hitter].last;
+    endPoint(sh.hitter, sh.serve && sh.serve.ace ? `ACE — ${who}` : sh.recv === 0 ? `${who} — OUT OF REACH` : `WINNER — ${who}`);
+  }
+}
+
+function gamesPlayed() {
+  return S.sets.reduce((n, st) => n + st.g[0] + st.g[1], 0) + S.games[0] + S.games[1];
+}
+
+function endPoint(winner, call) {
+  const before = rally;
+  rally = null;
+  awardPoint(winner);
+  toast(call);
+  // stamina only partly comes back: more at a changeover or set break, and the ceiling slowly drops
+  const setBreak = S.sets.length !== before.sets;
+  const changeover = gamesPlayed() !== before.games && gamesPlayed() % 2 === 1;
+  const rest = setBreak ? 0.8 : changeover ? 0.65 : 0.35;
+  pos.forEach(p => {
+    p.cap = Math.max(55, p.cap - Math.max(0, p.stamAtStart - p.stam) * 0.03);
+    p.restTo = p.stam + (p.cap - p.stam) * Math.min(1, rest * BODY[pos.indexOf(p)].recoverMul);   // Endurance
+  });
+  afterPoint();
+}
+
+function afterPoint() {
+  renderScore();
+  if (S.over) { bug.classList.remove("live"); showResult(); return; }
+  after(0.9, () => {                                     // game time, so a pause freezes it
+    pos.forEach(p => { if (p.restTo != null) { p.stam = Math.min(p.cap, p.restTo); p.restTo = null; } });
+    bug.classList.remove("live"); resetPositions(); renderScore();
+  });
+  queueServe(BETWEEN_POINTS, 1);                         // next point serves itself ~4 s later
+}
+/* A fault or a let: no point is played; serve again (2nd serve after a fault, the same serve after a let). */
+function retakeServe(no, call) {
+  rally = null;
+  toast(call);
+  after(0.4, () => { resetPositions(); renderScore(); });
+  queueServe(BETWEEN_SERVES, no);
+}
+
+/* =====================================================================
+   LOOP
+   ===================================================================== */
+let last = performance.now();
+function frame(now) {
+  requestAnimationFrame(frame);                          // schedule first, so one bad frame can't stop the game
+  const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = Math.max(last, now);   // never step backwards in time
+  if (!innerWidth || !innerHeight) return;              // hidden / zero-size window: nothing to draw
+  if (canvas.width !== innerWidth || canvas.height !== innerHeight) resize();
+  if (!paused) {                                          // a pause freezes the game clock, the rally and the serve timer
+    gameT += dt; runTimers();
+    if (rally) { clock += dt; stepRally(dt); }
+    else { pos.forEach(p => { p.moving = false; }); readyStep(dt); }
+    updateCamera(dt);
+  }
+  drawCourt();
+  const firstPerson = camMode === "pov";                  // in first person you don't see yourself
+  const items = [
+    { y: pos[1].y, draw: () => drawPlayer(1, pos[1], swing[1]) },
+    { y: 0, draw: drawNet },
+    { y: -99, draw: drawAim }
+  ];
+  if (!firstPerson) items.push({ y: pos[0].y + 0.001, draw: drawReach }, { y: pos[0].y, draw: () => drawPlayer(0, pos[0], swing[0]) });
+  if (ball) items.push({ y: ball.y - 0.01, draw: () => drawBall(ball) });
+  actx.setTransform(1, 0, 0, 1, 0, 0); actx.clearRect(0, 0, abuf.width, abuf.height);
+  actx.setTransform(AS, 0, 0, AS, 0, 0); actx.imageSmoothingEnabled = false;
+  b = actx;                                              // actors go on the finer layer, far to near
+  items.sort((a, c) => c.y - a.y).forEach(it => it.draw());
+  b = bMain;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(abuf, 0, 0, canvas.width, canvas.height);
+  renderHud();
+  renderReady();
+}
+
+/* Your serve target: a ball-yellow cross in the service box while you aim (and while the serve flies). */
+function drawAim() {
+  const aiming = S.server === 0 && ((nextServe && nextServe.ready) || (rally && (rally.serve || (rally.shot && rally.shot.isServe && !rally.shot.bounced))));
+  if (!aiming) return;
+  const bx = serviceBox(0);
+  b.strokeStyle = "rgba(216,238,76,0.35)"; b.lineWidth = 1;     // the box you must land in
+  const c = [proj(bx.xlo, bx.ylo), proj(bx.xhi, bx.ylo), proj(bx.xhi, bx.yhi), proj(bx.xlo, bx.yhi)];
+  b.beginPath(); c.forEach((p, i) => (i ? b.lineTo(p.x, p.y) : b.moveTo(p.x, p.y))); b.closePath(); b.stroke();
+  const p = proj(aim.x, aim.y), r = Math.max(2, p.s * 0.35);
+  b.strokeStyle = "#d8ee4c"; b.lineWidth = 2;
+  b.beginPath(); b.moveTo(p.x - r, p.y - r * 0.4); b.lineTo(p.x + r, p.y + r * 0.4); b.moveTo(p.x + r, p.y - r * 0.4); b.lineTo(p.x - r, p.y + r * 0.4); b.stroke();
+}
+
+/* READY countdown before each serve, with what to do. */
+const readyEl = document.getElementById("ready"), readyBig = document.getElementById("readyBig"), readySmall = document.getElementById("readySmall");
+function renderReady() {
+  const positioning = nextServe && nextServe.ready && !rally, serving = rally && rally.serve;
+  if (paused || S.over || !(positioning || serving)) { readyEl.hidden = true; return; }
+  readyEl.hidden = false;
+  const no = positioning ? nextServe.no : rally.serveNo;
+  const who = S.server === 0 ? "YOUR SERVE" : `${PLAYERS[S.server].last} TO SERVE`;
+  readyBig.textContent = positioning ? "GET SET" : "";
+  readySmall.textContent = `${who} · ${no === 2 ? "2ND" : "1ST"} SERVE · ` +
+    (S.server === 0 ? (positioning ? "WASD: YOUR SPOT · ARROWS / CLICK: AIM" : "ARROWS / CLICK: AIM · V: FIRST PERSON") : "WASD: MOVE INTO POSITION");
+}
+
+/* Faint ground ring = Sinner's real reach (arm + racket), so you can learn your body */
+function drawReach() {
+  const p = pos[0], r = BODY[0].reach, c = proj(p.x, p.y);
+  const rx = proj(p.x + r, p.y).x - c.x, ry = Math.abs(proj(p.x, p.y - r).y - proj(p.x, p.y + r).y) / 2;
+  b.strokeStyle = "rgba(216,238,76,0.28)"; b.lineWidth = 1;
+  b.beginPath(); b.ellipse(Math.round(c.x), Math.round(c.y), rx, Math.max(1, ry), 0, 0, Math.PI * 2); b.stroke();
+}
+
+const hudEls = [0, 1].map(i => ({ st: document.getElementById("st" + i), cap: document.getElementById("cap" + i) }));
+function renderHud() {
+  [0, 1].forEach(i => {
+    hudEls[i].st.style.width = pos[i].stam.toFixed(1) + "%";
+    hudEls[i].cap.style.left = `calc(${pos[i].cap.toFixed(1)}% - 2px)`;
+  });
+}
+/* Names, colours and body numbers on the HUD and buttons follow whoever you picked. */
+function labelPlayers() {
+  [0, 1].forEach(i => {
+    const P = PLAYERS[i];
+    document.getElementById("st" + i).style.background = P.ui || P.shirt;
+  });
+  document.getElementById("lblA").textContent = "Point " + PLAYERS[0].last.charAt(0) + PLAYERS[0].last.slice(1).toLowerCase();
+  document.getElementById("lblB").textContent = "Point " + PLAYERS[1].last.charAt(0) + PLAYERS[1].last.slice(1).toLowerCase();
+  document.getElementById("dotA").style.background = PLAYERS[0].ui;
+  document.getElementById("dotB").style.background = PLAYERS[1].ui;
+  canvas.setAttribute("aria-label", `Pixel tennis court: ${PLAYERS[0].first} ${PLAYERS[0].last} (you) near side, ${PLAYERS[1].first} ${PLAYERS[1].last} far side`);
+}
+labelPlayers();
+
+/* =====================================================================
+   UI WIRING
+   ===================================================================== */
+function manualPoint(p) {
+  if (S.over || rally) return;
+  awardPoint(p);
+  renderScore();
+  resetPositions();
+  if (S.over) { cancelServe(); showResult(); } else queueServe(BETWEEN_POINTS, 1);
+}
+function undo() {
+  if (!history.length || rally) return;
+  S = JSON.parse(history.pop());
+  document.getElementById("result").hidden = true;
+  resetPositions(); renderScore(); queueServe(BETWEEN_POINTS, 1);
+}
+function showResult() {
+  const w = S.winner;
+  document.getElementById("resultName").textContent = `${PLAYERS[w].first} ${PLAYERS[w].last.charAt(0)}${PLAYERS[w].last.slice(1).toLowerCase()}`;
+  document.getElementById("resultLine").textContent = S.sets.map(st => {
+    const a = st.g[w], c = st.g[1 - w];
+    return st.tb ? `${a}–${c}(${Math.min(st.tb[0], st.tb[1])})` : `${a}–${c}`;
+  }).join("  ");
+  document.getElementById("result").hidden = false;
+}
+function openSetup(step = 0) {                           // exit to the start flow (welcome → match → court → locker room)
+  rally = null; cancelServe(); setPaused(false);         // leaving stops the match where it is
+  pos.forEach(p => (p.motion = null));
+  document.getElementById("result").hidden = true;
+  StartFlow.open(step, matchLive() ? resumeFromMenu : null);
+}
+let matchOn = false;                                     // set when a match starts, so you can go back to it from the menu
+const matchLive = () => matchOn && !S.over;
+function resumeFromMenu() { resetPositions(); renderScore(); queueServe(READY + 0.5, 1); }   // "Back to match" from the welcome page
+
+/* PAUSE (Esc): freezes the game clock, the rally and the serve countdown. */
+const pauseEl = document.getElementById("pause");
+function setPaused(on) {
+  if (on && (StartFlow.isOpen() || S.over)) return;
+  paused = on; pauseEl.hidden = !on; input.keys.clear();
+  if (on) {
+    document.getElementById("pauseScore").textContent = `${PLAYERS[0].last} ${S.games[0]}–${S.games[1]} ${PLAYERS[1].last} · ${umpireCall()}`;
+    document.getElementById("resumeBtn").focus();
+  }
+}
+/* Called by the start flow (src/start/flow.js) with everything the player chose. */
+function startMatch({ bestOf, tbTo, surface, playerId, firstServer }) {
+  cfg.bestOf = bestOf; cfg.tbTo = tbTo; cfg.surface = surface;
+  choosePlayers(playerId, surface); labelPlayers();
+  cfg.firstServer = firstServer === "r" ? (Math.random() < 0.5 ? 0 : 1) : +firstServer;
+  S = freshState(); history = []; matchOn = true;
+  rally = null; cancelServe(); setPaused(false);
+  resetBodies(); resetPositions(); renderScore();
+  if (firstServer === "r") toast(`Coin toss: ${PLAYERS[cfg.firstServer].last} serves first`);
+  queueServe(READY + 1.0, 1);                            // the first serve comes by itself after a short READY
+}
+window.startMatch = startMatch;
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById("toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2200);
+}
+
+document.getElementById("pauseBtn").onclick = () => setPaused(!paused);
+document.getElementById("resumeBtn").onclick = () => setPaused(false);
+document.getElementById("pauseNew").onclick = () => openSetup(1);
+document.getElementById("slideBtn").onclick = () => slide(0);
+/* Touch: tap Slice to arm your next shot as a slice (it disarms after one shot). */
+const sliceBtn = document.getElementById("sliceBtn");
+sliceBtn.onclick = () => { input.slice = !input.slice; sliceBtn.setAttribute("aria-pressed", String(input.slice)); sliceBtn.classList.toggle("primary", input.slice); };
+document.getElementById("ptA").onclick = () => manualPoint(0);
+document.getElementById("ptB").onclick = () => manualPoint(1);
+document.getElementById("undoBtn").onclick = undo;
+document.getElementById("newBtn").onclick = () => openSetup(1);
+document.getElementById("againBtn").onclick = () => openSetup(1);
+document.getElementById("splitBtn").onclick = () => splitStep(0);
+const MOVE_KEYS = ["w", "a", "s", "d", "e", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];   // WASD moves, arrows aim, E held = slice
+const keyOf = e => (e.key.length === 1 ? e.key.toLowerCase() : e.key);   // W and w (Shift held) are the same key
+addEventListener("keyup", e => input.keys.delete(keyOf(e)));
+addEventListener("blur", () => input.keys.clear());
+addEventListener("keydown", e => {
+  if (StartFlow.isOpen()) return;
+  if (e.key === "Escape") {                               // Esc = pause / resume (another open panel closes itself first)
+    const other = [...document.querySelectorAll('[role="dialog"]')].some(d => d.offsetParent && !pauseEl.contains(d));
+    if (!other && document.getElementById("result").hidden) { e.preventDefault(); setPaused(!paused); }
+    return;
+  }
+  if (paused) return;
+  if (MOVE_KEYS.includes(keyOf(e))) { e.preventDefault(); input.keys.add(keyOf(e)); return; }
+  if (e.key === "Shift") { if (!e.repeat) splitStep(0); return; }
+  if (e.target.closest && e.target.closest("button") && e.code === "Space") return;
+  if (e.code === "Space") { e.preventDefault(); if (!e.repeat) slide(0); }   // Space = slide (points now serve by themselves)
+  else if (e.key === "v" || e.key === "V") { firstPersonServe = !firstPersonServe; toast(firstPersonServe ? "FIRST-PERSON SERVE ON" : "SERVE CAM ON"); }
+  else if (e.key === "1") manualPoint(0);                 // test keys (A and L now belong to movement)
+  else if (e.key === "2") manualPoint(1);
+  else if (e.key === "z" || e.key === "Z") undo();
+});
+addEventListener("resize", resize);
+
+/* Touch / mouse: drag on the court = virtual stick (screen up = toward the net) */
+const stick = document.getElementById("stick"), knob = document.getElementById("knob");
+let stickOrigin = null, aimDrag = null;
+/* Screen point → court point on the ground (inverse of proj with z = 0). */
+function screenToCourt(cx, cy) {
+  const sx = cx / innerWidth * BW, sy = cy / innerHeight * BH;
+  if (sy <= HZ + 1) return null;                         // above the horizon: not on the court
+  const d = F * CAM_H / (sy - HZ);
+  return { x: (sx - BW / 2) * d / F + CAM_X, y: d - CAM_BACK };
+}
+const aimingNow = () => S.server === 0 && !paused && ((nextServe && nextServe.ready && !rally) || (rally && rally.serve));
+function aimAt(cx, cy) {
+  const c = screenToCourt(cx, cy); if (!c) return;
+  const bx = serviceBox(0);
+  aim.x = clamp(c.x, bx.xlo + 0.05, bx.xhi - 0.05);
+  aim.y = clamp(c.y, bx.sy * 1.5, bx.sy * (COURT.SVC - 0.05));
+}
+canvas.addEventListener("pointerdown", e => {
+  if (aimingNow()) {                                      // serving: click / tap (and drag) to aim; you can't run during the windup anyway
+    const c = screenToCourt(e.clientX, e.clientY);
+    if (c && Math.sign(c.y) === serviceBox(0).sy) { aimDrag = e.pointerId; canvas.setPointerCapture(e.pointerId); aimAt(e.clientX, e.clientY); return; }
+  }
+  stickOrigin = { x: e.clientX, y: e.clientY, id: e.pointerId };
+  canvas.setPointerCapture(e.pointerId);
+  stick.style.left = e.clientX + "px"; stick.style.top = e.clientY + "px"; stick.hidden = false;
+  knob.style.transform = "";
+});
+canvas.addEventListener("pointermove", e => {
+  if (aimDrag === e.pointerId) { aimAt(e.clientX, e.clientY); return; }
+  if (!stickOrigin || e.pointerId !== stickOrigin.id) return;
+  let dx = (e.clientX - stickOrigin.x) / 40, dy = (e.clientY - stickOrigin.y) / 40;
+  const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; }
+  input.stick = { x: dx, y: -dy };
+  knob.style.transform = `translate(${dx * 30}px, ${dy * 30}px)`;
+});
+const endStick = () => { stickOrigin = null; aimDrag = null; input.stick = { x: 0, y: 0 }; stick.hidden = true; };
+canvas.addEventListener("pointerup", endStick);
+canvas.addEventListener("pointercancel", endStick);
+
+resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
+</script>
+<!-- Locker room (Locker Room Designer) and the start flow (Start Page Builder) -->
+<script src="src/lockerroom/lockerroom.js?v=0.7.0"></script>
+<script src="src/start/flow.js?v=0.7.0"></script>
+<script>StartFlow.open();</script>

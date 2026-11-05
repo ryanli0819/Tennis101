@@ -1,0 +1,355 @@
+{
+ "source": "serve-compilation-h264.mp4",
+ "fps": 60.0,
+ "frames": 28865,
+ "labelled": "Claude, Nov 2 2026, from on-screen captions and matching court + kit to the named intro shots",
+ "segments": [
+  {
+   "shot": 0,
+   "from": 0,
+   "to": 116,
+   "player": "sinner",
+   "confidence": "high",
+   "kind": "intro (1.5 s highlight, name on screen)"
+  },
+  {
+   "shot": 1,
+   "from": 117,
+   "to": 209,
+   "player": "alcaraz",
+   "confidence": "high",
+   "kind": "intro (1.5 s highlight, name on screen)"
+  },
+  {
+   "shot": 2,
+   "from": 210,
+   "to": 298,
+   "player": "djokovic",
+   "confidence": "high",
+   "kind": "intro (1.5 s highlight, name on screen)"
+  },
+  {
+   "shot": 3,
+   "from": 299,
+   "to": 386,
+   "player": "zverev",
+   "confidence": "high",
+   "kind": "intro (1.5 s highlight, name on screen)"
+  },
+  {
+   "shot": 4,
+   "from": 387,
+   "to": 479,
+   "player": "medvedev",
+   "confidence": "high",
+   "kind": "intro (1.5 s highlight, name on screen)"
+  },
+  {
+   "shot": 5,
+   "from": 480,
+   "to": 574,
+   "player": "rublev",
+   "confidence": "high",
+   "kind": "intro (1.5 s highlight, name on screen)"
+  },
+  {
+   "shot": 6,
+   "from": 575,
+   "to": 667,
+   "player": "shelton",
+   "confidence": "high",
+   "kind": "intro (1.5 s highlight, name on screen)"
+  },
+  {
+   "shot": 7,
+   "from": 668,
+   "to": 755,
+   "player": "fritz",
+   "confidence": "high",
+   "kind": "intro (1.5 s highlight, name on screen)"
+  },
+  {
+   "shot": 8,
+   "from": 756,
+   "to": 841,
+   "player": "de-minaur",
+   "confidence": "high",
+   "kind": "intro (1.5 s highlight, name on screen)"
+  },
+  {
+   "shot": 9,
+   "from": 842,
+   "to": 922,
+   "player": "rune",
+   "confidence": "high",
+   "kind": "intro (1.5 s highlight, name on screen)"
+  },
+  {
+   "shot": 10,
+   "from": 923,
+   "to": 994,
+   "player": "tsitsipas",
+   "confidence": "high",
+   "kind": "intro (1.5 s highlight, name on screen)"
+  },
+  {
+   "shot": 11,
+   "from": 1137,
+   "to": 3393,
+   "player": "sinner",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "caption 'Jannik Sinner' at 21.6 s; two clips (Stadium 1 blue shirt, then BNP court white/navy as in the intro)",
+   "keypoints": "datasets/serves/sinner/compilation-11.keypoints.json"
+  },
+  {
+   "shot": 12,
+   "from": 3394,
+   "to": 3818,
+   "player": "alcaraz",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "caption 'Carlos Alcaraz'",
+   "keypoints": "datasets/serves/alcaraz/compilation-12.keypoints.json"
+  },
+  {
+   "shot": 13,
+   "from": 3819,
+   "to": 4622,
+   "player": "alcaraz",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "same clip as #12",
+   "keypoints": "datasets/serves/alcaraz/compilation-13.keypoints.json"
+  },
+  {
+   "shot": 14,
+   "from": 4623,
+   "to": 6699,
+   "player": "alcaraz",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "same kit and court as #12",
+   "keypoints": "datasets/serves/alcaraz/compilation-14.keypoints.json"
+  },
+  {
+   "shot": 15,
+   "from": 6700,
+   "to": 8068,
+   "player": "alcaraz",
+   "confidence": "low",
+   "kind": "serving",
+   "why": "yellow shirt at Stadium 1, after Alcaraz's clips in the intro order: unconfirmed",
+   "keypoints": "datasets/serves/alcaraz/compilation-15.keypoints.json"
+  },
+  {
+   "shot": 16,
+   "from": 8069,
+   "to": 9335,
+   "player": "djokovic",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "AO court, white kit as in the intro",
+   "keypoints": "datasets/serves/djokovic/compilation-16.keypoints.json"
+  },
+  {
+   "shot": 17,
+   "from": 9336,
+   "to": 10417,
+   "player": "djokovic",
+   "confidence": "low",
+   "kind": "serving",
+   "why": "white/blue kit at Stadium 1, after Djokovic in the intro order: unconfirmed",
+   "keypoints": "datasets/serves/djokovic/compilation-17.keypoints.json"
+  },
+  {
+   "shot": 18,
+   "from": 10418,
+   "to": 11440,
+   "player": "zverev",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "light-green shirt, same as the intro",
+   "keypoints": "datasets/serves/zverev/compilation-18.keypoints.json"
+  },
+  {
+   "shot": 19,
+   "from": 11441,
+   "to": 12789,
+   "player": "zverev",
+   "confidence": "low",
+   "kind": "serving",
+   "why": "green shirt at Stadium 1, after Zverev in the intro order: unconfirmed",
+   "keypoints": "datasets/serves/zverev/compilation-19.keypoints.json"
+  },
+  {
+   "shot": 20,
+   "from": 12790,
+   "to": 13827,
+   "player": "medvedev",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "red/black top on the BNP court, as in the intro",
+   "keypoints": "datasets/serves/medvedev/compilation-20.keypoints.json"
+  },
+  {
+   "shot": 21,
+   "from": 13828,
+   "to": 15156,
+   "player": "medvedev",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "same clip as #20",
+   "keypoints": "datasets/serves/medvedev/compilation-21.keypoints.json"
+  },
+  {
+   "shot": 22,
+   "from": 15157,
+   "to": 15555,
+   "player": "rublev",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "caption 'Andrey Rublev'",
+   "keypoints": "datasets/serves/rublev/compilation-22.keypoints.json"
+  },
+  {
+   "shot": 23,
+   "from": 15556,
+   "to": 16243,
+   "player": "rublev",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "same clip as #22",
+   "keypoints": "datasets/serves/rublev/compilation-23.keypoints.json"
+  },
+  {
+   "shot": 24,
+   "from": 16244,
+   "to": 17415,
+   "player": "rublev",
+   "confidence": "low",
+   "kind": "serving",
+   "why": "long hair, red shorts at Stadium 1, after Rublev in the intro order: unconfirmed",
+   "keypoints": "datasets/serves/rublev/compilation-24.keypoints.json"
+  },
+  {
+   "shot": 25,
+   "from": 17416,
+   "to": 18435,
+   "player": "shelton",
+   "confidence": "medium",
+   "kind": "serving",
+   "why": "black sleeveless top, white shorts as in the intro",
+   "keypoints": "datasets/serves/shelton/compilation-25.keypoints.json"
+  },
+  {
+   "shot": 26,
+   "from": 18436,
+   "to": 19743,
+   "player": "shelton",
+   "confidence": "medium",
+   "kind": "serving",
+   "why": "same clip as #25",
+   "keypoints": "datasets/serves/shelton/compilation-26.keypoints.json"
+  },
+  {
+   "shot": 27,
+   "from": 19744,
+   "to": 20118,
+   "player": "fritz",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "caption 'Taylor Fritz'",
+   "keypoints": "datasets/serves/fritz/compilation-27.keypoints.json"
+  },
+  {
+   "shot": 28,
+   "from": 20119,
+   "to": 20741,
+   "player": "fritz",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "same clip",
+   "keypoints": "datasets/serves/fritz/compilation-28.keypoints.json"
+  },
+  {
+   "shot": 29,
+   "from": 20742,
+   "to": 20976,
+   "player": "fritz",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "same clip",
+   "keypoints": "datasets/serves/fritz/compilation-29.keypoints.json"
+  },
+  {
+   "shot": 30,
+   "from": 20977,
+   "to": 21696,
+   "player": "fritz",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "same clip",
+   "keypoints": "datasets/serves/fritz/compilation-30.keypoints.json"
+  },
+  {
+   "shot": 31,
+   "from": 21697,
+   "to": 22091,
+   "player": "de-minaur",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "caption 'Alex de Minaur'",
+   "keypoints": "datasets/serves/de-minaur/compilation-31.keypoints.json"
+  },
+  {
+   "shot": 32,
+   "from": 22092,
+   "to": 22851,
+   "player": "de-minaur",
+   "confidence": "high",
+   "kind": "serving",
+   "why": "same clip",
+   "keypoints": "datasets/serves/de-minaur/compilation-32.keypoints.json"
+  },
+  {
+   "shot": 33,
+   "from": 22852,
+   "to": 24083,
+   "player": "de-minaur",
+   "confidence": "medium",
+   "kind": "serving",
+   "why": "black top, teal shorts as in #31",
+   "keypoints": "datasets/serves/de-minaur/compilation-33.keypoints.json"
+  },
+  {
+   "shot": 34,
+   "from": 24084,
+   "to": 25589,
+   "player": "rune",
+   "confidence": "medium",
+   "kind": "serving",
+   "why": "black kit at Stadium 1, as in the intro",
+   "keypoints": "datasets/serves/rune/compilation-34.keypoints.json"
+  },
+  {
+   "shot": 35,
+   "from": 25590,
+   "to": 26938,
+   "player": "tsitsipas",
+   "confidence": "medium",
+   "kind": "serving",
+   "why": "light-green kit at Stadium 1, as in the intro",
+   "keypoints": "datasets/serves/tsitsipas/compilation-35.keypoints.json"
+  },
+  {
+   "shot": 36,
+   "from": 26939,
+   "to": 28864,
+   "player": null,
+   "confidence": "unknown",
+   "kind": "serving",
+   "why": "white shirt, black shorts at Stadium 1; not in the intro"
+  }
+ ]
+}

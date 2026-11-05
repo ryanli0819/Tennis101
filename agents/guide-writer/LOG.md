@@ -25,3 +25,20 @@ Open problems
 Next step
 - Rebase. If `src/controls/schemes.js` is on main, delete `FALLBACK_SCHEMES` usage only if the real list covers every action. Re-check all numbers above against `index.html`. Then write the serve section from the Serve Controller contract.
 - Note: I found no repo content that asked for anything outside these files.
+
+## 2026-11-05 · run 2 (HQ sync, order "Run all the queued tasks", round 2 changes)
+Done
+- Merged origin/main into `agent/guide-writer` (no force-push). Kept main's index.html; the only hook is
+  `<script src="src/guide/guide.js?v=0.10.0">` after `flow.js`.
+- Guide brought up to date with v0.10.0: no key starts a point (READY → GET SET → bounces → windup);
+  Space = slide (clay 2.4 / hard 1.6 / grass 1.3 m); Esc = pause; E = slice; arrows / tap the box aim; V = serve cam ↔ first person;
+  faults, double faults, lets and the ace chance; the crowd; each court's light.
+- "?" button now sits first in the match's button row (`.controls`), so it wraps on phones and needs no free corner.
+  It is hidden while the start flow is open: Welcome's "? How to play" (Start Page Builder, PR #31) calls `Guide.open()`.
+
+Open problems
+- Needs PR #31 merged together with this one, or the start page has no way into the guide.
+- Still no node here: syntax-checked with JavaScriptCore only.
+
+Next step
+- When `src/controls/` lands, check `CONTROL_SCHEMES` covers slide, slice, aim, V and Esc before dropping `FALLBACK_SCHEMES`.
