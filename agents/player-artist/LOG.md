@@ -43,3 +43,8 @@ Issues for me (all from ryanli0819): #1 "Motion update: Sinner's first serve is 
 2. Move `drawPlayer` into `src/players/` and lift it to the same detail (tapered limbs, shirt creases, the new heads).
 3. Sinner's alternate hard-court kits (orange-red/yellow shoes, grey/light blue, pale yellow) from `outfits.json`, picked per match in `choosePlayers`. Keep `P.ui` for the HUD.
 4. Racket: string bed with real mains and crosses, frame thickness by angle, per-player colours. Ask Ryan for Alcaraz clips (question issue) for his outfits.
+
+## 2026-11-05 — round 2 (Look & World review: rebase)
+- Rebased `agent/player-artist` on origin/main. The `drawCapturedFigure` / `sigHead` conflict in index.html is resolved by keeping the move to `src/players/player-art.js`; the script tag merged cleanly.
+- Carried over main's newer change to the serve figure (8a979e2, `W._look`): seen from the front, the eyes, nose and mouth turn to the box he serves to and look up at the toss; seen from behind, the cheek, the nose tip and the cap's brim show on the side he looks to. Sleeve (`P.sleeve`), wristbands and the bouncing hand were already in player-art.js.
+- Checked: syntax OK (osascript JS + `new Function`: index.html inline scripts, src/players/player-art.js). In the browser: Sinner serving (near) and Alcaraz serving (far) draw on the captured joints with `_look` set, through the toss, no console errors.
