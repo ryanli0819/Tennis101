@@ -5,7 +5,7 @@ briefSeen: 1 (look-world)
 
 - **Rankings:** kept the Nov 2 list (read live last run); no change needed for this order.
 - **Searched YouTube myself** (YouTube search results page, titles and channels only; nothing downloaded): "<name> serve / forehand / backhand slow motion", then plain "<name> serve" etc. where nothing came up.
-- **Added 59 clips for the 18 players who were missing strokes.** Every one of the live top 20 now has at least one serve1, forehand and backhand entry. Each link checked with YouTube oEmbed on Nov 5 (`oembed` field); one link that failed oEmbed (a Lehecka backhand short) was left out.
+- **Added 61 clips for the 18 players who were missing strokes.** Every one of the live top 20 now has at least one serve1, forehand and backhand entry. Each link checked with YouTube oEmbed on Nov 5 (`oembed` field); one link that failed oEmbed (a Lehecka backhand short) was left out.
 - Main channels: Courtside Tennis Highlights, Slow-Mo Tennis, Volley Viper Tennis, Love Tennis, Tennis Pro TV, Tennis Analytics (short single-stroke slow-mo; this channel also posts mirrored "Righty"/"Lefty" edits — those are noted and not used).
 - **Weak spots (noted per player in `searched` and the clip notes):** no slow-motion serve found for **Fils** or **Nakashima** (practice video + a match-highlights fallback with the broadcast camera behind the server); **Jodar**'s and **Lehecka**'s backhands come from court-level practice videos, not stroke-only clips. Tien is left-handed (noted).
 - `view` and `range` stay `null` unless the title says the view: the clips' chapters/descriptions don't give stroke time ranges, and I can't watch them.
