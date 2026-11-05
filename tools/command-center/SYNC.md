@@ -21,14 +21,13 @@ The agents run from the repo and GitHub, so a Claude session (ask "sync HQ") mov
 
 ## Automatic sync
 A scheduled task in the Claude app on Ryan's Mac, **Tennis101 HQ sync** (`tennis101-hq-sync`, every 30 minutes while the app
-is open), does steps 1–5 by itself. Each run also works on one open CEO order as the addressed agent: on `agent/<name>` in
-`.worktrees/<name>`, ending in a PR to `main` (never a push to `main`) that Ryan merges. The order gets `pr`, the agent
-shows `review` in HQ, and the order is marked done once the PR is merged or the issue closed.
+is open), runs the chain below by itself: routing, assigning, the agents' work (PRs from `agent/<name>` in
+`.worktrees/<name>`), the manager's review, the manager's merge and the report to Ryan.
 
 ## How a CEO order moves (managers in the middle)
 Ryan's rule: an order goes to the right manager first; the manager splits it among the agents on the team; an agent's
 work goes back to its manager; only when the manager has checked all of it and everything is correct and fits together
-does the order come back to Ryan as done. Fields on `commands/<id>`: `stage`, `sup`, `routedWhy`, `criteria`,
+does the manager merge it to the site and report to Ryan, who tests it and rates the merge and the manager 0–10. Fields on `commands/<id>`: `stage`, `sup`, `routedWhy`, `criteria`,
 `assignments` (`[{agent, task, state, pr, review, round}]`), `round`, `report`.
 
 1. **Routing** (`stage: "routing"`). `to: "auto"` → the manager (supervisor in `agents/supervisors.json`) whose team owns
@@ -48,6 +47,16 @@ does the order come back to Ryan as done. Fields on `commands/<id>`: `stage`, `s
    pieces fit together (shared contracts, no conflicts). Per assignment: `approved`, or `changes` with exact notes in
    `review` → `stage: "changes"`, `round` + 1, the agent fixes it on the same PR and hands it back. After 3 rounds
    without approval: `stage: "blocked"`, and the manager tells Ryan exactly what is wrong.
-5. **Back to the CEO** (`status: "done"`, `stage: "done"`). Only when every assignment is approved. `report`: a short
-   plain report to Ryan: what was done, how the manager verified it, the PRs (in merge order). Feed line
-   "<Manager> → CEO: done — <summary>". The agents show `review` in HQ until Ryan merges.
+5. **The manager merges** (only when every assignment is approved). Merge the PRs into `main` in order
+   (`gh pr merge --squash`), then check `main` itself: pull it, syntax-check, load the site locally at desktop and
+   ~400 px and confirm the behaviour and no console errors. If `main` is broken, revert the merge at once and send the
+   work back (`stage: "changes"`). Then record each player-visible change in `contemporary/` (its README), and if 5 or
+   more are waiting, publish the version as the Version Keeper does (CHANGELOG, `versions/`, `?v=` keys, tag, database
+   rebuild) and republish the demo artifact (`tools/build_demo_artifact.py`). `main` must always be playable.
+6. **Back to the CEO** (`status: "done"`, `stage: "done"`). `report`: a short plain report to Ryan: what changed on the
+   site, how the manager verified it, the merged PRs and the version. Feed line "<Manager> → CEO: merged — <summary>",
+   and a notification if possible.
+7. **Ryan rates it.** He tests the site and rates the merge and the manager 0–10 with feedback in HQ
+   (`rating: {score, feedback, at}`, `stage: "rated"`). The sync mirrors every rating into
+   `agents/command-center/ratings.json`. Before routing or assigning, a manager reads its own ratings and feedback and
+   does what the feedback asks; a low score (≤ 6) means the manager reopens that work as a new assignment.

@@ -107,6 +107,9 @@ input, select, textarea { background: var(--sunk); border: 1px solid var(--line)
 .stages span.now.redo { background: var(--warn); border-color: var(--warn) }
 .assign { display: grid; gap: 3px; font-size: 12px; border-left: 2px solid var(--line); padding-left: 8px }
 .assign a { color: var(--court) }
+.rate { display: grid; grid-template-columns: 76px 1fr auto; gap: 6px; align-items: start }
+@media (max-width: 420px) { .rate { grid-template-columns: 1fr } }
+.score { font: 700 12px/1 var(--mono, monospace); border-radius: 4px; padding: 4px 6px; background: var(--ceo); color: #fff; white-space: nowrap }
 .report { font-size: 13px; background: var(--court-soft); border: 1px solid color-mix(in srgb, var(--court) 30%, var(--line)); border-radius: 5px; padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere }
 .add-row { display: flex; flex-wrap: wrap; gap: 8px }
 
@@ -189,7 +192,7 @@ img.face { object-fit: cover; image-rendering: auto }
   <section class="ceo" aria-labelledby="ceoTitle">
     <div class="ceo-head">
       <h2 id="ceoTitle">CEO order</h2>
-      <span class="rule"><b>Chain of command:</b> your order goes to the right manager, who splits it among the agents on the team, checks every agent's work, and only reports it done to you once all of it is correct. Your orders override any open supervisor order.</span>
+      <span class="rule"><b>Chain of command:</b> your order goes to the right manager, who splits it among the agents on the team and checks every agent's work. Once all of it is correct, the manager merges it to the site and reports to you. You test it and rate the merge and the manager 0–10. Your orders override any open supervisor order.</span>
     </div>
     <form class="order-form" id="orderForm">
       <select id="orderTo" aria-label="Order to"></select>
@@ -457,7 +460,8 @@ img.face { object-fit: cover; image-rendering: auto }
       if (sid) {
         const s = S.sups[sid], synced = members.filter(m => (m.briefSeen || 0) >= (s.briefVersion || 0)).length;
         lane.append(el("div", { class: "sup" },
-          el("div", { class: "sup-head" }, el("div", {}, el("div", { class: "label" }, "Supervisor"), el("h3", {}, s.name)),
+          el("div", { class: "sup-head" }, el("div", {}, el("div", { class: "label" }, "Manager"), el("h3", {}, s.name),
+              (r => r ? el("span", { class: "note", title: "Your average rating of this manager's merges" }, `Your rating ${r.avg.toFixed(1)}/10 · ${r.n} merge${r.n > 1 ? "s" : ""}`) : null)(supRating(sid))),
             el("button", { class: "mode", type: "button", title: "Share: the team shares all information. Split: each agent keeps its own duty.", onclick: () => setMode(sid) }, s.mode === "split" ? "Split duties" : "Share all")),
           s.mission ? el("div", { class: "note" }, s.mission) : null,
           el("div", { class: "brief" }, s.brief || el("span", { class: "muted" }, "No team brief yet. Write one so the whole team works from the same page.")),
@@ -470,9 +474,10 @@ img.face { object-fit: cover; image-rendering: auto }
     }
   }
   // Where an order is: routing → the manager assigns → agents work → the manager reviews (and sends back) → done, reported to you.
-  const STAGES = [["routing", "To manager"], ["assigned", "Assigned"], ["working", "Agents working"], ["review", "Manager review"], ["done", "Done"]];
+  // After the review the manager merges the work (the site updates), then the CEO tests it and rates it 0–10.
+  const STAGES = [["routing", "To manager"], ["assigned", "Assigned"], ["working", "Agents working"], ["review", "Manager review"], ["done", "Merged · live"], ["rated", "Rated by you"]];
   function stageTrack(c) {
-    const cur = c.status === "done" ? "done" : c.stage === "changes" ? "working" : (c.stage || "routing"), at = STAGES.findIndex(s => s[0] === cur);
+    const cur = c.rating ? "rated" : c.status === "done" ? "done" : c.stage === "changes" ? "working" : (c.stage || "routing"), at = STAGES.findIndex(s => s[0] === cur);
     return el("div", { class: "stages", "aria-label": "Stage" }, STAGES.map(([k, label], n) => el("span", { class: n < at ? "past" : n === at ? "now" + (c.stage === "changes" ? " redo" : "") : "" },
       n === at && c.stage === "changes" ? "Redoing (round " + ((c.round || 1) + 1) + ")" : label)));
   }
@@ -486,8 +491,28 @@ img.face { object-fit: cover; image-rendering: auto }
       a.task ? el("span", { class: "note" }, a.task) : null,
       a.review ? el("span", { class: "note" }, "Manager: " + a.review) : null));
     if (c.status === "done" && c.report) out.push(el("div", { class: "report" }, el("b", {}, (sup ? sup.name : "Manager") + " reports: "), c.report));
+    if (c.status === "done" && c.rating && !reRating.has(c.k)) out.push(el("div", { class: "order-line" }, el("span", { class: "score" }, c.rating.score + "/10"),
+      el("span", {}, c.rating.feedback || el("span", { class: "muted" }, "No feedback")), el("button", { class: "btn small ghost", type: "button", onclick: () => { reRating.add(c.k); renderOrders(); } }, "Edit")));
+    else if (c.status === "done" && c.sup) out.push(rateForm(c));
     return out;
   }
+  // Your score for the merge: how well it works and how well the manager ran it. Managers read these before every order.
+  const reRating = new Set();
+  function rateForm(c) {
+    const score = el("select", { "aria-label": "Rating, 0 to 10" }, el("option", { value: "" }, "Rate…"),
+      Array.from({ length: 11 }, (_, n) => el("option", { value: String(10 - n) }, (10 - n) + " / 10")));
+    const fb = el("textarea", { rows: 2, placeholder: "Feedback for " + (S.sups[c.sup]?.name || "the manager") + ": what works, what doesn't", "aria-label": "Feedback" });
+    if (c.rating) { score.value = String(c.rating.score); fb.value = c.rating.feedback || ""; }
+    const form = el("form", { class: "rate", onsubmit: async e => { e.preventDefault();
+      if (score.value === "") { score.focus(); return; }
+      const rating = { score: +score.value, feedback: fb.value.trim(), at: Date.now() };
+      if (await write(() => db.doc("commands/" + c.k).update({ rating, stage: "rated" }), "Rating saved")) { reRating.delete(c.k);
+        logAct(`CEO rated ${S.sups[c.sup]?.name || "the manager"} ${rating.score}/10: ${c.text.slice(0, 80)}${rating.feedback ? " — " + rating.feedback : ""}`); } } },
+      score, fb, el("button", { class: "btn primary small", type: "submit" }, "Save"));
+    return form;
+  }
+  const supRating = sid => { const r = Object.values(S.cmds).filter(c => c.sup === sid && c.rating).map(c => c.rating.score);
+    return r.length ? { avg: r.reduce((a, b) => a + b, 0) / r.length, n: r.length } : null; };
   function renderOrders() {
     const box = $("#orders"); box.replaceChildren();
     const list = Object.entries(S.cmds).map(([k, c]) => ({ k, ...c })).filter(c => orderFilter === "all" || c.status === "open")
