@@ -273,7 +273,8 @@
              parts: { toss: 1, timing: 0.85, point: 0.95, dz: 0, off: 0 }, auto: true };
   }
 
-  /* SERVE ACTIONS for the control schemes (Controls Designer's CONTROL_SCHEMES contract: { action, keys, text }). */
+  /* SERVE ACTIONS, described for help text. The live bindings are the `serve` / `kick` / `slice` actions in
+     src/controls/schemes.js (CONTROL_SCHEMES); the game reads them with Controls.isHeld(). Keep the two in step. */
   const SERVE_BINDINGS = {
     keyboard: [
       { action: "serveToss",  keys: ["f"], text: "Hold F to toss, let go to release; hold F again to load the swing, let go to hit" },
@@ -288,10 +289,10 @@
       { action: "serveSlice", keys: ["flick sideways"], text: "Let go of Serve with a sideways flick: slice" },
     ],
     gamepad: [
-      { action: "serveToss",  keys: ["A"], text: "Hold A to toss, let go; hold again to load, let go to hit" },
+      { action: "serveToss",  keys: ["X"], text: "Hold X to toss, let go; hold again to load, let go to hit" },
       { action: "serveAim",   keys: ["right stick"], text: "Right stick: aim the serve" },
-      { action: "serveKick",  keys: ["RB"], text: "RB held at the swing: kick" },
-      { action: "serveSlice", keys: ["LB"], text: "LB held at the swing: slice" },
+      { action: "serveKick",  keys: ["LB"], text: "LB held at the swing: kick" },
+      { action: "serveSlice", keys: ["RB"], text: "RB held at the swing: slice" },
     ],
   };
 

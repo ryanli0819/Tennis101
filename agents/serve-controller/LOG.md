@@ -45,3 +45,11 @@ The first-person serve camera already exists (V, `CAMS.pov`, eye height 94% of `
 - Merged origin/main (8a979e2, side-on start + the server looks at the box) into `agent/serve-controller`, no force-push.
 - `stepMotion`: kept main's `sideOn(i, W, m, mo.t)` right after the pose (it reads `mo.t`, which the serve control now drives), and main's toss line (the ball travels from the hand, which is ahead of him side-on, toward the court) in **both** paths: the controlled toss (`ctl.flightU()`) and the auto toss.
 - Checks: both inline scripts in index.html parse (`osascript -l JavaScript` + `new Function`). `src/serve/control/` is unchanged by the merge, so `serve-control.test.mjs` results stand; no `node` on this Mac to re-run it.
+
+## 2026-11-05 — round 3 (PR #25): serve input through src/controls/
+- Merged `origin/agent/controls-designer` (#20) into `agent/serve-controller` (no force-push) and resolved the five index.html conflicts.
+- Added the serve actions to Controls Designer's contract in `src/controls/schemes.js`: `serve` and `kick` in `REQUIRED_ACTIONS` and `HELD`, bound in every scheme — WASD/Arrows: F serve, Q kick; touch: the Serve button (flick up = kick, sideways = slice); gamepad: X serve, LB kick. The slice brush reuses the existing `slice` action (E, / or RB). Hint lines mention serve/kick.
+- `serveInput()` now reads `Controls.isHeld("serve" | "kick" | "slice")` plus the touch Serve button; the duplicate `input.keys` / `userInput()` / `gamepad()` / own keydown handler are gone. The Serve button is touch-only (`data-scheme="touch"`), like Split / Slide / Slice.
+- Deviation from the review: gamepad A and RB were already taken (A = split step, RB = slice in #20), so serve is X and kick LB; SERVE_BINDINGS help text updated to match.
+- Checks: index.html inline scripts, schemes.js, serve-control.js, profile.js parse (`osascript -l JavaScript` + `new Function`); `schemes.test.js` run in JXA with a small CommonJS shim: all passed. `serve-control.test.mjs` not re-run (no node / QuickJS here); serve-control.js changed only in help text, so its logic results stand.
+- Next: manager's browser check of main + #19 + #20 + #23 + #25 + #30.
