@@ -10,7 +10,7 @@
     "big serve-forehand one-two"
   ],
   "confidence": "public",
-  "source": "widely documented public knowledge (ATP profile, broadcast coverage, Nov 2 2026 web check); not yet checked against Ryan's images; outfits wait on uploads; height 6'3\" / 70 kg: delraybeachopen.com player page (other sites say 1.85 to 1.91 m); style: tennis.com (Barcelona 2026: pace and topspin forehand, serve-forehand punch, flat and kick serves); Rolex since 2026: rolex.com; clay shoes/apparel listed by tennisexpress.com (retailer, undated)",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -38,11 +38,22 @@
     "celebrations": [
       "clenched fist and a shout"
     ],
-    "notes": "public; mannerisms to confirm from clips"
+    "notes": "public media; humble, hard-working, 'discovering that I'm a brave person'; fist clench on big points"
   },
   "media": {
     "images": "datasets/players/jodar/images/ (local only)",
     "video": "datasets/players/jodar/video/ and datasets/video/jodar/ (local only)",
     "serves": "datasets/serves/jodar/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "'I'm discovering that I'm a brave person'; humble, works little by little",
+      "url": "https://tennistourtalk.com/137509/rafael-jodar-im-discovering-that-im-a-brave-person"
+    },
+    {
+      "claim": "Rolex profile: fist clench celebration, career-high No. 11 (Aug 2026)",
+      "url": "https://www.rolex.com/it/rolex-family/tennis/rafael-jodar"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

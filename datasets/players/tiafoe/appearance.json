@@ -11,7 +11,7 @@
     "flashy, loose swing"
   ],
   "confidence": "public",
-  "source": "widely documented public knowledge (ATP profile, broadcast coverage); not yet checked against Ryan's images — outfits wait on uploads",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -40,11 +40,30 @@
       "chest-thump and arms-wide celebrations",
       "high-energy roars"
     ],
-    "notes": "public, general; confirm mannerisms from clips for the Animator"
+    "notes": "public media; extrovert who brings the crowd in, wants NBA-style celebrations in tennis"
   },
   "media": {
     "images": "datasets/players/tiafoe/images/ (local only)",
     "video": "datasets/players/tiafoe/video/ and datasets/video/tiafoe/ (local only)",
     "serves": "datasets/serves/tiafoe/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "ATP: performer with energy and charisma, toughness underneath",
+      "url": "https://www.atptour.com/en/news/frances-tiafoe-it-all-adds-up"
+    },
+    {
+      "claim": "interviewer: quick-witted, brings the crowd in",
+      "url": "https://www.tennis.com/news/articles/frances-tiafoe-blair-henley-houston"
+    },
+    {
+      "claim": "wants more personality and celebrations in tennis",
+      "url": "https://www.sportsbusinessdaily.com/Daily/Issues/2019/06/21/Leagues-and-Governing-Bodies/Tiafoe.aspx"
+    },
+    {
+      "claim": "TIME interview, US Open 2023",
+      "url": "https://time.com/6309355/frances-tiafoe-us-open-2023-interview"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

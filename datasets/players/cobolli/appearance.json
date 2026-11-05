@@ -10,7 +10,7 @@
     "quick, springy footwork"
   ],
   "confidence": "public",
-  "source": "widely documented public knowledge (ATP profile, broadcast coverage); not yet checked against Ryan's images — outfits wait on uploads",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -37,11 +37,26 @@
     "celebrations": [
       "roars and arms raised to the crowd"
     ],
-    "notes": "public, general; confirm mannerisms from clips for the Animator"
+    "notes": "public media; jokey, candid post-match interviews; coached by his father, argues with him because they are alike"
   },
   "media": {
     "images": "datasets/players/cobolli/images/ (local only)",
     "video": "datasets/players/cobolli/video/ and datasets/video/cobolli/ (local only)",
     "serves": "datasets/serves/cobolli/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "joking 'I completely hate my life!' interview after a two-day Wimbledon 2026 win",
+      "url": "https://www.tntsports.co.uk/tennis/wimbledon/2026/flavio-cobolli-bizarre-interview-win-mario-navone_sto23315461/story.shtml"
+    },
+    {
+      "claim": "jokingly questions the Wimbledon crowd after a quarter-final win",
+      "url": "https://tennishead.net/flavio-cobolli-jokingly-questions-the-wimbledon-crowd-after-beating-marin-cilic-to-reach-the-quarter-finals/"
+    },
+    {
+      "claim": "ATP: 'the game and the personality'",
+      "url": "https://www.atptour.com/en/news/cobolli-us-open-2024-feature"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

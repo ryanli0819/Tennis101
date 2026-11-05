@@ -11,7 +11,7 @@
     "long arms and a high service toss"
   ],
   "confidence": "public",
-  "source": "widely documented public knowledge (ATP profile, broadcast coverage); not yet checked against Ryan's images — outfits wait on uploads",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -39,11 +39,26 @@
     "celebrations": [
       "fist pump and a loud shout to his box"
     ],
-    "notes": "public, general; confirm mannerisms from clips for the Animator"
+    "notes": "public media; intensity and run-ins with umpires are documented, he has apologised for the worst (Acapulco 2022)"
   },
   "media": {
     "images": "datasets/players/zverev/images/ (local only)",
     "video": "datasets/players/zverev/video/ and datasets/video/zverev/ (local only)",
     "serves": "datasets/serves/zverev/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "called his own Acapulco 2022 outburst 'unacceptable', apologised",
+      "url": "https://www.eurosport.co.uk/tennis/no-excuse-alexander-zverev-apologises-after-assaulting-umpire-s-chair-with-racquet-at-mexican-open_sto8813747/story.shtml"
+    },
+    {
+      "claim": "passionate outbursts discussed by a former player",
+      "url": "https://www.tennis365.com/atp-tour/alexander-zverev-news-former-player-tennis-boring-passionate-outbursts"
+    },
+    {
+      "claim": "won the 2026 US Open over Shelton (current form)",
+      "url": "https://www.atptour.com/es/news/zverev-shelton-us-open-2026-final-resource-page"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

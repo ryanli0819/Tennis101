@@ -10,7 +10,7 @@
     "big jumping forehands"
   ],
   "confidence": "public",
-  "source": "widely documented public knowledge (ATP profile, broadcast coverage); not yet checked against Ryan's images — outfits wait on uploads",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -35,13 +35,29 @@
       "animated after winners"
     ],
     "celebrations": [
-      "flexes and shouts to the crowd"
+      "flexes and shouts to the crowd",
+      "Ronaldo-style 'Siu' jump-and-turn"
     ],
-    "notes": "public, general; confirm mannerisms from clips for the Animator"
+    "notes": "public media; says bringing energy is 'in my personality'; answers critics with results"
   },
   "media": {
     "images": "datasets/players/fils/images/ (local only)",
     "video": "datasets/players/fils/video/ and datasets/video/fils/ (local only)",
     "serves": "datasets/serves/fils/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "explosiveness and energy are his strengths, the crowd lifts him",
+      "url": "https://www.tennismajors.com/?p=730145"
+    },
+    {
+      "claim": "'Siu' celebration after beating Stricker (Jeddah 2023)",
+      "url": "https://www.atptour.com/es/news/fils-jeddah-2023-ronaldo-celebration"
+    },
+    {
+      "claim": "defiant statement after 'very bad' criticism (Cincinnati 2026)",
+      "url": "https://www.tennis365.com/tennis-news/arthur-fils-unpleasant-criticism-cincinnati-open-victory"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

@@ -10,7 +10,7 @@
     "fastest feet in the game (motion blur on runs)"
   ],
   "confidence": "public",
-  "source": "widely documented public knowledge (ATP profile, broadcast coverage); not yet checked against Ryan's images — outfits wait on uploads",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -36,13 +36,29 @@
       "shouts 'come on' often"
     ],
     "celebrations": [
-      "loud 'come on!' with a fist pump"
+      "loud 'come on!' with a fist pump",
+      "draws/signs the little 'Demon' devil on the camera lens"
     ],
-    "notes": "public, general; confirm mannerisms from clips for the Animator"
+    "notes": "public media; 'Demon' from a junior coach's play on his surname and his speed; calls himself a fighter and 'quite a normal kid'"
   },
   "media": {
     "images": "datasets/players/de-minaur/images/ (local only)",
     "video": "datasets/players/de-minaur/video/ and datasets/video/de-minaur/ (local only)",
     "serves": "datasets/serves/de-minaur/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "'Demon' nickname from junior coach Ben Pyne (surname + speed)",
+      "url": "https://ausopen.com/node/243021"
+    },
+    {
+      "claim": "'I don't want any regrets': fighter mindset",
+      "url": "https://www.uts.live/league-2024/oslo/news/4790-i-dont-want-any-regrets-the-demon-alex-de-minaur-on-tennis-career"
+    },
+    {
+      "claim": "the Demon camera signature celebration",
+      "url": "https://www.essentiallysports.com/atp-tennis-news-what-does-alex-de-minaur-s-the-demon-celebration-mean-where-did-he-get-the-nickname-from"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

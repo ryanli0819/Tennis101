@@ -11,7 +11,7 @@
     "big, upright service motion"
   ],
   "confidence": "public",
-  "source": "widely documented public knowledge (ATP profile, broadcast coverage, Nov 2 2026 web check); not yet checked against Ryan's images; outfits wait on uploads; headband: hitc.com (fans wearing his signature headband, Dallas 2026); Wimbledon walk-on suit: puntodebreak.com 2026-06-30, outlookindia.com (Fritz vs Lajovic, Wimbledon 2026 R1)",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -39,11 +39,30 @@
     "celebrations": [
       "clenched fist and a short shout toward his box"
     ],
-    "notes": "public, general; mannerisms to confirm from clips for the Animator"
+    "notes": "public media; 'Introvert King', 'just a really chill guy'; stubborn about his own decisions"
   },
   "media": {
     "images": "datasets/players/fritz/images/ (local only)",
     "video": "datasets/players/fritz/video/ and datasets/video/fritz/ (local only)",
     "serves": "datasets/serves/fritz/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "cool, calm and collected, quietly fierce (Hypebeast, US Open 2024)",
+      "url": "https://hypebeast.com/2024/8/taylor-fritz-2024-us-open-interview"
+    },
+    {
+      "claim": "'Introvert King' sends cat memes after Laver Cup",
+      "url": "https://www.tennis.com/news/articles/introvert-king-taylor-fritz-sends-cat-memes-at-the-club-laver-cup"
+    },
+    {
+      "claim": "coach: 'extremely stubborn'",
+      "url": "https://www.sportskeeda.com/tennis/news-he-s-extremely-stubborn-taylor-fritz-s-coach-michael-russell-reveals-top-american-s-tendencies-relives-excruciating-indian-wells-title-win"
+    },
+    {
+      "claim": "Racquet: never wanted to be a performer, but a champion",
+      "url": "https://racquetmag.com/taylor-fritz-is-the-final-boss"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

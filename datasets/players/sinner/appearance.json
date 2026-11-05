@@ -38,7 +38,7 @@
     }
   },
   "personality": {
-    "temperament": "ice-calm and composed; very little emotion shown between points",
+    "temperament": "ice-calm and composed; says staying calm lets him see the ball better and faster",
     "style": "flat, early, aggressive baseline hitting from both wings; big serve; relentless pace",
     "mannerisms": [
       "quick, efficient routine",
@@ -48,12 +48,27 @@
     "celebrations": [
       "understated fist pump; a rare roar on the biggest points"
     ],
-    "notes": "public, general (Nov 2 2026); bounce count to confirm from his clips"
+    "notes": "public media; coach Piatti tied his focus to his junior skiing"
   },
   "media": {
     "images": "datasets/players/sinner/images/ (local only)",
     "video": "datasets/players/sinner/video/ and datasets/video/sinner/ (local only)",
     "serves": "datasets/serves/sinner/"
   },
-  "outfits_detail": "datasets/players/sinner/outfits.json"
+  "outfits_detail": "datasets/players/sinner/outfits.json",
+  "sources": [
+    {
+      "claim": "calm is a tool: frustration is like driving fast without seeing outside the car (FT interview, via Il Sole 24 Ore)",
+      "url": "https://en.ilsole24ore.com/art/jannik-sinner-triumphs-wimbledon-and-first-italian-tennis-player-to-win-AHEgzjhB"
+    },
+    {
+      "claim": "insider: quiet and low-key off court",
+      "url": "https://www.tennis365.com/atp-tour/what-jannik-sinner-is-really-like-off-the-court"
+    },
+    {
+      "claim": "labelled 'cold' / Nadal-like mentality by a major winner",
+      "url": "https://www.tennis365.com/tennis-news/jannik-sinner-cold-mentality-compared-rafael-nadal-australian-open-tennis"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

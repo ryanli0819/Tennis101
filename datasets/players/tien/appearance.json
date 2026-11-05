@@ -10,8 +10,8 @@
     "left-handed: racket in the left hand everywhere",
     "unchanging expression"
   ],
-  "confidence": "to research",
-  "source": "widely documented public knowledge (ATP profile, broadcast coverage, Nov 2 2026 web check); not yet checked against Ryan's images; outfits wait on uploads; US Open 2026 4th round: ustasocal.com, tennishead.net (beat Mensik in five sets)",
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -39,11 +39,30 @@
     "celebrations": [
       "quiet fist pump; a smile at the end"
     ],
-    "notes": "public, general; to confirm from clips"
+    "notes": "public media; level-headed by nature; talks like he plays, no wasted motion; coached by Michael Chang"
   },
   "media": {
     "images": "datasets/players/tien/images/ (local only)",
     "video": "datasets/players/tien/video/ and datasets/video/tien/ (local only)",
     "serves": "datasets/serves/tien/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "speaks like he plays, without wasted motion",
+      "url": "https://www.tennis.com/news/articles/learner-tien-19-rafael-nadal-australian-open"
+    },
+    {
+      "claim": "Laver Cup spotlight: 'Fast Learner'",
+      "url": "https://lavercup.com/news/2026/08/21/player-spotlight-fast-learner-ready-for-laver-cup-debut"
+    },
+    {
+      "claim": "trusts Michael Chang, similar way of communicating",
+      "url": "https://www.puntodebreak.com/en/2026/03/31/tien-praises-the-figure-of-michael-chang-i-have-full-confidence-in-everything-he-says"
+    },
+    {
+      "claim": "keeps his cool in hostile territory (Toronto 2025)",
+      "url": "https://www.tennistv.com/videos/4328296/toronto-2025-r2-tien-interview"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

@@ -10,8 +10,8 @@
     "neat short dark hair",
     "stillness between points (very little movement)"
   ],
-  "confidence": "to research",
-  "source": "widely documented public knowledge (ATP profile, broadcast coverage, Nov 2 2026 web check); not yet checked against Ryan's images; outfits wait on uploads",
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -39,11 +39,26 @@
     "celebrations": [
       "small fist clench, eyes down"
     ],
-    "notes": "public, general; to confirm from clips"
+    "notes": "public media; composed in big moments ('born with it'); reserved off court"
   },
   "media": {
     "images": "datasets/players/nakashima/images/ (local only)",
     "video": "datasets/players/nakashima/video/ and datasets/video/nakashima/ (local only)",
     "serves": "datasets/serves/nakashima/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "composure in crucial moments, 'born with it' (USTA)",
+      "url": "https://www.usta.com/en/home/stay-current/national/brandon-nakashima--19--continues-to-build-on-breakout-2020-seaso.html"
+    },
+    {
+      "claim": "'Quiet Fire: the other side of Brandon Nakashima'",
+      "url": "https://ustasocal.com/news/brandon-nakashima-us-open-2025/"
+    },
+    {
+      "claim": "11 questions: temperament of an older player",
+      "url": "https://www.tennismajors.com/atp/b-nak-virginia-federer-11-questions-about-brandon-nakashima-442643.html"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

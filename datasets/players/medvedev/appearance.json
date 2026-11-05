@@ -11,7 +11,7 @@
     "stands meters behind the baseline to return"
   ],
   "confidence": "public",
-  "source": "widely documented public knowledge (ATP profile, broadcast coverage); not yet checked against Ryan's images — outfits wait on uploads",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -39,11 +39,26 @@
     "celebrations": [
       "understated; occasionally a cheeky or 'quiet' celebration"
     ],
-    "notes": "public, general; confirm mannerisms from clips for the Animator"
+    "notes": "public media; says his on-court tantrums are part of who he is; plays the 'villain' with crowds"
   },
   "media": {
     "images": "datasets/players/medvedev/images/ (local only)",
     "video": "datasets/players/medvedev/video/ and datasets/video/medvedev/ (local only)",
     "serves": "datasets/serves/medvedev/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "trolled the US Open crowd, asked for more boos",
+      "url": "https://prod.tennis.com/news/articles/a-troll-in-central-park-medvedev-takes-on-new-role"
+    },
+    {
+      "claim": "'I'm going to have tantrums, that's just who I am'",
+      "url": "https://sportskeeda.com/tennis/news-i-m-going-tantrums-that-s-just-i-am-daniil-medvedev-takes-unapologetic-stance-temperamental-on-court-persona"
+    },
+    {
+      "claim": "reads the room / from pariah to paragon",
+      "url": "https://www.tennis.com/news/articles/daniil-medvedev-s-journey-from-pariah-to-paragon"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

@@ -9,8 +9,8 @@
     "loose, wristy swings",
     "trick shots (tweeners, drop shots) in his idle repertoire"
   ],
-  "confidence": "to research",
-  "source": "widely documented public knowledge (ATP profile, broadcast coverage, Nov 2 2026 web check); not yet checked against Ryan's images; outfits wait on uploads",
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -38,11 +38,26 @@
     "celebrations": [
       "big roar, arms spread to the crowd"
     ],
-    "notes": "public, general; to confirm from clips"
+    "notes": "public media; 'my personality is a little special', tennis is 'a rollercoaster'; has apologised for outbursts"
   },
   "media": {
     "images": "datasets/players/davidovich-fokina/images/ (local only)",
     "video": "datasets/players/davidovich-fokina/video/ and datasets/video/davidovich-fokina/ (local only)",
     "serves": "datasets/serves/davidovich-fokina/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "'every player has a screw loose': his volatile on-court nature",
+      "url": "https://www.yardbarker.com/tennis/articles/every_player_has_a_screw_loose_alejandro_davidovich_fokina_reflects_on_his_volatile_on_court_nature/s1_17460_42063539"
+    },
+    {
+      "claim": "'a rollercoaster with my mind' after the Draper match",
+      "url": "https://www.tennis365.com/tennis-news/rollercoaster-alejandro-davidovich-fokina-reflects-dramatic-jack-draper-match"
+    },
+    {
+      "claim": "Major Talk #12: 'I need to understand tennis better'",
+      "url": "https://www.tennismajors.com/?p=591921"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

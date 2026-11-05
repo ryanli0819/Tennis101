@@ -1,5 +1,23 @@
 # Appearance Scout · log
 
+## Run 3 · 2026-11-05 (HQ sync, CEO order #33, issue #33) · briefSeen: look-world v1
+
+Order: "Do research on your own and acquire their personalities and appearances according to their very own media portrayal" (Look & World's criteria: personality and signature for all 20, from public media, a source link per claim, unconfirmed items marked, no photos).
+
+**Done**
+- All 20 `appearance.json` files now have a `sources` list (`{claim, url}`, 2–4 links each) from interviews, features and press: ATP Tour, Tennis.com, tournament sites, TIME, Hypebeast, Racquet, Tennis Majors, Tennis365, Punto de Break and others. Also `sourcedOn: 2026-11-05`.
+- Djokovic and Alcaraz had empty personalities. Both are now filled: Djokovic's bouncing under pressure and his heart celebration; Alcaraz's smile ("the key to everything") and crowd shots.
+- Every other player got a sourced `personality.notes` line: Shelton's phone celebration and "boring" off court, Medvedev's crowd trolling and "tantrums are who I am", Tien "talks like he plays", de Minaur's Demon camera sign, Fils's "Siu", and so on. Celebrations were added where a source shows them.
+- `confidence`: the five `to research` players and Djokovic (`medium`) are now `public`, because their personality is sourced.
+
+**Decisions / still unconfirmed**
+- Signatures (hair, build) are still general knowledge without a link. The `source` text says so. Linking them needs photos, and photos stay out of git, so #18 is still open.
+- Low-quality SEO pages (fake 2026 bios, "girlfriend" pages) were skipped. Gossip and private-life items were left out (RULES).
+- Mannerisms marked "to confirm" still need clips (Footage Scout's catalog, PR #15).
+
+**Next step**
+Outfits per court. When #18 stills or the Footage Scout clips arrive, read the hex values and set `confidence: clips`.
+
 ## Run 2 · 2026-11-02 (local pipeline, Ryan's Mac)
 briefSeen: look-world v1
 
