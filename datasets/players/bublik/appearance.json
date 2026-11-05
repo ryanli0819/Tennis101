@@ -2,8 +2,9 @@
   "player": "bublik",
   "name": "Alexander Bublik",
   "country": "KAZ",
-  "rank": 20,
-  "rankedOn": "2026-10-26",
+  "rank": null,
+  "rankedOn": "2026-11-02",
+  "rankNote": "outside the live top 20 on 2026-11-02 (in top20.json `extra`, No. 21+); file kept",
   "signature": "very tall (1.96 m), lanky Kazakh showman with short dark hair and a loose, nonchalant way of moving",
   "exaggerate": [
     "tallest, thinnest silhouette after Zverev and Medvedev",

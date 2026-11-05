@@ -1,0 +1,76 @@
+{
+  "player": "lehecka",
+  "name": "Jiří Lehečka",
+  "country": "CZE",
+  "rank": 15,
+  "rankedOn": "2026-11-02",
+  "signature": "tall, athletic Czech with short dark hair and a quiet, serious face between points; big serve and flat first-strike forehand",
+  "exaggerate": [
+    "upright, composed posture between points (barely any visible emotion)",
+    "big shoulder turn on the serve, then a step in to strike first",
+    "short, tidy hair; plain look with no accessories"
+  ],
+  "confidence": "to research",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images (height to confirm); outfits wait on uploads (#18)",
+  "outfits": {
+    "grass": {
+      "event": "Wimbledon",
+      "shirt": "#f4f4f0",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "notes": "all-white dress code; trim colours to research"
+    },
+    "hard": {
+      "event": "US Open",
+      "notes": "to research"
+    },
+    "clay": {
+      "event": "Roland-Garros (red clay)",
+      "notes": "to research"
+    }
+  },
+  "personality": {
+    "temperament": "calm and focused; works on staying calm the whole match so he can concentrate on the big points",
+    "style": "aggressive first-strike baseliner built on the serve: goes after the points instead of waiting",
+    "mannerisms": [
+      "detail-oriented routine and preparation",
+      "little visible emotion between points (to confirm with clips)"
+    ],
+    "celebrations": [
+      "restrained: a clenched fist and a nod rather than a big show (to confirm)"
+    ],
+    "notes": "public media; golf fan off court; lighter side shows in the locker room after hard matches"
+  },
+  "media": {
+    "images": "datasets/players/lehecka/images/ (local only)",
+    "video": "datasets/players/lehecka/video/ and datasets/video/lehecka/ (local only)",
+    "serves": "datasets/serves/lehecka/"
+  },
+  "sources": [
+    {
+      "claim": "focused on the serve and on staying calm through the whole match, to concentrate on the important points (Doha 2023)",
+      "url": "https://tennismajors.com/atp/we-can-see-positive-things-in-every-win-and-every-loss-blossoming-lehecka-learning-on-the-fly-662613.html"
+    },
+    {
+      "claim": "makes gains by being detail-oriented",
+      "url": "https://www.tennis365.com/australian-open/jiri-lehecka-gains-detail-oriented"
+    },
+    {
+      "claim": "'I knew I could beat the top guys'; aggressive, goes after the points",
+      "url": "https://www.tennismajors.com/?p=663533"
+    },
+    {
+      "claim": "golf fan (ATP feature, US Open 2025)",
+      "url": "https://www.atptour.com/en/news/lehecka-us-open-2025-feature"
+    },
+    {
+      "claim": "laughs in the locker room after a hard-fought match (ATP, 2026)",
+      "url": "https://www.atptour.com/en/news/lehecka-locker-room-code-2026"
+    },
+    {
+      "claim": "reached the Miami final in 2026",
+      "url": "https://www.puntodebreak.com/en/2026/03/28/lehecka-after-reaching-the-final-in-miami-i-knew-it-would-come-at-some-point"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
+}

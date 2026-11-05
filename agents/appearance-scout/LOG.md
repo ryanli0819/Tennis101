@@ -1,5 +1,19 @@
 # Appearance Scout · log
 
+## Run 4 · 2026-11-05 (HQ sync, CEO orders #12 and #33, review round 2) · briefSeen: look-world v1
+
+Fixed exactly what Look & World's round-1 review asked:
+1. **Lehečka** (live No. 15 on the Nov 2 list) added: `datasets/players/lehecka/appearance.json` with a signature and a personality from public media, one link per claim (Tennis Majors, Tennis365, ATP Tour, Punto de Break). Signature/build is general knowledge, so `confidence: to research`; height still to confirm.
+2. **Ranks**: every `appearance.json` now has `rank` and `rankedOn: 2026-11-02` from `datasets/footage/top20.json` (PR #15), e.g. Zverev 1, Sinner 2. Bublik's file is kept with `rank: null` and a `rankNote` (in `extra`, No. 21+).
+3. **Style lines**: Djokovic's style now has sources (ATP on his return, Tennis365, The Racquet on the sliding splits); Alcaraz's has the ATP forehand drop shot piece.
+
+**Decisions**
+- No photos, no hex values guessed; outfits still wait on #18.
+- Rublev, Rune and Tsitsipas folders still have no `appearance.json`; they are in `extra`, so left alone.
+
+**Next step**
+Outfits when #18 stills arrive; confirm Lehečka's height and look against press photos.
+
 ## Run 3 · 2026-11-05 (HQ sync, CEO order #33, issue #33) · briefSeen: look-world v1
 
 Order: "Do research on your own and acquire their personalities and appearances according to their very own media portrayal" (Look & World's criteria: personality and signature for all 20, from public media, a source link per claim, unconfirmed items marked, no photos).

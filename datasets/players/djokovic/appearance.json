@@ -2,8 +2,8 @@
   "player": "djokovic",
   "name": "Novak Djokovic",
   "country": "SRB",
-  "rank": 12,
-  "rankedOn": "2026-10-26",
+  "rank": 11,
+  "rankedOn": "2026-11-02",
   "signature": "lean, flexible build with short dark hair",
   "exaggerate": [
     "very lean torso",
@@ -62,6 +62,18 @@
     {
       "claim": "'I still believe I can beat them all, otherwise I wouldn't be here' (AO 2026)",
       "url": "https://www.puntodebreak.com/en/2026/01/24/djokovic-i-still-believe-i-can-beat-them-all-otherwise-i-wouldnt-be-here"
+    },
+    {
+      "claim": "style: one of the best returners in history, most return games won of any active player (ATP)",
+      "url": "https://www.atptour.com/en/news/djokovic-infosys-atp-beyond-the-numbers-january-2026"
+    },
+    {
+      "claim": "style: perhaps the greatest returner in men's history",
+      "url": "https://www.tennis365.com/facts-stats/novak-djokovic-return-stats-behind-recent-drop-off"
+    },
+    {
+      "claim": "style: slides on the stretch into low splits on hard courts (commentary, The Racquet)",
+      "url": "https://theracquet.substack.com/p/sliderman"
     }
   ],
   "sourcedOn": "2026-11-05"
