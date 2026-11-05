@@ -9,3 +9,12 @@ briefSeen: 1 (motion-body)
 - Checked in the browser: match loads, both rackets draw, serve and rally run, no console errors, desktop and 400 px.
 - Decision: the backswing test allows −0.08 m (the two-handed backhand's back pose sits 0.10 m behind the body).
 - Next: measure racket paths (wrist path, forearm angle, clock angle at takeback/contact/finish, contact point, phase timing) from the Footage Scout's Sinner/Alcaraz stroke clips once they are recorded (issue #14, PR #15) → `datasets/racket/<player>.json`.
+
+## 2026-11-05 — round 2 (CEO order #11): blocked on stroke clips
+- Manager's round-1 notes ask for measured racket paths (wrist path, forearm angle, clock angle at takeback/contact/finish,
+  contact point, timing) for Sinner and Alcaraz in `datasets/racket/<player>.json`, from local clips/keypoints.
+- Checked: `datasets/video/{sinner,alcaraz}/{forehand,backhand}/` hold only `.gitkeep` — no stroke clips on the Mac.
+  The only keypoints are serves (`datasets/serves/*`) and the US Open serve/split-step clips (`datasets/anatomy/uso/`),
+  which have no forehands or backhands. Nothing to measure, and guessing is against the mission ("measure, don't guess").
+- Handed back to Motion & Body as blocked: needs forehand + backhand clips of both players dropped into `datasets/inbox/`
+  (then `tools/intake/intake.py`). The `src/racket/` move on this PR is unchanged and still approved.
