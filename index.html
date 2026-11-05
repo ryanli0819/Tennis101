@@ -732,9 +732,10 @@ function drawCapturedFigure(i, p, W) {
       b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.15, r * 1.0, Math.PI, Math.PI * 2); b.fill();   // hair / cap crown
       if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(q(hx - r * 1.2), q(hy - r * 0.2), q(r * 2.4), Math.max(px, q(r * 0.18))); }   // brim
       else { b.fillStyle = hr; b.fillRect(q(hx - r), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); b.fillRect(q(hx + r * 0.7), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); }
-      b.fillStyle = "#1b1b1f"; b.fillRect(q(hx - r * 0.45), q(hy + r * 0.1), px * 2, px * 2); b.fillRect(q(hx + r * 0.25), q(hy + r * 0.1), px * 2, px * 2);   // eyes
-      b.fillStyle = skinD; b.fillRect(q(hx - px * 0.5), q(hy + r * 0.3), px, q(r * 0.25));                                  // nose
-      b.fillStyle = "#a4574a"; b.fillRect(q(hx - r * 0.25), q(hy + r * 0.62), q(r * 0.5), px);                             // mouth
+      const lk = W._look ? W._look.x * r * 0.38 : 0, lu = W._look ? W._look.up * r * 0.3 : 0;   // the face turns to where he looks
+      b.fillStyle = "#1b1b1f"; b.fillRect(q(hx - r * 0.45 + lk), q(hy + r * 0.1 - lu), px * 2, px * 2); b.fillRect(q(hx + r * 0.25 + lk), q(hy + r * 0.1 - lu), px * 2, px * 2);   // eyes
+      b.fillStyle = skinD; b.fillRect(q(hx - px * 0.5 + lk * 1.3), q(hy + r * 0.3 - lu), px, q(r * 0.25));                                  // nose
+      b.fillStyle = "#a4574a"; b.fillRect(q(hx - r * 0.25 + lk), q(hy + r * 0.62 - lu), q(r * 0.5), px);                             // mouth
       sigHead(P, false, hx, hy, r, hr, hrD, hrL);
       return;
     }
@@ -745,6 +746,15 @@ function drawCapturedFigure(i, p, W) {
     b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.1, r * 0.98, Math.PI, Math.PI * 2); b.fill();     // cap crown
     if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(hx - 0.5 / AS, hy - r * 1.05, 1 / AS, r * 0.95); }  // seam
     sigHead(P, true, hx, hy, r, hr, hrD, hrL);
+    const L = W._look;
+    if (L && Math.abs(L.x) > 0.15) {                     // seen from behind, his head turned: cheek, nose and the cap's brim show on that side
+      const sd = Math.sign(L.x), a = Math.min(1, Math.abs(L.x)), px = 1 / AS;
+      b.fillStyle = skin; b.beginPath(); b.ellipse(hx + sd * r * 0.72, hy + r * 0.28, r * 0.34 * a + px, r * 0.5, 0, 0, Math.PI * 2); b.fill();   // cheek
+      b.fillRect(q(hx + sd * r * (1.02 + 0.12 * a)) - (sd < 0 ? px : 0), q(hy + r * 0.25), px * 2, px * 2);                             // nose tip past the outline
+      b.fillStyle = shade(skin, -0.2); b.fillRect(q(hx + sd * r * 0.62), q(hy + r * 0.62), q(r * 0.3), px);                                 // jaw shadow
+      const brim = P.cap ? shade(P.cap, -0.2) : (P.look && P.look.band) || hrD;
+      if (P.cap) b.fillStyle = brim, b.fillRect(q(sd > 0 ? hx + r * 0.5 : hx - r * (0.5 + 1.0 * a)), q(hy - r * 0.12), q(r * (0.4 + a)), Math.max(px, q(r * 0.22)));   // brim
+    }
   }
 }
 
@@ -1328,6 +1338,22 @@ function serveFlip(i, m) {
   const right = PLAYERS[i].side === "near" ? 1 : -1, deuce = pos[i].x * right >= 0;
   return (deuce ? 1 : -1) * motionFacing(m);
 }
+/* SIDE-ON START (from Ryan's serve compilation): every server begins turned at an angle to the court, front shoulder
+   toward the net, front foot ahead, and turns square to the net only as he swings up to contact; after contact the
+   racket side comes through. The captured joints are flat (seen from behind), so this adds that depth along the court:
+   the lead side (tossing arm, front foot) forward, the racket side back. He looks across at the box he serves to,
+   up at the ball during the toss, and at the box again after contact (W._look: screen side −1…1, up 0…1). */
+function sideOn(i, W, m, t) {
+  const E = m.events, H = PLAYERS[i].heightM, fwd = -sideSign(i);
+  const k = t < E.trophy ? 1 : t < E.contact ? 1 - ease((t - E.trophy) / (E.contact - E.trophy)) : -0.45 * ease((t - E.contact) / ((E.finish - E.contact) || 1));
+  const D = 0.12 * H * k * fwd;                          // half the depth between the lead and the racket side
+  const lead = { Shoulder: 1, Elbow: 1.15, Wrist: 1.35, Hip: 0.75, Knee: 0.95, Ankle: 1.15 }, back = { Shoulder: 1, Elbow: 1, Wrist: 0.9, Hip: 0.75, Knee: 0.8, Ankle: 0.9 };
+  for (const n in lead) { if (W["left" + n]) W["left" + n].y += D * lead[n]; if (W["right" + n]) W["right" + n].y -= D * back[n]; }
+  const box = serviceBox(i), dx = box.mid - pos[i].x;
+  const across = clamp(dx / 2.6, -1, 1);                 // exaggerated so it reads in pixels
+  const up = t >= E.tossRelease && t < E.contact ? ease((t - E.tossRelease) / 0.18) : 0;
+  W._look = { x: across * (1 - up), up };
+}
 /* Advance player i's serve motion. During the serve the ball bounces in the routine, rides in the tossing hand,
    is tossed on one real throw that meets the racket at the motion's contact moment, and is then struck. */
 function stepMotion(i, dt) {
@@ -1337,6 +1363,7 @@ function stepMotion(i, dt) {
   const ev = ctl ? ctl.step(dt, i === 0 ? serveInput() : {}) : [];
   mo.t = ctl ? ctl.t : mo.t + dt;
   const W = mo.world = poseToWorld(i, pos[i], motionPose(m, mo.t));
+  sideOn(i, W, m, mo.t);
   if (sv && mo.t < bouncesEnd) {                         // BOUNCING: the hand pushes the ball down and meets it coming back up
     const H = PLAYERS[i].heightM, P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1;
     const wgt = Math.min(1, (bouncesEnd - mo.t) / 0.2) * Math.min(1, (mo.t - mo.t0) / 0.2);   // ease in and out of the routine
@@ -1371,13 +1398,13 @@ function stepMotion(i, dt) {
       if (ctl) {                                         // the toss flies on its own; the swing comes when you let go
         const u = ctl.flightU();
         ball.x = sv.release.x + (sv.hit.x - sv.release.x + (ctl.state.off || 0)) * u;   // an off toss drifts off the line
-        ball.y = pos[i].y - sideSign(i) * 0.45 * u;
+        ball.y = sv.release.y + (pos[i].y - sideSign(i) * 0.45 - sv.release.y) * u;
         ball.z = ctl.ballZ();
         if (ev.includes("contact")) { rally.serveResult = ctl.result; rally.serve = null; hitBall(i, true); }
       } else {
         const tt = mo.t - E.tossRelease, u = Math.min(1, tt / (E.contact - E.tossRelease));
         ball.x = sv.release.x + (sv.hit.x - sv.release.x) * u;
-        ball.y = pos[i].y - sideSign(i) * 0.45 * u;      // the toss drifts a little into the court
+        ball.y = sv.release.y + (pos[i].y - sideSign(i) * 0.45 - sv.release.y) * u;      // the toss drifts a little into the court
         ball.z = sv.release.z + sv.vz * tt - 0.5 * 9.81 * tt * tt;
         if (mo.t >= E.contact) { rally.serve = null; hitBall(i, true); }   // contact: the serve leaves the racket
       }

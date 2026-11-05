@@ -50,6 +50,9 @@ def kind_of(text):
         if any(w in t for w in words): return k
     return None
 
+def stroke_dir(kind):                                       # the Inbox app's three categories
+    return "serves" if kind and kind.startswith("serve") else "forehands" if kind == "forehand" else "backhands" if kind == "backhand" else ""
+
 def run(cmd):
     if DRY: return True
     r = subprocess.run(cmd, capture_output=True, text=True)
@@ -74,7 +77,7 @@ for dirpath, dirs, files in os.walk(INBOX):
         pid = found[0] if len(found) == 1 else None
         entry = {"file": f, "at": time.strftime("%Y-%m-%d %H:%M"), "player": pid, "players": found, "kind": kind}
         if len(found) > 1:                                   # a compilation: several players in one clip, split later by the agents
-            dest_dir = os.path.join(ROOT, "datasets/video/_compilations")
+            dest_dir = os.path.join(ROOT, "datasets/video/_compilations", stroke_dir(kind))
             entry["note"] = "compilation of " + ", ".join(found) + ": split into one segment per player (Footage Scout / Serve Analyst)"
         elif not pid:
             dest_dir = os.path.join(INBOX, "unsorted")

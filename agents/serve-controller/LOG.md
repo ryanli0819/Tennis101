@@ -40,3 +40,8 @@ The first-person serve camera already exists (V, `CAMS.pov`, eye height 94% of `
 1. If Ryan approves, default the 2nd serve's brush to kick and show the brush in the meter while loading.
 2. Hand `SERVE_BINDINGS` to the Controls Designer once `src/controls/schemes.js` is on main (replace the direct key wiring with the scheme lookup).
 3. When `launchBall` lands, launch the serve from the contact point with `{ vel, spin: rpm }` from `result` instead of `planShot`'s arc.
+
+## 2026-11-05 — round 2 (manager review: conflict with main's side-on serve)
+- Merged origin/main (8a979e2, side-on start + the server looks at the box) into `agent/serve-controller`, no force-push.
+- `stepMotion`: kept main's `sideOn(i, W, m, mo.t)` right after the pose (it reads `mo.t`, which the serve control now drives), and main's toss line (the ball travels from the hand, which is ahead of him side-on, toward the court) in **both** paths: the controlled toss (`ctl.flightU()`) and the auto toss.
+- Checks: both inline scripts in index.html parse (`osascript -l JavaScript` + `new Function`). `src/serve/control/` is unchanged by the merge, so `serve-control.test.mjs` results stand; no `node` on this Mac to re-run it.
