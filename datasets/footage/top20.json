@@ -37,8 +37,53 @@
           "identified": "low",
           "keypoints": "datasets/serves/zverev/compilation-19.keypoints.json",
           "status": "keypoints extracted"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=trPSrwyWNIw",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Alexander Zverev Forehand [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=qkQmT4fXKD8",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": "behind",
+          "speed": "slow",
+          "range": null,
+          "notes": "Forehand Compilation - Slow Motion Back View [Alcaraz Djokovic Sinner Zverev Rublev Shelton]. Compilation, back view; Zverev is one of six players.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=kzrFrtDD9KM",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Alexander Zverev Backhand [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=5qNx5QJPUOQ",
+          "source": "Topspin Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Zverev Two Hand Backhand Super Slow Motion.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
         }
-      ]
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "sinner",
@@ -151,7 +196,8 @@
           "notes": "Sinner vs Cameron Norrie, court level practice, 4K 60fps. Real speed: useful for footwork between strokes.",
           "status": "to record"
         }
-      ]
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "alcaraz",
@@ -301,7 +347,8 @@
         "file": "src/serve/motion/alcaraz-serve.js",
         "from": "datasets/serves/alcaraz/keyframes.json",
         "status": "hand-keyed (provisional) until the clips are captured"
-      }
+      },
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "shelton",
@@ -337,8 +384,42 @@
           "identified": "medium",
           "keypoints": "datasets/serves/shelton/compilation-26.keypoints.json",
           "status": "keypoints extracted"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=cUdkKJyHIYQ",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Ben Shelton Forehand [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=sUShqa9RHto",
+          "source": "Volley Viper Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Ben Shelton Backhand in Slow Motion 4K | Explosive Power & Spin.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=IQaEKk8luLM",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Ben Shelton - Insane Serve and Forehand Slow Motion [4k]. Serve and forehand in one video.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
         }
-      ]
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "medvedev",
@@ -374,8 +455,42 @@
           "identified": "high",
           "keypoints": "datasets/serves/medvedev/compilation-21.keypoints.json",
           "status": "keypoints extracted"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=iuOvL1HdYOc",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Daniil Medvedev | Forehand & Backhand [Slow Motion 4K 120fps]. Forehand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=iuOvL1HdYOc",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Daniil Medvedev | Forehand & Backhand [Slow Motion 4K 120fps]. Backhand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=sLouTPKHrW4",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Daniil Medvedev Backhand Slow Motion - Tennis Backhand Technique.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
         }
-      ]
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "cobolli",
@@ -383,7 +498,64 @@
       "country": "ITA",
       "rank": 6,
       "videoDir": "datasets/video/cobolli/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=XewX3v0Ku6o",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "コボッリのフラットサーブ（スロー）/ Flavio Cobolli Flat Serve Slow Motion. Flat serve.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=iTzvJaTh9SQ",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "serve2",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "コボッリのスピンサーブ（スロー）/ Flavio Cobolli Spin Serve Slow Motion. Spin (kick) serve.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=fkZJJdClm70",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "コボッリのフォアハンドストローク（スロー）/ Flavio Cobolli Forehand Stroke Slow Motion.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=SLW0uXUxhzU",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "コボッリのバックハンドストローク（スロー）/ Flavio Cobolli Backhand Stroke Slow Motion. Original (right-handed) version; the same channel also posts a mirrored lefty edit (tHuLpeETMpA), do not use that one.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=BYbrT2Xadb8",
+          "source": "OnlyTennis (YouTube)",
+          "stroke": "forehand",
+          "view": "side",
+          "speed": "slow",
+          "range": null,
+          "notes": "Flavio Cobolli slow-motion side-view point. Whole point from the side.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "fils",
@@ -391,7 +563,64 @@
       "country": "FRA",
       "rank": 7,
       "videoDir": "datasets/video/fils/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=p3APLVEy4sA",
+          "source": "The Tennis View  (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Arthur Fils Forehand and Backhand Warm-up in Slow Motion. Warm-up, forehand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=p3APLVEy4sA",
+          "source": "The Tennis View  (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Arthur Fils Forehand and Backhand Warm-up in Slow Motion. Warm-up, backhand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=iIJKIQbQCSo",
+          "source": "OnlyTennis (YouTube)",
+          "stroke": "forehand",
+          "view": "side",
+          "speed": "slow",
+          "range": null,
+          "notes": "Arthur Fils slow motion forehands and backhands side view.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=khSXwL4Rg7U",
+          "source": "Tennis Legend TV (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "real",
+          "range": null,
+          "notes": "The Massive Strokes of Arthur Fils (Practice Davis Cup 2024). Davis Cup 2024 practice. No slow-motion serve clip of Fils found after searching \"Arthur Fils serve\", \"serve slow motion\", \"serve technique\"; check whether this practice shows serves.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=5RZJlaZKom8",
+          "source": "Rolex Paris Masters (YouTube)",
+          "stroke": "serve1",
+          "view": "behind",
+          "speed": "real",
+          "range": null,
+          "notes": "Arthur Fils vs Tomas Machac | Second Round Highlights | Rolex Paris Masters 2026. Fallback: Paris 2026 match highlights, broadcast camera from behind the server.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "tiafoe",
@@ -399,7 +628,42 @@
       "country": "USA",
       "rank": 8,
       "videoDir": "datasets/video/tiafoe/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=DnjZqPocLeM",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "ティアフォーのフラットサーブ（スロー) / Frances Tiafoe Flat Serve Slow Motion. Flat serve.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=OvGakC-KQZs",
+          "source": "Love Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Frances Tiafoe Forehand Slow Motion - Modern ATP Forehand Technique in Tennis.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Z_G74jYKEaI",
+          "source": "Volley Viper Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Frances Tiafoe CRUSHING Backhands in Slow Motion 4K.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "de-minaur",
@@ -449,8 +713,42 @@
           "identified": "medium",
           "keypoints": "datasets/serves/de-minaur/compilation-33.keypoints.json",
           "status": "keypoints extracted"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=xmgSV-5mThk",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Alex de Minaur Forehand Technique [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=xd5Hg0ogcEo",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "デミノーのバックハンドストローク（スロー）/ Alex De Minaur Backhand Stroke Slow Motion.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=J0BC_-opCRw",
+          "source": "NEBTA OFFICIAL (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "ALEX DE MINAUR FOREHAND BACKHAND SERVES + SLOW MOTION US OPEN 2025. US Open 2025: forehand, backhand and serves.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
         }
-      ]
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "jodar",
@@ -458,7 +756,42 @@
       "country": "ESP",
       "rank": 10,
       "videoDir": "datasets/video/jodar/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=jNnhYeRfyYo",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Rafael Jodar Serve Technique [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=JsMbxPL6Wpw",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Rafael Jodar Forehand [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=VYpPRQC0wMM",
+          "source": "Tennis Analytica (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "real",
+          "range": null,
+          "notes": "AO26: NEXTGEN STAR ALERT! Rafael Jodar - Court Level 4K 60FPS!. AO 2026 court-level practice, 4K 60 fps (no stroke-only backhand clip found); backhands inside.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "djokovic",
@@ -494,8 +827,42 @@
           "identified": "low",
           "keypoints": "datasets/serves/djokovic/compilation-17.keypoints.json",
           "status": "keypoints extracted"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=FmrLQmZ1CVQ",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Novak Djokovic | Forehand Backhand in 4K Slow Motion [Front & Back View]. Front and back view; forehand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=FmrLQmZ1CVQ",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Novak Djokovic | Forehand Backhand in 4K Slow Motion [Front & Back View]. Front and back view; backhand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Qv-PM-z-IHs",
+          "source": "Tennis Pro TV (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Novak Djokovic Backhand Slow Motion in Court Level View -  ATP Tennis Two Handed Backhand Technique.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
         }
-      ]
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "fritz",
@@ -559,8 +926,42 @@
           "identified": "high",
           "keypoints": "datasets/serves/fritz/compilation-30.keypoints.json",
           "status": "keypoints extracted"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=gbVDhUjRfYg",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Taylor Fritz | Forehand & Backhand [Slow Motion 4K 120fps]. 4K 120 fps; forehand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=gbVDhUjRfYg",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Taylor Fritz | Forehand & Backhand [Slow Motion 4K 120fps]. 4K 120 fps; backhand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=BYDHmVn-4cc",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "backhand",
+          "view": "behind",
+          "speed": "real",
+          "range": null,
+          "notes": "Taylor Fritz Forehand & Backhand Back View  | Court Level Practice. Court-level practice, back view.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
         }
-      ]
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "auger-aliassime",
@@ -568,7 +969,42 @@
       "country": "CAN",
       "rank": 13,
       "videoDir": "datasets/video/auger-aliassime/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=Bdmb1ZOSQa8",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Felix Auger-Aliassime Serve [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=VQqkrQdvp3s",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Felix Auger-Aliassime Forehand [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=VKh00yDsxfk",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Felix Auger-Aliassime Backhand [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "paul",
@@ -576,7 +1012,42 @@
       "country": "USA",
       "rank": 14,
       "videoDir": "datasets/video/paul/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=8nrSUyzFFEc",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Tommy Paul Serve [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=T8wrcZqsvXw",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Tommy Paul Forehand [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=VDLZnWtMJWY",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "トミー・ポールのバックハンドストローク（スロー）/ Tommy Paul Backhand Stroke Slow Motion.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "lehecka",
@@ -584,7 +1055,42 @@
       "country": "CZE",
       "rank": 15,
       "videoDir": "datasets/video/lehecka/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=Nd8hqaYvcQc",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Jiri Lehecka Serve Technique [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=qVbhZbFMlBM",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Jiri Lehecka Forehand Technique [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=dWqlV5yRgEA",
+          "source": "Tennis Legend TV (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "real",
+          "range": null,
+          "notes": "The clean technique of Jiri Lehecka, Tomas Berdych's successor (Practice Davis Cup 2023). Davis Cup 2023 practice, all strokes.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "mensik",
@@ -592,7 +1098,42 @@
       "country": "CZE",
       "rank": 16,
       "videoDir": "datasets/video/mensik/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=mahQKAR-uAY",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Jakub Mensik Serve Slow Motion - Next Gen Serve Technique.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=aiXpEnsGYOA",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Mensik × Fils | Next Gen Power Tennis in Slow Motion [4K]. Mensik × Fils video, 4K; Mensik's forehand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=hjCz_3oZVV8",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "メンシークのバックハンドストローク（スロー）/ Jakub Mensik Backhand Stroke Slow Motion.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "davidovich-fokina",
@@ -600,7 +1141,53 @@
       "country": "ESP",
       "rank": 17,
       "videoDir": "datasets/video/davidovich-fokina/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=ppsGgprXAiU",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "ダビドビッチ・フォキナのスライスサーブ（スロー）/ Davidovich Fokina Slice Serve Slow Motion. Slice serve.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=VGGNcvuFjJo",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "serve2",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "ダビドビッチ・フォキナのスピンサーブ（スロー）/ Davidovich Fokina Spin Serve Slow Motion. Spin serve.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=7RiYQgRsE4w",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Davidovich Fokina Forehand & Backhand [Slow Motion]. Forehand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=7RiYQgRsE4w",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Davidovich Fokina Forehand & Backhand [Slow Motion]. Backhand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "nakashima",
@@ -608,7 +1195,53 @@
       "country": "USA",
       "rank": 18,
       "videoDir": "datasets/video/nakashima/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=DSuc7PM4tEw",
+          "source": "12kgp-Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "real",
+          "range": null,
+          "notes": "Brandon Nakashima | Court Level Practice - Multiple Angles [San Diego 2021, 4K 60FPS]. Court-level practice, multiple angles, 4K 60 fps; forehand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=DSuc7PM4tEw",
+          "source": "12kgp-Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "real",
+          "range": null,
+          "notes": "Brandon Nakashima | Court Level Practice - Multiple Angles [San Diego 2021, 4K 60FPS]. Same practice video, backhand part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=EPxPo9jqcR8",
+          "source": "tennisvideos (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "real",
+          "range": null,
+          "notes": "Brandon Nakashima. No serve-only clip found after searching \"Brandon Nakashima serve\" and \"serve slow motion\"; tennisvideos clip, check it shows serves.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=J66RevDE9Lk",
+          "source": "ATP Tour (YouTube)",
+          "stroke": "serve1",
+          "view": "behind",
+          "speed": "real",
+          "range": null,
+          "notes": "Matteo Berrettini vs Brandon Nakashima Highlights | Paris 2026 First Round. Fallback: Paris 2026 match highlights, broadcast camera from behind the server.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "tien",
@@ -616,7 +1249,42 @@
       "country": "USA",
       "rank": 19,
       "videoDir": "datasets/video/tien/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=w_C7WCf0Q2Y",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Learner Tien – Next-Gen Star [4K Slow-Motion]. Left-handed. 4K slow motion; serve part.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Syugznq_hH4",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Learner Tien Forehand [Slow Motion]. Left-handed. Skip the channel's \"Righty\" mirrored edit (VL0PDAVhDRM).",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=NMLPN6ApTyo",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "ラーナーティエンのバックハンドストローク（スロー）/ Learner Tien Backhand Stroke Slow Motion. Left-handed.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
       "id": "cerundolo",
@@ -624,7 +1292,42 @@
       "country": "ARG",
       "rank": 20,
       "videoDir": "datasets/video/cerundolo/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=DApK1ETTj8Q",
+          "source": "TheTinnin (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Pro Serve in Slow Motion \\\\ Francisco Cerundolo \\\\ Cincinnati Masters 2023. Cincinnati 2023.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=B1a1WpU5mMY",
+          "source": "Courtside Tennis Highlights (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Francisco Cerundolo Forehand [Slow Motion].",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=UgRP1X6nns8",
+          "source": "Tennis Analytics  (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "セルンドロのバックハンドストローク（スロー） / Francisco Cerundolo Backhand Stroke Slow Motion.",
+          "oembed": "checked 2026-11-05",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     }
   ],
   "legends": [

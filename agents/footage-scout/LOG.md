@@ -1,5 +1,17 @@
 # Footage Scout · log
 
+## 2026-11-05 — CEO orders #10 (round 2) and #32 "Find it yourself on youtube" (run by the HQ sync)
+briefSeen: 1 (look-world)
+
+- **Rankings:** kept the Nov 2 list (read live last run); no change needed for this order.
+- **Searched YouTube myself** (YouTube search results page, titles and channels only; nothing downloaded): "<name> serve / forehand / backhand slow motion", then plain "<name> serve" etc. where nothing came up.
+- **Added 59 clips for the 18 players who were missing strokes.** Every one of the live top 20 now has at least one serve1, forehand and backhand entry. Each link checked with YouTube oEmbed on Nov 5 (`oembed` field); one link that failed oEmbed (a Lehecka backhand short) was left out.
+- Main channels: Courtside Tennis Highlights, Slow-Mo Tennis, Volley Viper Tennis, Love Tennis, Tennis Pro TV, Tennis Analytics (short single-stroke slow-mo; this channel also posts mirrored "Righty"/"Lefty" edits — those are noted and not used).
+- **Weak spots (noted per player in `searched` and the clip notes):** no slow-motion serve found for **Fils** or **Nakashima** (practice video + a match-highlights fallback with the broadcast camera behind the server); **Jodar**'s and **Lehecka**'s backhands come from court-level practice videos, not stroke-only clips. Tien is left-handed (noted).
+- `view` and `range` stay `null` unless the title says the view: the clips' chapters/descriptions don't give stroke time ranges, and I can't watch them.
+- **Asked Ryan:** nothing new; recording a clip is only needed for the few players we turn into joints next (Zverev, Shelton, Medvedev in ranking order).
+- **Next step:** set views and ranges when clips are recorded; keypoints for the next pros added to the game.
+
 ## 2026-11-02 — CEO order #10 (run by the HQ sync)
 briefSeen: 1 (look-world)
 
