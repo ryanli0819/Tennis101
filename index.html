@@ -94,6 +94,11 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 .btn.primary { background: var(--ball); color: var(--chip-ink); border-color: var(--ball); }
 .btn.primary kbd { color: var(--chip-ink); border-color: rgb(10 17 32 / .35); }
 .btn .dot { width: 8px; height: 8px; border-radius: 50%; }
+.keyhints { flex-basis: 100%; margin: 0; text-align: right; font-family: var(--f-pix); font-size: 8px; letter-spacing: .06em;
+  color: rgb(238 243 251 / .75); text-shadow: 0 1px 0 rgb(0 0 0 / .5); pointer-events: none; }
+.picker { display: grid; gap: 6px; font-family: var(--f-pix); font-size: 9px; letter-spacing: .08em; color: var(--muted); }
+.picker select { font: 600 16px var(--f-name); color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 8px; }
+.picker select:focus-visible { outline: 2px solid var(--ball); outline-offset: 2px; }
 
 .home-btn { position: fixed; z-index: 6; top: calc(12px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); }
 .cam-tag {
@@ -155,6 +160,11 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 .bar { position: relative; height: 5px; background: rgb(14 23 41 / .65); border-radius: 2px; overflow: hidden; }
 .bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; }
 .bar .cap { position: absolute; top: 0; bottom: 0; width: 2px; background: rgb(238 243 251 / .7); }
+/* Serve meter (src/serve/control/): toss height (the tick = the ideal toss) and swing power, under the stamina strip */
+.serve-meter { position: fixed; z-index: 5; top: calc(48px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px));
+  width: 120px; display: grid; gap: 4px; pointer-events: none; }
+.serve-meter .bar i { width: 0; background: var(--ball); }
+.serve-meter .bar.toss .cap { left: calc(50% - 1px); }
 .callout { position: fixed; z-index: 6; left: 50%; transform: translateX(-50%); bottom: calc(76px + env(safe-area-inset-bottom, 0px));
   font-family: var(--f-pix); font-size: 10px; letter-spacing: .08em; color: var(--ball); text-shadow: 0 2px 0 rgb(0 0 0 / .55);
   pointer-events: none; white-space: nowrap; }
@@ -184,6 +194,11 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
   <div class="bar"><i id="st0" style="background:var(--sinner)"></i><span class="cap" id="cap0"></span></div>
   <div class="bar"><i id="st1" style="background:var(--alcaraz)"></i><span class="cap" id="cap1"></span></div>
 </div>
+<div class="serve-meter" id="serveMeter" hidden aria-hidden="true">
+  <span class="stamina-label" id="smLabel">SERVE</span>
+  <div class="bar toss"><i id="smToss"></i><span class="cap"></span></div>
+  <div class="bar"><i id="smPower"></i></div>
+</div>
 <div class="callout" id="hudMsg" aria-live="polite"></div>
 <div class="stick" id="stick" hidden><i id="knob"></i></div>
 <div class="cam-tag" id="camTag" hidden>NET CAM · VOLLEY</div>
@@ -192,10 +207,13 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <section class="scorebug" id="scorebug" aria-live="polite" aria-label="Scoreboard"></section>
 
 <div class="controls">
-  <button class="btn primary" id="pauseBtn" type="button">Pause <kbd>ESC</kbd></button>
-  <button class="btn" id="slideBtn" type="button">Slide <kbd>SPACE</kbd></button>
-  <button class="btn" id="splitBtn" type="button">Split step <kbd>SHIFT</kbd></button>
-  <button class="btn" id="sliceBtn" type="button" aria-pressed="false">Slice <kbd>E</kbd></button>
+  <p class="keyhints" id="keyHints" hidden></p>
+  <button class="btn primary" id="pauseBtn" type="button">Pause <kbd data-action="pause">ESC</kbd></button>
+  <button class="btn" id="serveBtn" type="button" data-scheme="touch">Serve</button>
+  <button class="btn" id="slideBtn" type="button" data-scheme="touch">Slide</button>
+  <button class="btn" id="splitBtn" type="button" data-scheme="touch">Split step</button>
+  <button class="btn" id="sliceBtn" type="button" data-scheme="touch" aria-pressed="false">Slice</button>
+  <button class="btn" id="viewBtn" type="button" data-scheme="touch">View</button>
   <button class="btn" id="ptA" type="button"><span class="dot" id="dotA" style="background:var(--sinner)"></span><span id="lblA">Point Sinner</span> <kbd>1</kbd></button>
   <button class="btn" id="ptB" type="button"><span class="dot" id="dotB" style="background:var(--alcaraz)"></span><span id="lblB">Point Alcaraz</span> <kbd>2</kbd></button>
   <button class="btn" id="undoBtn" type="button">Undo <kbd>Z</kbd></button>
@@ -218,9 +236,10 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
     <div><p class="eyebrow">MATCH PAUSED</p><h1 id="pauseTitle">Paused</h1></div>
     <p class="muted" id="pauseScore" style="margin:0;color:var(--muted)"></p>
     <div class="pause-actions">
-      <button class="btn primary" type="button" id="resumeBtn">Resume <kbd>ESC</kbd></button>
+      <button class="btn primary" type="button" id="resumeBtn">Resume <kbd data-action="pause">ESC</kbd></button>
       <button class="btn" type="button" id="pauseNew">New match</button>
     </div>
+    <label class="picker">CONTROLS <select id="schemeSel"></select></label>
   </div>
 </div>
 
@@ -228,6 +247,10 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 
 <!-- Skill points (Skills Coach) and Sinner's real serve, captured from video (Serve Analyst) -->
 <script src="src/skills/skills.js?v=0.10.0"></script>
+<!-- Serve control (toss → power → aim) and the profile that keeps your serve stats (Serve Controller) -->
+<script src="src/profile/profile.js?v=0.10.0"></script>
+<script src="src/serve/control/serve-control.js?v=0.10.0"></script>
+<script src="src/controls/schemes.js?v=0.10.0"></script>
 <script src="src/animation/run-cycle.js?v=0.10.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.10.0"></script>
 <script src="src/serve/motion/alcaraz-serve.js?v=0.10.0"></script>
@@ -867,7 +890,7 @@ function racketPose(i, p, ago = 0) {
   if (sh && sh.recv === i && !rally.serve && ball) {                              // the ball is coming: swing on the beat of its arrival
     const ttc = sh.t1 + 0.85 * sh.t2 - sh.t + ago;                                // ≈ time left until contact
     const side = (sh.end.x - p.x) * R >= 0;                                       // forehand if it comes to the racket side
-    const slice = i === 0 ? (input.keys.has("e") || input.slice) : !!p.planSlice; // you hold E; the computer decided early
+    const slice = i === 0 ? (Controls.isHeld("slice") || input.slice) : !!p.planSlice; // you hold E; the computer decided early
     const zc = Math.max(0.45, Math.min(1.75, sh.end.z));
     const set = (pz) => ({ ...pz, g: { ...pz.g, z: zc } });                       // aim the contact pose at the ball's height
     const keys = slice
@@ -1153,7 +1176,8 @@ let rally = null;
 let swing = [0, 0];
 let clock = 0;            // rally time in seconds
 const SPLIT_AIR = 0.22;   // seconds a split-step hop keeps you off the ground
-const input = { keys: new Set(), stick: { x: 0, y: 0 }, slice: false };   // slice: the touch Slice button is armed
+const input = { slice: false,   // slice: the touch Slice button is armed (keys, stick and gamepad live in src/controls/)
+                serveHeld: false, flick: null };   // the touch Serve button, and its last flick
 const ai = { target: null, at: 0 };
 
 /* One physics step for a body. ix/iy is the wanted direction (-1..1) in court axes. */
@@ -1203,7 +1227,7 @@ const SLIDE = { dur: 0.32, recover: 0.25, cooldown: 0.8, stamina: 3,
 function slide(i) {
   const p = pos[i], B = BODY[i];
   if (!rally || rally.serve || p.slide > 0 || p.slideCD > 0 || p.air > 0) return;
-  let [dx, dy] = i === 0 ? userInput() : [0, 0];
+  let { x: dx, y: dy } = i === 0 ? getMoveInput() : { x: 0, y: 0 };
   if (!dx && !dy) { dx = p.vx; dy = p.vy; }           // no key held: slide the way you're running
   const m = Math.hypot(dx, dy); if (m < 0.1) return;
   const dist = (SLIDE.dist[cfg.surface] || 1.6) * (1 + 0.03 * ((getSkills(PLAYERS[i].id).agility || 10) - 10));
@@ -1241,19 +1265,20 @@ function aiInput() {
   if (d < 0.15 || d <= v * v / (2 * BODY[1].brake) + 0.1) return [0, 0];
   return [dx / d, dy / d];
 }
-/* MOVEMENT is always WASD: W = forward (toward the net), S = back, A = left, D = right (or drag on touch).
-   How fast you then move comes from moveBody(): body + Speed skill, not from the key. */
-function userInput() {
-  const k = input.keys;
-  let x = (k.has("d") ? 1 : 0) - (k.has("a") ? 1 : 0);
-  let y = (k.has("w") ? 1 : 0) - (k.has("s") ? 1 : 0);
-  if (!x && !y) { x = input.stick.x; y = input.stick.y; }
-  return [x, y];
-}
-/* AIMING your serve is separate: arrow keys (← → sideways, ↑ ↓ deeper / shorter), or click / tap the box. */
+/* MOVEMENT comes from getMoveInput() (src/controls/schemes.js): WASD, arrows, touch drag or gamepad, whichever
+   scheme the player picked. It is only a wish {x, y}; how fast you move comes from moveBody(): body + Speed skill. */
+/* AIMING your serve is separate: arrow keys in the WASD scheme (← → sideways, ↑ ↓ deeper / shorter), or click / tap the box. */
 function aimInput() {
-  const k = input.keys;
-  return [(k.has("ArrowRight") ? 1 : 0) - (k.has("ArrowLeft") ? 1 : 0), (k.has("ArrowUp") ? 1 : 0) - (k.has("ArrowDown") ? 1 : 0)];
+  const a = Controls.getAimInput();
+  return [a.x, a.y];
+}
+/* HITTING your serve (src/serve/control/): hold the serve action (WASD/Arrows: F, touch: Serve, gamepad: X) to toss,
+   let go; hold again to load the swing, let go to hit. The brush at the swing sets the spin: kick held (Q / LB) = kick,
+   slice held (E or / / RB) = slice, else flat. Keys come from src/controls/schemes.js, like every other action. */
+function serveInput() {
+  const held = Controls.isHeld("serve") || input.serveHeld;
+  const brush = Controls.isHeld("kick") ? "kick" : Controls.isHeld("slice") ? "slice" : input.flick || "flat";
+  return { held, brush };
 }
 
 let msgTimer;
@@ -1331,9 +1356,11 @@ function sideOn(i, W, m, t) {
    is tossed on one real throw that meets the racket at the motion's contact moment, and is then struck. */
 function stepMotion(i, dt) {
   const mo = pos[i].motion, m = mo.m, E = m.events, bouncesEnd = E.set ?? E.start;
-  mo.t += dt;
+  const sv = rally && rally.serve, ctl = sv && sv.ctl;
+  // SERVE CONTROL owns the clock while serving: it holds the pose while you hold the toss or load the swing
+  const ev = ctl ? ctl.step(dt, i === 0 ? serveInput() : {}) : [];
+  mo.t = ctl ? ctl.t : mo.t + dt;
   const W = mo.world = poseToWorld(i, pos[i], motionPose(m, mo.t));
-  const sv = rally && rally.serve;
   sideOn(i, W, m, mo.t);
   if (sv && mo.t < bouncesEnd) {                         // BOUNCING: the hand pushes the ball down and meets it coming back up
     const H = PLAYERS[i].heightM, P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1;
@@ -1355,7 +1382,7 @@ function stepMotion(i, dt) {
     if (mo.t < bouncesEnd) {                             // ROUTINE: he bounces the ball ROUTINE.bounces times
       const P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1, h = W.leftHand || W.leftWrist;
       Object.assign(ball, { x: h.x, y: h.y + 0.25, z: Math.max(0, h.z - 0.035) * (2 * f - 1) ** 2 });   // under the palm → ground → palm
-    } else if (mo.t < E.tossRelease) {
+    } else if (ctl ? !ev.includes("release") && !sv.release : mo.t < E.tossRelease) {
       Object.assign(ball, W.leftWrist);                  // ball in the tossing hand
     } else {
       if (!sv.release) {                                 // solve the toss once: release point → contact point
@@ -1364,12 +1391,21 @@ function stepMotion(i, dt) {
         sv.release = { ...W.leftWrist };
         sv.hit = { x: C.rightWrist.x, z: C.rightWrist.z + RACKET_M * 0.9 };
         sv.vz = (sv.hit.z - sv.release.z + 0.5 * 9.81 * T * T) / T;   // z(T) = hit height under gravity
+        if (ctl) ctl.launchToss(sv.release.z);           // controlled: how long you held sets how high it goes
       }
-      const tt = mo.t - E.tossRelease, u = Math.min(1, tt / (E.contact - E.tossRelease));
-      ball.x = sv.release.x + (sv.hit.x - sv.release.x) * u;
-      ball.y = sv.release.y + (pos[i].y - sideSign(i) * 0.45 - sv.release.y) * u;   // from the hand (ahead of him, side-on), drifting into the court
-      ball.z = sv.release.z + sv.vz * tt - 0.5 * 9.81 * tt * tt;
-      if (mo.t >= E.contact) { rally.serve = null; hitBall(i, true); }   // contact: the serve leaves the racket
+      if (ctl) {                                         // the toss flies on its own; the swing comes when you let go
+        const u = ctl.flightU();
+        ball.x = sv.release.x + (sv.hit.x - sv.release.x + (ctl.state.off || 0)) * u;   // an off toss drifts off the line
+        ball.y = sv.release.y + (pos[i].y - sideSign(i) * 0.45 - sv.release.y) * u;
+        ball.z = ctl.ballZ();
+        if (ev.includes("contact")) { rally.serveResult = ctl.result; rally.serve = null; hitBall(i, true); }
+      } else {
+        const tt = mo.t - E.tossRelease, u = Math.min(1, tt / (E.contact - E.tossRelease));
+        ball.x = sv.release.x + (sv.hit.x - sv.release.x) * u;
+        ball.y = sv.release.y + (pos[i].y - sideSign(i) * 0.45 - sv.release.y) * u;      // the toss drifts a little into the court
+        ball.z = sv.release.z + sv.vz * tt - 0.5 * 9.81 * tt * tt;
+        if (mo.t >= E.contact) { rally.serve = null; hitBall(i, true); }   // contact: the serve leaves the racket
+      }
     }
   }
   if (mo.t >= E.finish) pos[i].motion = null;           // landing done: back to the normal sprite
@@ -1378,7 +1414,8 @@ function stepMotion(i, dt) {
 /* =====================================================================
    SERVING — the rhythm between points, aiming, faults, lets and aces
    The game serves by itself: ~4 s after a point (BETWEEN_POINTS), with a READY countdown at the end.
-   During READY the server aims (A/D sideways, W/S depth) and the receiver moves into position.
+   During READY the server aims (arrows, or tap the box) and the receiver moves into position. Then you hit your
+   own serve (F: toss, then load and swing; src/serve/control/); untouched, it goes by itself as a safe auto serve.
    ===================================================================== */
 /* Rhythm: point ends → 0.9 s → players reset → GET SET (POSITION s: move with WASD, aim) → the serve sequence:
    ball bounces (routine), toss and windup, contact. Contact lands ~4 s after the previous point ended. */
@@ -1396,7 +1433,6 @@ let nextServe = null;                                    // { at, no, ready } �
 function queueServe(delay, no = 1) { nextServe = { at: gameT + delay, no, ready: false }; }
 function cancelServe() { nextServe = null; timers.length = 0; }
 const clamp = (v, a, c) => Math.max(Math.min(a, c), Math.min(Math.max(a, c), v));
-const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) * 1.41;   // ≈ normal, sd 1
 
 /* The service box the server must hit: cross-court from where they stand. */
 function serviceBox(server) {
@@ -1413,34 +1449,24 @@ function steerAim(dt) {
   aim.x = clamp(aim.x + x * 3.2 * dt, bx.xlo + 0.05, bx.xhi - 0.05);
   aim.y = clamp(aim.y + y * 2.4 * dt * bx.sy, bx.sy * 1.5, bx.sy * (COURT.SVC - 0.05));
 }
-/* The computer server picks wide, body or down the T; second serves stay safer. */
-function aiAim(bx, second) {
-  const r = Math.random(), safe = second ? 0.55 : 0.85;
-  const x = r < 0.4 ? bx.wide * safe : r < 0.7 ? bx.mid : bx.wide * (1 - safe) + 0.001;
-  return { x, y: bx.back * (second ? 0.72 : 0.86) };
-}
-/* ACE_CHANCE holds the probability that the last serve was an ace, and why. An ace needs a near-perfect
-   placement (within 45 cm of the T, the sideline or the service line); it's far likelier when the
-   receiver is on the wrong side. Serve skill adds a constant step per point; second serves rarely ace. */
+/* ACE_CHANCE holds the probability that the last serve was an ace, and why. The serve itself (toss, power,
+   spin, sweet spot) comes from ServeControl (src/serve/control/); an ace needs its requirements met AND a
+   near-perfect placement (within 45 cm of the T, the sideline or the service line), and is far likelier when
+   the receiver is on the wrong side. Serve skill adds a constant step per point; second serves rarely ace.
+   All the numbers are in SERVE_TUNING. */
 let ACE_CHANCE = { chance: 0, perfect: false, wrongSide: false };
-function planServe(server, no) {
-  const B = BODY[server], bx = serviceBox(server), second = no === 2, r = pos[1 - server];
-  const target = server === 0 ? { ...aim } : aiAim(bx, second);
-  const sd = (second ? 0.65 : 1.35) * B.errMul;           // Control tightens the spread; a 2nd serve plays safe (tuned: ~35% 1st-serve faults, few double faults)
-  const land = { x: target.x + gauss() * sd, y: target.y + gauss() * sd * 0.8 };
-  const net = Math.random() < (second ? 0.04 : 0.09) * B.errMul;
-  const inBox = land.x >= bx.xlo && land.x <= bx.xhi && land.y >= bx.ylo && land.y <= bx.yhi;
-  const fault = net || !inBox;
-  const isLet = !fault && Math.random() < (PLAYERS[server].letRate || 0.02);
-  const edge = Math.min(Math.abs(land.x - bx.wide), Math.abs(land.x - bx.t), Math.abs(land.y - bx.back));
-  const perfect = !fault && edge < 0.45;
-  const wrongSide = Math.sign(land.x - bx.mid) !== Math.sign(r.x - bx.mid) && Math.abs(land.x - r.x) > 1.4;
-  const skill = (getSkills(PLAYERS[server].id).serve || 10) - 10;
-  let chance = perfect ? (wrongSide ? 0.22 + 0.012 * skill : 0.04 + 0.004 * skill) : 0;   // never extreme: the receiver still gets a racket on most
-  if (second) chance *= 0.3;
-  chance = clamp(chance, 0, 0.4);
-  ACE_CHANCE = window.ACE_CHANCE = { server, no, chance: +chance.toFixed(3), perfect, wrongSide, land, target };
-  return { no, land, target, fault, net, let: isLet, ace: !isLet && Math.random() < chance };
+function planServe(server, no, result) {
+  const B = BODY[server], P = PLAYERS[server], bx = serviceBox(server), second = no === 2;
+  result = result || ServeControl.autoResult(second, P.heightM);   // routine serve (no captured motion): clean, can't ace
+  const target = server === 0 ? { ...aim } : ServeControl.aiAim(bx, second);
+  const skill = getSkills(P.id).serve || 10;
+  const o = ServeControl.resolveServe({ result, target, box: bx, receiverX: pos[1 - server].x, second,
+                                        errMul: B.errMul, letRate: P.letRate || 0.02, skill });
+  result.target = target;                                // the Serve control contract, complete
+  ACE_CHANCE = window.ACE_CHANCE = { server, no, chance: o.chance, perfect: o.perfect, wrongSide: o.wrongSide,
+                                     requirements: o.requirements, sweetSpot: result.sweetSpot, land: o.land, target };
+  return { no, land: o.land, target, fault: o.fault, net: o.net, let: o.let, ace: o.ace, control: result,
+           speed: ServeControl.speedOf(result, B.serveBonus) };
 }
 /* The READY time before a serve: the server aims, the receiver gets into position. */
 function readyStep(dt) {
@@ -1455,7 +1481,7 @@ function readyStep(dt) {
     }
   }
   if (nextServe.ready) {
-    const u = userInput(); moveBody(0, u[0], u[1], dt);  // WASD: you walk to your spot (serving or receiving)
+    const u = getMoveInput(); moveBody(0, u.x, u.y, dt);  // WASD: you walk to your spot (serving or receiving)
     if (S.server === 0) { keepServeStance(0); steerAim(dt); const a = aiInput(); moveBody(1, a[0], a[1], dt); }
   }
   if (left <= 0) { const no = nextServe.no; nextServe = null; startRally(no); }
@@ -1537,17 +1563,19 @@ function planShot(hitter, isServe, q, out, sv = null, type = "drive") {
   const cx = Math.max(-6.5, Math.min(6.5, from.x + (bx - from.x) * k));
   const dist = Math.hypot(bx - from.x, by - from.y);
   // Strength / Serve skills add a constant m/s per point (shared with the Ball Physicist)
-  const speed = isServe ? (sv.no === 2 ? 32 : 40) + BODY[hitter].serveBonus
+  const speed = isServe ? sv.speed                      // ServeControl.speedOf: power × sweet spot, + Serve skill
               : slice ? 10.5 + 2.5 * q + rand(0, 1.5) + BODY[hitter].shotBonus * 0.3   // a slice is clearly slower than a drive: it floats
               : 19 + 6 * q + rand(0, 3) + BODY[hitter].shotBonus;               // 2nd serves are slower, safer
   /* CURVE. arc = how much the ball rises above a straight line (net clearance); curve = sideways bend in flight.
-     1st serve: flat-slice — low over the net, bending toward the sideline it's aimed at, skidding low.
-     2nd serve: kick — a high, safe arc over the net, bending the other way and jumping up after the bounce.
-     Rally shots: topspin — a higher arc and a little sideways drift. */
+     Serves follow the brush you chose (ServeControl spin): FLAT — low and straight, skidding through;
+     SLICE — low, bending hard toward the sideline it's aimed at; KICK — a high, safe arc, bending the other way
+     and jumping up after the bounce. Rally shots: topspin — a higher arc and a little sideways drift. */
   const toWide = Math.sign(bx - from.x) || 1;
-  const arc = isServe ? (sv.no === 2 ? 2.7 : 1.25) : slice ? 2.4 : 6;   // slice: low over the net (backspin)
-  const curve = isServe ? (sv.no === 2 ? -toWide * rand(0.2, 0.35) : toWide * rand(0.35, 0.6)) : slice ? toWide * rand(0.2, 0.45) : rand(-0.35, 0.35);
-  const kick = isServe ? (sv.no === 2 ? { up: 1.45, side: -toWide * 0.45 } : { up: 0.8, side: toWide * 0.25 })
+  const spin = isServe ? sv.control.spin.type : null;
+  const arc = isServe ? { flat: 1.1, slice: 1.35, kick: 2.7 }[spin] : slice ? 2.4 : 6;   // slice: low over the net (backspin)
+  const curve = isServe ? { flat: toWide * rand(0.1, 0.25), slice: toWide * rand(0.45, 0.7), kick: -toWide * rand(0.2, 0.35) }[spin]
+              : slice ? toWide * rand(0.2, 0.45) : rand(-0.35, 0.35);
+  const kick = isServe ? { flat: { up: 0.75, side: toWide * 0.1 }, slice: { up: 0.8, side: toWide * 0.35 }, kick: { up: 1.45, side: -toWide * 0.45 } }[spin]
              : slice ? { up: 0.4, side: 0 } : { up: 1, side: 0 };   // backspin: the slice stays low and stops
   return { hitter, recv, from, bounce: { x: bx, y: by }, end: { x: cx, y: cy, z: slice ? 0.45 : 1.0 }, isServe, serve: sv, arc, curve, kick, type,
            t1: dist / speed, t2: (0.42 - 0.08 * q) / SURF().pace * (slice ? 1.5 : 1), t: 0, out, bounced: false, prevD: Infinity, prevV: Infinity };
@@ -1566,7 +1594,7 @@ function hitBall(i, isServe, volley = false) {
   }
   // SHOT TYPE: you slice by holding E (or the Slice button) as you hit; the computer slices now and then,
   // more when it's stretched. A slice is a touch shot: a bit riskier.
-  const type = isServe ? "drive" : (i === 0 ? (input.keys.has("e") || input.slice) : p.planSlice || (q < 0.6 && Math.random() < 0.12)) ? "slice" : "drive";
+  const type = isServe ? "drive" : (i === 0 ? (Controls.isHeld("slice") || input.slice) : p.planSlice || (q < 0.6 && Math.random() < 0.12)) ? "slice" : "drive";
   p.planSlice = false;
   if (type === "slice") { err *= 1.25; if (i === 0) say(0, "SLICE"); }
   if (i === 0 && input.slice) { input.slice = false; sliceBtn.setAttribute("aria-pressed", "false"); sliceBtn.classList.remove("primary"); }
@@ -1574,10 +1602,18 @@ function hitBall(i, isServe, volley = false) {
   const Rs = PLAYERS[i].side === "near" ? 1 : -1;
   Object.assign(p, { hitT: clock, hitServe: isServe, strokeType: type, hitZ: ball.z, strokeSide: Math.sign((ball.x - p.x) * Rs) || 1 });   // racket follow-through
   if (isServe) {
-    const sv = planServe(i, rally.serveNo);
+    const sv = planServe(i, rally.serveNo, rally.serveResult);
+    rally.serveResult = null;
     rally.shot = planShot(i, true, 1, sv.fault, sv);
     rally.serveClock = clock;
-    if (i === 0 && ACE_CHANCE.chance > 0) say(0, `${ACE_CHANCE.perfect ? "PERFECT SPOT · " : ""}ACE CHANCE ${Math.round(ACE_CHANCE.chance * 100)}%`);
+    if (i === 0) {                                       // how you hit it: sweet spot and spin, then the ace chance
+      const c = sv.control;
+      say(0, c.auto ? "AUTO SERVE · HOLD F TO HIT YOUR OWN"
+        : `SWEET SPOT ${Math.round(c.sweetSpot * 100)}% · ${c.spin.type.toUpperCase()}` +
+          (ACE_CHANCE.chance > 0 ? ` · ACE CHANCE ${Math.round(ACE_CHANCE.chance * 100)}%` : ""));
+      if (!c.auto) Profile.recordServe(PLAYERS[0].id, { sweetSpot: c.sweetSpot, ace: sv.ace, fault: sv.fault,
+                                                        doubleFault: sv.fault && sv.no === 2 });
+    }
   } else rally.shot = planShot(i, isServe, q, Math.random() < err, null, type);
   const o = 1 - i, op = pos[o];
   op.contactT = clock; op.contactId++;
@@ -1607,6 +1643,10 @@ function startRally(no = 1) {                            // no = 1st or 2nd serv
     const t0 = m.events.routine != null ? m.events.routine : m.events.start - ROUTINE.seconds;
     rally.serve.captured = true;
     pos[i].motion = { t: t0, m, t0, flip: serveFlip(i, m) };
+    // you hit your own serve (toss → power → aim); the computer presses the same "key" through a plan
+    rally.serve.ctl = ServeControl.create({ events: m.events, t: t0, heightM: PLAYERS[i].heightM, armSpanM: PLAYERS[i].armSpanM,
+                                           human: i === 0, second: no === 2 });
+    input.flick = null;
   }
   bug.classList.add("live");                     // scoreboard fades while the point is live
   renderScore();
@@ -1617,15 +1657,15 @@ function stepRally(dt) {
   if (!rally) return;
   if (rally.serve) {                                    // routine and windup: the server's feet are planted
     if (S.server === 0) steerAim(dt);                    // you can aim until contact
-    else { const u = userInput(); moveBody(0, u[0], u[1], dt); }   // receiving: you can still move
+    else { const u = getMoveInput(); moveBody(0, u.x, u.y, dt); }   // receiving: you can still move
     if (rally.serve && !rally.serve.captured) stepRoutineServe(dt);
     return;
   }
   const sh = rally.shot; if (!sh) return;               // (guard: a point always has a ball in flight here)
   sh.t += dt;
   if (ai.at && clock >= ai.at) { ai.target = { x: sh.end.x, y: sh.end.y }; ai.at = 0; }
-  const ui = userInput(), ain = aiInput();
-  moveBody(0, ui[0], ui[1], dt);
+  const ui = getMoveInput(), ain = aiInput();
+  moveBody(0, ui.x, ui.y, dt);
   moveBody(1, ain[0], ain[1], dt);
   swing = swing.map(v => Math.max(0, v - dt * 4));
 
@@ -1714,6 +1754,7 @@ function frame(now) {
   requestAnimationFrame(frame);                          // schedule first, so one bad frame can't stop the game
   const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = Math.max(last, now);   // never step backwards in time
   if (!innerWidth || !innerHeight) return;              // hidden / zero-size window: nothing to draw
+  Controls.poll(doAction);                               // gamepad buttons (the Gamepad API has to be polled)
   const serveComing = (nextServe && nextServe.ready && !rally) || (rally && (rally.serve || (rally.shot && rally.shot.isServe)));
   pos.forEach((p, i) => { p.receiving = !!serveComing && i !== S.server && !S.over; });   // the receiver drops into the return stance
   if (canvas.width !== innerWidth || canvas.height !== innerHeight) resize();
@@ -1808,7 +1849,7 @@ function renderReady() {
   const who = S.server === 0 ? "YOUR SERVE" : `${PLAYERS[S.server].last} TO SERVE`;
   readyBig.textContent = positioning ? "GET SET" : "";
   readySmall.textContent = `${who} · ${no === 2 ? "2ND" : "1ST"} SERVE · ` +
-    (S.server === 0 ? (positioning ? "WASD: YOUR SPOT · ARROWS / CLICK: AIM" : "ARROWS / CLICK: AIM · V: FIRST PERSON") : "WASD: MOVE INTO POSITION");
+    (S.server === 0 ? (positioning ? "WASD: YOUR SPOT · ARROWS / CLICK: AIM" : "F: TOSS, THEN LOAD AND HIT · Q KICK · E SLICE") : "WASD: MOVE INTO POSITION");
 }
 
 /* Faint ground ring = Sinner's real reach (arm + racket), so you can learn your body */
@@ -1820,11 +1861,24 @@ function drawReach() {
 }
 
 const hudEls = [0, 1].map(i => ({ st: document.getElementById("st" + i), cap: document.getElementById("cap" + i) }));
+const smEls = { box: document.getElementById("serveMeter"), label: document.getElementById("smLabel"),
+                toss: document.getElementById("smToss"), power: document.getElementById("smPower") };
 function renderHud() {
   [0, 1].forEach(i => {
     hudEls[i].st.style.width = pos[i].stam.toFixed(1) + "%";
     hudEls[i].cap.style.left = `calc(${pos[i].cap.toFixed(1)}% - 2px)`;
   });
+  // SERVE METER while you serve: toss (the tick = the ideal toss), power, and what to do next. Serve skill shown.
+  const ctl = S.server === 0 && rally?.serve?.ctl;
+  smEls.box.hidden = !ctl;
+  if (!ctl) return;
+  const m = ctl.meter(), key = matchMedia("(pointer: coarse)").matches ? "SERVE" : "F";
+  const next = m.auto ? "AUTO" : { routine: "GET SET", wait: `HOLD ${key}: TOSS`, toss: "LET GO", flight: `HOLD ${key}: LOAD`,
+                                   load: "LET GO: HIT" }[m.phase] || m.brush.toUpperCase();
+  ctl.skill ??= Profile.serveSkill(PLAYERS[0].id);
+  smEls.label.textContent = `SERVE ${ctl.skill} · ${next}`;
+  smEls.toss.style.width = Math.min(100, m.toss * 50).toFixed(1) + "%";
+  smEls.power.style.width = (m.power * 100).toFixed(1) + "%";
 }
 /* Names, colours and body numbers on the HUD and buttons follow whoever you picked. */
 function labelPlayers() {
@@ -1879,15 +1933,16 @@ function resumeFromMenu() { resetPositions(); renderScore(); queueServe(READY + 
 const pauseEl = document.getElementById("pause");
 function setPaused(on) {
   if (on && (StartFlow.isOpen() || S.over)) return;
-  paused = on; pauseEl.hidden = !on; input.keys.clear();
+  paused = on; pauseEl.hidden = !on; Controls.clearHeld();
   if (on) {
     document.getElementById("pauseScore").textContent = `${PLAYERS[0].last} ${S.games[0]}–${S.games[1]} ${PLAYERS[1].last} · ${umpireCall()}`;
     document.getElementById("resumeBtn").focus();
   }
 }
 /* Called by the start flow (src/start/flow.js) with everything the player chose. */
-function startMatch({ bestOf, tbTo, surface, playerId, firstServer }) {
+function startMatch({ bestOf, tbTo, surface, playerId, firstServer, controls }) {
   cfg.bestOf = bestOf; cfg.tbTo = tbTo; cfg.surface = surface;
+  if (controls && controls !== Controls.getScheme().id) Controls.setScheme(controls);   // optional: the start flow's control choice
   choosePlayers(playerId, surface); labelPlayers();
   cfg.firstServer = firstServer === "r" ? (Math.random() < 0.5 ? 0 : 1) : +firstServer;
   S = freshState(); history = []; matchOn = true;
@@ -1916,26 +1971,52 @@ document.getElementById("undoBtn").onclick = undo;
 document.getElementById("newBtn").onclick = () => openSetup(1);
 document.getElementById("againBtn").onclick = () => openSetup(1);
 document.getElementById("splitBtn").onclick = () => splitStep(0);
-const MOVE_KEYS = ["w", "a", "s", "d", "e", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];   // WASD moves, arrows aim, E held = slice
-const keyOf = e => (e.key.length === 1 ? e.key.toLowerCase() : e.key);   // W and w (Shift held) are the same key
-addEventListener("keyup", e => input.keys.delete(keyOf(e)));
-addEventListener("blur", () => input.keys.clear());
-addEventListener("keydown", e => {
+/* Touch: hold Serve to toss, let go; hold again to load the swing, let go to hit. The flick as you let go of the
+   swing picks the spin (up = kick, sideways = slice, a plain release = flat). */
+const serveBtn = document.getElementById("serveBtn");
+let serveDown = null;
+serveBtn.addEventListener("pointerdown", e => {
+  e.preventDefault(); serveBtn.setPointerCapture(e.pointerId);
+  serveDown = { x: e.clientX, y: e.clientY }; input.serveHeld = true;
+});
+const serveUp = e => {
+  if (!serveDown) return;
+  if (rally?.serve?.ctl?.phase === "load") input.flick = ServeControl.brushFromFlick(e.clientX - serveDown.x, e.clientY - serveDown.y);
+  serveDown = null; input.serveHeld = false;
+};
+serveBtn.addEventListener("pointerup", serveUp);
+serveBtn.addEventListener("pointercancel", serveUp);
+document.getElementById("viewBtn").onclick = () => doAction("toggleView");
+/* CONTROLS: src/controls/schemes.js says which key / button means which action in the chosen scheme.
+   Held actions (move, aim, slice) are read with getMoveInput() / Controls.isHeld(); one-shot actions land here. */
+function doAction(a) {
   if (StartFlow.isOpen()) return;
-  if (e.key === "Escape") {                               // Esc = pause / resume (another open panel closes itself first)
+  if (a === "pause") {                                    // Esc / Start = pause / resume (another open panel closes itself first)
     const other = [...document.querySelectorAll('[role="dialog"]')].some(d => d.offsetParent && !pauseEl.contains(d));
-    if (!other && document.getElementById("result").hidden) { e.preventDefault(); setPaused(!paused); }
-    return;
+    if (!other && document.getElementById("result").hidden) { setPaused(!paused); return true; }
+    return false;
   }
   if (paused) return;
-  if (MOVE_KEYS.includes(keyOf(e))) { e.preventDefault(); input.keys.add(keyOf(e)); return; }
-  if (e.key === "Shift") { if (!e.repeat) splitStep(0); return; }
-  if (e.target.closest && e.target.closest("button") && e.code === "Space") return;
-  if (e.code === "Space") { e.preventDefault(); if (!e.repeat) slide(0); }   // Space = slide (points now serve by themselves)
-  else if (e.key === "v" || e.key === "V") { firstPersonServe = !firstPersonServe; toast(firstPersonServe ? "FIRST-PERSON SERVE ON" : "SERVE CAM ON"); }
-  else if (e.key === "1") manualPoint(0);                 // test keys (A and L now belong to movement)
-  else if (e.key === "2") manualPoint(1);
-  else if (e.key === "z" || e.key === "Z") undo();
+  if (a === "splitStep") splitStep(0);
+  else if (a === "slide") slide(0);                       // slide (points serve by themselves)
+  else if (a === "toggleView") { firstPersonServe = !firstPersonServe; toast(firstPersonServe ? "FIRST-PERSON SERVE ON" : "SERVE CAM ON"); }
+}
+Controls.mountPicker(document.getElementById("schemeSel"));
+Controls.onChange(s => { endStick(); toast(`CONTROLS: ${s.label.toUpperCase()}`); });
+Controls.applyUI();
+addEventListener("keyup", e => Controls.release(Controls.keyOf(e)));
+addEventListener("blur", () => Controls.clearHeld());
+addEventListener("keydown", e => {
+  if (StartFlow.isOpen()) return;
+  const key = Controls.keyOf(e);
+  if (key === "Escape") { if (doAction("pause")) e.preventDefault(); return; }   // Esc pauses in every scheme
+  if (paused || (e.target.closest && e.target.closest("select"))) return;
+  if (e.target.closest && e.target.closest("button") && key === "Space") return;
+  const a = Controls.press(key);
+  if (a) { e.preventDefault(); if (!e.repeat && !Controls.HELD.has(a)) doAction(a); return; }
+  if (key === "1") manualPoint(0);                        // test keys (A and L belong to movement)
+  else if (key === "2") manualPoint(1);
+  else if (key === "z") undo();
 });
 addEventListener("resize", resize);
 
@@ -1961,6 +2042,7 @@ canvas.addEventListener("pointerdown", e => {
     const c = screenToCourt(e.clientX, e.clientY);
     if (c && Math.sign(c.y) === serviceBox(0).sy) { aimDrag = e.pointerId; canvas.setPointerCapture(e.pointerId); aimAt(e.clientX, e.clientY); return; }
   }
+  if (!Controls.uses("touch")) return;                    // the drag stick belongs to the touch scheme only
   stickOrigin = { x: e.clientX, y: e.clientY, id: e.pointerId };
   canvas.setPointerCapture(e.pointerId);
   stick.style.left = e.clientX + "px"; stick.style.top = e.clientY + "px"; stick.hidden = false;
@@ -1971,10 +2053,10 @@ canvas.addEventListener("pointermove", e => {
   if (!stickOrigin || e.pointerId !== stickOrigin.id) return;
   let dx = (e.clientX - stickOrigin.x) / 40, dy = (e.clientY - stickOrigin.y) / 40;
   const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; }
-  input.stick = { x: dx, y: -dy };
+  Controls.setStick(dx, -dy);
   knob.style.transform = `translate(${dx * 30}px, ${dy * 30}px)`;
 });
-const endStick = () => { stickOrigin = null; aimDrag = null; input.stick = { x: 0, y: 0 }; stick.hidden = true; };
+function endStick() { stickOrigin = null; aimDrag = null; Controls.setStick(0, 0); stick.hidden = true; }
 canvas.addEventListener("pointerup", endStick);
 canvas.addEventListener("pointercancel", endStick);
 
