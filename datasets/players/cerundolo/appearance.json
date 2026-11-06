@@ -2,12 +2,15 @@
   "player": "cerundolo",
   "name": "Francisco Cerúndolo",
   "country": "ARG",
-  "rank": 19,
-  "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "rank": 20,
+  "rankedOn": "2026-11-02",
+  "signature": "Argentine (Francisco Cerundolo), dark hair, athletic build and a whipping, heavy forehand",
+  "exaggerate": [
+    "huge forehand follow-through wrapping round the neck",
+    "dark hair"
+  ],
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,15 +29,35 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "emotional and expressive; talks to himself and his box",
+    "style": "clay-court baseliner: runs around the backhand to hit a heavy, high-bouncing forehand",
+    "mannerisms": [
+      "animated walk between points",
+      "looks toward his box after errors"
+    ],
+    "celebrations": [
+      "loud 'vamos' with a fist pump"
+    ],
+    "notes": "public media; Argentina's No. 1; style likened by himself to del Potro's aggression; feeds off team energy"
   },
   "media": {
     "images": "datasets/players/cerundolo/images/ (local only)",
     "video": "datasets/players/cerundolo/video/ and datasets/video/cerundolo/ (local only)",
     "serves": "datasets/serves/cerundolo/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "GQ Mexico & Latinoamerica feature (via ATP)",
+      "url": "https://www.atptour.com/en/news/cerundolo-2025-feature-gq-mexico-latinoamerica"
+    },
+    {
+      "claim": "Cerundolo family feature",
+      "url": "https://www.atptour.com/en/news/cerundolo-family-feature-rio-2023"
+    },
+    {
+      "claim": "Laver Cup: 'back-and-forth energy' with the crowd/team",
+      "url": "https://lavercup.com/news/2024/09/15/francisco-cerundolo-a-seasoned-performer"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

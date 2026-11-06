@@ -3,14 +3,15 @@
   "name": "Daniil Medvedev",
   "country": "RUS",
   "rank": 5,
-  "rankedOn": "2026-10-26",
-  "signature": "very tall and thin, long arms and legs",
+  "rankedOn": "2026-11-02",
+  "signature": "very tall and thin (1.98 m), long arms and legs; deep return position",
   "exaggerate": [
     "extra-lanky limbs",
-    "narrow torso"
+    "narrow torso",
+    "stands meters behind the baseline to return"
   ],
-  "confidence": "medium",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -29,15 +30,35 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "unpredictable, sardonic, sometimes argues with umpire and crowd",
+    "style": "flat, low counterpunching from far back; unorthodox technique",
+    "mannerisms": [
+      "long pause before serving",
+      "talks to himself"
+    ],
+    "celebrations": [
+      "understated; occasionally a cheeky or 'quiet' celebration"
+    ],
+    "notes": "public media; says his on-court tantrums are part of who he is; plays the 'villain' with crowds"
   },
   "media": {
     "images": "datasets/players/medvedev/images/ (local only)",
     "video": "datasets/players/medvedev/video/ and datasets/video/medvedev/ (local only)",
     "serves": "datasets/serves/medvedev/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "trolled the US Open crowd, asked for more boos",
+      "url": "https://prod.tennis.com/news/articles/a-troll-in-central-park-medvedev-takes-on-new-role"
+    },
+    {
+      "claim": "'I'm going to have tantrums, that's just who I am'",
+      "url": "https://sportskeeda.com/tennis/news-i-m-going-tantrums-that-s-just-i-am-daniil-medvedev-takes-unapologetic-stance-temperamental-on-court-persona"
+    },
+    {
+      "claim": "reads the room / from pariah to paragon",
+      "url": "https://www.tennis.com/news/articles/daniil-medvedev-s-journey-from-pariah-to-paragon"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

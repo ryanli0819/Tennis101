@@ -3,11 +3,14 @@
   "name": "Flavio Cobolli",
   "country": "ITA",
   "rank": 6,
-  "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "rankedOn": "2026-11-02",
+  "signature": "compact and quick, with wavy brown hair",
+  "exaggerate": [
+    "bushy wavy hair",
+    "quick, springy footwork"
+  ],
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,15 +29,34 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "passionate and emotional, very expressive",
+    "style": "aggressive baseliner, heavy forehand, fast around the court",
+    "mannerisms": [
+      "animated reactions after points"
+    ],
+    "celebrations": [
+      "roars and arms raised to the crowd"
+    ],
+    "notes": "public media; jokey, candid post-match interviews; coached by his father, argues with him because they are alike"
   },
   "media": {
     "images": "datasets/players/cobolli/images/ (local only)",
     "video": "datasets/players/cobolli/video/ and datasets/video/cobolli/ (local only)",
     "serves": "datasets/serves/cobolli/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "joking 'I completely hate my life!' interview after a two-day Wimbledon 2026 win",
+      "url": "https://www.tntsports.co.uk/tennis/wimbledon/2026/flavio-cobolli-bizarre-interview-win-mario-navone_sto23315461/story.shtml"
+    },
+    {
+      "claim": "jokingly questions the Wimbledon crowd after a quarter-final win",
+      "url": "https://tennishead.net/flavio-cobolli-jokingly-questions-the-wimbledon-crowd-after-beating-marin-cilic-to-reach-the-quarter-finals/"
+    },
+    {
+      "claim": "ATP: 'the game and the personality'",
+      "url": "https://www.atptour.com/en/news/cobolli-us-open-2024-feature"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

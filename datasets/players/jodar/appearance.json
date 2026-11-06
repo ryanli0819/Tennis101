@@ -2,12 +2,15 @@
   "player": "jodar",
   "name": "Rafael Jódar",
   "country": "ESP",
-  "rank": 11,
-  "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "rank": 10,
+  "rankedOn": "2026-11-02",
+  "signature": "tall (about 1.91 m), slim Spanish teenager with short dark hair and a big forehand",
+  "exaggerate": [
+    "tall, light frame (about 70 kg)",
+    "big serve-forehand one-two"
+  ],
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,15 +29,31 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "intense and composed; fist clench on big points",
+    "style": "aggressive baseliner: flat-plus-topspin forehand, serve-forehand one-two, flat first and high kick second serve",
+    "mannerisms": [
+      "clenched-fist celebration between points",
+      "routine to confirm from clips"
+    ],
+    "celebrations": [
+      "clenched fist and a shout"
+    ],
+    "notes": "public media; humble, hard-working, 'discovering that I'm a brave person'; fist clench on big points"
   },
   "media": {
     "images": "datasets/players/jodar/images/ (local only)",
     "video": "datasets/players/jodar/video/ and datasets/video/jodar/ (local only)",
     "serves": "datasets/serves/jodar/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "'I'm discovering that I'm a brave person'; humble, works little by little",
+      "url": "https://tennistourtalk.com/137509/rafael-jodar-im-discovering-that-im-a-brave-person"
+    },
+    {
+      "claim": "Rolex profile: fist clench celebration, career-high No. 11 (Aug 2026)",
+      "url": "https://www.rolex.com/it/rolex-family/tennis/rafael-jodar"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

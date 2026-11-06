@@ -2,12 +2,17 @@
   "player": "bublik",
   "name": "Alexander Bublik",
   "country": "KAZ",
-  "rank": 20,
-  "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "rank": null,
+  "rankedOn": "2026-11-02",
+  "rankNote": "outside the live top 20 on 2026-11-02 (in top20.json `extra`, No. 21+); file kept",
+  "signature": "very tall (1.96 m), lanky Kazakh showman with short dark hair and a loose, nonchalant way of moving",
+  "exaggerate": [
+    "tallest, thinnest silhouette after Zverev and Medvedev",
+    "slouched, casual walk",
+    "underarm serve in his serve repertoire"
+  ],
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,15 +31,36 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "showman and entertainer; unpredictable, jokes with the crowd, sometimes visibly frustrated",
+    "style": "huge serve, underarm serves, drop shots and trick shots; plays fast and risky",
+    "mannerisms": [
+      "underarm serve now and then (great AI surprise)",
+      "very short time between points",
+      "casual racket twirls"
+    ],
+    "celebrations": [
+      "playful gestures to the crowd, shrugs and smiles"
+    ],
+    "notes": "public media; entertainer by choice; defends the underarm serve as more than a trick (RG 2026 press)"
   },
   "media": {
     "images": "datasets/players/bublik/images/ (local only)",
     "video": "datasets/players/bublik/video/ and datasets/video/bublik/ (local only)",
     "serves": "datasets/serves/bublik/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "sees entertaining fans as part of his tennis",
+      "url": "https://tennistourtalk.com/92645/bublik-sees-entertaining-fans-as-part-of-his-tennis-repertoire"
+    },
+    {
+      "claim": "underarm serve theory, Roland-Garros 2026",
+      "url": "https://www.puntodebreak.com/en/2026/05/24/bublik-and-his-theory-on-the-underarm-serve-whoever-thinks-its-tactic-has-no-idea-about-tennis"
+    },
+    {
+      "claim": "'the methods to his madness'",
+      "url": "https://www.tennis.com/news/articles/the-methods-to-his-madness-paying-off-for-alexander-bublik-in-2021"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }
