@@ -606,7 +606,7 @@ function drawShadows() {
       }
       continue;
     }
-    const p = pos[i], H = PLAYERS[i].heightM + (p.air > 0 ? 0.15 : 0);
+    const p = pos[i], H = PLAYERS[i].heightM + hopLift(p);
     // silhouette widths (metres) from the feet (t = 0) to the top of the head (t = 1)
     const prof = [[0, 0.16], [0.28, 0.2], [0.5, 0.2], [0.62, 0.17], [0.78, 0.25], [0.84, 0.12], [0.9, 0.12], [0.96, 0.09], [1, 0.02]];
     for (const d of L.shadows) {
@@ -935,7 +935,7 @@ function drawPlayer(i, pos, swing) {
   const turn = A.turn || 0, tw = 1 - 0.36 * Math.abs(turn), DEP = 0.42;   // body turned sideways = narrower; depth → screen height
   const look = RACKET_LOOK[P.id] || RACKET_LOOK.sinner;
   const rp = racketPose(i, pos);
-  const hop = pos.air > 0 ? h * 0.07 : 0, drop = (A.crouch + (rp.crouch || 0) - A.bob) * h;
+  const hop = hopLift(pos) * s, drop = (A.crouch + (rp.crouch || 0) - A.bob) * h;
   const tiltR = (rp.tilt || 0) * h;                         // + = racket shoulder lower (a slice finishing low), − = higher
   const x = g.x, y = g.y - hop, lx = A.lean * h, tx = x + lx;
   const Rr = (rx, ry, rw, rh, c) => { b.fillStyle = c; b.fillRect(q(rx), q(ry), Math.max(1 / AS, q(rw)), Math.max(1 / AS, q(rh))); };
@@ -1153,6 +1153,9 @@ let rally = null;
 let swing = [0, 0];
 let clock = 0;            // rally time in seconds
 const SPLIT_AIR = 0.22;   // seconds a split-step hop keeps you off the ground
+// Feet off the ground during a split step (metres): a free-flight arc, peak g·T²/8 ≈ 6 cm for 0.22 s
+// (Alcaraz's measured split steps: 2–6% of his height; datasets/anatomy/movements/split-step.json).
+const hopLift = p => { if (!(p.air > 0)) return 0; const u = 1 - p.air / SPLIT_AIR; return 9.81 * SPLIT_AIR * SPLIT_AIR / 2 * u * (1 - u); };
 const input = { keys: new Set(), stick: { x: 0, y: 0 }, slice: false };   // slice: the touch Slice button is armed
 const ai = { target: null, at: 0 };
 

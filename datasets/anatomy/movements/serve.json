@@ -1,0 +1,96 @@
+{
+  "movement": "serve",
+  "about": "The flat/first serve of a right-hander (Alcaraz), measured at real speed, plus the left-hander's mirror (Shelton). Times are seconds relative to contact (negative = before). Heights and distances are fractions of standing height H (multiply by heightM). Angles in degrees: joint flexion (0 = straight) or segment angle from vertical. Owner: Biomechanics Coach.",
+  "measuredFrom": {
+    "timing": "8 Alcaraz serves in Ryan's US Open clips vs Shelton (Apple Vision 2D pose, ~56 fps, real time, broadcast camera behind his baseline). Players separated from the crowd by datasets/anatomy/tools/uso_tracks.py, measured by measure.py → uso/measurements.json. One serve starts mid-motion (uso-2, frame 0) and one is quicker than the rest (uso-4: maybe a second serve); medians are robust to both.",
+    "angles": "The same serves. Seen from behind a side-on server, knee and elbow bends lie close to the picture plane, so they read well; trunk rotation does not show.",
+    "leftHanded": "datasets/serves/shelton/compilation-25/26 (4 serves, slow motion: angles only) and 10 other pros in the same compilation for comparison.",
+    "calibration": "Lengths use neck→ankle = 0.78 H (Drillis & Contini 1966); expect ±10%."
+  },
+  "sources": ["measured", "Kovacs M, Ellenbecker T. An 8-stage model for evaluating the tennis serve. Sports Health 2011;3(6):504–513 (phase names and order).", "Elliott B, Fleisig G, Nicholls R, Escamilla R. J Sci Med Sport 2003;6(1):76–87 (max shoulder external rotation ≈ 170°, proximal-to-distal sequence)."],
+  "events": [
+    { "name": "tossArmPassesShoulder", "t": -1.07, "range": [-1.09, -0.78], "n": 6, "what": "The toss hand (ball) rises past shoulder height. The weight has already rocked back and forward." },
+    { "name": "tossArmHighest", "t": -0.75, "range": [-0.77, -0.45], "n": 8, "what": "Toss arm straight up (within 7° of vertical, elbow ~8° bent), hand 1.33 H above the ground: the ball has just left the fingers." },
+    { "name": "deepestKnees", "t": -0.37, "range": [-0.40, -0.12], "n": 8, "what": "Loading / trophy: knees most bent, toss arm still up, racket hand low behind the back. From here the legs drive up." },
+    { "name": "contact", "t": 0, "what": "Racket arm nearly straight and close to vertical, body off the ground." },
+    { "name": "landing", "t": 0.32, "range": [0.28, 0.59], "n": 8, "what": "Lands on the front foot inside the court; the back leg kicks up behind for balance." }
+  ],
+  "kineticChain": {
+    "order": ["legs (knee + ankle extension, push up and forward)", "hips (pelvis rotates toward the net)", "trunk (uncoils; shoulders tilt: racket shoulder goes from low to high)", "shoulder (racket arm external rotation, then fast internal rotation)", "elbow (extends to nearly straight)", "forearm (pronates)", "wrist (flexes through contact)"],
+    "timing": [
+      { "segment": "legs", "starts": -0.37, "note": "measured: knee extension starts at the deepest bend; feet leave the ground just before contact" },
+      { "segment": "hips", "peakSpeed": "≈ -0.10", "note": "approximate, from the proximal-to-distal sequence (Elliott 2003); not visible from behind" },
+      { "segment": "trunk", "peakSpeed": "≈ -0.07", "note": "approximate; measured trunk lean grows from 11° (loading) to 18° at contact" },
+      { "segment": "shoulder", "maxExternalRotation": "≈ -0.03 to -0.05", "angle": 170, "note": "racket drop: the racket head points at the ground behind the back (Elliott 2003)" },
+      { "segment": "elbow", "extends": "−0.10 → 0", "note": "measured: 127° bent at the loading, 13° at contact" },
+      { "segment": "forearm+wrist", "at": 0, "note": "pronation and wrist flexion through contact" }
+    ]
+  },
+  "phases": {
+    "stance": {
+      "t": -1.65,
+      "body": { "hipHeightH": 0.46, "trunkLeanDeg": 5, "note": "side-on: front (left) shoulder points at the net" },
+      "legs": { "front": { "kneeFlex": 5, "what": "straight, front foot at the baseline pointing toward the net post" }, "back": { "kneeFlex": 37, "what": "bent, weight rocked back onto it" } },
+      "arms": {
+        "racket": { "elbowFlex": 40, "handHeightH": 0.56, "where": "in front of the body at waist height, the racket pointing at the target", "forwardH": 0.12 },
+        "toss": { "elbowFlex": 52, "handHeightH": 0.67, "where": "in front, ball against the strings or at the chest", "forwardH": 0.19 }
+      }
+    },
+    "tossArmPassesShoulder": {
+      "t": -1.07,
+      "body": { "hipHeightH": 0.50, "trunkLeanDeg": 4 },
+      "legs": { "front": { "kneeFlex": 16 }, "back": { "kneeFlex": 30 } },
+      "arms": {
+        "racket": { "elbowFlex": 31, "upperArmFromVerticalDeg": 177, "handHeightH": 0.48, "where": "hanging at the side, dropping back past the hip", "forwardH": 0.01 },
+        "toss": { "elbowFlex": 18, "upperArmFromVerticalDeg": 107, "handHeightH": 0.83, "where": "in front of the chest, rising straight (nearly horizontal now)", "forwardH": 0.28 }
+      }
+    },
+    "tossArmHighest": {
+      "t": -0.75,
+      "body": { "hipHeightH": 0.49, "trunkLeanDeg": 10, "note": "shoulder-over-shoulder: the racket shoulder is clearly lower than the toss shoulder" },
+      "legs": { "front": { "kneeFlex": 36 }, "back": { "kneeFlex": 34 }, "note": "the knees start bending as the arm goes up" },
+      "arms": {
+        "racket": { "elbowFlex": 44, "upperArmFromVerticalDeg": 172, "handHeightH": 0.45, "where": "still low, at the side/back of the hip (the racket hand starts up only now)", "forwardH": 0.0 },
+        "toss": { "elbowFlex": 8, "armFromVerticalDeg": 7, "handHeightH": 1.33, "where": "straight up, slightly in front of the shoulders", "forwardH": 0.07 }
+      }
+    },
+    "deepestKnees": {
+      "t": -0.37,
+      "body": { "hipHeightH": 0.47, "trunkLeanDeg": 11 },
+      "legs": { "front": { "kneeFlex": 49, "range": [44, 60] }, "back": { "kneeFlex": 72, "range": [64, 76] }, "note": "the back knee bends more; game captured motions bend 70–90°, the compilation pros 31–58° (front)" },
+      "arms": {
+        "racket": { "elbowFlex": 127, "upperArmFromVerticalDeg": 155, "handHeightH": 0.60, "where": "behind the body (back side of the chest line), elbow bending fast: the racket is going into the drop", "forwardH": -0.06 },
+        "toss": { "elbowFlex": 12, "armFromVerticalDeg": 5, "handHeightH": 1.24, "where": "still pointing up at the ball, above the front shoulder", "forwardH": 0.0 }
+      }
+    },
+    "contact": {
+      "t": 0,
+      "body": { "trunkLeanDeg": 18, "note": "off the ground (feet ~0.1–0.15 H up; the game's captured serves: 0.16–0.19 H). Hip height is not given: he moves into the court, so the picture overstates it. Trunk tilted up toward the racket side; racket shoulder now above the toss shoulder" },
+      "legs": { "front": { "kneeFlex": 3 }, "back": { "kneeFlex": 6 }, "note": "both legs straight, toes pointed" },
+      "arms": {
+        "racket": { "elbowFlex": 13, "upperArmFromVerticalDeg": 14, "handHeightH": 1.44, "where": "straight up, slightly in front of the head and toward the net", "forwardH": 0.07 },
+        "toss": { "where": "pulled down and in, tucked against the chest/belly (front of the body); elbow folded but ≤ 145–150°" }
+      }
+    },
+    "landing": {
+      "t": 0.32,
+      "body": { "trunkLeanDeg": 18, "note": "chest now faces the net; knees soften to absorb the landing" },
+      "legs": { "front": { "kneeFlex": 17, "what": "lands on it, inside the baseline" }, "back": { "kneeFlex": 102, "what": "kicked up behind for balance, foot off the ground" } },
+      "arms": {
+        "racket": { "elbowFlex": 22, "handHeightH": 0.75, "where": "swung across the body to the non-racket side (left hip for a right-hander), in front" },
+        "toss": { "elbowFlex": 60, "where": "out to the side / slightly behind for balance" }
+      }
+    }
+  },
+  "seenFromBehind": {
+    "about": "Where the arms are on screen for the near player (camera behind), so the sprite puts them on the right side of the torso.",
+    "rightHanded": "Side-on, facing screen-RIGHT. Toss (left) arm: in front of the chest = screen-right of the torso, on the far side of the body (behind the torso until it rises above the head). Racket (right) arm: on the near side (closest to the camera), so it is drawn OVER the torso; at the loading the hand is at the back = screen-left of the spine; at contact it is straight up, a little screen-right of the head; after contact it crosses to screen-right at hip height.",
+    "leftHanded": "Mirror image: facing screen-LEFT, toss (right) arm goes up screen-left in front, racket (left) arm drawn over the torso, loading screen-right of the spine, finishing across to screen-left."
+  },
+  "leftHanded": {
+    "player": "shelton",
+    "rule": "A left-hander's serve is the right-hander's mirrored: swap every left/right joint and flip x. Toss arm = RIGHT, front leg = RIGHT, racket arm = LEFT.",
+    "measured": { "tossArm": "right (4 of 4 serves)", "deepestFrontKneeFlex": 48.5, "deepestBackKneeFlex": 51.9, "contactElbowFlex": 10.8, "contactArmFromVerticalDeg": 6.0, "n": 4 },
+    "vsRightHanded": "Same sequence and the same near-straight contact arm. Shelton loads the front knee a little more (49° vs Alcaraz's 41° in the same compilation) and both knees about evenly; Alcaraz bends the back knee more than the front. Every right-hander in the compilation (Alcaraz, Sinner, Djokovic, Fritz, Medvedev, Rublev, Tsitsipas, de Minaur, Rune) tosses with the left arm."
+  }
+}

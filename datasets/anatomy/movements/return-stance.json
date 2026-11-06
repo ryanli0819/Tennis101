@@ -1,0 +1,37 @@
+{
+  "movement": "return-stance",
+  "about": "How the receiver waits for a serve: low, wide, bent forward, on the balls of the feet, then a split step landing as the server hits. Heights and widths in fractions of standing height H, angles in degrees, times in seconds. Owner: Biomechanics Coach.",
+  "measuredFrom": "Not yet measured. In Ryan's US Open clips the camera stays behind Alcaraz while he serves, and the receiver (Shelton, at the far baseline) is too small for Apple Vision to find. Values below come from body proportions and coaching biomechanics, cross-checked with Alcaraz's measured split steps. Replace with measured values once a clip shows a receiver (asked Ryan on GitHub).",
+  "confidence": "medium: geometry from proportions is solid; the knee and trunk angles are typical coaching values, not measured on these players.",
+  "sources": [
+    "Drillis & Contini 1966 (proportions; joints.json): hip 0.530 H, thigh 0.245 H, shank 0.246 H, shoulder width 0.259 H.",
+    "Kovacs MS. Movement for tennis: the importance of lateral training. Strength Cond J 2009;31(4):77–85 (athletic ready position, lateral first step).",
+    "Uzu R, Shinya M, Oda S. J Sports Sci Med 2009;8(4):667–671 (split step timed to the opponent's impact).",
+    "measured: Alcaraz's split-step landing width 0.30–0.45 H (split-step.json)."
+  ],
+  "stance": {
+    "feetWidthH": { "value": 0.38, "range": [0.32, 0.45], "note": "ankle to ankle, clearly wider than the shoulders (0.26 H); ≈ 0.7 m for a 1.83 m player" },
+    "feet": "turned out ~10–20°, weight on the balls of the feet, heels light",
+    "kneeFlex": { "value": 55, "range": [45, 70], "note": "knees point over the toes (slightly outward), never inward or backward" },
+    "hipFlex": { "value": 50, "range": [40, 65] },
+    "trunkLeanDeg": { "value": 30, "range": [25, 40], "note": "chest over the knees, back flat, head up looking at the server's toss" },
+    "hipHeightH": { "value": 0.44, "range": [0.42, 0.47], "note": "from the proportions: legs of 0.49 H bent 45–70° and spread 0.38 H wide; 0.07–0.11 H below standing (0.53 H)" },
+    "shoulderHeightH": { "value": 0.67, "range": [0.63, 0.71], "note": "hips lowered plus the trunk tipped forward (the torso is ~0.29 H long)" }
+  },
+  "arms": {
+    "racket": { "where": "in front of the body, centred, at waist/belly height; racket head up and slightly toward the backhand side", "elbowFlex": 90, "handForwardH": 0.15 },
+    "free": { "where": "on the racket's throat, in front of the body", "elbowFlex": 100 },
+    "seenFromBehind": "both hands are in front of the torso, so they are hidden by it; only the elbows show at the sides, slightly out from the body",
+    "seenFromFront": "both hands and the racket in front of the belly, the racket head up in the middle"
+  },
+  "rhythm": [
+    { "t": "server's toss → trophy", "what": "small bounces on the toes or a slow side-to-side rock (measured toe bounces: 0.03 H high, feet ~0.05 H apart)" },
+    { "t": "≈ −0.25 s before the server's contact", "what": "split step take-off (small two-footed hop)" },
+    { "t": "server's contact ± 0.1 s", "what": "lands wide (0.30–0.45 H), knees absorbing" },
+    { "t": "+0.1 to +0.25 s", "what": "reads the ball and pivots: unit turn of shoulders and hips to the forehand or backhand side, outside foot steps out" }
+  ],
+  "leftHanded": "Same stance; the racket head tilts toward his own backhand side (screen-opposite to a right-hander's).",
+  "game": {
+    "check": "Anim 'receive' (src/animation/run-cycle.js): crouch 0.085 and bend 0.055 put the sprite's hips ~0.085 H down and the trunk ~30° forward: as low as a real return stance. Feet ±0.4 sprite widths = 0.24 H apart are narrower than the sprite's own shoulders (0.30 H): widen to ±0.6–0.7 (0.36–0.42 H). See GAME_CHECK.md."
+  }
+}
