@@ -77,6 +77,7 @@ Sections in the script, top to bottom:
 - **Esc** = pause (Resume / New match). Exit buttons only on side screens (locker room ✕ Exit, help Close) — none on the welcome page or during a match (Ryan's rule).
 - **Space** = slide in the direction you're moving (clay ~2.4 m, hard ~1.6 m, grass ~1.3 m; Agility adds a little; stamina cost, short recovery, cooldown).
 - **WASD** (W forward toward the net, S back, A left, D right) or drag on the court (touch): move your player — always, including walking to your serving spot during GET SET (the server is held to the legal area behind the baseline). Speed comes from the body + the Speed skill.
+- **Control schemes** (`src/controls/schemes.js`, Controls Designer): Keyboard WASD (default, the keys listed here), Keyboard Arrows (arrows move, I/J/K/L aim, / slice), Touch (drag stick + Split / Slide / Slice / View buttons) and Gamepad (left stick moves, right stick aims, A split, B slide, RB slice, Y view, Start pause). Pick one in the pause menu (saved in `tennis101.controls`); only its buttons and hints show. The game reads movement with `getMoveInput()` → `{x, y}`.
 - **Arrow keys** or click/tap the service box: aim your serve. **V**: serve cam ↔ first person.
 - Past the service line toward the net, the camera switches to the **net camera** (low, behind you) for volleys; it switches back when you retreat.
 - Shift / "Split step": split-step hop.
