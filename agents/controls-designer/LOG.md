@@ -30,3 +30,8 @@ PR: #20. Issues read (all from ryanli0819): #3, #5, #7, #8 (commented on #5, #7,
 
 ### Next step
 Load the page in a browser at desktop and 400 px, play a point with each scheme (gamepad if one is around), and fix anything found. Then add gamepad navigation for the pause menu (picker, Resume) so pad players don't need the mouse.
+
+## 2026-11-06 — round 2 (Gameplay & Physics review)
+- Manager found the `#keyHints` line wrapping onto the scoreboard's footer row at ~400 px.
+- Fix: `@media (max-width: 799px), (max-height: 600px) { .keyhints { display: none; } }` as its own rule (the hint text is ~740 px wide, so it wraps below ~800 px). Desktop unchanged; the How to play guide and the touch buttons cover the keys on small screens.
+- Checked in the combined build (main + #19 + #20 + #23 + #25 + #30): hidden at 400×820, shown with no overlap at 820×640 and 1024×768, no sideways scroll, no console errors.

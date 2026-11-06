@@ -96,6 +96,8 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 .btn .dot { width: 8px; height: 8px; border-radius: 50%; }
 .keyhints { flex-basis: 100%; margin: 0; text-align: right; font-family: var(--f-pix); font-size: 8px; letter-spacing: .06em;
   color: rgb(238 243 251 / .75); text-shadow: 0 1px 0 rgb(0 0 0 / .5); pointer-events: none; }
+/* Narrow or short screens: the hint line would wrap onto the scoreboard (which must stay readable); the How to play guide lists the keys. */
+@media (max-width: 799px), (max-height: 600px) { .keyhints { display: none; } }
 .picker { display: grid; gap: 6px; font-family: var(--f-pix); font-size: 9px; letter-spacing: .08em; color: var(--muted); }
 .picker select { font: 600 16px var(--f-name); color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 8px; }
 .picker select:focus-visible { outline: 2px solid var(--ball); outline-offset: 2px; }
