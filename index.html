@@ -231,6 +231,7 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/animation/run-cycle.js?v=0.10.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.10.0"></script>
 <script src="src/serve/motion/alcaraz-serve.js?v=0.10.0"></script>
+<script src="src/camera/pov.js?v=0.10.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -414,20 +415,26 @@ const CAMS = {
   net:       () => ({ back: 5.2 - pos[0].y, h: 2.7, x: pos[0].x * 0.55, anchor: pos[0].y }),
   // SERVE CAM: close behind you, so you watch your whole routine and windup while you aim
   serve:     () => ({ back: 4.6 - pos[0].y, h: 2.4, x: pos[0].x * 0.8, anchor: pos[0].y }),
-  // FIRST PERSON (press V): your own eyes (eye height ≈ 94% of your real height), looking down the court
-  pov:       () => ({ back: 0.35 - pos[0].y, h: PLAYERS[0].heightM * 0.94, x: pos[0].x, anchor: null }),
+  // FIRST PERSON (press V): your own eyes at your real eye height, the head moving a little with the serve (src/camera/pov.js)
+  pov:       () => Pov.cam(PLAYERS[0], pos[0], Pov.head()),
 };
 /* You're serving: from the start of your routine until just after your racket meets the ball. */
 const serveCamWanted = () => S.server === 0 && !S.over && !!rally &&
   (!!rally.serve || (rally.shot && rally.shot.isServe && clock - (rally.serveClock || 0) < 0.35));
-const povWanted = () => serveCamWanted() && firstPersonServe;
+/* First person (V): from your GET SET until just after contact. */
+const povWanted = () => Pov.wanted({ firstPerson: firstPersonServe, server: S.server, over: S.over, rally, nextServe, clock });
 const NET_LINE = -COURT.SVC + 0.4, NET_EXIT = -COURT.SVC - 0.8;   // enter just inside the service line
 let CAM_BACK = 19, CAM_H = 5, CAM_X = 0, camMode = "broadcast";
+/* Pitch: only first person tilts the view (+ = looking up). HZ is then the middle of the view, not the horizon. */
+let CAM_P = 0, CAM_PC = 1, CAM_PS = 0;
+function setPitch(a) { CAM_P = a; CAM_PC = Math.cos(a); CAM_PS = Math.sin(a); }
+const horizonY = () => HZ + F * Math.tan(CAM_P);          // where the real horizon is on screen
 const horizonFor = t => t.anchor === null ? BH * 0.45 : BH * 0.76 - F * t.h / (t.anchor + t.back) * 0.97;   // eye level in first person
 function setHorizon() { HZ = horizonFor(CAMS[camMode]()); }
 function updateCamera(dt) {
   const y = pos[0].y;
-  if (serveCamWanted()) camMode = firstPersonServe ? "pov" : "serve";
+  if (povWanted()) camMode = "pov";
+  else if (serveCamWanted()) camMode = "serve";
   else if (camMode === "pov" || camMode === "serve") camMode = "broadcast";
   else if (camMode === "broadcast" && rally && y > NET_LINE) camMode = "net";
   else if (camMode === "net" && (!rally || y < NET_EXIT)) camMode = "broadcast";
@@ -437,6 +444,8 @@ function updateCamera(dt) {
   const t = CAMS[camMode](), k = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 1 - Math.exp(-dt * 5);
   CAM_BACK += (t.back - CAM_BACK) * k; CAM_H += (t.h - CAM_H) * k; CAM_X += (t.x - CAM_X) * k;
   HZ += (horizonFor(t) - HZ) * k;
+  const L = Pov.lookNow(camMode === "pov");                // first person looks down at the bounce, up with the toss
+  setPitch(L.rate ? CAM_P + (L.pitch - CAM_P) * (1 - Math.exp(-dt * L.rate)) : L.pitch);
 }
 
 function resize() {
@@ -451,8 +460,9 @@ function resize() {
   makeCrowd();
 }
 function proj(x, y, z = 0) {
-  const d = Math.max(0.4, y + CAM_BACK);             // distance from the camera (never behind it)
-  return { x: BW / 2 + (x - CAM_X) * F / d, y: HZ + (CAM_H - z) * F / d, s: F / d };
+  const dy = y + CAM_BACK, dz = z - CAM_H;
+  const d = Math.max(0.4, dy * CAM_PC + dz * CAM_PS);  // distance along the view (never behind the camera)
+  return { x: BW / 2 + (x - CAM_X) * F / d, y: HZ - (dz * CAM_PC - dy * CAM_PS) * F / d, s: F / d };
 }
 
 /* THE STADIUM: an oval bowl all around the court — a low back wall, TIERS rows of seating rising up and back,
@@ -563,7 +573,7 @@ const SURF = () => SURFACES[cfg.surface] || SURFACES.hard;
 function drawCourt() {
   const sc = SCENE(), su = SURF();
   // sky in flat pixel bands down to the horizon; ground below it; then the stadium bowl over both
-  const skyEnd = Math.max(1, Math.round(HZ));
+  const skyEnd = Math.max(1, Math.min(BH, Math.round(horizonY())));
   sc.sky.forEach((c, k) => { b.fillStyle = c; b.fillRect(0, Math.floor(skyEnd * k / sc.sky.length), BW, Math.ceil(skyEnd / sc.sky.length) + 1); });
   b.fillStyle = su.runoff; b.fillRect(0, skyEnd, BW, BH - skyEnd);
   drawStadium();
@@ -1731,7 +1741,8 @@ function frame(now) {
     { y: -99, draw: drawAim }
   ];
   if (!firstPerson) items.push({ y: pos[0].y + 0.001, draw: drawReach }, { y: pos[0].y, draw: () => drawPlayer(0, pos[0], swing[0]) });
-  if (ball) items.push({ y: ball.y - 0.01, draw: () => drawBall(ball) });
+  else items.push({ y: -999, draw: Pov.drawSelf });       // your own hands, racket and the ball you hold, nearest of all
+  if (ball && !(firstPerson && Pov.ownsBall())) items.push({ y: ball.y - 0.01, draw: () => drawBall(ball) });
   actx.setTransform(1, 0, 0, 1, 0, 0); actx.clearRect(0, 0, abuf.width, abuf.height);
   actx.setTransform(AS, 0, 0, AS, 0, 0); actx.imageSmoothingEnabled = false;
   b = actx;                                              // actors go on the finer layer, far to near
@@ -1758,7 +1769,8 @@ function drawServeInset() {
   if (!on || camMode === "pov") return;
   const IW = 60, IH = 78, p = pos[i];
   if (inset.width !== IW * AS) { inset.width = IW * AS; inset.height = IH * AS; }
-  const keep = { BW, BH, F, HZ, CAM_X, b };
+  const keep = { BW, BH, F, HZ, CAM_X, b, CAM_P };
+  setPitch(0);                                           // the inset never tilts
   const d = p.y + CAM_BACK;
   F = 0.86 * IH * d / 3.5;                               // frame 0 → 3.5 m: the toss and contact fit
   BW = IW; BH = IH; CAM_X = p.x; HZ = IH * 0.93 - CAM_H * F / d;
@@ -1774,7 +1786,7 @@ function drawServeInset() {
   drawShadows();
   drawPlayer(i, p, swing[i]);
   if (ball) drawBall(ball, true);
-  BW = keep.BW; BH = keep.BH; F = keep.F; HZ = keep.HZ; CAM_X = keep.CAM_X; b = keep.b;
+  BW = keep.BW; BH = keep.BH; F = keep.F; HZ = keep.HZ; CAM_X = keep.CAM_X; b = keep.b; setPitch(keep.CAM_P);
   const W = canvas.width, H = canvas.height, ih = Math.round(Math.min(H * 0.36, W * 0.42)), iw = Math.round(ih * IW / IH);
   const x0 = W - iw - 16, y0 = 16;
   ctx.imageSmoothingEnabled = false;
@@ -1942,12 +1954,14 @@ addEventListener("resize", resize);
 /* Touch / mouse: drag on the court = virtual stick (screen up = toward the net) */
 const stick = document.getElementById("stick"), knob = document.getElementById("knob");
 let stickOrigin = null, aimDrag = null;
-/* Screen point → court point on the ground (inverse of proj with z = 0). */
+/* Screen point → court point on the ground (inverse of proj with z = 0, pitch included). */
 function screenToCourt(cx, cy) {
   const sx = cx / innerWidth * BW, sy = cy / innerHeight * BH;
-  if (sy <= HZ + 1) return null;                         // above the horizon: not on the court
-  const d = F * CAM_H / (sy - HZ);
-  return { x: (sx - BW / 2) * d / F + CAM_X, y: d - CAM_BACK };
+  if (sy <= horizonY() + 1) return null;                 // above the horizon: not on the court
+  const up = (HZ - sy) / F, down = -(CAM_PS + up * CAM_PC);   // the ray's drop per unit along the view
+  if (down <= 0) return null;
+  const d = CAM_H / down;                                // along the view until it meets the ground
+  return { x: (sx - BW / 2) / F * d + CAM_X, y: d * (CAM_PC - up * CAM_PS) - CAM_BACK };
 }
 const aimingNow = () => S.server === 0 && !paused && ((nextServe && nextServe.ready && !rally) || (rally && rally.serve));
 function aimAt(cx, cy) {
