@@ -231,6 +231,9 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/animation/run-cycle.js?v=0.10.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.10.0"></script>
 <script src="src/serve/motion/alcaraz-serve.js?v=0.10.0"></script>
+<script src="src/body/skeleton.js?v=0.10.0"></script>
+<script src="src/body/ik.js?v=0.10.0"></script>
+<script src="src/body/body.js?v=0.10.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -1723,6 +1726,7 @@ function frame(now) {
     else { pos.forEach(p => { p.moving = false; }); readyStep(dt); }
     updateCamera(dt);
   }
+  if (window.Body) Body.update(paused ? 0 : dt, { pos, PLAYERS, racket: i => racketPose(i, pos[i]) });   // joints follow the footwork: src/body/
   drawCourt();
   const firstPerson = camMode === "pov";                  // in first person you don't see yourself
   const items = [
@@ -1732,6 +1736,7 @@ function frame(now) {
   ];
   if (!firstPerson) items.push({ y: pos[0].y + 0.001, draw: drawReach }, { y: pos[0].y, draw: () => drawPlayer(0, pos[0], swing[0]) });
   if (ball) items.push({ y: ball.y - 0.01, draw: () => drawBall(ball) });
+  if (window.Body && Body.debug) pos.forEach((p, i) => (i || !firstPerson) && items.push({ y: p.y - 0.002, draw: () => Body.drawDebug(b, proj, i, 1 / AS) }));   // ?body=skeleton
   actx.setTransform(1, 0, 0, 1, 0, 0); actx.clearRect(0, 0, abuf.width, abuf.height);
   actx.setTransform(AS, 0, 0, AS, 0, 0); actx.imageSmoothingEnabled = false;
   b = actx;                                              // actors go on the finer layer, far to near
