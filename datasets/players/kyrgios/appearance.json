@@ -1,0 +1,87 @@
+{
+  "player": "kyrgios",
+  "name": "Nick Kyrgios",
+  "country": "AUS",
+  "rank": null,
+  "rankedOn": "2026-11-02",
+  "rankNote": "outside the live top 20; on the roster as Ryan's pick (Nov 9 2026)",
+  "era": "2022, his best-known season (Wimbledon final): cap worn backwards, red cap and red shoes as a statement",
+  "signature": "tall, loose-limbed showman with a cap worn backwards and a fast, hard-to-read serve with a low toss; trick shots (tweeners, underarm serves)",
+  "exaggerate": [
+    "cap turned backwards with the brim bent up",
+    "red accents (cap, shoes) where the court allows them",
+    "very quick, compact service motion with a low toss",
+    "loose, slouchy walk between points"
+  ],
+  "confidence": "public",
+  "source": "personality and looks: public media, one link per claim in `sources` (Nov 9 2026); height (about 1.93 m) and hair are general knowledge and still need to be checked; outfits wait on stills (#18)",
+  "outfits": {
+    "grass": {
+      "event": "Wimbledon",
+      "shirt": "#f4f4f0",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "cap": "#f4f4f0",
+      "notes": "all-white dress code, cap worn backwards. 2022: red shoes and a red cap after matches, against the dress code (a possible post-match animation; hex to read from stills)"
+    },
+    "hard": {
+      "event": "US Open",
+      "notes": "to research"
+    },
+    "clay": {
+      "event": "Roland-Garros (red clay)",
+      "notes": "to research; he rarely plays on clay"
+    }
+  },
+  "personality": {
+    "temperament": "entertainer and rebel: plays to the crowd, argues with umpires, talks to his own box during matches",
+    "style": "huge, hard-to-read first serve (quick motion, low toss) and trick shots",
+    "mannerisms": [
+      "talks, shouts or complains to his player box between points"
+    ],
+    "celebrations": [
+      "showboating after trick shots, gestures to the crowd"
+    ],
+    "notes": "underarm and between-the-legs (tweener) serves are well documented: an AI serve option for him, like Bublik",
+    "toConfirm": [
+      "quick serve routine with few bounces",
+      "big forehand and sudden drop shots"
+    ]
+  },
+  "media": {
+    "images": "datasets/players/kyrgios/images/ (local only)",
+    "video": "datasets/players/kyrgios/video/ and datasets/video/kyrgios/ (local only)",
+    "serves": "datasets/serves/kyrgios/"
+  },
+  "sources": [
+    {
+      "claim": "underarm-tweener serve and showboating at the 2022 Australian Open ('It's a circus!')",
+      "url": "https://www.eurosport.co.uk/tennis/australian-open/2022/it-s-a-circus-nick-kyrgios-pulls-off-underarm-tweener-serve-in-extraordinary-showboat-at-australian_sto8718888/story.shtml"
+    },
+    {
+      "claim": "the best underarm server on tour (Mouratoglou)",
+      "url": "https://www.sportskeeda.com/tennis/news-nick-kyrgios-roger-federer-master-tweener-serena-williams-ex-coach-patrick-mouratoglou"
+    },
+    {
+      "claim": "serve is hard to read: quick motion and relatively low toss",
+      "url": "https://thetennisbros.com/tennis-tips/serve/the-kyrgios-underarm-serve/"
+    },
+    {
+      "claim": "rhythm and whip-like serve (Mouratoglou)",
+      "url": "https://www.tennisnet.com/en/news/patrick-mouratoglou-why-nick-kyrgios-serve-is-so-dangerous"
+    },
+    {
+      "claim": "2022 Wimbledon final: talked to his box; backwards cap with the brim bent up in warm-up",
+      "url": "https://www.thescore.com/atp/news/2383992/kyrgios-shows-he-belongs-on-biggest-stage-despite-losing-wimbledon-final"
+    },
+    {
+      "claim": "red cap and red shoes at Wimbledon 2022 ('Because I do what I want')",
+      "url": "https://larrybrownsports.com/tennis/nick-kyrgios-breaks-wimbledon-dress-code-red-hat/600388"
+    },
+    {
+      "claim": "tweener, leaping winner and a bottle thrown towards the umpire (Citi Open)",
+      "url": "https://www.tennis365.com/tennis-videos/video-highlights-nick-kyrgios-hits-tweener-leaping-winner-and-throws-a-water-bottle-at-umpire-in-citi-open-win"
+    }
+  ],
+  "sourcedOn": "2026-11-09"
+}

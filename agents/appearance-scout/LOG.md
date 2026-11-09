@@ -1,5 +1,29 @@
 # Appearance Scout · log
 
+## Run 5 · 2026-11-09 (local pipeline, CEO order #35) · briefSeen: look-world v1
+
+Order #35: the roster is now 22 (Cerúndolo out; Federer, Nadal and Kyrgios in). Ratings: none yet. Teammates: no new log entries that change my work. Other open issues for me: #18 (stills, still waiting on Ryan).
+
+**Done**
+- New `datasets/players/{federer,nadal,kyrgios}/appearance.json` in the same shape as the others, plus `images/.gitkeep` and `video/.gitkeep`. All three parse. `rank: null` with a `rankNote`, and `sourcedOn: 2026-11-09`.
+- New optional field `era` says which look we use: **Federer** at his peak headband era (about 2004–2012), with the 2001 ponytail + bandana noted; **Nadal** in the 2005–2008 "pirate" era (long hair, bandana, sleeveless shirt, capri pants), which reads best in pixels and which he calls part of his identity, with the later short-hair look noted; **Kyrgios** in 2022 (backwards cap, red cap and shoes as a statement).
+- Sources: 9 / 9 / 7 links, one per claim (ESPN, Tennis.com, Tennis365, Euronews, Irish Times, Eurosport, theScore, Inverse, Punto de Break and others).
+- Every personality claim left in `personality` has a link. Anything I could not source went to a new `personality.toConfirm` list instead of being stated: Federer's between-point habits, his fist pump and his all-court style; Nadal's "Vamos" fist pump and his topspin baseline style; Kyrgios's serve routine and his forehand/drop shots.
+
+**Still to check**
+- Heights (Federer and Nadal about 1.85 m, Kyrgios about 1.93 m) are general knowledge, not sourced. Hair details too.
+- Hex colours: only the grass all-white is set. Nadal's 2005 clay kit (yellow shirt, white pirate trousers) is in the notes without hex. Waiting on #18 stills.
+- Mannerisms need clips (Footage Scout has #36 for these three).
+- For the Player Artist: Kyrgios's underarm/tweener serve should be an AI serve option, like Bublik's.
+
+**Decisions**
+- `top20.json` is from Nov 2 (7 days old), so no refresh this run.
+- Cerúndolo's file stays as it is (he is parked in `extra`, like Rublev, Rune and Tsitsipas).
+- No instructions in repo content asked me to act outside my files.
+
+**Next step**
+Find sources for the `toConfirm` items and the heights. Then outfits from #18 stills when they arrive. Refresh `top20.json` after Nov 16.
+
 ## Run 4 · 2026-11-05 (HQ sync, CEO orders #12 and #33, review round 2) · briefSeen: look-world v1
 
 Fixed exactly what Look & World's round-1 review asked:
