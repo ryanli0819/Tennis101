@@ -231,6 +231,7 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/animation/run-cycle.js?v=0.10.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.10.0"></script>
 <script src="src/serve/motion/alcaraz-serve.js?v=0.10.0"></script>
+<script src="src/players/player-art.js?v=0.10.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -649,100 +650,8 @@ function drawNet() {
 }
 
 /* Pixel player sprite, scaled from real height. facing: 1 = back to camera (near), -1 = facing camera (far) */
-/* Draw a player from captured joints (court metres): pixel limbs, shirt, shorts, head and racket.
-   Used while Sinner plays his real serve motion. Order = back to front as seen from behind. */
-/* The signature look on the serve-motion figure's round head (same idea as drawSignature on the sprite). */
-function sigHead(P, near, hx, hy, r, hr, hrD, hrL) {
-  const L = P.look; if (!L) return;
-  const R = (x, y, w, h, c) => { b.fillStyle = c; b.fillRect(q(x), q(y), Math.max(1 / AS, q(w)), Math.max(1 / AS, q(h))); };
-  if (L.style === "cap-curls") {
-    for (const sd of [-1, 1]) for (let k = 0; k < 3; k++) R(hx + sd * r * (1.0 + 0.12 * (k % 2)) - r * 0.18, hy + r * (0.0 + k * 0.32), r * 0.36, r * 0.3, k % 2 ? hrL : hr);
-    const cap = P.cap || "#f2f2ef";
-    b.fillStyle = cap; b.beginPath(); b.arc(hx, hy - r * 0.1, r * 1.18, Math.PI, Math.PI * 2); b.fill();   // oversized crown
-    if (!near) R(hx - r * 1.6, hy - r * 0.16, r * 3.2, r * 0.26, shade(cap, -0.2));                        // long brim toward you
-  }
-  if (L.style === "long-band") {
-    b.fillStyle = hr; b.beginPath(); b.arc(hx, hy - r * 0.35, r * 1.2, Math.PI, Math.PI * 2); b.fill();    // volume over the band
-    if (near) R(hx - r * 1.15, hy - r * 0.2, r * 2.3, r * 1.9, hr);                                         // long hair to the neck
-    else { R(hx - r * 1.25, hy - r * 0.2, r * 0.42, r * 1.6, hr); R(hx + r * 0.83, hy - r * 0.2, r * 0.42, r * 1.6, hr);
-           if (L.beard) { R(hx - r * 0.85, hy + r * 0.35, r * 1.7, r * 0.75, hrD); R(hx - r * 0.25, hy + r * 0.6, r * 0.5, 1 / AS, "#b8695a"); } }
-    R(hx - r * 1.2, hy - r * 0.45, r * 2.4, r * 0.3, L.band || "#f6f6f2");                                  // hairband
-  }
-}
-
-function drawCapturedFigure(i, p, W) {
-  const P = PLAYERS[i], at = n => W[n] && proj(W[n].x, W[n].y, W[n].z);
-  const g = proj(p.x, p.y), lw = Math.max(2 / AS, q(g.s * 0.12)), skin = "#e1b48b";
-  const seg = (a, c, col, w = lw) => {
-    const A = typeof a === "string" ? at(a) : a, C = typeof c === "string" ? at(c) : c;
-    if (!A || !C) return;
-    b.strokeStyle = col; b.lineWidth = w; b.lineCap = "round";
-    b.beginPath(); b.moveTo(q(A.x), q(A.y)); b.lineTo(q(C.x), q(C.y)); b.stroke();
-  };
-  const mid = (a, c, u) => { const A = at(a), C = at(c); return A && C ? { x: A.x + (C.x - A.x) * u, y: A.y + (C.y - A.y) * u } : null; };
-  const quad = (pts, col) => { if (!pts.every(Boolean)) return; b.fillStyle = col; b.beginPath(); pts.forEach((v, k) => (k ? b.lineTo(v.x, v.y) : b.moveTo(v.x, v.y))); b.closePath(); b.fill(); };
-  b.fillStyle = "rgba(0,0,0,0.32)"; b.beginPath(); b.ellipse(Math.round(g.x), Math.round(g.y), g.s * 0.32, Math.max(1, g.s * 0.09), 0, 0, Math.PI * 2); b.fill();
-  // legs, shoes, shorts
-  for (const s of ["left", "right"]) {
-    seg(s + "Hip", s + "Knee", skin); seg(s + "Knee", s + "Ankle", skin);
-    const Kn = at(s + "Knee"), A0 = at(s + "Ankle");
-    if (Kn && A0) seg({ x: A0.x + (Kn.x - A0.x) * 0.18, y: A0.y + (Kn.y - A0.y) * 0.18 }, A0, "#f1f1ee", lw * 1.05);   // sock
-    const A = at(s + "Ankle"); if (A) { b.fillStyle = shade(P.shoes || "#f2f2f2", -0.45); b.fillRect(Math.round(A.x - lw * 0.75), Math.round(A.y + lw * 0.35), Math.ceil(lw * 1.6), Math.max(1, Math.ceil(lw * 0.3))); b.fillStyle = P.shoes || "#f2f2f2"; b.fillRect(Math.round(A.x - lw * 0.7), Math.round(A.y - lw * 0.4), Math.ceil(lw * 1.5), Math.ceil(lw * 0.8)); }
-    seg(s + "Hip", mid(s + "Hip", s + "Knee", 0.42), P.shorts, lw * 1.5);
-  }
-  // torso (shirt) between shoulders and hips
-  quad([at("leftShoulder"), at("rightShoulder"), at("rightHip"), at("leftHip")], P.shirt);
-  { const ls = at("leftShoulder"), lh = at("leftHip"), rs = at("rightShoulder"), rh = at("rightHip");   // shaded side of the jersey
-    if (ls && lh && rs && rh) quad([ls, { x: ls.x + (rs.x - ls.x) * 0.28, y: ls.y + (rs.y - ls.y) * 0.28 }, { x: lh.x + (rh.x - lh.x) * 0.28, y: lh.y + (rh.y - lh.y) * 0.28 }, lh], shade(P.shirt, -0.16)); }
-  seg("leftHip", "rightHip", P.shorts, lw * 1.4);
-  // arms, with short sleeves
-  for (const s of ["left", "right"]) {
-    seg(s + "Shoulder", s + "Elbow", skin); seg(s + "Elbow", s + "Wrist", s === "right" && P.sleeve ? P.sleeve : skin);   // racket forearm: sleeve if he wears one
-    seg(s + "Shoulder", mid(s + "Shoulder", s + "Elbow", 0.4), P.shirt, lw * 1.3);
-    const wr = mid(s + "Wrist", s + "Elbow", 0.18); if (wr) seg(wr, mid(s + "Wrist", s + "Elbow", 0.05), P.ui || "#f2f2f2", lw * 1.1);   // wristband
-  }
-  if (W.leftHand) seg("leftWrist", "leftHand", skin, lw * 1.15);   // the bouncing hand, flexing at the wrist
-  // racket: a real 3D racket continuing the right forearm (the same drawRacket as every other stroke)
-  if (W.rightElbow && W.rightWrist) {
-    const e = W.rightElbow, r = W.rightWrist, u = V3.norm({ x: r.x - e.x, y: r.y - e.y, z: r.z - e.z });
-    const n = V3.norm({ x: 0, y: u.z, z: -u.y });          // face square to the forearm, toward the net
-    drawRacket(r, u, n, RACKET_LOOK[P.id] || RACKET_LOOK.sinner);
-  }
-  // head (seen from behind: cap or hair with strands) between the neck and the nose
-  const N = at("neck"), H = at("nose");
-  if (N && H) {
-    const r = Math.max(2, g.s * 0.12), hx = H.x, hy = H.y - g.s * 0.04, [hr, hrD, hrL] = HAIR[P.id] || [P.hair, P.hair, P.hair];
-    if (P.side !== "near") {                                                                 // FAR server, seen from the front: a face
-      const px = 1 / AS, skinD = shade(skin, -0.18);
-      b.fillStyle = skin; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();
-      b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.15, r * 1.0, Math.PI, Math.PI * 2); b.fill();   // hair / cap crown
-      if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(q(hx - r * 1.2), q(hy - r * 0.2), q(r * 2.4), Math.max(px, q(r * 0.18))); }   // brim
-      else { b.fillStyle = hr; b.fillRect(q(hx - r), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); b.fillRect(q(hx + r * 0.7), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); }
-      const lk = W._look ? W._look.x * r * 0.38 : 0, lu = W._look ? W._look.up * r * 0.3 : 0;   // the face turns to where he looks
-      b.fillStyle = "#1b1b1f"; b.fillRect(q(hx - r * 0.45 + lk), q(hy + r * 0.1 - lu), px * 2, px * 2); b.fillRect(q(hx + r * 0.25 + lk), q(hy + r * 0.1 - lu), px * 2, px * 2);   // eyes
-      b.fillStyle = skinD; b.fillRect(q(hx - px * 0.5 + lk * 1.3), q(hy + r * 0.3 - lu), px, q(r * 0.25));                                  // nose
-      b.fillStyle = "#a4574a"; b.fillRect(q(hx - r * 0.25 + lk), q(hy + r * 0.62 - lu), q(r * 0.5), px);                             // mouth
-      sigHead(P, false, hx, hy, r, hr, hrD, hrL);
-      return;
-    }
-    b.fillStyle = hrD; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();             // back of the head: hair, no face
-    b.fillStyle = skin; b.fillRect(q(hx - r * 1.08), q(hy), 1 / AS, q(r * 0.35)); b.fillRect(q(hx + r * 1.08) - 1 / AS, q(hy), 1 / AS, q(r * 0.35));   // ears
-    b.fillStyle = hr; b.beginPath(); b.arc(hx, hy + r * 0.15, r * 0.98, Math.PI * 0.05, Math.PI * 0.95); b.fill();   // hair below the cap
-    for (let k = -2; k <= 2; k++) { b.fillStyle = k % 2 ? hrL : hrD; b.fillRect(hx + k * r * 0.35 - 0.5 / AS, hy + r * 0.55, 1 / AS, r * 0.3); }  // curls
-    b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.1, r * 0.98, Math.PI, Math.PI * 2); b.fill();     // cap crown
-    if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(hx - 0.5 / AS, hy - r * 1.05, 1 / AS, r * 0.95); }  // seam
-    sigHead(P, true, hx, hy, r, hr, hrD, hrL);
-    const L = W._look;
-    if (L && Math.abs(L.x) > 0.15) {                     // seen from behind, his head turned: cheek, nose and the cap's brim show on that side
-      const sd = Math.sign(L.x), a = Math.min(1, Math.abs(L.x)), px = 1 / AS;
-      b.fillStyle = skin; b.beginPath(); b.ellipse(hx + sd * r * 0.72, hy + r * 0.28, r * 0.34 * a + px, r * 0.5, 0, 0, Math.PI * 2); b.fill();   // cheek
-      b.fillRect(q(hx + sd * r * (1.02 + 0.12 * a)) - (sd < 0 ? px : 0), q(hy + r * 0.25), px * 2, px * 2);                             // nose tip past the outline
-      b.fillStyle = shade(skin, -0.2); b.fillRect(q(hx + sd * r * 0.62), q(hy + r * 0.62), q(r * 0.3), px);                                 // jaw shadow
-      const brim = P.cap ? shade(P.cap, -0.2) : (P.look && P.look.band) || hrD;
-      if (P.cap) b.fillStyle = brim, b.fillRect(q(sd > 0 ? hx + r * 0.5 : hx - r * (0.5 + 1.0 * a)), q(hy - r * 0.12), q(r * (0.4 + a)), Math.max(px, q(r * 0.22)));   // brim
-    }
-  }
-}
+/* The detailed figure drawn on captured serve joints (and its signature heads) lives in src/players/player-art.js
+   (PlayerArt.drawCapturedFigure). Owner: Player Artist. */
 
 /* =====================================================================
    PLAYER SPRITE (detailed, on the actor layer) + 3D RACKET
@@ -926,10 +835,10 @@ function drawSignature(P, near, H) {
 }
 
 function drawPlayer(i, pos, swing) {
-  if (pos.motion && pos.motion.world) return drawCapturedFigure(i, pos, pos.motion.world);
+  if (pos.motion && pos.motion.world) return PlayerArt.drawCapturedFigure(i, pos, pos.motion.world);
   const P = PLAYERS[i], near = P.side === "near", R = near ? 1 : -1;
   const g = proj(pos.x, pos.y), s = g.s;
-  const h = Math.max(6, P.heightM * s), w = h * 0.30, skin = "#e1b48b", skinD = shade(skin, -0.18), skinL = shade(skin, 0.12);
+  const h = Math.max(6, P.heightM * s), w = h * 0.30, skin = PlayerArt.skinOf(P)[0], skinD = shade(skin, -0.18), skinL = shade(skin, 0.12);
   const A = window.Anim ? Anim.frame(pos, BODY[i], near, P.id)
     : { bob: 0, lean: 0, crouch: 0.02, turn: 0, feet: [{ dx: -0.26, dy: 0, lift: 0 }, { dx: 0.26, dy: 0, lift: 0 }], knees: [{ dx: 0, dy: 0 }, { dx: 0, dy: 0 }], arms: [0, 0] };
   const turn = A.turn || 0, tw = 1 - 0.36 * Math.abs(turn), DEP = 0.42;   // body turned sideways = narrower; depth → screen height
