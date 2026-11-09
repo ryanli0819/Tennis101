@@ -1,5 +1,20 @@
 # Footage Scout · log
 
+## 2026-11-09 — CEO order #36: clip links for Federer, Nadal and Kyrgios
+briefSeen: 1 (look-world)
+
+- **Rankings:** kept the Nov 2 list; this order is only about Ryan's three picks, and the roster list itself was not changed (as the order says).
+- **Searched YouTube** (results-page titles and channels only; nothing downloaded or watched): "<name> serve / forehand / backhand slow motion", "<name> second serve kick slow motion", "<name> slice backhand slow motion".
+- **Added 27 clips**, every one checked with YouTube oEmbed on Nov 9 (`oembed: "checked 2026-11-09"`), all `status: "to record"`, `range: null`:
+  - Federer (10): serve1 ×3, serve2 ×1 (forehand.TV, Stuttgart 2018), forehand ×2, backhand ×2 (one-handed; one has a back view), slice ×2.
+  - Nadal (9): serve1 ×4, forehand ×2, backhand ×2, slice ×1. Left-handed. **No 2nd-serve clip**: the only one found is Tennis Analytics' mirrored "Righty" edit, not used.
+  - Kyrgios (8): serve1 ×2, serve2 ×1 (short edit, speed unknown, `speed: null`), forehand ×2, backhand ×2, slice ×1.
+- Left out because oEmbed failed (401): Federer 2nd serve 210 fps (tennisspeed, PLwz3noMt8o), Kyrgios AO 2022 court level + side view (RFkDl_FQlPs). Noted in each player's `searched`.
+- Two videos show several strokes (Nadal f1qdyFC-Yas, Kyrgios J0n8o5JEdhE): one entry per stroke, same URL, as decided on Nov 2.
+- `data/build_db.py` doesn't read `top20.json`, so no DB rebuild was needed.
+- **Asked Ryan:** nothing new; recordings come once these players are scheduled for joints.
+- **Next step:** a real Nadal 2nd-serve clip (try "Nadal kick serve practice", court-level practice channels); set views/ranges when clips are recorded.
+
 ## 2026-11-05 — CEO orders #10 (round 2) and #32 "Find it yourself on youtube" (run by the HQ sync)
 briefSeen: 1 (look-world)
 
