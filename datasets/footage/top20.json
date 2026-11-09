@@ -1,5 +1,5 @@
 {
-  "_about": "Footage Scout's catalog. Links and time ranges only, never video. Video goes in datasets/video/<id>/<stroke>/ (git-ignored).",
+  "_about": "Footage Scout's catalog. Links and time ranges only, never video. Video goes in datasets/video/<id>/<stroke>/ (git-ignored). `players` is the roster: the live top 20 of Nov 2 minus Cerúndolo, plus Ryan's picks Federer, Nadal and Kyrgios (22).",
   "rankedOn": "2026-11-02",
   "source": "Official ATP singles rankings page (atptour.com/en/rankings/singles, list of Nov 2, 2026), read Nov 2, 2026.",
   "players": [
@@ -1287,10 +1287,43 @@
       "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
     },
     {
+      "id": "nadal",
+      "name": "Rafael Nadal",
+      "country": "ESP",
+      "note": "Legend, retired. Added to the roster by Ryan.",
+      "videoDir": "datasets/video/nadal/",
+      "clips": [],
+      "rank": null,
+      "pick": "Ryan's pick (Nov 9, 2026)"
+    },
+    {
+      "id": "federer",
+      "name": "Roger Federer",
+      "country": "SUI",
+      "note": "Legend, retired. Added to the roster by Ryan.",
+      "videoDir": "datasets/video/federer/",
+      "clips": [],
+      "rank": null,
+      "pick": "Ryan's pick (Nov 9, 2026)"
+    },
+    {
+      "id": "kyrgios",
+      "name": "Nick Kyrgios",
+      "country": "AUS",
+      "rank": null,
+      "pick": "Ryan's pick (Nov 9, 2026)",
+      "note": "Added to the roster by Ryan; outside the current top 20.",
+      "videoDir": "datasets/video/kyrgios/",
+      "clips": []
+    }
+  ],
+  "legends": [],
+  "extra": [
+    {
       "id": "cerundolo",
       "name": "Francisco Cerúndolo",
       "country": "ARG",
-      "rank": 20,
+      "rank": null,
       "videoDir": "datasets/video/cerundolo/",
       "clips": [
         {
@@ -1327,32 +1360,9 @@
           "status": "to record"
         }
       ],
-      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found."
-    }
-  ],
-  "legends": [
-    {
-      "id": "nadal",
-      "name": "Rafael Nadal",
-      "country": "ESP",
-      "rankInScreenshot": 1,
-      "pointsInScreenshot": 6675,
-      "note": "From a separate table in Ryan's screenshot (not the current ATP list).",
-      "videoDir": "datasets/video/nadal/",
-      "clips": []
+      "searched": "YouTube searched 2026-11-05 (\"<name> serve/forehand/backhand slow motion\" and plain stroke names). serve1, forehand and backhand all found.",
+      "note": "Rank 20 on Nov 2, 2026. Taken off the roster by Ryan on Nov 9, 2026; his clip links are kept here."
     },
-    {
-      "id": "federer",
-      "name": "Roger Federer",
-      "country": "SUI",
-      "rankInScreenshot": 2,
-      "pointsInScreenshot": 5305,
-      "note": "From a separate table in Ryan's screenshot (not the current ATP list).",
-      "videoDir": "datasets/video/federer/",
-      "clips": []
-    }
-  ],
-  "extra": [
     {
       "id": "bublik",
       "name": "Alexander Bublik",
