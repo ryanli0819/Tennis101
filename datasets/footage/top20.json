@@ -1292,9 +1292,110 @@
       "country": "ESP",
       "note": "Legend, retired. Added to the roster by Ryan.",
       "videoDir": "datasets/video/nadal/",
-      "clips": [],
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=4ulUCZqvvV8",
+          "source": "Love Tennis (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Rafael Nadal Serve Slow Motion - ATP Tennis Serve Technique. 10 min. Left-handed.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=VXTxuWxafKg",
+          "source": "Essential Tennis (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Rafael Nadal Serve In Super Slow Motion - 2013 Cincinnati Open. Left-handed.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=I1-HrpUaY9U",
+          "source": "Online Tennis Instruction (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Rafael Nadal Serve Slow Motion - BNP Paribas Open 2013. Left-handed.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=ijLU5PB44tc",
+          "source": "Slow Motion Tennis (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Rafael Nadal - Slice Serve. 18 s; his lefty slice serve (a 1st-serve variant, not a 2nd serve).",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Q7Ta9DbHKjk",
+          "source": "Love Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Rafael Nadal Forehand Slow Motion. 10 min. Left-handed; skip mirrored \"for right handers\" edits (e.g. GVL2PSny6A4).",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=f1qdyFC-Yas",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Rafael Nadal Forehand Backhand Practice 2022 [Slow Motion 4K 240fps]. Forehands and backhands in one video, practice court.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=xm2zi36uZEg",
+          "source": "Essential Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Rafael Nadal Backhand in Super Slow Motion - BNP Paribas Open 2013. Two-handed, left-handed.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=f1qdyFC-Yas",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Rafael Nadal Forehand Backhand Practice 2022 [Slow Motion 4K 240fps]. Same video as the forehand entry; backhand parts.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Ril7Cq2iiK4",
+          "source": "Silentium (YouTube)",
+          "stroke": "slice",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Nadal Backhand Slice in Slow Motion. 24 s.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        }
+      ],
       "rank": null,
-      "pick": "Ryan's pick (Nov 9, 2026)"
+      "pick": "Ryan's pick (Nov 9, 2026)",
+      "searched": "YouTube searched 2026-11-09 (same queries). serve1, forehand, backhand and slice found. No real 2nd-serve clip: only Tennis Analytics' mirrored \"Righty\" kick serve (5uVqGxmd63U), not used. Left-handed throughout."
     },
     {
       "id": "federer",
@@ -1302,9 +1403,121 @@
       "country": "SUI",
       "note": "Legend, retired. Added to the roster by Ryan.",
       "videoDir": "datasets/video/federer/",
-      "clips": [],
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=1YuShuvbZnM",
+          "source": "Love Tennis (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Roger Federer Serve Slow Motion - ATP Tennis Serve Technique. 8 min of serves.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=WsQ0ghZg5FE",
+          "source": "Bob shi (YouTube)",
+          "stroke": "serve1",
+          "view": "side",
+          "speed": "slow",
+          "range": null,
+          "notes": "Roger Federer Side View Serve in Super Slow Motion. 33 s.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=FBkFgS3e4QY",
+          "source": "Essential Tennis (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Roger Federer Serve In Super Slow Motion - 2013 Cincinnati Open. 1:38.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=v-trNvBmFyE",
+          "source": "forehand.TV (YouTube)",
+          "stroke": "serve2",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Roger Federer's second serve in super slow motion (Stuttgart 2018). 30 s.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=EFY460oquXw",
+          "source": "Love Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Roger Federer Forehand Slow Motion Court Level View. 7 min.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=4vwWACUTTmA",
+          "source": "Love Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": "side",
+          "speed": "slow",
+          "range": null,
+          "notes": "Roger Federer Forehand Slow Motion 2019 - Side View. 15 min.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=5_SnJPl4cz4",
+          "source": "Love Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": "behind",
+          "speed": "slow",
+          "range": null,
+          "notes": "Roger Federer Backhand Slow Motion Front, Back, Side View. One-handed; has front and side angles too, pick the back-view part when recording.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=MTP99IHemNA",
+          "source": "Love Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Roger Federer Backhand Slow Motion 2019 - Court Level View. One-handed.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=nocXg77xfTs",
+          "source": "Tennis Pro TV (YouTube)",
+          "stroke": "slice",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Roger Federer Backhand Slice Slow Motion Court Level View.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=_YE-k1QwZfg",
+          "source": "Slow Motion Tennis (YouTube)",
+          "stroke": "slice",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Roger Federer - Slow Motion Slice Backhand, Australian Open 2011. 3:18.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        }
+      ],
       "rank": null,
-      "pick": "Ryan's pick (Nov 9, 2026)"
+      "pick": "Ryan's pick (Nov 9, 2026)",
+      "searched": "YouTube searched 2026-11-09 (\"<name> serve/forehand/backhand slow motion\", \"second serve kick slow motion\", \"slice backhand slow motion\"). serve1, serve2, forehand, backhand and slice all found. Left out: tennisspeed 2nd serve 210 fps (PLwz3noMt8o), oEmbed failed (401)."
     },
     {
       "id": "kyrgios",
@@ -1314,7 +1527,97 @@
       "pick": "Ryan's pick (Nov 9, 2026)",
       "note": "Added to the roster by Ryan; outside the current top 20.",
       "videoDir": "datasets/video/kyrgios/",
-      "clips": []
+      "clips": [
+        {
+          "url": "https://www.youtube.com/watch?v=Z_LU2q1CROA",
+          "source": "Love Tennis (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Nick Kyrgios Serve Slow Motion - ATP Fastest Tennis Serve Technique. 10 min.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=HrNRY1sMCmU",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "serve1",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Nick Kyrgios | Serve Slow motion [Water bottle Challenge]. 5:35, practice court.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=N-WzN9EJcZs",
+          "source": "Tennis Edits (YouTube)",
+          "stroke": "serve2",
+          "view": null,
+          "speed": null,
+          "range": null,
+          "notes": "Nick Kyrgios DEADLY Second Serve. 21 s edit; title doesn't say slow motion or the camera, probably broadcast. Only 2nd-serve link found.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=TBHfZkPLb30",
+          "source": "Love Tennis (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Nick Kyrgios Forehand Slow Motion - ATP Modern Tennis Forehand. 8 min.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=1PAvJnXuMdw",
+          "source": "ZenRacquets (YouTube)",
+          "stroke": "forehand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Court Level Nick Kyrgios Forehand Practice in Slow Motion at Indian Wells 2019. 13 min.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=VZK9GymPRGk",
+          "source": "Love Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Nick Kyrgios Backhand Slow Motion. 4 min, two-handed.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=J0n8o5JEdhE",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "backhand",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Nick Kyrgios slow motion | Forehand Backhand Slice & Serve. 8 min, all strokes in one video.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=J0n8o5JEdhE",
+          "source": "Slow-Mo Tennis (YouTube)",
+          "stroke": "slice",
+          "view": null,
+          "speed": "slow",
+          "range": null,
+          "notes": "Nick Kyrgios slow motion | Forehand Backhand Slice & Serve. Same video as the backhand entry; slice parts.",
+          "oembed": "checked 2026-11-09",
+          "status": "to record"
+        }
+      ],
+      "searched": "YouTube searched 2026-11-09 (same queries). serve1, forehand, backhand and slice found; serve2 only as a short edit of unknown speed. Left out: Court Level Tennis practice + side view AO 2022 (RFkDl_FQlPs), oEmbed failed (401)."
     }
   ],
   "legends": [],
