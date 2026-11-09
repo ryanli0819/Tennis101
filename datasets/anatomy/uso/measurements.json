@@ -1,0 +1,2841 @@
+{
+ "about": "Measured from Apple Vision 2D pose (numbers only; video stays local). Heights and widths are fractions of standing height (H); angles in degrees seen in the picture; times in seconds. Built by datasets/anatomy/tools/measure.py.",
+ "uso": {
+  "alcarazServes": {
+   "n": 8,
+   "summary": {
+    "contact.backKneeFlex": {
+     "median": 6.45,
+     "range": [
+      3.9,
+      36.9
+     ],
+     "n": 8
+    },
+    "contact.frontKneeFlex": {
+     "median": 3.35,
+     "range": [
+      0.8,
+      35.6
+     ],
+     "n": 8
+    },
+    "contact.hipHeightH": {
+     "median": 0.833,
+     "range": [
+      0.482,
+      1.071
+     ],
+     "n": 8
+    },
+    "contact.hitElbowFlex": {
+     "median": 12.7,
+     "range": [
+      11.2,
+      161.9
+     ],
+     "n": 8
+    },
+    "contact.hitHand.forwardH": {
+     "median": 0.066,
+     "range": [
+      -0.062,
+      0.093
+     ],
+     "n": 8
+    },
+    "contact.hitHand.upH": {
+     "median": 0.36,
+     "range": [
+      0.129,
+      0.548
+     ],
+     "n": 8
+    },
+    "contact.hitUpperArmFromUp": {
+     "median": 14.05,
+     "range": [
+      6.9,
+      25.3
+     ],
+     "n": 8
+    },
+    "contact.hitWristHeightH": {
+     "median": 1.437,
+     "range": [
+      0.899,
+      1.879
+     ],
+     "n": 8
+    },
+    "contact.shoulderTilt": {
+     "median": -60.95,
+     "range": [
+      -71.4,
+      -46.4
+     ],
+     "n": 8
+    },
+    "contact.tossArmFromUp": {
+     "median": 53.35,
+     "range": [
+      5.3,
+      101.4
+     ],
+     "n": 2
+    },
+    "contact.tossElbowFlex": {
+     "median": 5.1,
+     "range": [
+      5.1,
+      5.1
+     ],
+     "n": 1
+    },
+    "contact.tossHand.forwardH": {
+     "median": 0.059,
+     "range": [
+      0.027,
+      0.091
+     ],
+     "n": 2
+    },
+    "contact.tossHand.upH": {
+     "median": 0.129,
+     "range": [
+      -0.055,
+      0.312
+     ],
+     "n": 2
+    },
+    "contact.tossWristHeightH": {
+     "median": 1.019,
+     "range": [
+      0.955,
+      1.083
+     ],
+     "n": 2
+    },
+    "contact.trunkLeanFromUp": {
+     "median": 18.35,
+     "range": [
+      10.2,
+      29.4
+     ],
+     "n": 8
+    },
+    "deepestKnees.backKneeFlex": {
+     "median": 72.0,
+     "range": [
+      64.4,
+      75.9
+     ],
+     "n": 8
+    },
+    "deepestKnees.frontKneeFlex": {
+     "median": 48.8,
+     "range": [
+      43.9,
+      60.0
+     ],
+     "n": 8
+    },
+    "deepestKnees.hipHeightH": {
+     "median": 0.469,
+     "range": [
+      0.423,
+      0.597
+     ],
+     "n": 8
+    },
+    "deepestKnees.hitElbowFlex": {
+     "median": 126.75,
+     "range": [
+      93.5,
+      168.2
+     ],
+     "n": 8
+    },
+    "deepestKnees.hitHand.forwardH": {
+     "median": -0.064,
+     "range": [
+      -0.158,
+      0.132
+     ],
+     "n": 8
+    },
+    "deepestKnees.hitHand.upH": {
+     "median": -0.177,
+     "range": [
+      -0.26,
+      -0.11
+     ],
+     "n": 8
+    },
+    "deepestKnees.hitUpperArmFromUp": {
+     "median": 154.5,
+     "range": [
+      138.4,
+      172.3
+     ],
+     "n": 8
+    },
+    "deepestKnees.hitWristHeightH": {
+     "median": 0.602,
+     "range": [
+      0.542,
+      0.761
+     ],
+     "n": 8
+    },
+    "deepestKnees.shoulderTilt": {
+     "median": 75.65,
+     "range": [
+      68.1,
+      86.9
+     ],
+     "n": 8
+    },
+    "deepestKnees.tossArmFromUp": {
+     "median": 5.25,
+     "range": [
+      2.3,
+      8.7
+     ],
+     "n": 8
+    },
+    "deepestKnees.tossElbowFlex": {
+     "median": 12.15,
+     "range": [
+      6.7,
+      14.2
+     ],
+     "n": 8
+    },
+    "deepestKnees.tossHand.forwardH": {
+     "median": 0.0,
+     "range": [
+      -0.083,
+      0.054
+     ],
+     "n": 8
+    },
+    "deepestKnees.tossHand.upH": {
+     "median": 0.458,
+     "range": [
+      0.423,
+      0.604
+     ],
+     "n": 8
+    },
+    "deepestKnees.tossWristHeightH": {
+     "median": 1.236,
+     "range": [
+      1.126,
+      1.624
+     ],
+     "n": 8
+    },
+    "deepestKnees.trunkLeanFromUp": {
+     "median": 11.3,
+     "range": [
+      6.4,
+      20.4
+     ],
+     "n": 8
+    },
+    "landing.backKneeFlex": {
+     "median": 101.6,
+     "range": [
+      18.2,
+      147.2
+     ],
+     "n": 8
+    },
+    "landing.frontKneeFlex": {
+     "median": 17.45,
+     "range": [
+      7.4,
+      19.9
+     ],
+     "n": 8
+    },
+    "landing.hipHeightH": {
+     "median": 0.669,
+     "range": [
+      0.583,
+      0.901
+     ],
+     "n": 8
+    },
+    "landing.hitElbowFlex": {
+     "median": 22.4,
+     "range": [
+      14.4,
+      46.7
+     ],
+     "n": 7
+    },
+    "landing.hitHand.forwardH": {
+     "median": 0.105,
+     "range": [
+      -0.009,
+      0.191
+     ],
+     "n": 7
+    },
+    "landing.hitHand.upH": {
+     "median": -0.228,
+     "range": [
+      -0.326,
+      -0.139
+     ],
+     "n": 7
+    },
+    "landing.hitUpperArmFromUp": {
+     "median": 159.1,
+     "range": [
+      140.8,
+      167.9
+     ],
+     "n": 7
+    },
+    "landing.hitWristHeightH": {
+     "median": 0.747,
+     "range": [
+      0.565,
+      0.911
+     ],
+     "n": 7
+    },
+    "landing.shoulderTilt": {
+     "median": 2.7,
+     "range": [
+      -14.8,
+      61.2
+     ],
+     "n": 8
+    },
+    "landing.tossArmFromUp": {
+     "median": 115.5,
+     "range": [
+      94.1,
+      156.0
+     ],
+     "n": 8
+    },
+    "landing.tossElbowFlex": {
+     "median": 59.6,
+     "range": [
+      18.6,
+      101.2
+     ],
+     "n": 8
+    },
+    "landing.tossHand.forwardH": {
+     "median": -0.147,
+     "range": [
+      -0.244,
+      0.137
+     ],
+     "n": 8
+    },
+    "landing.tossHand.upH": {
+     "median": -0.077,
+     "range": [
+      -0.187,
+      0.006
+     ],
+     "n": 8
+    },
+    "landing.tossWristHeightH": {
+     "median": 0.855,
+     "range": [
+      0.645,
+      1.196
+     ],
+     "n": 8
+    },
+    "landing.trunkLeanFromUp": {
+     "median": 17.5,
+     "range": [
+      8.4,
+      21.8
+     ],
+     "n": 8
+    },
+    "stance.backKneeFlex": {
+     "median": 36.9,
+     "range": [
+      30.2,
+      38.7
+     ],
+     "n": 5
+    },
+    "stance.frontKneeFlex": {
+     "median": 4.7,
+     "range": [
+      1.2,
+      6.5
+     ],
+     "n": 5
+    },
+    "stance.hipHeightH": {
+     "median": 0.458,
+     "range": [
+      0.45,
+      0.497
+     ],
+     "n": 5
+    },
+    "stance.hitElbowFlex": {
+     "median": 39.9,
+     "range": [
+      26.3,
+      52.6
+     ],
+     "n": 5
+    },
+    "stance.hitHand.forwardH": {
+     "median": 0.119,
+     "range": [
+      0.089,
+      0.148
+     ],
+     "n": 5
+    },
+    "stance.hitHand.upH": {
+     "median": -0.261,
+     "range": [
+      -0.288,
+      -0.24
+     ],
+     "n": 5
+    },
+    "stance.hitUpperArmFromUp": {
+     "median": 168.4,
+     "range": [
+      161.5,
+      174.9
+     ],
+     "n": 5
+    },
+    "stance.hitWristHeightH": {
+     "median": 0.561,
+     "range": [
+      0.52,
+      0.588
+     ],
+     "n": 5
+    },
+    "stance.shoulderTilt": {
+     "median": 24.8,
+     "range": [
+      18.7,
+      43.5
+     ],
+     "n": 5
+    },
+    "stance.tossArmFromUp": {
+     "median": 133.7,
+     "range": [
+      132.4,
+      135.7
+     ],
+     "n": 4
+    },
+    "stance.tossElbowFlex": {
+     "median": 51.9,
+     "range": [
+      39.3,
+      65.6
+     ],
+     "n": 4
+    },
+    "stance.tossHand.forwardH": {
+     "median": 0.193,
+     "range": [
+      0.187,
+      0.199
+     ],
+     "n": 4
+    },
+    "stance.tossHand.upH": {
+     "median": -0.16,
+     "range": [
+      -0.183,
+      -0.151
+     ],
+     "n": 4
+    },
+    "stance.tossWristHeightH": {
+     "median": 0.673,
+     "range": [
+      0.615,
+      0.693
+     ],
+     "n": 4
+    },
+    "stance.trunkLeanFromUp": {
+     "median": 5.1,
+     "range": [
+      4.4,
+      5.5
+     ],
+     "n": 5
+    },
+    "time.deepestKnees": {
+     "median": -0.361,
+     "range": [
+      -0.401,
+      -0.124
+     ],
+     "n": 8
+    },
+    "time.landing": {
+     "median": 0.323,
+     "range": [
+      0.279,
+      0.585
+     ],
+     "n": 8
+    },
+    "time.tossArmHighest": {
+     "median": -0.735,
+     "range": [
+      -0.773,
+      -0.449
+     ],
+     "n": 8
+    },
+    "time.tossStart": {
+     "median": -1.065,
+     "range": [
+      -1.093,
+      -0.78
+     ],
+     "n": 6
+    },
+    "tossArmHighest.backKneeFlex": {
+     "median": 34.15,
+     "range": [
+      26.5,
+      71.1
+     ],
+     "n": 8
+    },
+    "tossArmHighest.frontKneeFlex": {
+     "median": 36.0,
+     "range": [
+      29.4,
+      46.4
+     ],
+     "n": 8
+    },
+    "tossArmHighest.hipHeightH": {
+     "median": 0.49,
+     "range": [
+      0.443,
+      0.645
+     ],
+     "n": 8
+    },
+    "tossArmHighest.hitElbowFlex": {
+     "median": 44.0,
+     "range": [
+      18.6,
+      66.5
+     ],
+     "n": 7
+    },
+    "tossArmHighest.hitHand.forwardH": {
+     "median": 0.003,
+     "range": [
+      -0.16,
+      0.066
+     ],
+     "n": 7
+    },
+    "tossArmHighest.hitHand.upH": {
+     "median": -0.374,
+     "range": [
+      -0.483,
+      -0.326
+     ],
+     "n": 7
+    },
+    "tossArmHighest.hitUpperArmFromUp": {
+     "median": 171.75,
+     "range": [
+      168.2,
+      179.1
+     ],
+     "n": 8
+    },
+    "tossArmHighest.hitWristHeightH": {
+     "median": 0.451,
+     "range": [
+      0.386,
+      0.625
+     ],
+     "n": 7
+    },
+    "tossArmHighest.shoulderTilt": {
+     "median": 71.7,
+     "range": [
+      63.5,
+      82.4
+     ],
+     "n": 8
+    },
+    "tossArmHighest.tossArmFromUp": {
+     "median": 7.05,
+     "range": [
+      2.3,
+      12.4
+     ],
+     "n": 8
+    },
+    "tossArmHighest.tossElbowFlex": {
+     "median": 8.05,
+     "range": [
+      1.3,
+      12.5
+     ],
+     "n": 8
+    },
+    "tossArmHighest.tossHand.forwardH": {
+     "median": 0.069,
+     "range": [
+      -0.082,
+      0.133
+     ],
+     "n": 8
+    },
+    "tossArmHighest.tossHand.upH": {
+     "median": 0.488,
+     "range": [
+      0.434,
+      0.644
+     ],
+     "n": 8
+    },
+    "tossArmHighest.tossWristHeightH": {
+     "median": 1.329,
+     "range": [
+      1.196,
+      1.751
+     ],
+     "n": 8
+    },
+    "tossArmHighest.trunkLeanFromUp": {
+     "median": 10.05,
+     "range": [
+      4.3,
+      16.6
+     ],
+     "n": 8
+    },
+    "tossStart.backKneeFlex": {
+     "median": 29.5,
+     "range": [
+      26.5,
+      39.4
+     ],
+     "n": 6
+    },
+    "tossStart.frontKneeFlex": {
+     "median": 15.5,
+     "range": [
+      13.3,
+      18.6
+     ],
+     "n": 6
+    },
+    "tossStart.hipHeightH": {
+     "median": 0.503,
+     "range": [
+      0.456,
+      0.528
+     ],
+     "n": 6
+    },
+    "tossStart.hitElbowFlex": {
+     "median": 30.9,
+     "range": [
+      29.6,
+      33.4
+     ],
+     "n": 6
+    },
+    "tossStart.hitHand.forwardH": {
+     "median": 0.013,
+     "range": [
+      0.002,
+      0.077
+     ],
+     "n": 6
+    },
+    "tossStart.hitHand.upH": {
+     "median": -0.376,
+     "range": [
+      -0.41,
+      -0.31
+     ],
+     "n": 6
+    },
+    "tossStart.hitUpperArmFromUp": {
+     "median": 177.35,
+     "range": [
+      174.2,
+      179.5
+     ],
+     "n": 6
+    },
+    "tossStart.hitWristHeightH": {
+     "median": 0.482,
+     "range": [
+      0.427,
+      0.523
+     ],
+     "n": 6
+    },
+    "tossStart.shoulderTilt": {
+     "median": 49.75,
+     "range": [
+      45.8,
+      89.6
+     ],
+     "n": 6
+    },
+    "tossStart.tossArmFromUp": {
+     "median": 107.45,
+     "range": [
+      102.0,
+      120.9
+     ],
+     "n": 6
+    },
+    "tossStart.tossElbowFlex": {
+     "median": 18.4,
+     "range": [
+      7.9,
+      23.3
+     ],
+     "n": 6
+    },
+    "tossStart.tossHand.forwardH": {
+     "median": 0.276,
+     "range": [
+      0.136,
+      0.297
+     ],
+     "n": 6
+    },
+    "tossStart.tossHand.upH": {
+     "median": -0.023,
+     "range": [
+      -0.065,
+      -0.003
+     ],
+     "n": 6
+    },
+    "tossStart.tossWristHeightH": {
+     "median": 0.827,
+     "range": [
+      0.731,
+      0.876
+     ],
+     "n": 6
+    },
+    "tossStart.trunkLeanFromUp": {
+     "median": 4.4,
+     "range": [
+      3.1,
+      6.9
+     ],
+     "n": 6
+    }
+   },
+   "each": [
+    {
+     "hand": "right",
+     "frames": {
+      "tossStart": 434,
+      "tossArmHighest": 452,
+      "deepestKnees": 474,
+      "contact": 495,
+      "landing": 513
+     },
+     "timesToContact": {
+      "tossStart": -1.085,
+      "tossArmHighest": -0.765,
+      "deepestKnees": -0.374,
+      "landing": 0.32
+     },
+     "stance": {
+      "frontKneeFlex": 4.7,
+      "backKneeFlex": 36.9,
+      "hitElbowFlex": 52.6,
+      "tossElbowFlex": 39.3,
+      "hitUpperArmFromUp": 174.9,
+      "tossArmFromUp": 133.4,
+      "trunkLeanFromUp": 5.1,
+      "shoulderTilt": 22.5,
+      "hipHeightH": 0.45,
+      "hitWristHeightH": 0.52,
+      "tossWristHeightH": 0.615,
+      "hitHand": {
+       "forwardH": 0.089,
+       "upH": -0.251
+      },
+      "tossHand": {
+       "forwardH": 0.196,
+       "upH": -0.155
+      }
+     },
+     "tossStart": {
+      "frontKneeFlex": 15.6,
+      "backKneeFlex": 26.5,
+      "hitElbowFlex": 32.2,
+      "tossElbowFlex": 11.0,
+      "hitUpperArmFromUp": 174.2,
+      "tossArmFromUp": 105.0,
+      "trunkLeanFromUp": 6.9,
+      "shoulderTilt": 50.1,
+      "hipHeightH": 0.465,
+      "hitWristHeightH": 0.427,
+      "tossWristHeightH": 0.785,
+      "hitHand": {
+       "forwardH": 0.002,
+       "upH": -0.369
+      },
+      "tossHand": {
+       "forwardH": 0.272,
+       "upH": -0.011
+      }
+     },
+     "tossArmHighest": {
+      "frontKneeFlex": 29.7,
+      "backKneeFlex": 28.0,
+      "hitElbowFlex": 42.0,
+      "tossElbowFlex": 12.5,
+      "hitUpperArmFromUp": 170.1,
+      "tossArmFromUp": 10.8,
+      "trunkLeanFromUp": 15.8,
+      "shoulderTilt": 67.1,
+      "hipHeightH": 0.448,
+      "hitWristHeightH": 0.386,
+      "tossWristHeightH": 1.196,
+      "hitHand": {
+       "forwardH": 0.003,
+       "upH": -0.376
+      },
+      "tossHand": {
+       "forwardH": 0.102,
+       "upH": 0.434
+      }
+     },
+     "deepestKnees": {
+      "frontKneeFlex": 48.6,
+      "backKneeFlex": 67.9,
+      "hitElbowFlex": 168.2,
+      "tossElbowFlex": 6.7,
+      "hitUpperArmFromUp": 148.8,
+      "tossArmFromUp": 5.3,
+      "trunkLeanFromUp": 18.5,
+      "shoulderTilt": 72.2,
+      "hipHeightH": 0.423,
+      "hitWristHeightH": 0.542,
+      "tossWristHeightH": 1.126,
+      "hitHand": {
+       "forwardH": -0.067,
+       "upH": -0.161
+      },
+      "tossHand": {
+       "forwardH": -0.008,
+       "upH": 0.423
+      }
+     },
+     "contact": {
+      "frontKneeFlex": 9.6,
+      "backKneeFlex": 7.2,
+      "hitElbowFlex": 22.0,
+      "tossElbowFlex": null,
+      "hitUpperArmFromUp": 25.3,
+      "tossArmFromUp": 101.4,
+      "trunkLeanFromUp": 12.0,
+      "shoulderTilt": -46.4,
+      "hipHeightH": 0.735,
+      "hitWristHeightH": 1.254,
+      "tossWristHeightH": 0.955,
+      "hitHand": {
+       "forwardH": 0.075,
+       "upH": 0.245
+      },
+      "tossHand": {
+       "forwardH": 0.091,
+       "upH": -0.055
+      }
+     },
+     "landing": {
+      "frontKneeFlex": 10.3,
+      "backKneeFlex": 18.2,
+      "hitElbowFlex": 22.4,
+      "tossElbowFlex": 18.6,
+      "hitUpperArmFromUp": 159.1,
+      "tossArmFromUp": 142.8,
+      "trunkLeanFromUp": 8.4,
+      "shoulderTilt": 4.4,
+      "hipHeightH": 0.583,
+      "hitWristHeightH": 0.565,
+      "tossWristHeightH": 0.645,
+      "hitHand": {
+       "forwardH": 0.105,
+       "upH": -0.267
+      },
+      "tossHand": {
+       "forwardH": -0.198,
+       "upH": -0.187
+      }
+     },
+     "player": "alcaraz",
+     "clip": "uso-0.keypoints.json"
+    },
+    {
+     "hand": "right",
+     "frames": {
+      "tossStart": 338,
+      "tossArmHighest": 357,
+      "deepestKnees": 378,
+      "contact": 399,
+      "landing": 417
+     },
+     "timesToContact": {
+      "tossStart": -1.093,
+      "tossArmHighest": -0.753,
+      "deepestKnees": -0.376,
+      "landing": 0.323
+     },
+     "stance": {
+      "frontKneeFlex": null,
+      "backKneeFlex": null,
+      "hitElbowFlex": null,
+      "tossElbowFlex": null,
+      "hitUpperArmFromUp": null,
+      "tossArmFromUp": null,
+      "trunkLeanFromUp": null,
+      "shoulderTilt": null
+     },
+     "tossStart": {
+      "frontKneeFlex": 14.9,
+      "backKneeFlex": 36.0,
+      "hitElbowFlex": 33.4,
+      "tossElbowFlex": 7.9,
+      "hitUpperArmFromUp": 179.5,
+      "tossArmFromUp": 102.0,
+      "trunkLeanFromUp": 3.9,
+      "shoulderTilt": 89.4,
+      "hipHeightH": 0.512,
+      "hitWristHeightH": 0.523,
+      "tossWristHeightH": 0.876,
+      "hitHand": {
+       "forwardH": 0.077,
+       "upH": -0.356
+      },
+      "tossHand": {
+       "forwardH": 0.143,
+       "upH": -0.003
+      }
+     },
+     "tossArmHighest": {
+      "frontKneeFlex": 41.4,
+      "backKneeFlex": 33.6,
+      "hitElbowFlex": null,
+      "tossElbowFlex": 7.4,
+      "hitUpperArmFromUp": 171.0,
+      "tossArmFromUp": 5.4,
+      "trunkLeanFromUp": 4.8,
+      "shoulderTilt": 81.4,
+      "hipHeightH": 0.501,
+      "tossWristHeightH": 1.363,
+      "tossHand": {
+       "forwardH": 0.053,
+       "upH": 0.517
+      }
+     },
+     "deepestKnees": {
+      "frontKneeFlex": 60.0,
+      "backKneeFlex": 73.2,
+      "hitElbowFlex": 98.2,
+      "tossElbowFlex": 12.2,
+      "hitUpperArmFromUp": 138.4,
+      "tossArmFromUp": 8.4,
+      "trunkLeanFromUp": 6.4,
+      "shoulderTilt": 86.9,
+      "hipHeightH": 0.486,
+      "hitWristHeightH": 0.686,
+      "tossWristHeightH": 1.254,
+      "hitHand": {
+       "forwardH": 0.123,
+       "upH": -0.11
+      },
+      "tossHand": {
+       "forwardH": 0.054,
+       "upH": 0.459
+      }
+     },
+     "contact": {
+      "frontKneeFlex": 1.4,
+      "backKneeFlex": 4.8,
+      "hitElbowFlex": 17.4,
+      "tossElbowFlex": null,
+      "hitUpperArmFromUp": 13.5,
+      "tossArmFromUp": null,
+      "trunkLeanFromUp": 29.4,
+      "shoulderTilt": -71.4,
+      "hipHeightH": 0.845,
+      "hitWristHeightH": 1.503,
+      "hitHand": {
+       "forwardH": 0.056,
+       "upH": 0.393
+      }
+     },
+     "landing": {
+      "frontKneeFlex": 19.3,
+      "backKneeFlex": 93.1,
+      "hitElbowFlex": 41.3,
+      "tossElbowFlex": 69.0,
+      "hitUpperArmFromUp": 167.9,
+      "tossArmFromUp": 156.0,
+      "trunkLeanFromUp": 21.7,
+      "shoulderTilt": 42.2,
+      "hipHeightH": 0.699,
+      "hitWristHeightH": 0.747,
+      "tossWristHeightH": 0.851,
+      "hitHand": {
+       "forwardH": -0.009,
+       "upH": -0.228
+      },
+      "tossHand": {
+       "forwardH": -0.067,
+       "upH": -0.124
+      }
+     },
+     "player": "alcaraz",
+     "clip": "uso-1.keypoints.json"
+    },
+    {
+     "hand": "right",
+     "frames": {
+      "tossStart": null,
+      "tossArmHighest": 0,
+      "deepestKnees": 6,
+      "contact": 25,
+      "landing": 42
+     },
+     "timesToContact": {
+      "tossStart": null,
+      "tossArmHighest": -0.449,
+      "deepestKnees": -0.341,
+      "landing": 0.305
+     },
+     "stance": {
+      "frontKneeFlex": null,
+      "backKneeFlex": null,
+      "hitElbowFlex": null,
+      "tossElbowFlex": null,
+      "hitUpperArmFromUp": null,
+      "tossArmFromUp": null,
+      "trunkLeanFromUp": null,
+      "shoulderTilt": null
+     },
+     "tossStart": null,
+     "tossArmHighest": {
+      "frontKneeFlex": 46.4,
+      "backKneeFlex": 71.1,
+      "hitElbowFlex": 61.2,
+      "tossElbowFlex": 9.2,
+      "hitUpperArmFromUp": 168.2,
+      "tossArmFromUp": 3.0,
+      "trunkLeanFromUp": 5.6,
+      "shoulderTilt": 82.4,
+      "hipHeightH": 0.517,
+      "hitWristHeightH": 0.565,
+      "tossWristHeightH": 1.522,
+      "hitHand": {
+       "forwardH": -0.16,
+       "upH": -0.354
+      },
+      "tossHand": {
+       "forwardH": -0.039,
+       "upH": 0.604
+      }
+     },
+     "deepestKnees": {
+      "frontKneeFlex": 45.1,
+      "backKneeFlex": 75.9,
+      "hitElbowFlex": 97.3,
+      "tossElbowFlex": 8.9,
+      "hitUpperArmFromUp": 166.5,
+      "tossArmFromUp": 8.7,
+      "trunkLeanFromUp": 6.4,
+      "shoulderTilt": 82.9,
+      "hipHeightH": 0.498,
+      "hitWristHeightH": 0.673,
+      "tossWristHeightH": 1.468,
+      "hitHand": {
+       "forwardH": -0.158,
+       "upH": -0.238
+      },
+      "tossHand": {
+       "forwardH": -0.083,
+       "upH": 0.557
+      }
+     },
+     "contact": {
+      "frontKneeFlex": 0.8,
+      "backKneeFlex": 7.8,
+      "hitElbowFlex": 12.7,
+      "tossElbowFlex": null,
+      "hitUpperArmFromUp": 6.9,
+      "tossArmFromUp": null,
+      "trunkLeanFromUp": 23.8,
+      "shoulderTilt": -66.0,
+      "hipHeightH": 0.938,
+      "hitWristHeightH": 1.861,
+      "hitHand": {
+       "forwardH": -0.053,
+       "upH": 0.548
+      }
+     },
+     "landing": {
+      "frontKneeFlex": 17.7,
+      "backKneeFlex": 111.9,
+      "hitElbowFlex": 15.0,
+      "tossElbowFlex": 101.2,
+      "hitUpperArmFromUp": 159.3,
+      "tossArmFromUp": 99.7,
+      "trunkLeanFromUp": 20.5,
+      "shoulderTilt": 61.2,
+      "hipHeightH": 0.79,
+      "hitWristHeightH": 0.901,
+      "tossWristHeightH": 1.118,
+      "hitHand": {
+       "forwardH": 0.07,
+       "upH": -0.211
+      },
+      "tossHand": {
+       "forwardH": 0.126,
+       "upH": 0.006
+      }
+     },
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json"
+    },
+    {
+     "hand": "right",
+     "frames": {
+      "tossStart": null,
+      "tossArmHighest": 1200,
+      "deepestKnees": 1218,
+      "contact": 1240,
+      "landing": 1258
+     },
+     "timesToContact": {
+      "tossStart": null,
+      "tossArmHighest": -0.719,
+      "deepestKnees": -0.395,
+      "landing": 0.323
+     },
+     "stance": {
+      "frontKneeFlex": null,
+      "backKneeFlex": null,
+      "hitElbowFlex": null,
+      "tossElbowFlex": null,
+      "hitUpperArmFromUp": null,
+      "tossArmFromUp": null,
+      "trunkLeanFromUp": null,
+      "shoulderTilt": null
+     },
+     "tossStart": null,
+     "tossArmHighest": {
+      "frontKneeFlex": 37.3,
+      "backKneeFlex": 35.8,
+      "hitElbowFlex": 44.6,
+      "tossElbowFlex": 8.3,
+      "hitUpperArmFromUp": 179.1,
+      "tossArmFromUp": 6.4,
+      "trunkLeanFromUp": 4.3,
+      "shoulderTilt": 79.2,
+      "hipHeightH": 0.645,
+      "hitWristHeightH": 0.625,
+      "tossWristHeightH": 1.751,
+      "hitHand": {
+       "forwardH": -0.09,
+       "upH": -0.483
+      },
+      "tossHand": {
+       "forwardH": -0.082,
+       "upH": 0.644
+      }
+     },
+     "deepestKnees": {
+      "frontKneeFlex": 57.2,
+      "backKneeFlex": 75.8,
+      "hitElbowFlex": 106.4,
+      "tossElbowFlex": 9.7,
+      "hitUpperArmFromUp": 172.3,
+      "tossArmFromUp": 4.1,
+      "trunkLeanFromUp": 7.9,
+      "shoulderTilt": 78.6,
+      "hipHeightH": 0.597,
+      "hitWristHeightH": 0.761,
+      "tossWristHeightH": 1.624,
+      "hitHand": {
+       "forwardH": -0.147,
+       "upH": -0.26
+      },
+      "tossHand": {
+       "forwardH": -0.057,
+       "upH": 0.604
+      }
+     },
+     "contact": {
+      "frontKneeFlex": 0.9,
+      "backKneeFlex": 3.9,
+      "hitElbowFlex": 12.4,
+      "tossElbowFlex": null,
+      "hitUpperArmFromUp": 8.8,
+      "tossArmFromUp": null,
+      "trunkLeanFromUp": 27.4,
+      "shoulderTilt": -66.9,
+      "hipHeightH": 1.071,
+      "hitWristHeightH": 1.879,
+      "hitHand": {
+       "forwardH": -0.062,
+       "upH": 0.484
+      }
+     },
+     "landing": {
+      "frontKneeFlex": 17.2,
+      "backKneeFlex": 110.1,
+      "hitElbowFlex": 46.7,
+      "tossElbowFlex": 99.8,
+      "hitUpperArmFromUp": 159.9,
+      "tossArmFromUp": 114.5,
+      "trunkLeanFromUp": 20.6,
+      "shoulderTilt": 19.6,
+      "hipHeightH": 0.901,
+      "hitWristHeightH": 0.911,
+      "tossWristHeightH": 1.196,
+      "hitHand": {
+       "forwardH": 0.002,
+       "upH": -0.326
+      },
+      "tossHand": {
+       "forwardH": 0.137,
+       "upH": -0.042
+      }
+     },
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json"
+    },
+    {
+     "hand": "right",
+     "frames": {
+      "tossStart": 2215,
+      "tossArmHighest": 2231,
+      "deepestKnees": 2256,
+      "contact": 2274,
+      "landing": 2293
+     },
+     "timesToContact": {
+      "tossStart": -1.06,
+      "tossArmHighest": -0.773,
+      "deepestKnees": -0.323,
+      "landing": 0.341
+     },
+     "stance": {
+      "frontKneeFlex": 5.0,
+      "backKneeFlex": 37.1,
+      "hitElbowFlex": 41.7,
+      "tossElbowFlex": 48.2,
+      "hitUpperArmFromUp": 173.0,
+      "tossArmFromUp": 135.7,
+      "trunkLeanFromUp": 4.4,
+      "shoulderTilt": 30.8,
+      "hipHeightH": 0.494,
+      "hitWristHeightH": 0.588,
+      "tossWristHeightH": 0.693,
+      "hitHand": {
+       "forwardH": 0.117,
+       "upH": -0.288
+      },
+      "tossHand": {
+       "forwardH": 0.19,
+       "upH": -0.183
+      }
+     },
+     "tossStart": {
+      "frontKneeFlex": 18.6,
+      "backKneeFlex": 29.3,
+      "hitElbowFlex": 32.0,
+      "tossElbowFlex": 16.8,
+      "hitUpperArmFromUp": 175.6,
+      "tossArmFromUp": 110.5,
+      "trunkLeanFromUp": 3.7,
+      "shoulderTilt": 45.8,
+      "hipHeightH": 0.528,
+      "hitWristHeightH": 0.488,
+      "tossWristHeightH": 0.854,
+      "hitHand": {
+       "forwardH": 0.011,
+       "upH": -0.41
+      },
+      "tossHand": {
+       "forwardH": 0.297,
+       "upH": -0.044
+      }
+     },
+     "tossArmHighest": {
+      "frontKneeFlex": 29.4,
+      "backKneeFlex": 26.5,
+      "hitElbowFlex": 38.1,
+      "tossElbowFlex": 9.4,
+      "hitUpperArmFromUp": 171.8,
+      "tossArmFromUp": 12.4,
+      "trunkLeanFromUp": 14.2,
+      "shoulderTilt": 63.5,
+      "hipHeightH": 0.501,
+      "hitWristHeightH": 0.456,
+      "tossWristHeightH": 1.359,
+      "hitHand": {
+       "forwardH": 0.001,
+       "upH": -0.406
+      },
+      "tossHand": {
+       "forwardH": 0.133,
+       "upH": 0.497
+      }
+     },
+     "deepestKnees": {
+      "frontKneeFlex": 49.0,
+      "backKneeFlex": 67.4,
+      "hitElbowFlex": 166.5,
+      "tossElbowFlex": 12.1,
+      "hitUpperArmFromUp": 157.3,
+      "tossArmFromUp": 3.5,
+      "trunkLeanFromUp": 17.2,
+      "shoulderTilt": 72.7,
+      "hipHeightH": 0.49,
+      "hitWristHeightH": 0.624,
+      "tossWristHeightH": 1.268,
+      "hitHand": {
+       "forwardH": -0.06,
+       "upH": -0.187
+      },
+      "tossHand": {
+       "forwardH": 0.003,
+       "upH": 0.457
+      }
+     },
+     "contact": {
+      "frontKneeFlex": 13.4,
+      "backKneeFlex": 5.7,
+      "hitElbowFlex": 12.7,
+      "tossElbowFlex": null,
+      "hitUpperArmFromUp": 14.6,
+      "tossArmFromUp": null,
+      "trunkLeanFromUp": 18.1,
+      "shoulderTilt": -62.9,
+      "hipHeightH": 0.83,
+      "hitWristHeightH": 1.477,
+      "hitHand": {
+       "forwardH": 0.078,
+       "upH": 0.373
+      }
+     },
+     "landing": {
+      "frontKneeFlex": 7.4,
+      "backKneeFlex": 147.2,
+      "hitElbowFlex": 14.4,
+      "tossElbowFlex": 51.3,
+      "hitUpperArmFromUp": 148.5,
+      "tossArmFromUp": 116.5,
+      "trunkLeanFromUp": 14.5,
+      "shoulderTilt": -14.8,
+      "hipHeightH": 0.686,
+      "hitWristHeightH": 0.782,
+      "tossWristHeightH": 0.871,
+      "hitHand": {
+       "forwardH": 0.191,
+       "upH": -0.178
+      },
+      "tossHand": {
+       "forwardH": -0.203,
+       "upH": -0.089
+      }
+     },
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json"
+    },
+    {
+     "hand": "right",
+     "frames": {
+      "tossStart": 223,
+      "tossArmHighest": 248,
+      "deepestKnees": 264,
+      "contact": 284,
+      "landing": 304
+     },
+     "timesToContact": {
+      "tossStart": -1.065,
+      "tossArmHighest": -0.628,
+      "deepestKnees": -0.349,
+      "landing": 0.349
+     },
+     "stance": {
+      "frontKneeFlex": 1.2,
+      "backKneeFlex": 38.7,
+      "hitElbowFlex": 26.3,
+      "tossElbowFlex": 65.6,
+      "hitUpperArmFromUp": 161.5,
+      "tossArmFromUp": 134.0,
+      "trunkLeanFromUp": 5.0,
+      "shoulderTilt": 43.5,
+      "hipHeightH": 0.457,
+      "hitWristHeightH": 0.558,
+      "tossWristHeightH": 0.654,
+      "hitHand": {
+       "forwardH": 0.138,
+       "upH": -0.261
+      },
+      "tossHand": {
+       "forwardH": 0.187,
+       "upH": -0.164
+      }
+     },
+     "tossStart": {
+      "frontKneeFlex": 13.3,
+      "backKneeFlex": 28.9,
+      "hitElbowFlex": 29.8,
+      "tossElbowFlex": 23.3,
+      "hitUpperArmFromUp": 177.7,
+      "tossArmFromUp": 105.2,
+      "trunkLeanFromUp": 5.5,
+      "shoulderTilt": 49.4,
+      "hipHeightH": 0.494,
+      "hitWristHeightH": 0.45,
+      "tossWristHeightH": 0.821,
+      "hitHand": {
+       "forwardH": 0.015,
+       "upH": -0.383
+      },
+      "tossHand": {
+       "forwardH": 0.28,
+       "upH": -0.012
+      }
+     },
+     "tossArmHighest": {
+      "frontKneeFlex": 34.7,
+      "backKneeFlex": 37.1,
+      "hitElbowFlex": 66.5,
+      "tossElbowFlex": 7.8,
+      "hitUpperArmFromUp": 172.0,
+      "tossArmFromUp": 2.3,
+      "trunkLeanFromUp": 16.6,
+      "shoulderTilt": 69.7,
+      "hipHeightH": 0.456,
+      "hitWristHeightH": 0.446,
+      "tossWristHeightH": 1.256,
+      "hitHand": {
+       "forwardH": 0.021,
+       "upH": -0.33
+      },
+      "tossHand": {
+       "forwardH": 0.049,
+       "upH": 0.48
+      }
+     },
+     "deepestKnees": {
+      "frontKneeFlex": 46.3,
+      "backKneeFlex": 64.4,
+      "hitElbowFlex": 155.3,
+      "tossElbowFlex": 14.1,
+      "hitUpperArmFromUp": 153.3,
+      "tossArmFromUp": 2.3,
+      "trunkLeanFromUp": 14.7,
+      "shoulderTilt": 68.1,
+      "hipHeightH": 0.447,
+      "hitWristHeightH": 0.578,
+      "tossWristHeightH": 1.185,
+      "hitHand": {
+       "forwardH": -0.076,
+       "upH": -0.168
+      },
+      "tossHand": {
+       "forwardH": 0.04,
+       "upH": 0.439
+      }
+     },
+     "contact": {
+      "frontKneeFlex": 5.0,
+      "backKneeFlex": 8.1,
+      "hitElbowFlex": 11.2,
+      "tossElbowFlex": null,
+      "hitUpperArmFromUp": 15.7,
+      "tossArmFromUp": null,
+      "trunkLeanFromUp": 15.1,
+      "shoulderTilt": -59.0,
+      "hipHeightH": 0.781,
+      "hitWristHeightH": 1.396,
+      "hitHand": {
+       "forwardH": 0.084,
+       "upH": 0.348
+      }
+     },
+     "landing": {
+      "frontKneeFlex": 12.6,
+      "backKneeFlex": 70.9,
+      "hitElbowFlex": 19.9,
+      "tossElbowFlex": 49.5,
+      "hitUpperArmFromUp": 140.8,
+      "tossArmFromUp": 94.1,
+      "trunkLeanFromUp": 11.5,
+      "shoulderTilt": 1.0,
+      "hipHeightH": 0.606,
+      "hitWristHeightH": 0.719,
+      "tossWristHeightH": 0.849,
+      "hitHand": {
+       "forwardH": 0.137,
+       "upH": -0.139
+      },
+      "tossHand": {
+       "forwardH": -0.175,
+       "upH": -0.008
+      }
+     },
+     "player": "alcaraz",
+     "clip": "uso-3.keypoints.json"
+    },
+    {
+     "hand": "right",
+     "frames": {
+      "tossStart": 789,
+      "tossArmHighest": 807,
+      "deepestKnees": 827,
+      "contact": 850,
+      "landing": 866
+     },
+     "timesToContact": {
+      "tossStart": -1.065,
+      "tossArmHighest": -0.751,
+      "deepestKnees": -0.401,
+      "landing": 0.279
+     },
+     "stance": {
+      "frontKneeFlex": 6.5,
+      "backKneeFlex": 32.8,
+      "hitElbowFlex": 39.9,
+      "tossElbowFlex": 55.6,
+      "hitUpperArmFromUp": 168.4,
+      "tossArmFromUp": 132.4,
+      "trunkLeanFromUp": 5.5,
+      "shoulderTilt": 18.7,
+      "hipHeightH": 0.497,
+      "hitWristHeightH": 0.561,
+      "tossWristHeightH": 0.692,
+      "hitHand": {
+       "forwardH": 0.119,
+       "upH": -0.282
+      },
+      "tossHand": {
+       "forwardH": 0.199,
+       "upH": -0.151
+      }
+     },
+     "tossStart": {
+      "frontKneeFlex": 15.4,
+      "backKneeFlex": 29.7,
+      "hitElbowFlex": 29.7,
+      "tossElbowFlex": 22.7,
+      "hitUpperArmFromUp": 177.0,
+      "tossArmFromUp": 109.7,
+      "trunkLeanFromUp": 4.9,
+      "shoulderTilt": 46.9,
+      "hipHeightH": 0.519,
+      "hitWristHeightH": 0.479,
+      "tossWristHeightH": 0.833,
+      "hitHand": {
+       "forwardH": 0.012,
+       "upH": -0.388
+      },
+      "tossHand": {
+       "forwardH": 0.285,
+       "upH": -0.034
+      }
+     },
+     "tossArmHighest": {
+      "frontKneeFlex": 32.8,
+      "backKneeFlex": 34.7,
+      "hitElbowFlex": 44.0,
+      "tossElbowFlex": 7.3,
+      "hitUpperArmFromUp": 172.2,
+      "tossArmFromUp": 7.7,
+      "trunkLeanFromUp": 14.5,
+      "shoulderTilt": 63.5,
+      "hipHeightH": 0.479,
+      "hitWristHeightH": 0.451,
+      "tossWristHeightH": 1.3,
+      "hitHand": {
+       "forwardH": 0.003,
+       "upH": -0.374
+      },
+      "tossHand": {
+       "forwardH": 0.094,
+       "upH": 0.474
+      }
+     },
+     "deepestKnees": {
+      "frontKneeFlex": 43.9,
+      "backKneeFlex": 71.7,
+      "hitElbowFlex": 147.1,
+      "tossElbowFlex": 14.1,
+      "hitUpperArmFromUp": 155.7,
+      "tossArmFromUp": 5.2,
+      "trunkLeanFromUp": 20.4,
+      "shoulderTilt": 70.7,
+      "hipHeightH": 0.452,
+      "hitWristHeightH": 0.564,
+      "tossWristHeightH": 1.219,
+      "hitHand": {
+       "forwardH": -0.023,
+       "upH": -0.187
+      },
+      "tossHand": {
+       "forwardH": -0.003,
+       "upH": 0.468
+      }
+     },
+     "contact": {
+      "frontKneeFlex": 1.7,
+      "backKneeFlex": 3.9,
+      "hitElbowFlex": 12.3,
+      "tossElbowFlex": null,
+      "hitUpperArmFromUp": 23.9,
+      "tossArmFromUp": null,
+      "trunkLeanFromUp": 18.6,
+      "shoulderTilt": -54.3,
+      "hipHeightH": 0.836,
+      "hitWristHeightH": 1.292,
+      "hitHand": {
+       "forwardH": 0.093,
+       "upH": 0.215
+      }
+     },
+     "landing": {
+      "frontKneeFlex": 18.3,
+      "backKneeFlex": 19.7,
+      "hitElbowFlex": 27.9,
+      "tossElbowFlex": 36.8,
+      "hitUpperArmFromUp": 145.9,
+      "tossArmFromUp": 107.4,
+      "trunkLeanFromUp": 12.5,
+      "shoulderTilt": -5.4,
+      "hipHeightH": 0.653,
+      "hitWristHeightH": 0.688,
+      "tossWristHeightH": 0.858,
+      "hitHand": {
+       "forwardH": 0.146,
+       "upH": -0.235
+      },
+      "tossHand": {
+       "forwardH": -0.244,
+       "upH": -0.065
+      }
+     },
+     "player": "alcaraz",
+     "clip": "uso-3.keypoints.json"
+    },
+    {
+     "hand": "right",
+     "frames": {
+      "tossStart": 518,
+      "tossArmHighest": 535,
+      "deepestKnees": 555,
+      "contact": 562,
+      "landing": 595
+     },
+     "timesToContact": {
+      "tossStart": -0.78,
+      "tossArmHighest": -0.479,
+      "deepestKnees": -0.124,
+      "landing": 0.585
+     },
+     "stance": {
+      "frontKneeFlex": 3.9,
+      "backKneeFlex": 30.2,
+      "hitElbowFlex": 27.7,
+      "tossElbowFlex": null,
+      "hitUpperArmFromUp": 163.8,
+      "tossArmFromUp": null,
+      "trunkLeanFromUp": 5.4,
+      "shoulderTilt": 24.8,
+      "hipHeightH": 0.458,
+      "hitWristHeightH": 0.565,
+      "hitHand": {
+       "forwardH": 0.148,
+       "upH": -0.24
+      }
+     },
+     "tossStart": {
+      "frontKneeFlex": 18.3,
+      "backKneeFlex": 39.4,
+      "hitElbowFlex": 29.6,
+      "tossElbowFlex": 20.0,
+      "hitUpperArmFromUp": 179.2,
+      "tossArmFromUp": 120.9,
+      "trunkLeanFromUp": 3.1,
+      "shoulderTilt": 89.6,
+      "hipHeightH": 0.456,
+      "hitWristHeightH": 0.485,
+      "tossWristHeightH": 0.731,
+      "hitHand": {
+       "forwardH": 0.067,
+       "upH": -0.31
+      },
+      "tossHand": {
+       "forwardH": 0.136,
+       "upH": -0.065
+      }
+     },
+     "tossArmHighest": {
+      "frontKneeFlex": 42.7,
+      "backKneeFlex": 29.2,
+      "hitElbowFlex": 18.6,
+      "tossElbowFlex": 1.3,
+      "hitUpperArmFromUp": 171.7,
+      "tossArmFromUp": 9.6,
+      "trunkLeanFromUp": 5.9,
+      "shoulderTilt": 73.7,
+      "hipHeightH": 0.443,
+      "hitWristHeightH": 0.446,
+      "tossWristHeightH": 1.221,
+      "hitHand": {
+       "forwardH": 0.066,
+       "upH": -0.326
+      },
+      "tossHand": {
+       "forwardH": 0.084,
+       "upH": 0.449
+      }
+     },
+     "deepestKnees": {
+      "frontKneeFlex": 52.9,
+      "backKneeFlex": 72.3,
+      "hitElbowFlex": 93.5,
+      "tossElbowFlex": 14.2,
+      "hitUpperArmFromUp": 146.1,
+      "tossArmFromUp": 8.3,
+      "trunkLeanFromUp": 6.9,
+      "shoulderTilt": 82.9,
+      "hipHeightH": 0.438,
+      "hitWristHeightH": 0.58,
+      "tossWristHeightH": 1.144,
+      "hitHand": {
+       "forwardH": 0.132,
+       "upH": -0.137
+      },
+      "tossHand": {
+       "forwardH": 0.045,
+       "upH": 0.427
+      }
+     },
+     "contact": {
+      "frontKneeFlex": 35.6,
+      "backKneeFlex": 36.9,
+      "hitElbowFlex": 161.9,
+      "tossElbowFlex": 5.1,
+      "hitUpperArmFromUp": 9.2,
+      "tossArmFromUp": 5.3,
+      "trunkLeanFromUp": 10.2,
+      "shoulderTilt": -50.1,
+      "hipHeightH": 0.482,
+      "hitWristHeightH": 0.899,
+      "tossWristHeightH": 1.083,
+      "hitHand": {
+       "forwardH": 0.015,
+       "upH": 0.129
+      },
+      "tossHand": {
+       "forwardH": 0.027,
+       "upH": 0.312
+      }
+     },
+     "landing": {
+      "frontKneeFlex": 19.9,
+      "backKneeFlex": 128.4,
+      "hitElbowFlex": null,
+      "tossElbowFlex": 67.9,
+      "hitUpperArmFromUp": null,
+      "tossArmFromUp": 132.6,
+      "trunkLeanFromUp": 21.8,
+      "shoulderTilt": -12.7,
+      "hipHeightH": 0.613,
+      "tossWristHeightH": 0.757,
+      "tossHand": {
+       "forwardH": -0.119,
+       "upH": -0.091
+      }
+     },
+     "player": "alcaraz",
+     "clip": "uso-4.keypoints.json"
+    }
+   ]
+  },
+  "splitSteps": {
+   "n": 4,
+   "summary": {
+    "airTime": {
+     "median": 0.18,
+     "range": [
+      0.108,
+      0.34
+     ]
+    },
+    "heightH": {
+     "median": 0.035,
+     "range": [
+      0.024,
+      0.062
+     ]
+    },
+    "landingStanceWidthH": {
+     "median": 0.347,
+     "range": [
+      0.297,
+      0.451
+     ]
+    },
+    "landingHipDropH": {
+     "median": -0.009,
+     "range": [
+      -0.062,
+      0.041
+     ]
+    },
+    "afterServeContact": {
+     "median": 0.916,
+     "range": [
+      0.863,
+      1.183
+     ]
+    }
+   },
+   "each": [
+    {
+     "takeoff": 446,
+     "land": 465,
+     "airTime": 0.34,
+     "heightH": 0.037,
+     "landingStanceWidthH": 0.367,
+     "landingHipDropH": -0.004,
+     "player": "alcaraz",
+     "clip": "uso-1.keypoints.json",
+     "afterServeContact": 1.183
+    },
+    {
+     "takeoff": 61,
+     "land": 73,
+     "airTime": 0.216,
+     "heightH": 0.062,
+     "landingStanceWidthH": 0.451,
+     "landingHipDropH": 0.041,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 0.863
+    },
+    {
+     "takeoff": 1285,
+     "land": 1291,
+     "airTime": 0.108,
+     "heightH": 0.024,
+     "landingStanceWidthH": 0.327,
+     "landingHipDropH": -0.062,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 0.916
+    },
+    {
+     "takeoff": 2317,
+     "land": 2325,
+     "airTime": 0.144,
+     "heightH": 0.032,
+     "landingStanceWidthH": 0.297,
+     "landingHipDropH": -0.015,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 0.916
+    }
+   ]
+  },
+  "bouncesOnToes": {
+   "n": 14,
+   "summary": {
+    "airTime": {
+     "median": 0.241,
+     "range": [
+      0.108,
+      0.341
+     ]
+    },
+    "heightH": {
+     "median": 0.032,
+     "range": [
+      0.02,
+      0.055
+     ]
+    },
+    "landingStanceWidthH": {
+     "median": 0.048,
+     "range": [
+      0.005,
+      0.197
+     ]
+    }
+   },
+   "each": [
+    {
+     "takeoff": 576,
+     "land": 590,
+     "airTime": 0.249,
+     "heightH": 0.035,
+     "landingStanceWidthH": 0.041,
+     "landingHipDropH": -0.075,
+     "player": "alcaraz",
+     "clip": "uso-0.keypoints.json",
+     "afterServeContact": 1.69
+    },
+    {
+     "takeoff": 613,
+     "land": 628,
+     "airTime": 0.267,
+     "heightH": 0.03,
+     "landingStanceWidthH": 0.197,
+     "landingHipDropH": 0.047,
+     "player": "alcaraz",
+     "clip": "uso-0.keypoints.json",
+     "afterServeContact": 2.367
+    },
+    {
+     "takeoff": 649,
+     "land": 657,
+     "airTime": 0.142,
+     "heightH": 0.031,
+     "landingStanceWidthH": 0.025,
+     "landingHipDropH": 0.008,
+     "player": "alcaraz",
+     "clip": "uso-0.keypoints.json",
+     "afterServeContact": 2.883
+    },
+    {
+     "takeoff": 658,
+     "land": 664,
+     "airTime": 0.108,
+     "heightH": 0.02,
+     "landingStanceWidthH": 0.032,
+     "landingHipDropH": 0.022,
+     "player": "alcaraz",
+     "clip": "uso-1.keypoints.json",
+     "afterServeContact": 4.749
+    },
+    {
+     "takeoff": 209,
+     "land": 217,
+     "airTime": 0.144,
+     "heightH": 0.029,
+     "landingStanceWidthH": 0.056,
+     "landingHipDropH": 0.057,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 3.45
+    },
+    {
+     "takeoff": 241,
+     "land": 260,
+     "airTime": 0.341,
+     "heightH": 0.055,
+     "landingStanceWidthH": 0.088,
+     "landingHipDropH": -0.036,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 4.223
+    },
+    {
+     "takeoff": 325,
+     "land": 342,
+     "airTime": 0.305,
+     "heightH": 0.034,
+     "landingStanceWidthH": 0.046,
+     "landingHipDropH": 0.007,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 5.696
+    },
+    {
+     "takeoff": 1349,
+     "land": 1362,
+     "airTime": 0.234,
+     "heightH": 0.035,
+     "landingStanceWidthH": 0.007,
+     "landingHipDropH": -0.043,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 2.192
+    },
+    {
+     "takeoff": 1448,
+     "land": 1457,
+     "airTime": 0.162,
+     "heightH": 0.052,
+     "landingStanceWidthH": 0.05,
+     "landingHipDropH": 0.071,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 3.899
+    },
+    {
+     "takeoff": 1611,
+     "land": 1617,
+     "airTime": 0.108,
+     "heightH": 0.026,
+     "landingStanceWidthH": 0.005,
+     "landingHipDropH": -0.032,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 6.775
+    },
+    {
+     "takeoff": 966,
+     "land": 985,
+     "airTime": 0.332,
+     "heightH": 0.045,
+     "landingStanceWidthH": 0.055,
+     "landingHipDropH": -0.02,
+     "player": "alcaraz",
+     "clip": "uso-3.keypoints.json",
+     "afterServeContact": 2.356
+    },
+    {
+     "takeoff": 1024,
+     "land": 1040,
+     "airTime": 0.279,
+     "heightH": 0.03,
+     "landingStanceWidthH": 0.152,
+     "landingHipDropH": 0.049,
+     "player": "alcaraz",
+     "clip": "uso-3.keypoints.json",
+     "afterServeContact": 3.316
+    },
+    {
+     "takeoff": 653,
+     "land": 666,
+     "airTime": 0.231,
+     "heightH": 0.028,
+     "landingStanceWidthH": 0.019,
+     "landingHipDropH": -0.105,
+     "player": "alcaraz",
+     "clip": "uso-4.keypoints.json",
+     "afterServeContact": 1.844
+    },
+    {
+     "takeoff": 687,
+     "land": 701,
+     "airTime": 0.248,
+     "heightH": 0.032,
+     "landingStanceWidthH": 0.132,
+     "landingHipDropH": 0.043,
+     "player": "alcaraz",
+     "clip": "uso-4.keypoints.json",
+     "afterServeContact": 2.465
+    }
+   ]
+  },
+  "directionChanges": {
+   "n": 9,
+   "summary": {
+    "speedInH": {
+     "median": 0.49,
+     "range": [
+      0.38,
+      0.93
+     ]
+    },
+    "speedOutH": {
+     "median": 0.62,
+     "range": [
+      0.39,
+      2.01
+     ]
+    },
+    "stanceWidthH": {
+     "median": 0.23,
+     "range": [
+      0.0,
+      0.87
+     ]
+    },
+    "hipDropH": {
+     "median": 0.02,
+     "range": [
+      -0.15,
+      0.15
+     ]
+    },
+    "trunkLeanToNewDir": {
+     "median": 4.9,
+     "range": [
+      -8.4,
+      9.6
+     ]
+    }
+   },
+   "each": [
+    {
+     "frame": 640,
+     "speedInH": 0.57,
+     "speedOutH": 0.77,
+     "stanceWidthH": 0.339,
+     "hipDropH": 0.006,
+     "trunkLeanToNewDir": 7.9,
+     "player": "alcaraz",
+     "clip": "uso-1.keypoints.json",
+     "afterServeContact": 4.319
+    },
+    {
+     "frame": 710,
+     "speedInH": 0.49,
+     "speedOutH": 0.39,
+     "stanceWidthH": 0.082,
+     "hipDropH": 0.014,
+     "trunkLeanToNewDir": 8.9,
+     "player": "alcaraz",
+     "clip": "uso-1.keypoints.json",
+     "afterServeContact": 5.573
+    },
+    {
+     "frame": 266,
+     "speedInH": 0.42,
+     "speedOutH": 0.54,
+     "stanceWidthH": 0.139,
+     "hipDropH": 0.047,
+     "trunkLeanToNewDir": -2.7,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 4.331
+    },
+    {
+     "frame": 318,
+     "speedInH": 0.61,
+     "speedOutH": 0.62,
+     "stanceWidthH": 0.001,
+     "hipDropH": 0.148,
+     "trunkLeanToNewDir": 4.9,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 5.265
+    },
+    {
+     "frame": 1553,
+     "speedInH": 0.45,
+     "speedOutH": 1.0,
+     "stanceWidthH": 0.233,
+     "hipDropH": 0.097,
+     "trunkLeanToNewDir": 1.3,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 5.625
+    },
+    {
+     "frame": 1664,
+     "speedInH": 0.6,
+     "speedOutH": 0.58,
+     "stanceWidthH": 0.138,
+     "hipDropH": -0.064,
+     "trunkLeanToNewDir": -2.8,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 7.619
+    },
+    {
+     "frame": 1715,
+     "speedInH": 0.39,
+     "speedOutH": 2.01,
+     "stanceWidthH": 0.872,
+     "hipDropH": -0.148,
+     "trunkLeanToNewDir": 7.3,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 8.536
+    },
+    {
+     "frame": 2416,
+     "speedInH": 0.38,
+     "speedOutH": 0.62,
+     "stanceWidthH": 0.361,
+     "hipDropH": 0.059,
+     "trunkLeanToNewDir": -8.4,
+     "player": "alcaraz",
+     "clip": "uso-2.keypoints.json",
+     "afterServeContact": 2.552
+    },
+    {
+     "frame": 640,
+     "speedInH": 0.93,
+     "speedOutH": 0.42,
+     "stanceWidthH": 0.256,
+     "hipDropH": 0.019,
+     "trunkLeanToNewDir": 9.6,
+     "player": "alcaraz",
+     "clip": "uso-4.keypoints.json",
+     "afterServeContact": 1.383
+    }
+   ]
+  }
+ },
+ "compilationServes": {
+  "alcaraz": {
+   "hands": [
+    "right"
+   ],
+   "n": 5,
+   "median": {
+    "contactElbowFlex": 7.2,
+    "contactArmFromUp": 6.4,
+    "deepestFrontKneeFlex": 41.1,
+    "deepestBackKneeFlex": 52.3,
+    "trophyHitElbowFlex": 73.1,
+    "trophyTossArmFromUp": 1.0
+   },
+   "each": [
+    {
+     "file": "datasets/serves/alcaraz/compilation-12.keypoints.json",
+     "contactFrame": 323,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 4.5,
+     "contactArmFromUp": 6.0,
+     "deepestFrontKneeFlex": 47.7,
+     "deepestBackKneeFlex": 56.6,
+     "trophyHitElbowFlex": 57.2,
+     "trophyTossArmFromUp": 9.1
+    },
+    {
+     "file": "datasets/serves/alcaraz/compilation-13.keypoints.json",
+     "contactFrame": 309,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 105.4,
+     "contactArmFromUp": 149.0,
+     "deepestFrontKneeFlex": 48.5,
+     "deepestBackKneeFlex": 55.5,
+     "trophyHitElbowFlex": 56.6,
+     "trophyTossArmFromUp": 8.5
+    },
+    {
+     "file": "datasets/serves/alcaraz/compilation-14.keypoints.json",
+     "contactFrame": 386,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 7.2,
+     "contactArmFromUp": 6.4,
+     "deepestFrontKneeFlex": 41.1,
+     "deepestBackKneeFlex": 51.2,
+     "trophyHitElbowFlex": 74.7,
+     "trophyTossArmFromUp": 1.0
+    },
+    {
+     "file": "datasets/serves/alcaraz/compilation-14.keypoints.json",
+     "contactFrame": 1134,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 74.8,
+     "contactArmFromUp": 163.5,
+     "deepestFrontKneeFlex": 25.7,
+     "deepestBackKneeFlex": 33.9,
+     "trophyHitElbowFlex": 73.1,
+     "trophyTossArmFromUp": 0.6
+    },
+    {
+     "file": "datasets/serves/alcaraz/compilation-14.keypoints.json",
+     "contactFrame": 1295,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 7.1,
+     "contactArmFromUp": 6.4,
+     "deepestFrontKneeFlex": 40.4,
+     "deepestBackKneeFlex": 52.3,
+     "trophyHitElbowFlex": 73.1,
+     "trophyTossArmFromUp": 0.6
+    }
+   ]
+  },
+  "de-minaur": {
+   "hands": [
+    "right"
+   ],
+   "n": 4,
+   "median": {
+    "contactElbowFlex": 7.8,
+    "contactArmFromUp": 2.7,
+    "deepestFrontKneeFlex": 31.5,
+    "deepestBackKneeFlex": 48.4,
+    "trophyHitElbowFlex": 88.0,
+    "trophyTossArmFromUp": 3.0
+   },
+   "each": [
+    {
+     "file": "datasets/serves/de-minaur/compilation-31.keypoints.json",
+     "contactFrame": 330,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 11.3,
+     "contactArmFromUp": 1.9,
+     "deepestFrontKneeFlex": 29.8,
+     "deepestBackKneeFlex": 46.3,
+     "trophyHitElbowFlex": 51.0,
+     "trophyTossArmFromUp": 0.3
+    },
+    {
+     "file": "datasets/serves/de-minaur/compilation-32.keypoints.json",
+     "contactFrame": 405,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 7.9,
+     "contactArmFromUp": 0.9,
+     "deepestFrontKneeFlex": 29.9,
+     "deepestBackKneeFlex": 46.9,
+     "trophyHitElbowFlex": 79.8,
+     "trophyTossArmFromUp": 3.3
+    },
+    {
+     "file": "datasets/serves/de-minaur/compilation-33.keypoints.json",
+     "contactFrame": 234,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 4.1,
+     "contactArmFromUp": 8.6,
+     "deepestFrontKneeFlex": 33.1,
+     "deepestBackKneeFlex": 51.0,
+     "trophyHitElbowFlex": 106.4,
+     "trophyTossArmFromUp": 2.9
+    },
+    {
+     "file": "datasets/serves/de-minaur/compilation-33.keypoints.json",
+     "contactFrame": 972,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 7.8,
+     "contactArmFromUp": 3.5,
+     "deepestFrontKneeFlex": 34.3,
+     "deepestBackKneeFlex": 49.9,
+     "trophyHitElbowFlex": 96.3,
+     "trophyTossArmFromUp": 3.2
+    }
+   ]
+  },
+  "djokovic": {
+   "hands": [
+    "right"
+   ],
+   "n": 2,
+   "median": {
+    "contactElbowFlex": 14.9,
+    "contactArmFromUp": 14.1,
+    "deepestFrontKneeFlex": 43.2,
+    "deepestBackKneeFlex": 35.4,
+    "trophyHitElbowFlex": 79.8,
+    "trophyTossArmFromUp": 2.2
+   },
+   "each": [
+    {
+     "file": "datasets/serves/djokovic/compilation-16.keypoints.json",
+     "contactFrame": 500,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 13.4,
+     "contactArmFromUp": 14.3,
+     "deepestFrontKneeFlex": 42.6,
+     "deepestBackKneeFlex": 35.1,
+     "trophyHitElbowFlex": 126.7,
+     "trophyTossArmFromUp": 2.2
+    },
+    {
+     "file": "datasets/serves/djokovic/compilation-16.keypoints.json",
+     "contactFrame": 999,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 16.3,
+     "contactArmFromUp": 13.8,
+     "deepestFrontKneeFlex": 43.8,
+     "deepestBackKneeFlex": 35.6,
+     "trophyHitElbowFlex": 33.0,
+     "trophyTossArmFromUp": 2.3
+    }
+   ]
+  },
+  "fritz": {
+   "hands": [
+    "right"
+   ],
+   "n": 5,
+   "median": {
+    "contactElbowFlex": 6.6,
+    "contactArmFromUp": 7.6,
+    "deepestFrontKneeFlex": 42.3,
+    "deepestBackKneeFlex": 51.2,
+    "trophyHitElbowFlex": 12.9,
+    "trophyTossArmFromUp": 14.2
+   },
+   "each": [
+    {
+     "file": "datasets/serves/fritz/compilation-27.keypoints.json",
+     "contactFrame": 317,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 8.0,
+     "contactArmFromUp": 4.4,
+     "deepestFrontKneeFlex": 42.3,
+     "deepestBackKneeFlex": 51.2,
+     "trophyHitElbowFlex": 20.0,
+     "trophyTossArmFromUp": 14.2
+    },
+    {
+     "file": "datasets/serves/fritz/compilation-28.keypoints.json",
+     "contactFrame": 368,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 8.1,
+     "contactArmFromUp": 5.7,
+     "deepestFrontKneeFlex": 42.0,
+     "deepestBackKneeFlex": 51.2,
+     "trophyHitElbowFlex": 19.9,
+     "trophyTossArmFromUp": 14.2
+    },
+    {
+     "file": "datasets/serves/fritz/compilation-29.keypoints.json",
+     "contactFrame": 97,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 5.6,
+     "contactArmFromUp": 7.6,
+     "deepestFrontKneeFlex": 48.7,
+     "deepestBackKneeFlex": 51.6,
+     "trophyHitElbowFlex": 11.6,
+     "trophyTossArmFromUp": 14.0
+    },
+    {
+     "file": "datasets/serves/fritz/compilation-30.keypoints.json",
+     "contactFrame": 127,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 6.6,
+     "contactArmFromUp": 173.3,
+     "deepestFrontKneeFlex": 4.4,
+     "deepestBackKneeFlex": 14.3,
+     "trophyHitElbowFlex": 6.7,
+     "trophyTossArmFromUp": 17.7
+    },
+    {
+     "file": "datasets/serves/fritz/compilation-30.keypoints.json",
+     "contactFrame": 314,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 4.2,
+     "contactArmFromUp": 8.6,
+     "deepestFrontKneeFlex": 47.7,
+     "deepestBackKneeFlex": 52.9,
+     "trophyHitElbowFlex": 12.9,
+     "trophyTossArmFromUp": 14.1
+    }
+   ]
+  },
+  "medvedev": {
+   "hands": [
+    "right"
+   ],
+   "n": 3,
+   "median": {
+    "contactElbowFlex": 7.6,
+    "contactArmFromUp": 9.2,
+    "deepestFrontKneeFlex": 37.7,
+    "deepestBackKneeFlex": 50.0,
+    "trophyHitElbowFlex": 102.0,
+    "trophyTossArmFromUp": 5.2
+   },
+   "each": [
+    {
+     "file": "datasets/serves/medvedev/compilation-20.keypoints.json",
+     "contactFrame": 267,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 7.3,
+     "contactArmFromUp": 9.0,
+     "deepestFrontKneeFlex": 37.6,
+     "deepestBackKneeFlex": 50.1,
+     "trophyHitElbowFlex": 99.1,
+     "trophyTossArmFromUp": 5.2
+    },
+    {
+     "file": "datasets/serves/medvedev/compilation-20.keypoints.json",
+     "contactFrame": 701,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 7.6,
+     "contactArmFromUp": 9.2,
+     "deepestFrontKneeFlex": 37.7,
+     "deepestBackKneeFlex": 50.0,
+     "trophyHitElbowFlex": 102.0,
+     "trophyTossArmFromUp": 5.5
+    },
+    {
+     "file": "datasets/serves/medvedev/compilation-21.keypoints.json",
+     "contactFrame": 930,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 18.0,
+     "contactArmFromUp": 14.0,
+     "deepestFrontKneeFlex": 40.3,
+     "deepestBackKneeFlex": 44.2,
+     "trophyHitElbowFlex": 177.9,
+     "trophyTossArmFromUp": 2.2
+    }
+   ]
+  },
+  "rublev": {
+   "hands": [
+    "right"
+   ],
+   "n": 2,
+   "median": {
+    "contactElbowFlex": 2.9,
+    "contactArmFromUp": 7.2,
+    "deepestFrontKneeFlex": 34.3,
+    "deepestBackKneeFlex": 54.8,
+    "trophyHitElbowFlex": 29.2,
+    "trophyTossArmFromUp": 8.0
+   },
+   "each": [
+    {
+     "file": "datasets/serves/rublev/compilation-22.keypoints.json",
+     "contactFrame": 313,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 2.9,
+     "contactArmFromUp": 7.2,
+     "deepestFrontKneeFlex": 33.4,
+     "deepestBackKneeFlex": 55.4,
+     "trophyHitElbowFlex": 28.8,
+     "trophyTossArmFromUp": 8.0
+    },
+    {
+     "file": "datasets/serves/rublev/compilation-23.keypoints.json",
+     "contactFrame": 364,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 2.9,
+     "contactArmFromUp": 7.1,
+     "deepestFrontKneeFlex": 35.2,
+     "deepestBackKneeFlex": 54.3,
+     "trophyHitElbowFlex": 29.7,
+     "trophyTossArmFromUp": 8.0
+    }
+   ]
+  },
+  "rune": {
+   "hands": [
+    "right"
+   ],
+   "n": 2,
+   "median": {
+    "contactElbowFlex": 5.9,
+    "contactArmFromUp": 5.3,
+    "deepestFrontKneeFlex": 56.1,
+    "deepestBackKneeFlex": 58.5,
+    "trophyHitElbowFlex": 128.3,
+    "trophyTossArmFromUp": 4.3
+   },
+   "each": [
+    {
+     "file": "datasets/serves/rune/compilation-34.keypoints.json",
+     "contactFrame": 327,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 5.4,
+     "contactArmFromUp": 6.0,
+     "deepestFrontKneeFlex": 56.2,
+     "deepestBackKneeFlex": 58.5,
+     "trophyHitElbowFlex": 129.1,
+     "trophyTossArmFromUp": 4.4
+    },
+    {
+     "file": "datasets/serves/rune/compilation-34.keypoints.json",
+     "contactFrame": 845,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 6.4,
+     "contactArmFromUp": 4.6,
+     "deepestFrontKneeFlex": 56.0,
+     "deepestBackKneeFlex": 58.6,
+     "trophyHitElbowFlex": 127.5,
+     "trophyTossArmFromUp": 4.3
+    }
+   ]
+  },
+  "shelton": {
+   "hands": [
+    "left"
+   ],
+   "n": 4,
+   "median": {
+    "contactElbowFlex": 10.8,
+    "contactArmFromUp": 6.0,
+    "deepestFrontKneeFlex": 48.5,
+    "deepestBackKneeFlex": 51.9,
+    "trophyHitElbowFlex": 24.8,
+    "trophyTossArmFromUp": 5.0
+   },
+   "each": [
+    {
+     "file": "datasets/serves/shelton/compilation-25.keypoints.json",
+     "contactFrame": 300,
+     "hand": "left",
+     "tossArm": "right",
+     "labelsMirrored": false,
+     "contactElbowFlex": 172.9,
+     "contactArmFromUp": 146.8,
+     "deepestFrontKneeFlex": 46.7,
+     "deepestBackKneeFlex": 33.3,
+     "trophyHitElbowFlex": 47.6,
+     "trophyTossArmFromUp": 8.2
+    },
+    {
+     "file": "datasets/serves/shelton/compilation-25.keypoints.json",
+     "contactFrame": 804,
+     "hand": "left",
+     "tossArm": "right",
+     "labelsMirrored": false,
+     "contactElbowFlex": 0.2,
+     "contactArmFromUp": 10.1,
+     "deepestFrontKneeFlex": 47.7,
+     "deepestBackKneeFlex": 34.0,
+     "trophyHitElbowFlex": 47.6,
+     "trophyTossArmFromUp": 8.1
+    },
+    {
+     "file": "datasets/serves/shelton/compilation-26.keypoints.json",
+     "contactFrame": 350,
+     "hand": "left",
+     "tossArm": "right",
+     "labelsMirrored": false,
+     "contactElbowFlex": 9.3,
+     "contactArmFromUp": 0.8,
+     "deepestFrontKneeFlex": 49.4,
+     "deepestBackKneeFlex": 69.7,
+     "trophyHitElbowFlex": 1.0,
+     "trophyTossArmFromUp": 1.9
+    },
+    {
+     "file": "datasets/serves/shelton/compilation-26.keypoints.json",
+     "contactFrame": 926,
+     "hand": "left",
+     "tossArm": "right",
+     "labelsMirrored": false,
+     "contactElbowFlex": 12.2,
+     "contactArmFromUp": 1.8,
+     "deepestFrontKneeFlex": 50.7,
+     "deepestBackKneeFlex": 71.0,
+     "trophyHitElbowFlex": 1.9,
+     "trophyTossArmFromUp": 0.3
+    }
+   ]
+  },
+  "sinner": {
+   "hands": [
+    "right"
+   ],
+   "n": 4,
+   "median": {
+    "contactElbowFlex": 6.8,
+    "contactArmFromUp": 7.0,
+    "deepestFrontKneeFlex": 54.1,
+    "deepestBackKneeFlex": 63.6,
+    "trophyHitElbowFlex": 36.2,
+    "trophyTossArmFromUp": 8.1
+   },
+   "each": [
+    {
+     "file": "datasets/serves/sinner/compilation-11.keypoints.json",
+     "contactFrame": 398,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 0.7,
+     "contactArmFromUp": 3.6,
+     "deepestFrontKneeFlex": 48.6,
+     "deepestBackKneeFlex": 69.5,
+     "trophyHitElbowFlex": 34.1,
+     "trophyTossArmFromUp": 12.0
+    },
+    {
+     "file": "datasets/serves/sinner/compilation-11.keypoints.json",
+     "contactFrame": 765,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 8.6,
+     "contactArmFromUp": 2.2,
+     "deepestFrontKneeFlex": 50.8,
+     "deepestBackKneeFlex": 67.0,
+     "trophyHitElbowFlex": 30.4,
+     "trophyTossArmFromUp": 13.2
+    },
+    {
+     "file": "datasets/serves/sinner/compilation-11.keypoints.json",
+     "contactFrame": 1398,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 6.9,
+     "contactArmFromUp": 10.3,
+     "deepestFrontKneeFlex": 57.4,
+     "deepestBackKneeFlex": 60.3,
+     "trophyHitElbowFlex": 47.5,
+     "trophyTossArmFromUp": 4.2
+    },
+    {
+     "file": "datasets/serves/sinner/compilation-11.keypoints.json",
+     "contactFrame": 1900,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 6.8,
+     "contactArmFromUp": 10.3,
+     "deepestFrontKneeFlex": 57.7,
+     "deepestBackKneeFlex": 60.2,
+     "trophyHitElbowFlex": 38.3,
+     "trophyTossArmFromUp": 1.6
+    }
+   ]
+  },
+  "tsitsipas": {
+   "hands": [
+    "right"
+   ],
+   "n": 2,
+   "median": {
+    "contactElbowFlex": 9.4,
+    "contactArmFromUp": 14.4,
+    "deepestFrontKneeFlex": 31.7,
+    "deepestBackKneeFlex": 55.1,
+    "trophyHitElbowFlex": 93.7,
+    "trophyTossArmFromUp": 9.0
+   },
+   "each": [
+    {
+     "file": "datasets/serves/tsitsipas/compilation-35.keypoints.json",
+     "contactFrame": 353,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 8.9,
+     "contactArmFromUp": 14.5,
+     "deepestFrontKneeFlex": 30.0,
+     "deepestBackKneeFlex": 56.0,
+     "trophyHitElbowFlex": 32.3,
+     "trophyTossArmFromUp": 16.8
+    },
+    {
+     "file": "datasets/serves/tsitsipas/compilation-35.keypoints.json",
+     "contactFrame": 841,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": false,
+     "contactElbowFlex": 9.8,
+     "contactArmFromUp": 14.3,
+     "deepestFrontKneeFlex": 33.4,
+     "deepestBackKneeFlex": 54.3,
+     "trophyHitElbowFlex": 155.0,
+     "trophyTossArmFromUp": 1.2
+    }
+   ]
+  },
+  "zverev": {
+   "hands": [
+    "left",
+    "right"
+   ],
+   "n": 2,
+   "median": {
+    "contactElbowFlex": 10.0,
+    "contactArmFromUp": 14.1,
+    "deepestFrontKneeFlex": 58.2,
+    "deepestBackKneeFlex": 49.0,
+    "trophyHitElbowFlex": 12.0,
+    "trophyTossArmFromUp": 5.5
+   },
+   "each": [
+    {
+     "file": "datasets/serves/zverev/compilation-18.keypoints.json",
+     "contactFrame": 271,
+     "hand": "right",
+     "tossArm": "left",
+     "labelsMirrored": true,
+     "contactElbowFlex": 11.6,
+     "contactArmFromUp": 13.1,
+     "deepestFrontKneeFlex": 57.7,
+     "deepestBackKneeFlex": 49.3,
+     "trophyHitElbowFlex": null,
+     "trophyTossArmFromUp": 0.1
+    },
+    {
+     "file": "datasets/serves/zverev/compilation-18.keypoints.json",
+     "contactFrame": 656,
+     "hand": "left",
+     "tossArm": "right",
+     "labelsMirrored": false,
+     "contactElbowFlex": 8.4,
+     "contactArmFromUp": 15.0,
+     "deepestFrontKneeFlex": 58.7,
+     "deepestBackKneeFlex": 48.6,
+     "trophyHitElbowFlex": 12.0,
+     "trophyTossArmFromUp": 10.8
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,48 @@
+{
+  "movement": "split-step",
+  "about": "A small two-footed hop timed to land as the opponent hits, so the legs are loaded and the first step can go either way. Times in seconds, heights and widths in fractions of standing height H, angles in degrees. Owner: Biomechanics Coach.",
+  "measuredFrom": "Alcaraz in Ryan's US Open clips vs Shelton (real time, ~56 fps, camera behind him). A split step = both feet leave the ground together and land together at least 0.25 H apart; narrower hops are the small bounces on the toes between shots (listed separately). datasets/anatomy/uso/measurements.json → splitSteps, bouncesOnToes.",
+  "sources": [
+    "measured",
+    "Uzu R, Shinya M, Oda S. A split-step shortens the time to perform a choice reaction step-and-reach movement in a simulated tennis situation. J Sports Sci Med 2009;8(4):667–671 (players time the split step so the landing falls around the opponent's impact; it shortens the reaction step).",
+    "Drillis & Contini 1966 (body proportions; see joints.json)"
+  ],
+  "measured": {
+    "n": 4,
+    "timing": "All 4 came right after Alcaraz's own serve: they landed 0.86–1.18 s after his serve contact (median 0.92 s), i.e. as Shelton struck the return.",
+    "airTime": { "median": 0.18, "range": [0.11, 0.34] },
+    "heightH": { "median": 0.035, "range": [0.024, 0.062], "note": "≈ 6 cm for Alcaraz (1.83 m); free flight of 0.18–0.22 s gives 4–6 cm (h = g·T²/8), so the two agree" },
+    "landingStanceWidthH": { "median": 0.35, "range": [0.30, 0.45], "note": "ankle to ankle, wider than the shoulders (0.26 H): about 0.63 m for Alcaraz" },
+    "hipDropOnLanding": "not resolvable from a camera behind the player (±0.06 H noise); the knees bend away from the camera"
+  },
+  "bouncesOnToes": {
+    "n": 14,
+    "what": "Narrow little hops between shots, feet almost together (0.05 H apart), heels never down.",
+    "airTime": { "median": 0.24, "range": [0.11, 0.34] },
+    "heightH": { "median": 0.032, "range": [0.02, 0.055] }
+  },
+  "phases": [
+    { "name": "preload", "t": -0.30, "relativeTo": "landing",
+      "body": "slight dip: knees ~20–30°, hips drop ~0.02 H, trunk leaning forward ~15–20°",
+      "arms": "both hands in front of the hips at waist height, racket head up, the free hand on the throat; elbows ~90°, hands ~0.15–0.2 H in front of the body" },
+    { "name": "takeoff", "t": -0.18, "relativeTo": "landing",
+      "body": "both ankles plantarflex (toes push), knees and hips extend together; a small hop, not a jump",
+      "arms": "unchanged: the racket stays in front" },
+    { "name": "flight", "t": -0.09, "relativeTo": "landing",
+      "body": "feet spread apart in the air from ~0.2 H to ~0.35 H; knees stay soft (~15–25°)",
+      "arms": "in front, racket centred" },
+    { "name": "landing", "t": 0, "relativeTo": "landing (= opponent's contact ± 0.1 s)",
+      "body": "lands on the balls of both feet at once, 0.30–0.45 H apart; knees absorb to ~35–50°, hips ~0.04–0.06 H lower than standing; trunk ~20° forward",
+      "arms": "in front of the body, ready to turn to either side" },
+    { "name": "firstStep", "t": 0.1, "relativeTo": "landing",
+      "body": "the leg on the ball's side turns out (a pivot/open step) while the far leg pushes; the shoulders start turning with the hips",
+      "arms": "unit turn: both hands take the racket back toward the ball side" }
+  ],
+  "kineticChain": "Ankles → knees → hips extend almost together for the take-off (a hop, so the trunk and arms barely move); on landing the order reverses: ankles, knees and hips absorb, which pre-stretches the legs for the first step.",
+  "seenFromBehind": "Square to the net: both feet visible, symmetric, wider than the hips on landing; the racket and both hands are hidden in front of the torso (only the elbows show at the sides).",
+  "seenFromFront": "Both hands and the racket head in front of the chest, centred.",
+  "game": {
+    "splitAirSeconds": 0.22,
+    "check": "Air time 0.22 s is inside the measured range. The hop height now follows the air time (index.html hopLift: a free-flight arc, peak g·T²/8 ≈ 6 cm) instead of a fixed 0.07 H (13 cm) lift. The landing stance in Anim (feet ±0.3 sprite widths ≈ 0.18 H apart) is about half the measured 0.35 H: see GAME_CHECK.md."
+  }
+}
