@@ -1,0 +1,91 @@
+{
+  "player": "alcaraz",
+  "name": "Carlos Alcaraz",
+  "hand": "right",
+  "observed": [
+    {
+      "id": "v1",
+      "url": "https://www.youtube.com/watch?v=YFK-EoLdzg4",
+      "title": "Carlos Alcaraz vs Casper Ruud Court-Level Highlights | Paris 2026",
+      "event": "Paris 2026",
+      "surface": "hard (indoor)",
+      "camera": "court-level, behind the near player (players large and sharp)",
+      "watchedOn": "2026-11-09"
+    },
+    {
+      "id": "v2",
+      "url": "https://www.youtube.com/watch?v=76kloSuaPEQ",
+      "title": "Carlos Alcaraz vs Ben Shelton Title Battle | Paris 2026 Final Highlights",
+      "event": "Paris 2026 final",
+      "surface": "hard (indoor)",
+      "camera": "broadcast (high, wide) plus close-ups between points",
+      "watchedOn": "2026-11-09"
+    }
+  ],
+  "appearance": {
+    "outfit": {
+      "event": "Paris 2026",
+      "shirt": "#1c2340 navy, short sleeves, yellow collar trim",
+      "shorts": "#e3e02a neon yellow",
+      "shoes": "black with yellow accents",
+      "accessories": [
+        "black wristband on the left wrist"
+      ]
+    },
+    "hair": "dark brown, thick and curly, medium length",
+    "headwear": "none in Paris (no white hairband here, unlike the long-band look in ROSTER)",
+    "build": "compact and powerful, thick thighs",
+    "seen": [
+      "v1 0.0",
+      "v1 65.0",
+      "v2 148.0"
+    ]
+  },
+  "forehand": {
+    "stance": "open stance on wide balls, very low (deep knee bend, back knee near the court)",
+    "takeback": "early unit turn",
+    "contact": "in front, from a low base",
+    "finish": "long, wraps across the body over the left shoulder; back leg kicks up and around on the hard ones",
+    "legs": "explosive push from the outside leg, often off the ground at the finish",
+    "seen": [
+      "v1 55.0",
+      "v2 130.0"
+    ],
+    "confidence": "partial"
+  },
+  "backhand": {
+    "hands": "two",
+    "stance": "open or semi-open on the run, wide base",
+    "takeback": "high: racket head up behind the left shoulder, then a loop down",
+    "contact": "in front of the body",
+    "finish": "high over the right shoulder, both hands still on the grip",
+    "seen": [
+      "v1 39.2-40.2",
+      "v1 75.0"
+    ],
+    "confidence": "clear"
+  },
+  "running": {
+    "ready": "wide, low stance, weight forward",
+    "firstStep": "explosive crossover into a huge first stride; the back leg stays fully stretched behind",
+    "braking": "plants low on the outside leg and hits from the lunge, then side-shuffles back",
+    "recovery": "quick side shuffle to the centre, small steps",
+    "seen": [
+      "v1 0-10",
+      "v2 130.0-131.6"
+    ]
+  },
+  "mannerisms": [
+    "clenched fist toward his box after a winner (v1 65.0, v2 148.0)"
+  ],
+  "gameHints": {
+    "player-artist": "Paris kit: navy shirt with a yellow collar, neon-yellow shorts, black shoes, dark curls; no hairband for this event. Exaggerate the low base and the curls.",
+    "racket-coach": "Backhand: high takeback (racket head up behind the left shoulder), finish high over the right shoulder. Forehand: wrap finish over the left shoulder.",
+    "animator": "Very low centre of mass; open-stance lunge forehand with the back leg flung up; crossover first step with full back-leg extension; recover with a side shuffle."
+  },
+  "notSeen": [
+    "serve (not studied in these clips)",
+    "one-handed slice backhand",
+    "a clear forehand takeback (only finishes and lunges were sharp)"
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "player": "ruud",
+  "name": "Casper Ruud",
+  "hand": "right",
+  "observed": [
+    {
+      "id": "v1",
+      "url": "https://www.youtube.com/watch?v=YFK-EoLdzg4",
+      "title": "Carlos Alcaraz vs Casper Ruud Court-Level Highlights | Paris 2026",
+      "event": "Paris 2026",
+      "surface": "hard (indoor)",
+      "camera": "court-level, behind the near player (players large and sharp)",
+      "watchedOn": "2026-11-09"
+    }
+  ],
+  "appearance": {
+    "outfit": {
+      "event": "Paris 2026",
+      "shirt": "#2c4f7c mid-blue, short sleeves",
+      "shorts": "#c9c9cf light grey",
+      "shoes": "white",
+      "accessories": [
+        "white headband",
+        "white wristbands on both wrists"
+      ]
+    },
+    "hair": "brown, short, held back by the headband",
+    "headwear": "white headband",
+    "build": "tall, upright",
+    "seen": [
+      "v1 30.0",
+      "v1 85.7-86.8"
+    ]
+  },
+  "forehand": {
+    "stance": "wide base; on the stretch he reaches with a long straight arm and a deep bend in the front knee",
+    "takeback": "early unit turn with a high, looping takeback (racket up beside the head)",
+    "contact": "not seen sharply",
+    "finish": "not seen",
+    "seen": [
+      "v1 24.6-25.4",
+      "v1 84.6-85.5"
+    ],
+    "confidence": "partial"
+  },
+  "backhand": {
+    "hands": "not seen in this video",
+    "confidence": "none"
+  },
+  "running": {
+    "ready": "wide, upright stance behind the baseline",
+    "splitStep": "small hop, lands wide",
+    "firstStep": "crossover to the forehand side",
+    "recovery": "crossover then shuffle back to the middle",
+    "seen": [
+      "v1 24.2-25.4",
+      "v1 29.4-31.4",
+      "v1 84.0-84.6"
+    ]
+  },
+  "mannerisms": [
+    "wipes his face and touches the headband walking back between points (v1 85.7-86.8)"
+  ],
+  "gameHints": {
+    "player-artist": "Blue shirt, light-grey shorts, white headband and white wristbands, white shoes; tall and upright.",
+    "racket-coach": "Forehand: big high loop takeback; reach forehand with a straight arm on wide balls.",
+    "animator": "Wide, upright ready stance; crossover to the forehand side; face-wipe walk between points."
+  },
+  "notSeen": [
+    "backhand (he was far side or off camera when hitting backhands)",
+    "forehand contact and finish",
+    "serve"
+  ]
+}

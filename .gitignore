@@ -1,5 +1,6 @@
 .DS_Store
-.claude/
+.claude/*
+!.claude/skills/
 
 # Raw video stays on this Mac; only extracted keypoint JSON goes to GitHub
 datasets/**/*.mov

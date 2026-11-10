@@ -1,0 +1,78 @@
+{
+  "player": "shelton",
+  "name": "Ben Shelton",
+  "hand": "left",
+  "observed": [
+    {
+      "id": "v2",
+      "url": "https://www.youtube.com/watch?v=76kloSuaPEQ",
+      "title": "Carlos Alcaraz vs Ben Shelton Title Battle | Paris 2026 Final Highlights",
+      "event": "Paris 2026 final",
+      "surface": "hard (indoor)",
+      "camera": "broadcast (high, wide) plus close-ups between points",
+      "watchedOn": "2026-11-09"
+    }
+  ],
+  "appearance": {
+    "outfit": {
+      "event": "Paris 2026 final",
+      "shirt": "#1e2638 dark navy",
+      "shorts": "#1e2638 dark navy",
+      "shoes": "white, white socks",
+      "accessories": [
+        "white headband",
+        "white wristband"
+      ]
+    },
+    "hair": "dark brown, wavy, over the headband",
+    "headwear": "white headband",
+    "build": "tall, broad-shouldered",
+    "racket": "multicoloured frame (blue, orange, purple)",
+    "seen": [
+      "v2 118.0",
+      "v2 120.0"
+    ]
+  },
+  "forehand": {
+    "stance": "semi-open",
+    "finish": "big and high: racket ends up over the right shoulder with the left arm high (left-handed, so his forehand is on his left)",
+    "seen": [
+      "v2 166.0-166.4"
+    ],
+    "confidence": "glimpse (broadcast camera)"
+  },
+  "backhand": {
+    "hands": "two",
+    "stance": "open stance on the run to his right",
+    "takeback": "low, racket head below the hands behind the right hip",
+    "contact": "beside the front hip while lunging",
+    "finish": "high over the left shoulder, both hands on",
+    "seen": [
+      "v2 39.4-40.2"
+    ],
+    "confidence": "partial"
+  },
+  "running": {
+    "ready": "very wide receiving stance, knees bent",
+    "splitStep": "deep and wide",
+    "firstStep": "big lean and long drive step toward the ball",
+    "recovery": "settles back into a wide stance quickly",
+    "seen": [
+      "v2 38.0-39.2",
+      "v2 167.2-167.6"
+    ]
+  },
+  "mannerisms": [
+    "roars with the racket held low after big points (v2 120.0)"
+  ],
+  "gameHints": {
+    "player-artist": "All dark navy kit, white headband, white wristband, white shoes and socks; left-handed, so the racket is in the left hand; colourful racket frame.",
+    "racket-coach": "Left-handed: mirror the swing. Two-handed backhand: low takeback, high finish over the left shoulder.",
+    "animator": "Very wide, low receiving stance and a deep split step; long, driving first strides."
+  },
+  "notSeen": [
+    "serve (the main reason people know him; not studied here)",
+    "a sharp forehand takeback and contact",
+    "slices"
+  ]
+}
