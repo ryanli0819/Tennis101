@@ -25,67 +25,81 @@
   "appearance": {
     "outfit": {
       "event": "Paris 2026",
-      "shirt": "#1c2340 navy, short sleeves, yellow collar trim",
+      "shirt": "#1c2340 navy, short sleeves, bright-yellow collar, small yellow square logo on the chest",
       "shorts": "#e3e02a neon yellow",
       "shoes": "black with yellow accents",
       "accessories": [
-        "black wristband on the left wrist"
+        "thin chain necklace (v2 73.0)"
       ]
     },
-    "hair": "dark brown, thick and curly, medium length",
+    "hair": "dark brown, thick, wavy-curly, medium length",
     "headwear": "none in Paris (no white hairband here, unlike the long-band look in ROSTER)",
     "build": "compact and powerful, thick thighs",
     "seen": [
       "v1 0.0",
       "v1 65.0",
+      "v2 54.0",
+      "v2 62.0",
+      "v2 73.0",
       "v2 148.0"
-    ]
+    ],
+    "face": "short beard / stubble"
   },
   "forehand": {
-    "stance": "open stance on wide balls, very low (deep knee bend, back knee near the court)",
-    "takeback": "early unit turn",
-    "contact": "in front, from a low base",
-    "finish": "long, wraps across the body over the left shoulder; back leg kicks up and around on the hard ones",
-    "legs": "explosive push from the outside leg, often off the ground at the finish",
+    "stance": "open stance, very low base on wide balls; sprints with crossovers to reach it first",
+    "takeback": "early unit turn with the left arm across the body; racket taken back high, then dropped low below the ball before the swing",
+    "contact": "in front, from a deep knee bend",
+    "finish": "wraps across the body over the left shoulder, often with both arms up",
+    "legs": "loads the outside (right) leg; the back leg kicks up and around at the finish on hard hits",
     "seen": [
+      "v1 17.8-18.2",
+      "v1 44.6-45.2",
       "v1 55.0",
+      "v1 128.6",
       "v2 130.0"
     ],
-    "confidence": "partial"
+    "confidence": "clear"
   },
   "backhand": {
     "hands": "two",
-    "stance": "open or semi-open on the run, wide base",
-    "takeback": "high: racket head up behind the left shoulder, then a loop down",
+    "stance": "neutral to open; steps out with the right leg on returns, open stance on the run",
+    "takeback": "high: racket head up behind the left shoulder after the unit turn, then a loop down",
     "contact": "in front of the body",
-    "finish": "high over the right shoulder, both hands still on the grip",
+    "finish": "high over the right shoulder, both hands on the grip",
     "seen": [
       "v1 39.2-40.2",
+      "v1 56.8-57.2",
       "v1 75.0"
     ],
     "confidence": "clear"
   },
   "running": {
-    "ready": "wide, low stance, weight forward",
-    "firstStep": "explosive crossover into a huge first stride; the back leg stays fully stretched behind",
-    "braking": "plants low on the outside leg and hits from the lunge, then side-shuffles back",
-    "recovery": "quick side shuffle to the centre, small steps",
+    "ready": "wide, low stance, weight forward on the balls of the feet",
+    "splitStep": "lands wide and low just as the opponent hits (return at v1 56.6, timed with Ruud's serve contact)",
+    "firstStep": "explosive crossover into a huge first stride; back leg fully stretched behind",
+    "braking": "plants low on the outside leg and hits from the lunge; bends right down to dig out low balls on the run (v1 129.0)",
+    "recovery": "quick side shuffle back to the centre, small steps",
     "seen": [
-      "v1 0-10",
+      "v1 0-3",
+      "v1 17.4-17.8",
+      "v1 56.4-56.6",
+      "v1 114.0",
+      "v1 129.0-129.4",
       "v2 130.0-131.6"
     ]
   },
   "mannerisms": [
-    "clenched fist toward his box after a winner (v1 65.0, v2 148.0)"
+    "clenched fist toward his box or the camera after a winner (v1 65.0, v2 73.0, v2 148.0)"
   ],
   "gameHints": {
-    "player-artist": "Paris kit: navy shirt with a yellow collar, neon-yellow shorts, black shoes, dark curls; no hairband for this event. Exaggerate the low base and the curls.",
-    "racket-coach": "Backhand: high takeback (racket head up behind the left shoulder), finish high over the right shoulder. Forehand: wrap finish over the left shoulder.",
-    "animator": "Very low centre of mass; open-stance lunge forehand with the back leg flung up; crossover first step with full back-leg extension; recover with a side shuffle."
+    "player-artist": "Paris kit: navy shirt with a bright-yellow collar and small yellow chest logo, neon-yellow shorts, black shoes; dark wavy curls and short beard; no hairband at this event. Exaggerate the low base and the curls.",
+    "racket-coach": "Forehand: high takeback, drop the racket below the ball, wrap finish over the left shoulder. Backhand (two hands): racket head up behind the left shoulder, loop down, finish high over the right shoulder.",
+    "animator": "Very low centre of mass; crossover first step with full back-leg extension; open-stance forehand from a lunge with the back leg flung up; split step that lands as the opponent hits; recover with a side shuffle.",
+    "body-animator": "Split-step landing at the opponent's contact (wide, knees deep); lunge depth: back knee close to the court."
   },
   "notSeen": [
-    "serve (not studied in these clips)",
+    "serve (in view at v1 75 and v1 126 but not stepped through)",
     "one-handed slice backhand",
-    "a clear forehand takeback (only finishes and lunges were sharp)"
+    "drop shot"
   ]
 }
