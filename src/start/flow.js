@@ -75,7 +75,7 @@
         <h1 class="sf-title">Tennis<em>101</em></h1>
         <p class="sf-tag">Play inside a real pro's body.</p>
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">${onResume ? `<button class="btn primary big" type="button" id="sfResume">Back to match →</button>` : ""}<button class="btn ${onResume ? "" : "primary "}big" type="button" data-go="next">${onResume ? "New match" : "Play →"}</button></div>
-        <p class="sf-links"><a href="presentation/">How it was built</a> · <a href="agents/dashboard.html">Agent Control Room</a></p></div>`;
+        <p class="sf-links"><a href="presentation/">How it was built</a> · <a href="src/serve/motion/viewer.html">Serve viewer</a> · <a href="agents/dashboard.html">Agent Control Room</a></p></div>`;
     } else if (n === 1) {
       v.innerHTML = `${steps(0)}<div><h2>Choose your match</h2><p class="sub">How long do you want to play?</p></div>
         <div class="sf-opts" id="sfLen"></div>

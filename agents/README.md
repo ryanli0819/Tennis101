@@ -54,7 +54,7 @@ Keep these stable. Change one only in your own PR, and say so in its description
 
 **Locker room (Locker Room Designer).** `Lockerroom.render(el, { roster, bodyStats, selected, onSelect })`, called by the start flow after the match and court choices.
 
-**Serving (Serve Controller · first version in `index.html`).** The game serves by itself about 4 s after each point (`BETWEEN_POINTS`), with a 2 s READY countdown (`READY`), and 2.5 s after a fault or let. `planServe(server, no)` returns `{ land, target, fault, net, let, ace }`. `ACE_CHANCE` stores the last serve's ace probability: near zero unless the placement is perfect (within 45 cm of a line), and much higher when the receiver is on the wrong side. Per-player `letRate` is in `ROSTER`. Second serves use `SERVE_MOTIONS.sinner.second`.
+**Serving (Serve Controller · first version in `index.html`).** The game serves by itself about 4 s after each point (`BETWEEN_POINTS`), with a 2 s READY countdown (`READY`), and 2.5 s after a fault or let. `planServe(server, no)` returns `{ land, target, fault, net, let, ace }`. `ACE_CHANCE` stores the last serve's ace probability: near zero unless the placement is perfect (within 45 cm of a line), and much higher when the receiver is on the wrong side. Per-player `letRate` is in `ROSTER`. Second serves use that player's `SERVE_MOTIONS[id].second`. When a player has only one captured serve, that same motion is reused and marked `reused`. Speed, spin and serve type stay the game's own numbers.
 
 **First person (First-Person Camera).** `CAMS.pov` and `povWanted()`: from your READY countdown to just after your contact, at eye height = 94% of `heightM`.
 

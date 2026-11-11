@@ -1,0 +1,253 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Captured serves · Tennis101</title>
+<style>
+:root { --night: #0a1120; --panel: #0e1729; --panel-2: #16233c; --line: #2a3b5e; --ink: #eef3fb; --muted: #8b9cbc; --ball: #d8ee4c; --toss: #23b59c; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--night); color: var(--ink); font: 15px/1.45 "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+main { max-width: 1080px; margin: 0 auto; padding: 16px 16px 40px; display: grid; gap: 12px; }
+h1 { margin: 0; font: 600 28px/1.1 "Barlow Condensed", "Arial Narrow", sans-serif; letter-spacing: .02em; }
+h1 small { display: block; font: 10px ui-monospace, monospace; letter-spacing: .12em; color: var(--ball); margin-bottom: 6px; }
+p { margin: 0; }
+a { color: var(--ball); }
+.muted { color: var(--muted); }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+label { display: grid; gap: 4px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+select, button { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 7px 10px; }
+button { cursor: pointer; }
+button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--ball); outline-offset: 2px; }
+input[type=range] { flex: 1; min-width: 120px; accent-color: var(--ball); }
+canvas { width: 100%; height: min(58vh, 560px); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; display: block; touch-action: none; }
+.stage { position: relative; }
+.phase { position: absolute; left: 12px; top: 12px; background: rgba(10, 17, 32, .72); border: 1px solid var(--line); border-radius: 5px; padding: 4px 8px; font-size: 12px; letter-spacing: .08em; }
+.notes { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 6px; font-size: 13px; }
+.notes b { color: var(--ink); font-weight: 600; }
+.flags { display: flex; flex-wrap: wrap; gap: 6px; }
+.flag { font-size: 11px; letter-spacing: .04em; border: 1px solid var(--line); border-radius: 99px; padding: 3px 8px; color: var(--muted); }
+.flag.warn { color: var(--ball); border-color: #6a7030; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; margin-right: 14px; }
+.legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+@media (max-width: 640px) {
+  h1 { font-size: 24px; }
+  canvas { height: 68vw; min-height: 280px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto; }
+}
+</style>
+<main>
+  <div>
+    <h1><small>TENNIS101</small>Captured serves</h1>
+    <p class="muted">All 22 roster players, from checked 3D footage. Drag to orbit. Speed, spin and serve type were not measured, so they are left blank. <a href="../../../index.html">Back to the game</a> · <a href="../../../datasets/serves/viewer.html">Older Sinner clip viewer</a></p>
+  </div>
+  <div class="bar">
+    <label>Player
+      <select id="player"></select>
+    </label>
+    <label>Serve
+      <select id="serve"></select>
+    </label>
+    <button id="play" type="button">Play</button>
+    <label>Speed
+      <select id="speed" aria-label="Playback speed">
+        <option value="0.5">½×</option>
+        <option value="1" selected>1×</option>
+        <option value="0.25">¼×</option>
+      </select>
+    </label>
+  </div>
+  <div class="bar">
+    <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Time">
+    <span id="clock" class="muted">0.00 s</span>
+  </div>
+  <div class="stage">
+    <canvas id="cv" width="960" height="640"></canvas>
+    <div class="phase" id="phase">READY</div>
+  </div>
+  <p class="legend"><span><i style="background:var(--toss)"></i>tossing side</span><span><i style="background:var(--ball)"></i>hitting side</span><span><i style="background:var(--ink)"></i>centre</span><span class="muted">+x player's right · +y up · +z into the court</span></p>
+  <div class="notes" id="notes"></div>
+</main>
+<script src="roster-serves.js"></script>
+<script>
+const catalog = window.SERVE_CATALOG || [];
+const cv = document.getElementById("cv"), g = cv.getContext("2d");
+const ui = (id) => document.getElementById(id);
+const BONES = [
+  ["nose", "neck"], ["leftEar", "nose"], ["rightEar", "nose"],
+  ["neck", "leftShoulder"], ["neck", "rightShoulder"],
+  ["leftShoulder", "leftElbow"], ["leftElbow", "leftWrist"], ["leftWrist", "leftIndex"],
+  ["rightShoulder", "rightElbow"], ["rightElbow", "rightWrist"], ["rightWrist", "rightIndex"],
+  ["leftShoulder", "leftHip"], ["rightShoulder", "rightHip"], ["leftHip", "rightHip"],
+  ["neck", "pelvis"],
+  ["leftHip", "leftKnee"], ["leftKnee", "leftAnkle"], ["leftAnkle", "leftToe"], ["leftAnkle", "leftHeel"],
+  ["rightHip", "rightKnee"], ["rightKnee", "rightAnkle"], ["rightAnkle", "rightToe"], ["rightAnkle", "rightHeel"],
+];
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let player = catalog[0], motion = null, t = 0, playing = !reduced, last = performance.now();
+const cam = { yaw: 0.6, pitch: 0.18, dist: 2.35 };
+ui("play").textContent = playing ? "Pause" : "Play";
+
+function fillPlayers() {
+  const sel = ui("player");
+  catalog.forEach((p, i) => {
+    const o = document.createElement("option");
+    o.value = String(i);
+    o.textContent = p.name + (p.hand === "L" ? " (L)" : "");
+    sel.appendChild(o);
+  });
+  sel.onchange = () => { player = catalog[+sel.value]; fillServes(); };
+  fillServes();
+}
+function fillServes() {
+  const sel = ui("serve");
+  sel.innerHTML = "";
+  player.serves.forEach((s, i) => {
+    const o = document.createElement("option");
+    o.value = String(i);
+    const tag = s.role === "first" ? "1st in game" : s.role === "second" ? (s.reused ? "2nd · reused" : "2nd in game") : "extra";
+    o.textContent = tag + " · " + (s.eventYear || "year n/a") + " · " + (s.quality || "");
+    sel.appendChild(o);
+  });
+  sel.onchange = () => pick(+sel.value);
+  const first = Math.max(0, player.serves.findIndex((s) => s.role === "first"));
+  sel.value = String(first);
+  pick(first);
+}
+function pick(i) {
+  motion = player.serves[i];
+  t = 0;
+  draw();
+  notes();
+}
+function poseAt(m, time) {
+  const fr = m.frames;
+  if (time <= fr[0].t) return fr[0].joints;
+  if (time >= fr[fr.length - 1].t) return fr[fr.length - 1].joints;
+  let k = 1;
+  while (k < fr.length - 1 && fr[k].t < time) k++;
+  const a = fr[k - 1], c = fr[k];
+  const u = (time - a.t) / ((c.t - a.t) || 1);
+  const out = {};
+  for (const n in c.joints) {
+    const p = a.joints[n] || c.joints[n], q = c.joints[n];
+    out[n] = { x: p.x + (q.x - p.x) * u, y: p.y + (q.y - p.y) * u, z: p.z + (q.z - p.z) * u };
+  }
+  return out;
+}
+function project(p, w, h) {
+  const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw), cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+  const x = p.x, y = p.y - 0.95, z = p.z;
+  const x1 = cy * x + sy * z, z1 = -sy * x + cy * z;
+  const y2 = cp * y - sp * z1, z2 = sp * y + cp * z1 + cam.dist;
+  const f = Math.min(w, h) * 1.25;
+  return { x: w / 2 + x1 / z2 * f, y: h * 0.56 - y2 / z2 * f };
+}
+function phaseName(m, time) {
+  const e = m.events;
+  if (time < e.tossRelease) return "STANCE";
+  if (time < e.trophy) return "TOSS";
+  if (time < e.contact) return "TROPHY";
+  if (time < e.finish) return "CONTACT";
+  return "FINISH";
+}
+function draw() {
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  }
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+  g.fillStyle = "#0e1729"; g.fillRect(0, 0, w, h);
+  // ground
+  g.strokeStyle = "#24344f"; g.lineWidth = 1;
+  for (let i = -2; i <= 2; i++) {
+    const a = project({ x: -1.2, y: 0, z: i * 0.4 }, w, h), b = project({ x: 1.2, y: 0, z: i * 0.4 }, w, h);
+    g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke();
+  }
+  if (!motion) return;
+  const J = poseAt(motion, t);
+  const hit = motion.hand === "L" ? "left" : "right";
+  const col = (n) => n.startsWith(hit) ? "#d8ee4c" : n.startsWith(hit === "left" ? "right" : "left") ? "#23b59c" : "#eef3fb";
+  g.lineWidth = 3; g.lineCap = "round";
+  for (const [a, b] of BONES) {
+    if (!J[a] || !J[b]) continue;
+    const A = project(J[a], w, h), B = project(J[b], w, h);
+    g.strokeStyle = col(a);
+    g.beginPath(); g.moveTo(A.x, A.y); g.lineTo(B.x, B.y); g.stroke();
+  }
+  for (const n in J) {
+    const P = project(J[n], w, h);
+    g.fillStyle = col(n);
+    g.beginPath(); g.arc(P.x, P.y, n === "nose" ? 5 : 3.2, 0, Math.PI * 2); g.fill();
+  }
+  const dur = motion.frames[motion.frames.length - 1].t || 1;
+  ui("scrub").value = String(Math.round(t / dur * 1000));
+  ui("clock").textContent = t.toFixed(2) + " / " + dur.toFixed(2) + " s";
+  ui("phase").textContent = phaseName(motion, t);
+}
+function notes() {
+  if (!motion || !player) return;
+  const kb = motion.kneeBend == null ? "—" : motion.kneeBend.toFixed(2);
+  const ba = motion.backArch == null ? "—" : motion.backArch.toFixed(2);
+  const raw = (motion.kneeBendRaw != null && motion.kneeBendRaw !== motion.kneeBend) || (motion.backArchRaw != null && motion.backArchRaw !== motion.backArch);
+  const flags = [];
+  flags.push(`<span class="flag">speed — not measured</span>`);
+  flags.push(`<span class="flag">spin — not measured</span>`);
+  flags.push(`<span class="flag">type — not classified</span>`);
+  if (motion.reused) flags.push(`<span class="flag warn">only one serve · reused for 2nd</span>`);
+  if (motion.lowConfidence) flags.push(`<span class="flag warn">low confidence</span>`);
+  if (player.hand === "L") flags.push(`<span class="flag">left-handed</span>`);
+  if (raw) flags.push(`<span class="flag warn">knee / arch clamped to 0–1</span>`);
+  if (player.gap) flags.push(`<span class="flag">thin footage</span>`);
+  const src = motion.source ? `<a href="${motion.source}">source</a>` : "source not listed";
+  ui("notes").innerHTML = `
+    <div class="flags">${flags.join("")}</div>
+    <div><b>${player.name}</b> · ${player.heightM} m · wrist at contact ${motion.hittingWristHeightM == null ? "—" : motion.hittingWristHeightM + " m"} · estimated contact ${motion.estimatedContactHeightM == null ? "—" : motion.estimatedContactHeightM + " m (labeled: wrist + 0.55 m racket)"}</div>
+    <div>${motion.event || "Event not labeled"}${motion.eventYear ? " (" + motion.eventYear + ")" : ""} · ${src}</div>
+    <div>kneeBend ${kb}${motion.kneeBendRaw != null ? " (raw " + motion.kneeBendRaw + ")" : ""} · backArch ${ba}${motion.backArchRaw != null ? " (raw " + motion.backArchRaw + ")" : ""}. Both are monocular estimates.</div>
+    <div class="muted">${motion.note || ""}</div>`;
+}
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (playing && motion) {
+    const dur = motion.frames[motion.frames.length - 1].t || 1;
+    t += dt * (+ui("speed").value);
+    if (t > dur) t = 0;
+    draw();
+  }
+  requestAnimationFrame(frame);
+}
+ui("play").onclick = () => { playing = !playing; ui("play").textContent = playing ? "Pause" : "Play"; };
+ui("scrub").oninput = () => {
+  if (!motion) return;
+  const dur = motion.frames[motion.frames.length - 1].t || 1;
+  t = +ui("scrub").value / 1000 * dur;
+  draw();
+};
+let drag = null;
+cv.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, yaw: cam.yaw, pitch: cam.pitch }; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove", (e) => {
+  if (!drag) return;
+  cam.yaw = drag.yaw + (e.clientX - drag.x) * 0.01;
+  cam.pitch = Math.max(-0.4, Math.min(1.2, drag.pitch + (e.clientY - drag.y) * 0.01));
+  draw();
+});
+cv.addEventListener("pointerup", () => { drag = null; });
+addEventListener("keydown", (e) => {
+  if (e.key === " " && e.target === document.body) { e.preventDefault(); ui("play").click(); }
+  if (!motion) return;
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+    t = Math.max(0, t + (e.key === "ArrowRight" ? 0.05 : -0.05));
+    draw();
+  }
+});
+addEventListener("resize", draw);
+if (!catalog.length) {
+  ui("notes").textContent = "Serve data did not load.";
+} else {
+  fillPlayers();
+  requestAnimationFrame(frame);
+}
+</script>

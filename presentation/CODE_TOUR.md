@@ -105,6 +105,7 @@ if (mo.t >= E.contact) { rally.serve = null; hitBall(0, true); } // [G5] contact
 | H2 | [`clean_keypoints.py`](../datasets/serves/tools/clean_keypoints.py) | Cleans the track in 3 passes (below) and picks 20 key frames |
 | H3 | [`export_motion.py`](../datasets/serves/tools/export_motion.py) | Converts to body heights, mirrors to the back view, writes the game file |
 | H4 | [`viewer.html`](../datasets/serves/viewer.html) | Plays raw vs cleaned joints as dots and lines |
+| H5 | [`src/serve/motion/viewer.html`](../src/serve/motion/viewer.html) | Plays the captured 3D serve of any of the 22 roster players |
 
 ```python
 # ---- pass A: confidence + left/right swaps ----              [H2a] drop <0.3 confidence, undo L/R swaps vs previous frame
