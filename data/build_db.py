@@ -47,19 +47,39 @@ def build():
     db = sqlite3.connect(DB)
     db.executescript(open(path("data", "schema.sql")).read())
 
-    # PLAYERS: parsed from the ROSTER array in index.html (the game's single source of player data).
-    # The first pro in the roster is the default near-court player; you can pick either in the locker room.
+    # PLAYERS: Sinner and Alcaraz are written in index.html. The other pros are in
+    # src/players/roster.js (same fields). The first pro is the default near-court player.
+    row_re = re.compile(
+        r'\{\s*id:\s*"([^"]+)",\s*last:\s*"([^"]+)",\s*first:\s*"([^"]+)",\s*code:\s*"([^"]+)",\s*heightM:\s*([\d.]+),\s*weightKg:\s*([\d.]+)')
+    pro_re = re.compile(
+        r'pro\(\{\s*id:\s*"([^"]+)",\s*last:\s*"([^"]+)",\s*first:\s*"([^"]+)",\s*code:\s*"([^"]+)",\s*h:\s*([\d.]+),\s*w:\s*([\d.]+)')
     src = open(path("index.html")).read()
-    rows = re.findall(r'\{ id: "(\w+)",\s*last: "(\w+)",\s*first: "(\w+)", code: "(\w+)", heightM: ([\d.]+), weightKg: ([\d.]+)', src)
-    for n, (pid, last, first, code, h, w) in enumerate(rows):
+    roster_src = open(path("src", "players", "roster.js")).read()
+    rows = row_re.findall(src) + pro_re.findall(roster_src)
+    seen = set()
+    n = 0
+    for pid, last, first, code, h, w in rows:
+        if pid in seen:
+            continue
+        seen.add(pid)
         db.execute("INSERT INTO players VALUES (?,?,?,?,?,?,?)", (pid, first, last.title(), code, float(h), float(w), "near" if n == 0 else "far"))
+        n += 1
 
-    # SKILLS: the SKILLS list and PLAYER_SKILLS table in src/skills/skills.js
+    # SKILLS: the SKILLS list and PLAYER_SKILLS table in src/skills/skills.js,
+    # plus ROSTER_SKILLS in src/players/roster.js (quoted ids, so hyphens work).
     sk = open(path("src", "skills", "skills.js")).read()
     for sid, name, what, step in re.findall(r'\{ id: "(\w+)",\s*name: "([^"]+)",\s*what: "([^"]+)",\s*step: "([^"]+)" \}', sk):
         db.execute("INSERT INTO skills VALUES (?,?,?,?)", (sid, name, what, step))
+    skill_rows = {}
     for pid, body in re.findall(r'^\s*(\w+):\s*\{ (speed: [^}]+)\}', sk, re.M):
-        for skill, pts in re.findall(r'(\w+): (\d+)', body):
+        skill_rows[pid] = dict(re.findall(r'(\w+): (\d+)', body))
+    roster_js = open(path("src", "players", "roster.js")).read()
+    for pid, body in re.findall(r'"?([\w-]+)"?\s*:\s*SK\(([^)]+)\)', roster_js):
+        nums = [int(x.strip()) for x in body.split(",")]
+        keys = ["speed", "agility", "endurance", "strength", "serve", "control", "reflexes", "netPlay"]
+        skill_rows[pid] = dict(zip(keys, nums))
+    for pid, skills in skill_rows.items():
+        for skill, pts in skills.items():
             db.execute("INSERT INTO player_skills VALUES (?,?,?)", (pid, skill, int(pts)))
 
     # AGENTS: from the registry the dashboard also reads

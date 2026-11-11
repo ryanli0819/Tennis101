@@ -2,6 +2,10 @@
 
 Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it was published (Eastern time, to the hour).
 
+## Unreleased
+- Real heights and weights for the rest of the roster: the other 20 pros now have a sourced height, weight, playing hand and backhand. (Nov 11, 3 PM · pixel characters, branch agent/pixel-characters)
+- The rest of the roster, in pixels: you can play as any of the 22 pros, each with his own hair, hat or headband, and a kit for grass, hard and clay. Left-handers hold the racket in the left hand. (Nov 11, 4 PM · pixel characters, branch agent/pixel-characters)
+
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
 
 ## v0.11.0 — Nov 11, 2026, 2 PM

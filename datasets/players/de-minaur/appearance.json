@@ -10,22 +10,34 @@
     "fastest feet in the game (motion blur on runs)"
   ],
   "confidence": "public",
-  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18) Body numbers added Nov 11 2026 from the 2026 ATP media guide where the player is listed, otherwise the source named in body.",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
       "shirt": "#f4f4f0",
       "shorts": "#f4f4f0",
       "shoes": "#f4f4f0",
-      "notes": "all-white dress code; trim colours to research"
+      "notes": "all-white dress code; trim colours to research",
+      "hexKind": "dress-code",
+      "cap": "#f4f4f0"
     },
     "hard": {
       "event": "US Open",
-      "notes": "to research"
+      "notes": "He often wears a cap (signature). Cap colour at the US Open was not sourced; the dark cap is a neutral default on the navy shirt.",
+      "cap": "#1a1a1e",
+      "shirt": "#1c2a44",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "hexKind": "game-design-default"
     },
     "clay": {
       "event": "Roland-Garros (red clay)",
-      "notes": "to research"
+      "notes": "Neutral default kit. A citable clay colour was not found for this run.",
+      "cap": "#f4f4f0",
+      "shirt": "#3e4c5c",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "hexKind": "game-design-default"
     }
   },
   "personality": {
@@ -58,7 +70,61 @@
     {
       "claim": "the Demon camera signature celebration",
       "url": "https://www.essentiallysports.com/atp-tennis-news-what-does-alex-de-minaur-s-the-demon-celebration-mean-where-did-he-get-the-nickname-from"
+    },
+    {
+      "claim": "1.83 m / 68 kg, right-handed, two-handed backhand",
+      "url": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf"
     }
   ],
-  "sourcedOn": "2026-11-05"
+  "sourcedOn": "2026-11-11",
+  "body": {
+    "heightM": 1.83,
+    "weightKg": 68,
+    "hand": "right",
+    "backhand": "two-handed",
+    "confidence": "public",
+    "heightSource": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf",
+    "weightSource": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf",
+    "plays": "Right-handed, two-handed backhand",
+    "conflicts": [
+      "Tennis Companion's ATP-derived table lists 69 kg. The 2026 media guide lists 68 kg. The game uses 68 kg."
+    ]
+  },
+  "game": {
+    "reachM": {
+      "value": 1.5,
+      "kind": "derived",
+      "formula": "0.44 * heightM + 0.69",
+      "note": "Same formula as bodyStats() in index.html. Not a measured wingspan. datasets/players/<id>/body.json does not exist yet (Body Scout has not run)."
+    },
+    "letRate": {
+      "value": 0.02,
+      "kind": "estimate",
+      "note": "Same range already used for Sinner (0.02) and Alcaraz (0.03): lets on roughly 1–3% of pro serves. Not counted from a match log."
+    },
+    "skills": {
+      "values": {
+        "speed": 19,
+        "agility": 19,
+        "endurance": 18,
+        "strength": 12,
+        "serve": 13,
+        "control": 16,
+        "reflexes": 18,
+        "netPlay": 12
+      },
+      "kind": "game-design",
+      "scale": "1–20, 10 = neutral, the Skills Coach scale in src/skills/skills.js",
+      "note": "Not a measured rating. Set from the published style already in this file (serve size, footspeed, touch) so the locker room is not all 10s."
+    },
+    "torsoScale": {
+      "kind": "game-design",
+      "note": "look.torso in src/players/roster.js is a pixel width multiplier taken from words already in signature/exaggerate (lanky, broad, slim). It is not a measured shoulder width."
+    },
+    "favouriteServes": {
+      "summary": "Not a serve-led game; footspeed is the trait the skills follow.",
+      "kind": "summary-of-published-style",
+      "from": "signature"
+    }
+  }
 }

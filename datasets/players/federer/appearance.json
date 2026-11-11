@@ -13,7 +13,7 @@
     "upright, relaxed posture; light, gliding footwork (no grunting, few big gestures)"
   ],
   "confidence": "public",
-  "source": "personality and looks: public media, one link per claim in `sources` (Nov 9 2026); build and height (about 1.85 m) are general knowledge and still need to be checked; outfits wait on stills (#18)",
+  "source": "personality and looks: public media, one link per claim in `sources` (Nov 9 2026); build and height (about 1.85 m) are general knowledge and still need to be checked; outfits wait on stills (#18) Body numbers added Nov 11 2026 from the 2026 ATP media guide where the player is listed, otherwise the source named in body.",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -21,15 +21,29 @@
       "shorts": "#f4f4f0",
       "shoes": "#f4f4f0",
       "headband": "#f4f4f0",
-      "notes": "all-white dress code. Walk-on: a cardigan (2008) and an all-white military-style jacket with gold details (2009), a possible walk-on animation. Trim colours to research"
+      "notes": "all-white dress code. Walk-on: a cardigan (2008) and an all-white military-style jacket with gold details (2009), a possible walk-on animation. Trim colours to research",
+      "hexKind": "dress-code",
+      "band": "#f4f4f0"
     },
     "hard": {
       "event": "US Open",
-      "notes": "to research; he switched from the bandana to a headband at the 2001 US Open"
+      "notes": "Headband era. No US Open shirt colour was sourced, so the shirt stays white rather than a guessed polo. The white headband is the signature.",
+      "shirt": "#f4f4f0",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "band": "#f4f4f0",
+      "headband": "#f4f4f0",
+      "hexKind": "withheld"
     },
     "clay": {
       "event": "Roland-Garros (red clay)",
-      "notes": "to research"
+      "notes": "Clay shirt colour withheld for the same reason. White headband stays.",
+      "shirt": "#f4f4f0",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "band": "#f4f4f0",
+      "headband": "#f4f4f0",
+      "hexKind": "withheld"
     }
   },
   "personality": {
@@ -88,7 +102,63 @@
     {
       "claim": "tears on court after big wins",
       "url": "https://www.tennis365.com/tennis-features/top-10-tracks-of-their-tears-when-tennis-stars-broke-down-featuring-andy-murrays-waterworks"
+    },
+    {
+      "claim": "Wikipedia infobox: 1.85 m, right-handed, one-handed backhand",
+      "url": "https://en.wikipedia.org/wiki/Roger_Federer"
+    },
+    {
+      "claim": "Tennis Companion ATP-derived table: 1.85 m / 85 kg",
+      "url": "https://tenniscompanion.org/players/male/height-and-weight/"
     }
   ],
-  "sourcedOn": "2026-11-09"
+  "sourcedOn": "2026-11-11",
+  "body": {
+    "heightM": 1.85,
+    "weightKg": 85,
+    "hand": "right",
+    "backhand": "one-handed",
+    "confidence": "public",
+    "heightSource": "https://en.wikipedia.org/wiki/Roger_Federer",
+    "weightSource": "https://tenniscompanion.org/players/male/height-and-weight/",
+    "plays": "Right-handed, one-handed backhand",
+    "weightNote": "Wikipedia's infobox (read Nov 11 2026) gives height and the one-handed backhand, not weight. 85 kg is the figure on Tennis Companion's ATP-derived table and on the same comparison pages that list Nadal at 85 kg. Marked from that secondary table, not from the 2026 media guide (the legends page omits height and weight)."
+  },
+  "game": {
+    "reachM": {
+      "value": 1.5,
+      "kind": "derived",
+      "formula": "0.44 * heightM + 0.69",
+      "note": "Same formula as bodyStats() in index.html. Not a measured wingspan. datasets/players/<id>/body.json does not exist yet (Body Scout has not run)."
+    },
+    "letRate": {
+      "value": 0.02,
+      "kind": "estimate",
+      "note": "Same range already used for Sinner (0.02) and Alcaraz (0.03): lets on roughly 1–3% of pro serves. Not counted from a match log."
+    },
+    "skills": {
+      "values": {
+        "speed": 15,
+        "agility": 16,
+        "endurance": 16,
+        "strength": 16,
+        "serve": 16,
+        "control": 19,
+        "reflexes": 17,
+        "netPlay": 18
+      },
+      "kind": "game-design",
+      "scale": "1–20, 10 = neutral, the Skills Coach scale in src/skills/skills.js",
+      "note": "Not a measured rating. Set from the published style already in this file (serve size, footspeed, touch) so the locker room is not all 10s."
+    },
+    "torsoScale": {
+      "kind": "game-design",
+      "note": "look.torso in src/players/roster.js is a pixel width multiplier taken from words already in signature/exaggerate (lanky, broad, slim). It is not a measured shoulder width."
+    },
+    "favouriteServes": {
+      "summary": "Varied serve from one toss; slice and kick both part of the one-handed game.",
+      "kind": "summary-of-published-style",
+      "from": "Wikipedia playing-style paragraph"
+    }
+  }
 }

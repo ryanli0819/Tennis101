@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tennis101 — pixel characters</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #12151c; color: #e8e6df; font: 14px/1.4 ui-sans-serif, system-ui, sans-serif; }
+  header { padding: 16px 18px 8px; max-width: 1100px; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  p { margin: 0; color: #b7b3a8; max-width: 70ch; }
+  .key { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 18px 0; font-size: 12px; color: #b7b3a8; }
+  .key i { display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; padding: 14px; }
+  article { background: #1c212b; border: 1px solid #2c3342; border-radius: 8px; padding: 10px; }
+  article h2 { font-size: 15px; margin: 0 0 2px; }
+  article .meta { color: #9aa; font-size: 12px; margin-bottom: 8px; }
+  .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  figure { margin: 0; text-align: center; }
+  figure canvas { width: 72px; height: 104px; image-rendering: pixelated; background: #2a3140; border-radius: 4px; }
+  figcaption { font-size: 10px; color: #b7b3a8; margin-top: 3px; }
+  .tag { font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
+  .tag.ok { color: #b7e3a0; }
+  .tag.est { color: #e3c98a; }
+  .faces { display: flex; justify-content: center; gap: 4px; }
+  @media (max-width: 420px) { .grid { grid-template-columns: 1fr; } figure canvas { width: 64px; height: 96px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Pixel characters</h1>
+  <p>Every pro on the roster, front and back, in the three court kits. White kits on grass follow the dress code. A gold tag means the shirt colour is named in a source and the hex is only an approximation. A grey tag means a neutral default, not a researched kit.</p>
+</header>
+<div class="key">
+  <span><i style="background:#b7e3a0"></i> named colour (hex approximate)</span>
+  <span><i style="background:#e3c98a"></i> dress code, withheld, or neutral default</span>
+  <span><i style="background:#e8e6df"></i> left-handers hold the racket in the left hand</span>
+</div>
+<div class="grid" id="grid"></div>
+<script src="roster.js"></script>
+<script src="looks.js"></script>
+<script>
+const REF = [
+  { id: "sinner", last: "SINNER", first: "Jannik", code: "ITA", heightM: 1.91, weightKg: 77, shirt: "#23b59c", hair: "#c4672f", lefty: false, backhand: "two",
+    outfits: { clay: { shirt: "#141418", shorts: "#1e1d22", shoes: "#1c1b20", cap: "#16161b", hexKind: "sampled" },
+               hard: { shirt: "#1f2f4a", shorts: "#f5f5f2", shoes: "#f0ece6", cap: "#f2f2ef", hexKind: "sampled" },
+               grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", shoes: "#f4f4f0", cap: "#f4f4f0", hexKind: "dress-code" } },
+    look: { style: "cap-curls" } },
+  { id: "alcaraz", last: "ALCARAZ", first: "Carlos", code: "ESP", heightM: 1.83, weightKg: 74, shirt: "#e2544a", hair: "#2a1c14", lefty: false, backhand: "two",
+    outfits: { hard: { shirt: "#3c3f45", shirtLow: "#a3a7ad", shorts: "#1f2024", shoes: "#1d1d20", hexKind: "sampled" },
+               clay: { shirt: "#ef6a2c", shorts: "#f4f4f0", shoes: "#a6e04a", hexKind: "sampled" },
+               grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", shoes: "#f4f4f0", hexKind: "dress-code" } },
+    look: { style: "long-band", band: "#f6f6f2", beard: true } },
+];
+PlayerArt.HAIR = Object.assign({
+  sinner: ["#e0702a", "#a8461a", "#f7a35c"],
+  alcaraz: ["#2a1c14", "#120b07", "#4d3626"],
+}, PlayerArt.HAIR);
+PlayerArt.RACKET = Object.assign({
+  sinner: { frame: "#1d1d22", accent: "#f2f2ef" },
+  alcaraz: { frame: "#1d1d22", accent: "#e2544a" },
+}, PlayerArt.RACKET);
+
+const SURF = ["grass", "hard", "clay"];
+const players = REF.concat(window.ROSTER_REST || []);
+const grid = document.getElementById("grid");
+
+function tag(kind) {
+  const named = kind === "named-colour-approximate" || kind === "sampled";
+  return `<span class="tag ${named ? "ok" : "est"}">${named ? "sourced colour" : (kind || "default")}</span>`;
+}
+
+for (const P of players) {
+  const art = document.createElement("article");
+  const hand = P.lefty ? "left hand" : "right hand";
+  const bh = P.backhand === "one" ? "one-handed backhand" : "two-handed backhand";
+  art.innerHTML = `<h2>${P.first} ${P.last}</h2>
+    <div class="meta">${P.heightM.toFixed(2)} m · ${P.weightKg} kg · ${hand} · ${bh} · ${P.look.style}</div>
+    <div class="row"></div>`;
+  const row = art.querySelector(".row");
+  for (const surface of SURF) {
+    const fig = document.createElement("figure");
+    const kind = (P.outfits[surface] || {}).hexKind;
+    fig.innerHTML = `<div class="faces"></div><figcaption>${surface}<br>${tag(kind)}</figcaption>`;
+    const faces = fig.querySelector(".faces");
+    for (const facing of ["back", "front"]) {
+      const c = document.createElement("canvas");
+      c.width = 64; c.height = 96;
+      c.title = `${P.id} ${surface} ${facing}`;
+      PlayerArt.paint(c, P, facing, surface);
+      faces.appendChild(c);
+    }
+    row.appendChild(fig);
+  }
+  grid.appendChild(art);
+}
+</script>
+</body>
+</html>

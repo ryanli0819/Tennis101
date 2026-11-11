@@ -14,22 +14,34 @@
     "lasso-style forehand finish over the head"
   ],
   "confidence": "public",
-  "source": "looks, rituals and celebrations: public media, one link per claim in `sources` (Nov 9 2026); height (about 1.85 m) is general knowledge and still needs to be checked; hex colours wait on stills (#18)",
+  "source": "looks, rituals and celebrations: public media, one link per claim in `sources` (Nov 9 2026); height (about 1.85 m) is general knowledge and still needs to be checked; hex colours wait on stills (#18) Body numbers added Nov 11 2026 from the 2026 ATP media guide where the player is listed, otherwise the source named in body.",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
       "shirt": "#f4f4f0",
       "shorts": "#f4f4f0",
       "shoes": "#f4f4f0",
-      "notes": "all-white dress code; in the pirate era he wore white pirate pants at Wimbledon too (to confirm). Trim colours to research"
+      "notes": "All-white dress code, including the bandana. Pirate-length pants at Wimbledon are the chosen era and remain to confirm.",
+      "hexKind": "dress-code",
+      "band": "#f4f4f0"
     },
     "hard": {
       "event": "US Open",
-      "notes": "to research; sleeveless shirt and pirate pants in the 2005–2008 era"
+      "notes": "Pirate-era silhouette (sleeveless, capri, bandana) is sourced. The 2005–08 US Open colours were not read from a still. Navy shirt is the neutral default. Bandana red is not a sourced hex.",
+      "band": "#7a2430",
+      "hexKind": "game-design-default",
+      "shirt": "#1c2a44",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0"
     },
     "clay": {
       "event": "Roland-Garros (red clay)",
-      "notes": "2005 clay: a yellow shirt, bandana and white pirate-length trousers (Monte Carlo 2005 report); hex values to read from stills"
+      "notes": "2005 clay: yellow shirt and white pirate trousers (sources already in this file). Bandana red is not in that report.",
+      "shirt": "#e6c34a",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "band": "#7a2430",
+      "hexKind": "named-colour-approximate"
     }
   },
   "personality": {
@@ -90,7 +102,63 @@
     {
       "claim": "'there are two Rafas': the competitor on court and the calm person off it",
       "url": "https://tennisuptodate.com/atp/there-are-two-rafas-rafael-nadal-explains-the-contrast-between-his-competitive-and-private-life"
+    },
+    {
+      "claim": "Wikipedia infobox: 1.85 m, left-handed, two-handed backhand",
+      "url": "https://en.wikipedia.org/wiki/Rafael_Nadal"
+    },
+    {
+      "claim": "ATP overview archived Dec 2018: 185 cm, 85 kg, left-handed, two-handed backhand",
+      "url": "https://web.archive.org/web/20181213125347/www.atptour.com/en/players/rafael-nadal/n409/overview"
     }
   ],
-  "sourcedOn": "2026-11-09"
+  "sourcedOn": "2026-11-11",
+  "body": {
+    "heightM": 1.85,
+    "weightKg": 85,
+    "hand": "left",
+    "backhand": "two-handed",
+    "confidence": "public",
+    "heightSource": "https://en.wikipedia.org/wiki/Rafael_Nadal",
+    "weightSource": "https://web.archive.org/web/20181213125347/www.atptour.com/en/players/rafael-nadal/n409/overview",
+    "plays": "Left-handed, two-handed backhand",
+    "era": "Pirate era, 2005–2008, as already chosen in this file. The 2026 media guide's legends page does not reprint height or weight."
+  },
+  "game": {
+    "reachM": {
+      "value": 1.5,
+      "kind": "derived",
+      "formula": "0.44 * heightM + 0.69",
+      "note": "Same formula as bodyStats() in index.html. Not a measured wingspan. datasets/players/<id>/body.json does not exist yet (Body Scout has not run)."
+    },
+    "letRate": {
+      "value": 0.03,
+      "kind": "estimate",
+      "note": "Same range already used for Sinner (0.02) and Alcaraz (0.03): lets on roughly 1–3% of pro serves. Not counted from a match log."
+    },
+    "skills": {
+      "values": {
+        "speed": 16,
+        "agility": 16,
+        "endurance": 19,
+        "strength": 18,
+        "serve": 15,
+        "control": 16,
+        "reflexes": 16,
+        "netPlay": 14
+      },
+      "kind": "game-design",
+      "scale": "1–20, 10 = neutral, the Skills Coach scale in src/skills/skills.js",
+      "note": "Not a measured rating. Set from the published style already in this file (serve size, footspeed, touch) so the locker room is not all 10s."
+    },
+    "torsoScale": {
+      "kind": "game-design",
+      "note": "look.torso in src/players/roster.js is a pixel width multiplier taken from words already in signature/exaggerate (lanky, broad, slim). It is not a measured shoulder width."
+    },
+    "favouriteServes": {
+      "summary": "Heavy topspin lefty serve, kick on the second.",
+      "kind": "summary-of-published-style",
+      "from": "era notes; kick share is not a counted percentage"
+    }
+  }
 }

@@ -11,22 +11,31 @@
     "short, tidy hair; plain look with no accessories"
   ],
   "confidence": "to research",
-  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images (height to confirm); outfits wait on uploads (#18)",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images (height to confirm); outfits wait on uploads (#18) Body numbers added Nov 11 2026 from the 2026 ATP media guide where the player is listed, otherwise the source named in body.",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
       "shirt": "#f4f4f0",
       "shorts": "#f4f4f0",
       "shoes": "#f4f4f0",
-      "notes": "all-white dress code; trim colours to research"
+      "notes": "all-white dress code; trim colours to research",
+      "hexKind": "dress-code"
     },
     "hard": {
       "event": "US Open",
-      "notes": "to research"
+      "notes": "Neutral default kit (navy shirt, white shorts). A citable US Open colour was not found for this run.",
+      "shirt": "#1c2a44",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "hexKind": "game-design-default"
     },
     "clay": {
       "event": "Roland-Garros (red clay)",
-      "notes": "to research"
+      "notes": "Neutral default kit. A citable clay colour was not found for this run.",
+      "shirt": "#3e4c5c",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "hexKind": "game-design-default"
     }
   },
   "personality": {
@@ -70,7 +79,58 @@
     {
       "claim": "reached the Miami final in 2026",
       "url": "https://www.puntodebreak.com/en/2026/03/28/lehecka-after-reaching-the-final-in-miami-i-knew-it-would-come-at-some-point"
+    },
+    {
+      "claim": "1.85 m / 81 kg, right-handed, two-handed backhand",
+      "url": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf"
     }
   ],
-  "sourcedOn": "2026-11-05"
+  "sourcedOn": "2026-11-11",
+  "body": {
+    "heightM": 1.85,
+    "weightKg": 81,
+    "hand": "right",
+    "backhand": "two-handed",
+    "confidence": "public",
+    "heightSource": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf",
+    "weightSource": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf",
+    "plays": "Right-handed, two-handed backhand"
+  },
+  "game": {
+    "reachM": {
+      "value": 1.5,
+      "kind": "derived",
+      "formula": "0.44 * heightM + 0.69",
+      "note": "Same formula as bodyStats() in index.html. Not a measured wingspan. datasets/players/<id>/body.json does not exist yet (Body Scout has not run)."
+    },
+    "letRate": {
+      "value": 0.02,
+      "kind": "estimate",
+      "note": "Same range already used for Sinner (0.02) and Alcaraz (0.03): lets on roughly 1–3% of pro serves. Not counted from a match log."
+    },
+    "skills": {
+      "values": {
+        "speed": 15,
+        "agility": 14,
+        "endurance": 14,
+        "strength": 16,
+        "serve": 16,
+        "control": 14,
+        "reflexes": 14,
+        "netPlay": 12
+      },
+      "kind": "game-design",
+      "scale": "1–20, 10 = neutral, the Skills Coach scale in src/skills/skills.js",
+      "note": "Not a measured rating. Set from the published style already in this file (serve size, footspeed, touch) so the locker room is not all 10s."
+    },
+    "torsoScale": {
+      "kind": "game-design",
+      "note": "look.torso in src/players/roster.js is a pixel width multiplier taken from words already in signature/exaggerate (lanky, broad, slim). It is not a measured shoulder width."
+    },
+    "favouriteServes": {
+      "summary": "Big serve and a flat first-strike forehand.",
+      "kind": "summary-of-published-style",
+      "from": "signature"
+    }
+  }
 }

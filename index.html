@@ -231,6 +231,9 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/animation/run-cycle.js?v=0.11.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.11.0"></script>
 <script src="src/serve/motion/alcaraz-serve.js?v=0.11.0"></script>
+<script src="src/players/roster.js?v=0.11.0"></script>
+<script src="src/players/looks.js?v=0.11.0"></script>
+<script src="src/players/pose.js?v=0.11.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -250,7 +253,9 @@ const ROSTER = [
                clay:  { shirt: "#ef6a2c", shorts: "#f4f4f0", shoes: "#a6e04a" },
                grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", shoes: "#f4f4f0" } },
     // SIGNATURE (Ryan's call): his current look, long outgrown hair and a full beard, held back by a white hairband
-    look: { style: "long-band", band: "#f6f6f2", beard: true } }
+    look: { style: "long-band", band: "#f6f6f2", beard: true } },
+  // The other 20 pros (src/players/roster.js). Same shape: height, weight, outfits, look.
+  ...(window.ROSTER_REST || []),
 ];
 /* letRate = chance a serve that would land in clips the net cord first (a LET, served again). Estimates
    (lets happen on roughly 1–3% of pro serves); the Serve Analyst refines them from match data. */
@@ -280,6 +285,7 @@ function choosePlayers(youId, surface = "hard") {
 }
 choosePlayers("sinner");
 window.ROSTER = ROSTER;
+window.PLAYERS = PLAYERS;          // pose.js reads these; the array is mutated in place
 
 /* =====================================================================
    SCORING ENGINE — pure state, no drawing
@@ -669,6 +675,7 @@ function sigHead(P, near, hx, hy, r, hr, hrD, hrL) {
            if (L.beard) { R(hx - r * 0.85, hy + r * 0.35, r * 1.7, r * 0.75, hrD); R(hx - r * 0.25, hy + r * 0.6, r * 0.5, 1 / AS, "#b8695a"); } }
     R(hx - r * 1.2, hy - r * 0.45, r * 2.4, r * 0.3, L.band || "#f6f6f2");                                  // hairband
   }
+  if (window.PlayerArt && L.style !== "cap-curls" && L.style !== "long-band") PlayerArt.sigHead(P, near, hx, hy, r, hr, hrD, hrL);
 }
 
 function drawCapturedFigure(i, p, W) {
@@ -801,6 +808,10 @@ function drawCapturedFigure(i, p, W) {
    ===================================================================== */
 const HAIR = { sinner: ["#e0702a", "#a8461a", "#f7a35c"], alcaraz: ["#2a1c14", "#120b07", "#4d3626"] };   // base, shadow, highlight
 const RACKET_LOOK = { sinner: { frame: "#1d1d22", accent: "#f2f2ef" }, alcaraz: { frame: "#1d1d22", accent: "#e2544a" } };
+if (window.PlayerArt) {                                                    // the rest of the roster (src/players/roster.js)
+  Object.assign(HAIR, PlayerArt.HAIR || {});
+  Object.assign(RACKET_LOOK, PlayerArt.RACKET || {});
+}
 function shade(hex, amt) {                               // lighten (+) or darken (−) a #rrggbb colour
   const n = parseInt(hex.slice(1), 16), f = c => Math.max(0, Math.min(255, Math.round(c + (amt > 0 ? (255 - c) : c) * amt)));
   return "#" + [f(n >> 16), f((n >> 8) & 255), f(n & 255)].map(v => v.toString(16).padStart(2, "0")).join("");
@@ -855,6 +866,7 @@ function drawRacket(grip, u, n, look, ox = 0, oy = 0) {
    SLICE CLOCK (seen from behind the player): the racket top starts at ~2 o'clock (high and back) and finishes
    at SLICE_END o'clock (low and in front), 10 → 8/7 on the backhand side; shoulders tilt with the swing. */
 const SLICE_END = { sinner: 4, alcaraz: 5 };              // Sinner finishes higher and shorter, Alcaraz lower and longer
+if (window.PlayerArt && PlayerArt.SLICE_END) Object.assign(SLICE_END, PlayerArt.SLICE_END);
 function poseTrack(keys, t) {                              // keys: [[time, pose], ...] sorted by time
   const n = keys.length;
   if (t <= keys[0][0]) return keys[0][1];
@@ -870,8 +882,9 @@ function poseTrack(keys, t) {                              // keys: [[time, pose
 }
 function racketPose(i, p, ago = 0) {
   const R = PLAYERS[i].side === "near" ? 1 : -1;        // near player's right is +x and forward is +y; far is the mirror
-  const W = (dx, dy, z) => ({ x: p.x + R * dx, y: p.y + R * dy, z });
-  const D = (dx, dy, dz) => V3.norm({ x: R * dx, y: R * dy, z: dz });
+  const hand = PLAYERS[i].lefty ? -1 : 1;               // a left-hander's racket stays in the left hand
+  const W = (dx, dy, z) => ({ x: p.x + R * hand * dx, y: p.y + R * dy, z });
+  const D = (dx, dy, dz) => V3.norm({ x: R * hand * dx, y: R * dy, z: dz });
   const clk = (c, fwd) => D(Math.sin(c * Math.PI / 6), fwd, Math.cos(c * Math.PI / 6));   // racket top pointing at c o'clock
   const hz = Math.max(0.45, Math.min(1.75, p.hitZ ?? 1.0));                              // contact height of the last ball
   const se = SLICE_END[PLAYERS[i].id] ?? 4.5;
@@ -913,11 +926,11 @@ function racketPose(i, p, ago = 0) {
                             : [[0, POSE.bsHit], [0.36, POSE.bsEnd], [0.52, POSE.bsEnd], [1.0, POSE.ready]], tt), false);
   const [H, E] = fh ? [POSE.fhHit, POSE.fhEnd] : [POSE.bhHit, POSE.bhEnd];
   if (tt >= 0 && tt < 0.8)                                                        // just hit: contact → follow-through → back to ready
-    return out(poseTrack([[0, H], [0.26, E], [0.8, POSE.ready]], tt), !fh);
+    return out(poseTrack([[0, H], [0.26, E], [0.8, POSE.ready]], tt), !fh && PLAYERS[i].backhand !== "one");
   const sh = rally && rally.shot;
   if (sh && sh.recv === i && !rally.serve && ball) {                              // the ball is coming: swing on the beat of its arrival
     const ttc = sh.t1 + 0.85 * sh.t2 - sh.t + ago;                                // ≈ time left until contact
-    const side = (sh.end.x - p.x) * R >= 0;                                       // forehand if it comes to the racket side
+    const side = (sh.end.x - p.x) * R * hand >= 0;                                // forehand if it comes to the racket side (lefties mirrored)
     const slice = i === 0 ? (input.keys.has("e") || input.slice) : !!p.planSlice; // you hold E; the computer decided early
     const zc = Math.max(0.45, Math.min(1.75, sh.end.z));
     const set = (pz) => ({ ...pz, g: { ...pz.g, z: zc } });                       // aim the contact pose at the ball's height
@@ -926,7 +939,7 @@ function racketPose(i, p, ago = 0) {
               : [[-1.1, POSE.ready], [-0.45, POSE.bsBack], [-0.2, POSE.bsBack], [0, set(POSE.bsHit)]])
       : (side ? [[-1.1, POSE.ready], [-0.45, POSE.fhBack], [-0.18, POSE.fhLoop], [0, set(POSE.fhHit)]]
               : [[-1.1, POSE.ready], [-0.45, POSE.bhBack], [-0.18, POSE.bhLoop], [0, set(POSE.bhHit)]]);
-    return out(poseTrack(keys, -Math.max(-0.02, ttc)), !side && !slice);
+    return out(poseTrack(keys, -Math.max(-0.02, ttc)), !side && !slice && PLAYERS[i].backhand !== "one");
   }
   return out(POSE.ready, false);
 }
@@ -974,13 +987,14 @@ function drawSignature(P, near, H) {
     Rr(hx0 - hw * 0.14, hy0 + hh * 0.06, hw * 1.28, hh * 0.14, band);                        // the hairband, right round the head
     Rr(hx0 - hw * 0.14, hy0 + hh * 0.17, hw * 1.28, px, shade(band, -0.25));
   }
+  if (window.PlayerArt && L.style !== "cap-curls" && L.style !== "long-band") PlayerArt.drawLook(P, near, H);
 }
 
 function drawPlayer(i, pos, swing) {
   if (pos.motion && pos.motion.world) return drawCapturedFigure(i, pos, pos.motion.world);
   const P = PLAYERS[i], near = P.side === "near", R = near ? 1 : -1;
   const g = proj(pos.x, pos.y), s = g.s;
-  const h = Math.max(6, P.heightM * s), w = h * 0.30, skin = "#e1b48b", skinD = shade(skin, -0.18), skinL = shade(skin, 0.12);
+  const h = Math.max(6, P.heightM * s), w = h * 0.30 * ((P.look && P.look.torso) || 1), skin = "#e1b48b", skinD = shade(skin, -0.18), skinL = shade(skin, 0.12);
   const A = window.Anim ? Anim.frame(pos, BODY[i], near, P.id)
     : { bob: 0, lean: 0, crouch: 0.02, turn: 0, feet: [{ dx: -0.26, dy: 0, lift: 0 }, { dx: 0.26, dy: 0, lift: 0 }], knees: [{ dx: 0, dy: 0 }, { dx: 0, dy: 0 }], arms: [0, 0] };
   const turn = A.turn || 0, DEP = 0.42;                    // depth → screen height
@@ -1057,11 +1071,12 @@ function drawPlayer(i, pos, swing) {
   const arm = (sx, sy, hx2, hy2, out, sleeve) => {
     const ex = (sx + hx2) / 2 + out * w * 0.18, ey = (sy + hy2) / 2 + h * 0.02;
     Lr(sx, sy, ex, ey, skin, w * 0.21); Lr(ex, ey, hx2, hy2, sleeve || skin, w * 0.18);         // forearm (or a compression sleeve over it)
-    Lr(sx, sy, sx + (ex - sx) * 0.45, sy + (ey - sy) * 0.45, shirt, w * 0.28);              // short sleeve
+    if (!(P.sleeveless || (P.look && P.look.sleeveless))) Lr(sx, sy, sx + (ex - sx) * 0.45, sy + (ey - sy) * 0.45, shirt, w * 0.28);   // short sleeve (a sleeveless shirt leaves the arm bare)
     Ln(hx2 + (ex - hx2) * 0.22, hy2 + (ey - hy2) * 0.22, hx2 + (ex - hx2) * 0.08, hy2 + (ey - hy2) * 0.08, P.ui || "#f2f2f2", w * 0.2);  // wristband
     Rr(hx2 - w * 0.08, hy2 - w * 0.08, w * 0.16, w * 0.16, skinL);                           // hand
   };
-  const rS = { x: tx + R * w * 0.5 * tw, y: shY + h * 0.05 + tiltR }, lS = { x: tx - R * w * 0.5 * tw, y: shY + h * 0.05 - tiltR };
+  const rackSide = R * (P.lefty ? -1 : 1);                 // racket shoulder: the player's racket side, so a lefty is mirrored
+  const rS = { x: tx + rackSide * w * 0.5 * tw, y: shY + h * 0.05 + tiltR }, lS = { x: tx - rackSide * w * 0.5 * tw, y: shY + h * 0.05 - tiltR };
   const swingDir = A.dir === "right" ? 1 : A.dir === "left" ? -1 : 0, swingUp = A.dir === "away" ? 1 : A.dir === "toward" ? -1 : 0;
   let freeHand = { x: lS.x - R * w * 0.25 * tw + swingDir * A.arms[0] * w * 0.55,           // the free arm pumps with the legs
                    y: shY + h * 0.33 + A.arms[0] * h * 0.05 - swingUp * A.arms[0] * h * 0.035 - Math.abs(swingDir * A.arms[0]) * h * 0.04 };
@@ -1086,17 +1101,19 @@ function drawPlayer(i, pos, swing) {
   };
   const drawArms = (front) => {
     const freeHidden = near ? freeFront : !freeFront, racketHidden = near ? racketFront : !racketFront;
-    if (freeHidden !== front) arm(lS.x, lS.y, freeHand.x, freeHand.y, -R);
-    else if (front && near) stub(lS, freeHand.x, freeHand.y, -R, 0.6);
-    if (racketHidden !== front) arm(rS.x, rS.y, grip.x, grip.y, R, P.sleeve);
-    else if (front && near) stub(rS, grip.x, grip.y, R, 0.6);
+    const outR = Math.sign(rackSide) || 1;
+    if (freeHidden !== front) arm(lS.x, lS.y, freeHand.x, freeHand.y, -outR);
+    else if (front && near) stub(lS, freeHand.x, freeHand.y, -outR, 0.6);
+    if (racketHidden !== front) arm(rS.x, rS.y, grip.x, grip.y, outR, P.sleeve);
+    else if (front && near) stub(rS, grip.x, grip.y, outR, 0.6);
   };
   drawArms(false);                                                                           // arms hidden behind the torso first
   b.save(); b.translate(q(tx), 0); b.scale(tw, 1); b.translate(-q(tx), 0);               // turned sideways: the torso narrows
   // SHORTS: round (cylinder shading), a waistband, the split between the legs and a side seam that turn with the hips
   b.beginPath(); b.moveTo(q(tx - w * 0.45), q(hipY - h * 0.06)); b.lineTo(q(tx + w * 0.45), q(hipY - h * 0.06));
-  b.lineTo(q(tx + w * 0.47), q(hipY + h * 0.1)); b.lineTo(q(tx - w * 0.47), q(hipY + h * 0.1)); b.closePath();
-  cyl(tx - w * 0.47, tx + w * 0.47, hipY - h * 0.06, hipY + h * 0.1, P.shorts);
+  const hem = h * ((P.look && P.look.capri) ? 0.32 : 0.1);   // pirate pants end below the knee
+  b.lineTo(q(tx + w * 0.47), q(hipY + hem)); b.lineTo(q(tx - w * 0.47), q(hipY + hem)); b.closePath();
+  cyl(tx - w * 0.47, tx + w * 0.47, hipY - h * 0.06, hipY + hem, P.shorts);
   Rr(tx - w * 0.45, hipY - h * 0.06, w * 0.9, h * 0.022, shade(P.shorts, -0.24));
   { const m0 = mark(0, w * 0.45); if (m0 != null) Rr(m0 - 0.5 / AS, hipY + h * 0.045, 1 / AS, h * 0.055, shade(P.shorts, -0.34)); }   // the split
   for (const sd of [-1, 1]) { const ms = mark(sd * Math.PI / 2 * 0.92, w * 0.46); if (ms != null) Rr(ms - 0.5 / AS, hipY - h * 0.04, 1 / AS, h * 0.13, shade(P.shorts, -0.3)); }   // side seams
@@ -1130,6 +1147,7 @@ function drawPlayer(i, pos, swing) {
   // HEAD: neck, ears, hair with strands (or cap with seams and the hair showing under it); face from the front
   const hw = w * 0.56 * (1 - 0.15 * Math.abs(turn)), hh = h * 0.15, hx0 = tx - hw / 2 + tR * 0.6 + turn * w * 0.06, hy0 = shY - hh - h * 0.015 + Math.abs(tiltR) * 0.3;
   const [hair, hairD, hairL] = HAIR[P.id] || [P.hair, shade(P.hair, -0.35), shade(P.hair, 0.25)];
+  const wearCap = P.cap && (!P.look || P.look.style === "cap-curls");   // other looks draw their own hat
   Rr(tx - w * 0.12, shY - h * 0.03, w * 0.24, h * 0.04, skinD);                              // neck
   Rr(hx0, hy0, hw, hh, skin);                                                                // head
   Rr(lit > 0 ? hx0 : hx0 + hw * 0.74, hy0 + hh * 0.08, hw * 0.26, hh * 0.86, skinD);         // round: the side away from the light in shade
@@ -1143,7 +1161,7 @@ function drawPlayer(i, pos, swing) {
     }
   };
   if (near) {                                                                                // seen from behind
-    if (P.cap) {
+    if (wearCap) {
       strands(hx0 - 1 / AS, hy0 + hh * 0.42, hw + 2 / AS, hh * 0.5);                        // hair covers the whole back of the head under the cap
       for (let k = 0; k < 7; k++) {                                                          // curls: an uneven edge at the nape and sides
         const cx = hx0 - 1 / AS + (hw + 2 / AS) * k / 6, len = hh * (0.1 + 0.12 * ((k * 37) % 5) / 4);
@@ -1165,11 +1183,11 @@ function drawPlayer(i, pos, swing) {
       Rr(sd > 0 ? hx0 + hw : hx0 - 1 / AS, hy0 + hh * 0.56, 1 / AS, hh * 0.12, skin);        // nose tip
     }
   } else {                                                                                   // seen from the front: a face
-    if (P.cap) { Rr(hx0, hy0 - hh * 0.04, hw, hh * 0.4, P.cap); Rr(hx0 - hw * 0.1, hy0 + hh * 0.3, hw * 1.2, hh * 0.08, shade(P.cap, -0.25)); }   // cap + brim
+    if (wearCap) { Rr(hx0, hy0 - hh * 0.04, hw, hh * 0.4, P.cap); Rr(hx0 - hw * 0.1, hy0 + hh * 0.3, hw * 1.2, hh * 0.08, shade(P.cap, -0.25)); }   // cap + brim
     else { strands(hx0, hy0 - hh * 0.06, hw, hh * 0.38); Rr(hx0, hy0 + hh * 0.25, hw * 0.18, hh * 0.3, hair); Rr(hx0 + hw * 0.82, hy0 + hh * 0.25, hw * 0.18, hh * 0.3, hair); }
     const px = 1 / AS, eyeY = hy0 + hh * 0.5;
     const fo = turn * hw * 0.22; b.save(); b.translate(q(fo), 0);                        // turning: the face slides toward where they run
-    if (P.cap) Rr(hx0, hy0 + hh * 0.38, hw, hh * 0.08, skinD);                               // shadow under the brim
+    if (wearCap) Rr(hx0, hy0 + hh * 0.38, hw, hh * 0.08, skinD);                             // shadow under the brim
     Rr(tx - hw * 0.34, eyeY - hh * 0.12, hw * 0.24, px, hairD); Rr(tx + hw * 0.1, eyeY - hh * 0.12, hw * 0.24, px, hairD);   // eyebrows
     Rr(tx - hw * 0.32, eyeY, hw * 0.2, px * 2, "#f4f1ea"); Rr(tx + hw * 0.12, eyeY, hw * 0.2, px * 2, "#f4f1ea");           // whites of the eyes
     Rr(tx - hw * 0.24, eyeY, px * 2, px * 2, "#1b1b1f"); Rr(tx + hw * 0.2, eyeY, px * 2, px * 2, "#1b1b1f");                 // pupils
@@ -1228,6 +1246,7 @@ const newBody = (y) => ({ x: 0, y, vx: 0, vy: 0, run: 0, moving: false,
   landT: -9, contactT: -9, contactId: 0, gradedFor: -1,
   slide: 0, slideV: { x: 0, y: 0 }, slideCD: 0, slideRec: 0 });   // slide: time left, its velocity, cooldown, recovery
 const pos = [newBody(-12.4), newBody(12.4)];
+window.pos = pos;
 let ball = null;          // {x,y,z}
 let rally = null;
 let swing = [0, 0];
@@ -1667,8 +1686,8 @@ function hitBall(i, isServe, volley = false) {
   if (type === "slice") { err *= 1.25; if (i === 0) say(0, "SLICE"); }
   if (i === 0 && input.slice) { input.slice = false; sliceBtn.setAttribute("aria-pressed", "false"); sliceBtn.classList.remove("primary"); }
   swing[i] = 1;
-  const Rs = PLAYERS[i].side === "near" ? 1 : -1;
-  Object.assign(p, { hitT: clock, hitServe: isServe, strokeType: type, hitZ: ball.z, strokeSide: Math.sign((ball.x - p.x) * Rs) || 1 });   // racket follow-through
+  const Rs = PLAYERS[i].side === "near" ? 1 : -1, hand = PLAYERS[i].lefty ? -1 : 1;
+  Object.assign(p, { hitT: clock, hitServe: isServe, strokeType: type, hitZ: ball.z, strokeSide: Math.sign((ball.x - p.x) * Rs * hand) || 1 });   // racket follow-through (lefties mirrored)
   if (isServe) {
     const sv = planServe(i, rally.serveNo);
     rally.shot = planShot(i, true, 1, sv.fault, sv);
