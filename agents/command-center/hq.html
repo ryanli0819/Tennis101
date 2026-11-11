@@ -4,8 +4,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a club scoreboard over a court plan — the CEO's order bar on top, one lane per supervisor
-   (its agents stacked below it, like players in a draw), and the order book / wiring on the side.
+/* Layout: a pixel-art campus of one building per agent (the default view), with the board and the
+   family tree still one click away. The CEO's order bar stays on top; the order book stays on the side.
    Palette: light pink (blush) with sage green, calm and easy on the eyes; dusty rose marks the CEO. */
 :root {
   --bg: #fbeef2; --panel: #fffafb; --sunk: #f7e7ec; --ink: #2f2a33; --muted: #7a6c76; --line: #ecd5dc;
@@ -72,6 +72,8 @@ input, select, textarea { background: var(--sunk); border: 1px solid var(--line)
 .main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start }
 @media (max-width: 1100px) { .main { grid-template-columns: 1fr } }
 .lanes { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; align-items: start; min-width: 0 }
+/* .lanes sets display:grid, which would otherwise beat the hidden attribute and leave the board on screen. */
+#lanes[hidden], #tree[hidden], #campus[hidden] { display: none !important }
 .lane { display: grid; gap: 8px; min-width: 0 }
 .sup { background: var(--court-soft); border: 1px solid color-mix(in srgb, var(--court) 35%, var(--line)); border-radius: 6px; padding: 12px; display: grid; gap: 8px }
 .sup-head { display: flex; justify-content: space-between; gap: 8px; align-items: start }
@@ -166,7 +168,42 @@ img.face { object-fit: cover; image-rendering: auto }
 .kids::before { content: ""; position: absolute; top: 0; left: 50%; width: 2px; height: 22px; background: var(--line) }
 .legend { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 12px; color: var(--muted); margin-top: 14px; justify-content: center }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 6px; z-index: 30; font-size: 13px }
-@media (prefers-reduced-motion: no-preference) { .agent, .btn { transition: border-color .15s } }
+@media (prefers-reduced-motion: no-preference) { .agent, .btn, .plot { transition: border-color .15s } }
+
+/* campus: one pixel building per agent, on a lawn. Cards keep the labels readable in both themes. */
+.views { flex-wrap: wrap; max-width: 100% }
+.campus-map { position: relative; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; min-width: 0 }
+.campus-ground { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none }
+.campus-stack { position: relative; display: grid; gap: 14px; padding: 12px }
+.campus-legend { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.campus-legend .note { margin-right: 4px }
+.hood { display: grid; gap: 8px }
+.hood-sign { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; justify-content: space-between;
+  background: color-mix(in srgb, var(--panel) 92%, transparent); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; width: fit-content; max-width: 100% }
+.hood-sign h3 { font-size: 20px; color: var(--court) }
+.plots { display: flex; flex-wrap: wrap; gap: 10px }
+.plot { flex: 1 1 168px; max-width: 230px; display: grid; justify-items: center; gap: 3px; text-align: center;
+  background: color-mix(in srgb, var(--panel) 94%, transparent); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px 8px; color: inherit; min-width: 0 }
+.plot:hover { border-color: var(--court) }
+.plot canvas { width: 128px; height: 104px; image-rendering: pixelated; image-rendering: crisp-edges }
+.plot .place { font: 700 12px/1.1 var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--court) }
+.plot .pn { font: 700 16px/1.1 var(--display); text-wrap: balance }
+.plot .ps { font-size: 12px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; width: 100% }
+.show-court { position: relative; height: 112px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden }
+.show-court canvas { width: 100%; height: 100%; image-rendering: pixelated; display: block }
+.show-court span { position: absolute; left: 10px; bottom: 8px; background: color-mix(in srgb, var(--panel) 92%, transparent);
+  border: 1px solid var(--line); border-radius: 4px; padding: 3px 8px; font: 700 16px/1 var(--display); color: var(--ink) }
+@media (max-width: 720px) {
+  .views button { padding: 7px 8px }
+  .plots { display: grid; grid-template-columns: 1fr 1fr }
+  .plot { max-width: none }
+  .plot canvas { width: 112px; height: 91px }
+}
+@media (max-width: 520px) {
+  .plots { grid-template-columns: 1fr }
+  .plot { grid-template-columns: 104px minmax(0, 1fr); justify-items: start; text-align: left; align-items: center }
+  .plot canvas { grid-row: 1 / span 5; width: 96px; height: 78px }
+}
 </style>
 
 <div class="wrap">
@@ -205,7 +242,8 @@ img.face { object-fit: cover; image-rendering: auto }
     <div style="display:grid;gap:12px;min-width:0">
       <div class="add-row" style="justify-content:space-between">
         <div class="views" role="group" aria-label="View">
-          <button type="button" id="vBoard" aria-pressed="true">Board</button>
+          <button type="button" id="vCampus" aria-pressed="true">Campus</button>
+          <button type="button" id="vBoard" aria-pressed="false">Board</button>
           <button type="button" id="vTree" aria-pressed="false">Family tree</button>
         </div>
         <span class="add-row">
@@ -213,8 +251,9 @@ img.face { object-fit: cover; image-rendering: auto }
         <button class="btn" id="newSup" type="button">+ New supervisor</button>
         </span>
       </div>
+      <div class="campus" id="campus"><div class="empty">Loading the campus…</div></div>
       <div class="tree" id="tree" hidden></div>
-      <div class="lanes" id="lanes"><div class="empty">Loading the team…</div></div>
+      <div class="lanes" id="lanes" hidden><div class="empty">Loading the team…</div></div>
     </div>
 
     <aside class="side">
@@ -263,7 +302,7 @@ img.face { object-fit: cover; image-rendering: auto }
 
 <div id="overlay" hidden><div class="scrim" id="scrim"></div><div class="drawer" id="drawer" role="dialog" aria-modal="true"></div></div>
 <div class="toast" id="toast" hidden></div>
-
+<script src="campus.js"></script>
 <script>
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
@@ -366,9 +405,18 @@ img.face { object-fit: cover; image-rendering: auto }
       const gr = gen.getBoundingClientRect(), f = bs[0].getBoundingClientRect(), l = bs[bs.length - 1].getBoundingClientRect();
       gen.style.setProperty("--l", (f.left + f.width / 2 - gr.left) + "px"); gen.style.setProperty("--r", (gr.right - (l.left + l.width / 2)) + "px"); });
   }
-  const setView = v => { const tree = v === "tree"; $("#tree").hidden = !tree; $("#lanes").hidden = tree;
-    $("#vTree").setAttribute("aria-pressed", String(tree)); $("#vBoard").setAttribute("aria-pressed", String(!tree));
-    try { localStorage.setItem("hq.view", v); } catch (e) {} if (tree) renderTree(); };
+  const setView = v => {
+    const view = v === "tree" || v === "board" ? v : "campus";
+    $("#campus").hidden = view !== "campus";
+    $("#tree").hidden = view !== "tree";
+    $("#lanes").hidden = view !== "board";
+    $("#vCampus").setAttribute("aria-pressed", String(view === "campus"));
+    $("#vBoard").setAttribute("aria-pressed", String(view === "board"));
+    $("#vTree").setAttribute("aria-pressed", String(view === "tree"));
+    try { localStorage.setItem("hq.view", view); } catch (e) {}
+    if (view === "tree") renderTree();
+    if (view === "campus") renderCampus();
+  };
 
   /* ---------- orders and the chain of command ---------- */
   // Which open orders apply to an agent: sent to it, to its supervisor's team, or to everyone.
@@ -420,7 +468,7 @@ img.face { object-fit: cover; image-rendering: auto }
     $("#nReview").textContent = agents.filter(a => a.status === "review" || a.status === "blocked").length;
     $("#nSync").textContent = offBrief.length;
     $("#nOrders").textContent = openCmds.length;
-    renderTargets(); renderLanes(agents); renderTree(); renderOrders(); renderLinks(); renderScripts(); renderActivity();
+    renderTargets(); renderLanes(agents); renderCampus(); renderTree(); renderOrders(); renderLinks(); renderScripts(); renderActivity();
     for (const b of document.querySelectorAll("form button, #newAgent, #newSup")) b.disabled = canWrite === false || !db;
   }
   function renderTargets() {
@@ -448,6 +496,55 @@ img.face { object-fit: cover; image-rendering: auto }
         behind ? el("span", { class: "chip warn" }, `Behind brief v${sup.briefVersion}`) : null,
         links.slice(0, 3).map(l => el("span", { class: "chip link" }, (l.a === a.id ? "→ " + agentName(l.b) : "← " + agentName(l.a)))),
         el("span", { class: "chip" }, "Updated " + ago(a.updatedAt))));
+  }
+  function renderCampus() {
+    const box = $("#campus");
+    if (!box || box.hidden || !window.HQCampus) return;
+    const agents = Object.entries(S.agents).map(([id, a]) => ({ id, ...a }));
+    if (!agents.length) { box.replaceChildren(el("div", { class: "empty" }, "Loading the campus…")); return; }
+    const C = HQCampus.colors(HQCampus.isDark());
+    const groups = HQCampus.neighborhoods(agents, S.sups);
+    const map = el("div", { class: "campus-map" });
+    const ground = el("canvas", { class: "campus-ground", "aria-hidden": "true" });
+    const stack = el("div", { class: "campus-stack" });
+    stack.append(el("div", { class: "campus-legend" },
+      el("span", { class: "note" }, "Each building is an agent. Select one for the same detail as the board."),
+      ...["running", "queued", "review", "blocked", "idle"].map(k => el("span", { class: "pill " + k }, STATUS[k]))));
+    const court = el("div", { class: "show-court" }, el("canvas", { class: "mini-court", "aria-hidden": "true" }), el("span", {}, "Centre court"));
+    groups.forEach((g, i) => {
+      if (i === Math.ceil(groups.length / 2)) stack.append(court);
+      const plots = el("div", { class: "plots" });
+      for (const a of g.agents) plots.append(campusPlot(a, C));
+      stack.append(el("section", { class: "hood", "aria-label": g.name },
+        el("div", { class: "hood-sign" }, el("h3", {}, g.name),
+          g.mode ? el("span", { class: "note" }, g.mode === "split" ? "Split duties" : "Share all") : null),
+        plots));
+    });
+    if (!groups.length) stack.append(court);
+    map.append(ground, stack);
+    box.replaceChildren(map);
+    requestAnimationFrame(() => { HQCampus.paintGround(ground, C); const mini = map.querySelector(".mini-court"); if (mini) HQCampus.paintCourt(mini, C); });
+  }
+  function campusPlot(a, C) {
+    const spec = HQCampus.kindFor(a.id, a.title);
+    const status = a.status || "idle";
+    const cv = el("canvas", { width: 64, height: 52, "aria-hidden": "true" });
+    HQCampus.paintBuilding(cv, spec, status, C);
+    const sup = a.supervisor && S.sups[a.supervisor];
+    const behind = sup && (a.briefSeen || 0) < (sup.briefVersion || 0);
+    const nOrd = ordersFor(a.id).filter(c => c.status === "open").length;
+    const blurb = a.task || a.job || "";
+    return el("button", { class: "plot", type: "button", onclick: () => openAgent(a.id),
+      "aria-label": (a.title || a.id) + ", " + spec.place + ", " + (STATUS[status] || status) + (blurb ? ". " + blurb : ""),
+      title: a.job || spec.place },
+      cv,
+      el("span", { class: "place" }, spec.place),
+      el("span", { class: "pn" }, a.title || a.id),
+      el("span", { class: "pill " + status }, STATUS[status] || status),
+      el("div", { class: "chips" },
+        behind ? el("span", { class: "chip warn" }, "Off brief") : null,
+        nOrd ? el("span", { class: "chip ceo" }, nOrd === 1 ? "1 order" : nOrd + " orders") : null),
+      blurb ? el("span", { class: "ps" }, blurb) : null);
   }
   function renderLanes(agents) {
     const lanes = $("#lanes"); lanes.replaceChildren();
@@ -638,6 +735,49 @@ img.face { object-fit: cover; image-rendering: auto }
     if (await write(async () => { for (const [k, a] of Object.entries(S.agents)) if (a.supervisor === sid && (a.briefSeen || 0) < v) await db.doc("agents/" + k).update({ briefSeen: v }); }, "Team synced to brief v" + v))
       logAct(`${S.sups[sid].name}: CEO synced the team to brief v${v}`); }
 
+  // Repo fallback when the live HQ database isn't there: agents.json, supervisors.json and each LOG.md.
+  async function loadRepoTeam() {
+    try {
+      const base = new URL(".", location.href);
+      const [aj, sj] = await Promise.all([
+        fetch(new URL("../agents.json", base)).then(r => { if (!r.ok) throw new Error("agents.json"); return r.json(); }),
+        fetch(new URL("../supervisors.json", base)).then(r => { if (!r.ok) throw new Error("supervisors.json"); return r.json(); }),
+      ]);
+      const supOfName = {};
+      for (const [sid, s] of Object.entries(sj.supervisors || {})) for (const m of s.members || []) supOfName[m] = sid;
+      const logs = await Promise.all((aj.agents || []).map(async a => {
+        try {
+          const res = await fetch(new URL("../" + a.name + "/LOG.md", base));
+          return [a.name, res.ok ? await res.text() : ""];
+        } catch (e) { return [a.name, ""]; }
+      }));
+      if (db) return;
+      const logOf = Object.fromEntries(logs);
+      const agents = {};
+      for (const a of aj.agents || []) {
+        const parsed = window.HQCampus ? HQCampus.parseLog(logOf[a.name] || "") : { status: "idle", task: "", briefSeen: null };
+        const sid = supOfName[a.name] || null;
+        const ver = sid && sj.supervisors[sid] ? (sj.supervisors[sid].briefVersion || 0) : 0;
+        agents[a.name] = {
+          title: a.title, job: a.job, branch: "agent/" + a.name,
+          status: parsed.status || "idle", task: parsed.task || "",
+          supervisor: sid, progress: 0,
+          // Logs rarely record briefSeen. Missing means "not flagged", not "behind".
+          briefSeen: parsed.briefSeen == null ? ver : parsed.briefSeen,
+          updatedAt: null, source: "log",
+        };
+      }
+      S.agents = agents;
+      S.sups = Object.fromEntries(Object.entries(sj.supervisors || {}).map(([k, s]) => [k, { ...s }]));
+      S.links = Object.fromEntries((sj.links || []).map((l, i) => ["repo-" + i, l]));
+      S.scripts = Object.fromEntries((sj.scripts || []).map((s, i) => ["repo-" + i, { ...s, enabled: s.enabled !== false }]));
+      render();
+    } catch (e) {
+      const box = $("#campus");
+      if (box && !Object.keys(S.agents).length) box.replaceChildren(el("div", { class: "empty" }, "The campus could not load the team from this folder."));
+    }
+  }
+
   /* ---------- wiring ---------- */
   $("#orderForm").addEventListener("submit", async e => { e.preventDefault(); const t = $("#orderText").value.trim(); if (!t) { $("#orderText").focus(); return; }
     if (await issueOrder($("#orderTo").value, t)) $("#orderText").value = ""; });
@@ -651,9 +791,18 @@ img.face { object-fit: cover; image-rendering: auto }
   for (const b of document.querySelectorAll(".tab")) b.addEventListener("click", () => { orderFilter = b.dataset.f;
     for (const x of document.querySelectorAll(".tab")) x.setAttribute("aria-selected", String(x === b)); renderOrders(); });
   $("#newAgent").addEventListener("click", openNewAgent);
+  $("#vCampus").addEventListener("click", () => setView("campus"));
   $("#vBoard").addEventListener("click", () => setView("board"));
   $("#vTree").addEventListener("click", () => setView("tree"));
-  try { if (localStorage.getItem("hq.view") === "tree") setView("tree"); } catch (e) {}
+  try { const saved = localStorage.getItem("hq.view"); if (saved === "tree" || saved === "board") setView(saved); } catch (e) {}
+  let campusResize;
+  addEventListener("resize", () => { clearTimeout(campusResize); campusResize = setTimeout(() => {
+    if ($("#campus").hidden || !window.HQCampus) return;
+    const C = HQCampus.colors(HQCampus.isDark());
+    const ground = $("#campus .campus-ground"), mini = $("#campus .mini-court");
+    if (ground) HQCampus.paintGround(ground, C);
+    if (mini) HQCampus.paintCourt(mini, C);
+  }, 150); });
   matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => render());
   $("#newSup").addEventListener("click", () => openSup(null));
   setInterval(() => { if (overlay.hidden) render(); }, 30000);   // keep the "x min ago" labels fresh (render only, no writes)
@@ -663,7 +812,9 @@ img.face { object-fit: cover; image-rendering: auto }
   (async () => {
     db = await window.claude?.use?.("db") ?? null;
     const user = await window.claude?.use?.("user") ?? null;
-    if (!db) { setLive("warn", "Offline"); const b = $("#banner"); b.hidden = false; b.textContent = "Live team data isn't available in this view. Open it on claude.ai while signed in."; render(); return; }
+    if (!db) { setLive("warn", "From the repo"); const b = $("#banner"); b.hidden = false;
+      b.textContent = "Live orders aren't available in this view. Each building shows that agent from agents.json and its LOG.md. Open Tennis101 HQ on claude.ai while signed in for the live team.";
+      render(); loadRepoTeam(); return; }
     canWrite = user ? await user.can("data.write") : null;
     if (canWrite === false) { const b = $("#banner"); b.hidden = false; b.textContent = "You can watch the team here, but only the owner (the CEO) can give orders."; }
     let first = 0; const want = 5;
