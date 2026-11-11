@@ -8,3 +8,12 @@ Mission: make the players' joints and movement look natural, using an establishe
 - Export `getPose(i)` and `playMotion(i, frames)` (for serves from Serve Analyst). Player Artist draws the pixels; you provide the pose.
 - Captured serves come from the Serve Analyst (`src/serve/motion/`, notes in `MOTION_NOTES.md`). `playMotion` must play them unchanged, and blend into and out of your own animation.
 - Code lives in `src/body/`. Tests: segment lengths add up to each player's height; knee and elbow angles stay in range during a run cycle.
+
+## Style notes from video (datasets/players/<id>/style.json)
+Claude watches YouTube clips with the `watch-tennis-video` skill (`.claude/skills/watch-tennis-video/`) and writes what it saw: the outfit and look, forehand and backhand (stance, takeback, contact, finish), and running (ready stance, split step, first step, braking, recovery), each with the video and time. Read the file for any player you work on and follow its `gameHints` entry for your role. Only what is in `seen` was observed; `notSeen` items are still open. If you need a player or stroke that is not there, ask your manager for a video run (it needs the built-in browser, which pipeline agents do not have).
+
+## Real bodies (Body Scout → datasets/players/<id>/body.json, window.BODIES)
+Every pro's researched body: sourced height and weight, wingspan, segment lengths, shoulder and hip width, build
+proportions, speed and joint flexibility. Build what you draw or animate from `BODIES[id]` (fall back to the
+current numbers when it is missing), never from one shared template: hips, shoulders and limbs must have that
+player's real proportions and read as a round 3D body, not a flat rectangle.

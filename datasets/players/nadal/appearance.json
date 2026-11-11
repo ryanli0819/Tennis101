@@ -1,0 +1,96 @@
+{
+  "player": "nadal",
+  "name": "Rafael Nadal",
+  "country": "ESP",
+  "rank": null,
+  "rankedOn": "2026-11-02",
+  "rankNote": "retired legend; on the roster as Ryan's pick (Nov 9 2026), not in the live top 20",
+  "era": "early 'pirate' era, 2005–2008: long hair, bandana, sleeveless shirt and three-quarter 'pirate' (capri) pants. Later look (about 2009 on): shorter hair, headband, sleeved shirts and shorts",
+  "signature": "left-hander with long hair under a bandana, a sleeveless shirt showing big arms, and knee-length 'pirate' pants; the whipping lasso forehand",
+  "exaggerate": [
+    "bandana with long hair sticking out the back",
+    "sleeveless shirt and big, muscular arms (left arm swings the racket)",
+    "pirate pants ending just below the knee",
+    "lasso-style forehand finish over the head"
+  ],
+  "confidence": "public",
+  "source": "looks, rituals and celebrations: public media, one link per claim in `sources` (Nov 9 2026); height (about 1.85 m) is general knowledge and still needs to be checked; hex colours wait on stills (#18)",
+  "outfits": {
+    "grass": {
+      "event": "Wimbledon",
+      "shirt": "#f4f4f0",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "notes": "all-white dress code; in the pirate era he wore white pirate pants at Wimbledon too (to confirm). Trim colours to research"
+    },
+    "hard": {
+      "event": "US Open",
+      "notes": "to research; sleeveless shirt and pirate pants in the 2005–2008 era"
+    },
+    "clay": {
+      "event": "Roland-Garros (red clay)",
+      "notes": "2005 clay: a yellow shirt, bandana and white pirate-length trousers (Monte Carlo 2005 report); hex values to read from stills"
+    }
+  },
+  "personality": {
+    "temperament": "fierce, intense competitor, all-out effort on every ball; humble and polite off court",
+    "style": "'King of Clay': 14 Roland-Garros titles; left-handed",
+    "mannerisms": [
+      "pre-serve routine: tugs his shorts, tucks his hair behind the left ear then the right, wipes his face, bounces the ball, then serves",
+      "lines up two water bottles in front of his chair, labels facing the court",
+      "keeps a towel at both corners of the court since the serve clock"
+    ],
+    "celebrations": [
+      "bites the trophy (since Monte Carlo 2005)"
+    ],
+    "notes": "he says the rituals are not superstition but a way to order his surroundings; public media for rituals, bottles and trophy bite",
+    "toConfirm": [
+      "big uppercut fist pump with a 'Vamos' roar",
+      "heavy-topspin baseliner, relentless defence"
+    ]
+  },
+  "media": {
+    "images": "datasets/players/nadal/images/ (local only)",
+    "video": "datasets/players/nadal/video/ and datasets/video/nadal/ (local only)",
+    "serves": "datasets/serves/nadal/"
+  },
+  "sources": [
+    {
+      "claim": "short tugs, hair tucks and water bottles: his rituals",
+      "url": "https://news.yahoo.com/short-tugs-shoulder-taps-water-114051902.html"
+    },
+    {
+      "claim": "two bottles at his feet aimed at the court; 'not superstition' (his own words)",
+      "url": "https://www.inverse.com/article/33718-rafael-nadal-and-the-psychology-of-sports-rituals"
+    },
+    {
+      "claim": "towel at both corners of the court since the serve clock",
+      "url": "https://sportspsychologytennis.com/superstitions-and-routines-of-nadal"
+    },
+    {
+      "claim": "the trophy bite began at Monte Carlo 2005",
+      "url": "https://www.thetennisgazette.com/news/rafael-nadal-now-explains-why-he-always-bit-the-trophy-after-winning-a-tournament/"
+    },
+    {
+      "claim": "sleeveless shirt and pirate shorts era, 2005–2008",
+      "url": "https://www.tennis.com/baseline/articles/rafael-nadal-fashion-retrospective-from-sleeveless-tops-and-pirate-pants-to-bold-and-bright-in-nike"
+    },
+    {
+      "claim": "the pirate-pants era on clay",
+      "url": "https://www.tennis365.com/atp-tour/remembering-when-the-pirate-pants-wearing-rafael-nadal-came-of-age-on-clay"
+    },
+    {
+      "claim": "Nadal on his early look: long hair, bandana, 'horrible' but part of his identity",
+      "url": "https://www.puntodebreak.com/en/2026/10/14/rafa-nadal-opens-up-about-his-look-at-the-beginning-of-his-career"
+    },
+    {
+      "claim": "Roland-Garros farewell: record 14 titles",
+      "url": "https://www.news4jax.com/sports/2025/05/25/french-open-2025-rafael-nadal-gets-a-farewell-ceremony-at-a-tournament-he-won-a-record-14-times/"
+    },
+    {
+      "claim": "'there are two Rafas': the competitor on court and the calm person off it",
+      "url": "https://tennisuptodate.com/atp/there-are-two-rafas-rafael-nadal-explains-the-contrast-between-his-competitive-and-private-life"
+    }
+  ],
+  "sourcedOn": "2026-11-09"
+}

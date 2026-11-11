@@ -3,11 +3,14 @@
   "name": "Jakub Mensik",
   "country": "CZE",
   "rank": 16,
-  "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "rankedOn": "2026-11-02",
+  "signature": "tall (1.93 m), long-limbed Czech with short brown hair and a huge, fluid serve",
+  "exaggerate": [
+    "tall, lanky sprite with long arms",
+    "very high toss and full stretch at contact"
+  ],
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -18,7 +21,7 @@
     },
     "hard": {
       "event": "US Open",
-      "notes": "to research"
+      "notes": "US Open 2026 (mixed doubles, matched with Muchova): maroon/pink look; exact hexes to read from images"
     },
     "clay": {
       "event": "Roland-Garros (red clay)",
@@ -26,15 +29,35 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "calm and mature for his age; dry humour in press",
+    "style": "first-strike: big serve plus heavy forehand and a solid two-handed backhand",
+    "mannerisms": [
+      "long, loose serve motion",
+      "few bounces before serving (to confirm)"
+    ],
+    "celebrations": [
+      "arms up and a wide smile after big wins"
+    ],
+    "notes": "public media; calm competitor who rarely throws a racket; works with a mental coach since his teens"
   },
   "media": {
     "images": "datasets/players/mensik/images/ (local only)",
     "video": "datasets/players/mensik/video/ and datasets/video/mensik/ (local only)",
     "serves": "datasets/serves/mensik/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "Red Bull athlete page: calm competitive mindset",
+      "url": "https://www.redbull.com/int-en/athlete/jakub-mensik"
+    },
+    {
+      "claim": "Roland-Garros 2026: composure decisive, admits 'some jitters'",
+      "url": "https://www.rolandgarros.com/en-us/article/2026-edition-r4-mensik-fonseca"
+    },
+    {
+      "claim": "'keeping it simple' in Miami",
+      "url": "https://www.tennismajors.com/atp/miami-open-masters-1000-atp/mensik-keeping-it-simple-in-miami-everything-is-happening-at-the-right-time-815077.html"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

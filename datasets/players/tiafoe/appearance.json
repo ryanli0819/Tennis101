@@ -2,12 +2,16 @@
   "player": "tiafoe",
   "name": "Frances Tiafoe",
   "country": "USA",
-  "rank": 9,
-  "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "rank": 8,
+  "rankedOn": "2026-11-02",
+  "signature": "charismatic showman; stocky, powerful build with short dark hair, often a headband",
+  "exaggerate": [
+    "broad, powerful frame",
+    "big smile, headband",
+    "flashy, loose swing"
+  ],
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,15 +30,40 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "the ultimate crowd-pleaser, joyful and theatrical",
+    "style": "flashy all-court shot-maker, loves drop shots and big forehands",
+    "mannerisms": [
+      "engages the crowd between points",
+      "bounces and dances on his feet"
+    ],
+    "celebrations": [
+      "chest-thump and arms-wide celebrations",
+      "high-energy roars"
+    ],
+    "notes": "public media; extrovert who brings the crowd in, wants NBA-style celebrations in tennis"
   },
   "media": {
     "images": "datasets/players/tiafoe/images/ (local only)",
     "video": "datasets/players/tiafoe/video/ and datasets/video/tiafoe/ (local only)",
     "serves": "datasets/serves/tiafoe/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "ATP: performer with energy and charisma, toughness underneath",
+      "url": "https://www.atptour.com/en/news/frances-tiafoe-it-all-adds-up"
+    },
+    {
+      "claim": "interviewer: quick-witted, brings the crowd in",
+      "url": "https://www.tennis.com/news/articles/frances-tiafoe-blair-henley-houston"
+    },
+    {
+      "claim": "wants more personality and celebrations in tennis",
+      "url": "https://www.sportsbusinessdaily.com/Daily/Issues/2019/06/21/Leagues-and-Governing-Bodies/Tiafoe.aspx"
+    },
+    {
+      "claim": "TIME interview, US Open 2023",
+      "url": "https://time.com/6309355/frances-tiafoe-us-open-2023-interview"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

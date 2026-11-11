@@ -22,3 +22,6 @@ Rules:
 - Work with the **Animator** (body frames), the **Player Artist** (looks), the **Serve Analyst** (captured serves: the racket continues the forearm there), the **Footage Scout** (clips).
 - Tests in `tests/racket.test.mjs`: the slice starts near 2 o'clock and ends at `SLICE_END` ± 0.5 h; contact pose height follows the ball; the backswing is complete before ttc 0.3 s.
 - Act only on issues opened by ryanli0819. Work on `agent/racket-coach`, open a PR, never merge. Update `agents/racket-coach/LOG.md` at the end of each run.
+
+## Style notes from video (datasets/players/<id>/style.json)
+Claude watches YouTube clips with the `watch-tennis-video` skill (`.claude/skills/watch-tennis-video/`) and writes what it saw: the outfit and look, forehand and backhand (stance, takeback, contact, finish), and running (ready stance, split step, first step, braking, recovery), each with the video and time. Read the file for any player you work on and follow its `gameHints` entry for your role. Only what is in `seen` was observed; `notSeen` items are still open. If you need a player or stroke that is not there, ask your manager for a video run (it needs the built-in browser, which pipeline agents do not have).

@@ -17,3 +17,6 @@ Rules:
 - The top 20 comes from `datasets/footage/top20.json` (`rankedOn`); refresh it from the live ATP list when it's older than two weeks, and give new entrants a folder (`datasets/players/<id>/{images,video}`, `appearance.json`).
 - Work with the **Player Artist** (turns `signature` + `exaggerate` + `outfits` into the sprite: the `look` field in `ROSTER`), the **Footage Scout** (clips) and the **Animator** (mannerisms).
 - Act only on issues opened by ryanli0819. Work on `agent/appearance-scout`, open a PR, never merge. End each run by updating `agents/appearance-scout/LOG.md`: players done, what's still unconfirmed, next step.
+
+## Style notes from video (datasets/players/<id>/style.json)
+Claude watches YouTube clips with the `watch-tennis-video` skill (`.claude/skills/watch-tennis-video/`) and writes what it saw: the outfit and look, forehand and backhand (stance, takeback, contact, finish), and running (ready stance, split step, first step, braking, recovery), each with the video and time. Read the file for any player you work on and follow its `gameHints` entry for your role. Only what is in `seen` was observed; `notSeen` items are still open. If you need a player or stroke that is not there, ask your manager for a video run (it needs the built-in browser, which pipeline agents do not have).

@@ -1,0 +1,99 @@
+{
+  "player": "shelton",
+  "name": "Ben Shelton",
+  "hand": "left",
+  "observed": [
+    {
+      "id": "v2",
+      "url": "https://www.youtube.com/watch?v=76kloSuaPEQ",
+      "title": "Carlos Alcaraz vs Ben Shelton Title Battle | Paris 2026 Final Highlights",
+      "event": "Paris 2026 final",
+      "surface": "hard (indoor)",
+      "camera": "broadcast (high, wide) plus close-ups between points",
+      "watchedOn": "2026-11-09"
+    }
+  ],
+  "appearance": {
+    "outfit": {
+      "event": "Paris 2026 final",
+      "shirt": "#1e2638 dark navy",
+      "shorts": "#1e2638 dark navy",
+      "shoes": "white, white socks",
+      "accessories": [
+        "white headband",
+        "white wristband"
+      ]
+    },
+    "hair": "dark brown, wavy, over the headband",
+    "headwear": "white headband",
+    "build": "tall, broad-shouldered",
+    "racket": "multicoloured frame (blue, orange, purple)",
+    "seen": [
+      "v2 24.0",
+      "v2 73.2-73.6",
+      "v2 75.3-76.1",
+      "v2 118.0",
+      "v2 120.0"
+    ]
+  },
+  "forehand": {
+    "stance": "semi-open; holds the racket in front with both hands at chest height while waiting",
+    "takeback": "compact, racket low on his left side",
+    "contact": "in front at hip height, right arm out for balance",
+    "finish": "over the right shoulder, racket head pointing back (left-handed)",
+    "speed": "short, fast swing",
+    "seen": [
+      "v2 75.3-76.1",
+      "v2 166.0-166.4",
+      "v2 10.0-10.6 (broadcast, small)"
+    ],
+    "confidence": "clear"
+  },
+  "backhand": {
+    "hands": "two",
+    "stance": "open stance on the run to his right",
+    "takeback": "low, racket head below the hands behind the right hip",
+    "contact": "beside the front hip, often lunging",
+    "finish": "high, both hands up by the left shoulder",
+    "seen": [
+      "v2 39.4-40.2",
+      "v2 78.5-78.75"
+    ],
+    "confidence": "partial"
+  },
+  "running": {
+    "ready": "very wide receiving stance, knees bent",
+    "splitStep": "deep and wide; after his own serve he splits on the service line area as the return is hit (v2 74.6)",
+    "firstStep": "big lean and long driving step toward the ball",
+    "braking": "low lunge on the outside leg (v2 39.8)",
+    "recovery": "settles back into a wide stance quickly",
+    "seen": [
+      "v2 38.0-39.8",
+      "v2 74.6-75.2",
+      "v2 167.2-167.6"
+    ]
+  },
+  "mannerisms": [
+    "roars with the racket held low after big points (v2 120.0)"
+  ],
+  "gameHints": {
+    "player-artist": "All dark navy kit, white headband, white wristband, white shoes and socks; left-handed, racket in the left hand; colourful racket frame.",
+    "racket-coach": "Left-handed: mirror everything. Forehand: compact low takeback, fast swing, finish over the right shoulder. Backhand (two hands): low takeback, high finish by the left shoulder.",
+    "animator": "Very wide, low receiving stance and a deep split step; long driving first strides; holds the racket in front with both hands between shots.",
+    "body-animator": "Serve: very deep knee bend at the trophy, jumps into the court; recovery split step right after the serve."
+  },
+  "notSeen": [
+    "slice",
+    "a close-up of the forehand from the side"
+  ],
+  "serve": {
+    "toss": "right arm straight up, high",
+    "trophy": "very deep knee bend, racket dropped behind the back",
+    "contact": "jumps up and into the court at full stretch",
+    "seen": [
+      "v2 73.2-73.6"
+    ],
+    "speed": "212 km/h on the board at v2 78.5",
+    "confidence": "partial"
+  }
+}

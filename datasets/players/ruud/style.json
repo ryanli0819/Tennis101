@@ -1,0 +1,99 @@
+{
+  "player": "ruud",
+  "name": "Casper Ruud",
+  "hand": "right",
+  "observed": [
+    {
+      "id": "v1",
+      "url": "https://www.youtube.com/watch?v=YFK-EoLdzg4",
+      "title": "Carlos Alcaraz vs Casper Ruud Court-Level Highlights | Paris 2026",
+      "event": "Paris 2026",
+      "surface": "hard (indoor)",
+      "camera": "court-level, behind the near player (players large and sharp)",
+      "watchedOn": "2026-11-09"
+    }
+  ],
+  "appearance": {
+    "outfit": {
+      "event": "Paris 2026",
+      "shirt": "#2c4f7c mid-blue, short sleeves",
+      "shorts": "#c9c9cf light grey",
+      "shoes": "white",
+      "accessories": [
+        "white headband",
+        "white wristbands on both wrists"
+      ]
+    },
+    "hair": "brown, short, held back by the headband",
+    "headwear": "white headband",
+    "build": "tall, upright",
+    "seen": [
+      "v1 26.2-26.8",
+      "v1 82.0",
+      "v1 167.4-168.6",
+      "v1 85.7-86.8"
+    ]
+  },
+  "forehand": {
+    "confidence": "none",
+    "note": "Earlier 'high loop takeback' (v1 84.6-85.5) was wrong: those frames are Ruud walking after the point. No clear forehand in this video.",
+    "seen": []
+  },
+  "backhand": {
+    "hands": "two (drive); one (defensive slice on the stretch)",
+    "drive": {
+      "stance": "open: loads the left leg, right leg trailing",
+      "takeback": "compact, racket at hip height behind the left side, short loop",
+      "finish": "high over the right shoulder",
+      "seen": [
+        "v1 168.86-169.4 (return of serve)"
+      ]
+    },
+    "slice": {
+      "stance": "deep lunge onto the left leg at full stretch",
+      "swing": "one hand, long straight right arm reaching low; left arm thrown up behind for balance",
+      "seen": [
+        "v1 24.75-25.35"
+      ]
+    },
+    "confidence": "clear"
+  },
+  "running": {
+    "ready": "very wide, upright stance behind the baseline; sways side to side while receiving",
+    "splitStep": "both feet off the ground just as the server hits (v1 168.6), lands wide",
+    "firstStep": "crossover; long running strides to the forehand side",
+    "braking": "deep lunge on the outside leg (v1 25.2)",
+    "recovery": "crossover then shuffle back to the middle",
+    "seen": [
+      "v1 24.6-25.4",
+      "v1 26.2-27.2",
+      "v1 167.4-168.8",
+      "v1 169.4-169.6",
+      "v1 29.95-30.4"
+    ]
+  },
+  "mannerisms": [
+    "touches the headband / wipes his face walking back between points (v1 31.4-33.0, v1 85.7-86.8, v1 172-173)"
+  ],
+  "gameHints": {
+    "player-artist": "Blue shirt, light-grey shorts, white headband and white wristbands, white shoes; tall and upright.",
+    "racket-coach": "Backhand drive: two hands, compact hip-height takeback, high finish over the right shoulder. Defensive backhand: one-handed slice at full stretch. Serve: side-on, high toss, kick-back of the right leg on landing.",
+    "animator": "Very wide receiving stance with a sway; airborne split step timed to the serve; deep lunge with the free arm thrown up on the slice; headband touch between points.",
+    "body-animator": "Lunge onto the left leg for the stretched slice; land the serve on the left foot with the right leg kicked back."
+  },
+  "notSeen": [
+    "forehand (no clear forehand near the camera in v1)",
+    "forehand and backhand finishes on a normal rally ball"
+  ],
+  "serve": {
+    "routine": "stands side-on, looks at the box, bounces the ball with the racket held low",
+    "toss": "left arm straight up, high toss",
+    "trophy": "racket behind the head, knees bent",
+    "contact": "full reach up and into the court",
+    "landing": "lands on the front (left) foot, right leg kicks back",
+    "seen": [
+      "v1 81.0-83.4"
+    ],
+    "confidence": "clear"
+  }
+}

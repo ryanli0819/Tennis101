@@ -3,11 +3,15 @@
   "name": "Ben Shelton",
   "country": "USA",
   "rank": 4,
-  "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "rankedOn": "2026-11-02",
+  "signature": "powerful left-hander with a huge serve; tall, athletic and broad-shouldered",
+  "exaggerate": [
+    "left-handed sprite",
+    "broad shoulders and a big service leap",
+    "explosive, bouncy body language"
+  ],
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,15 +30,36 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "energetic showman, feeds off the crowd",
+    "style": "lefty serve-plus-forehand power, comes forward to finish",
+    "mannerisms": [
+      "bounces on his toes between points",
+      "pumps up the crowd"
+    ],
+    "celebrations": [
+      "'hang up the phone' gesture after big wins",
+      "big fist pumps"
+    ],
+    "notes": "public media; calls himself quiet and 'boring' off court, the showman is the on-court side"
   },
   "media": {
     "images": "datasets/players/shelton/images/ (local only)",
     "video": "datasets/players/shelton/video/ and datasets/video/shelton/ (local only)",
     "serves": "datasets/serves/shelton/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "'dialed in' phone celebration: picks up an imaginary phone and hangs up",
+      "url": "https://larrybrownsports.com/tennis/ben-shelton-phone-celebration-us-open-semifinals/620140"
+    },
+    {
+      "claim": "calls himself 'boring' off the court",
+      "url": "https://sportskeeda.com/tennis/news-i-just-keep-mouth-shut-ben-shelton-opens-side-personality-calls-boring-court"
+    },
+    {
+      "claim": "ATP feature: Florida Gators roots, energy on court",
+      "url": "https://www.atptour.com/en/news/shelton-gators-2023-feature"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

@@ -2,15 +2,15 @@
   "player": "djokovic",
   "name": "Novak Djokovic",
   "country": "SRB",
-  "rank": 12,
-  "rankedOn": "2026-10-26",
+  "rank": 11,
+  "rankedOn": "2026-11-02",
   "signature": "lean, flexible build with short dark hair",
   "exaggerate": [
     "very lean torso",
     "short dark hair"
   ],
-  "confidence": "medium",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -29,15 +29,52 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "fierce, self-believing competitor; emotional, sometimes fights the crowd and then wins it over",
+    "style": "elastic defender and returner: slides into splits on hard courts, best return in the game, deep two-handed backhand",
+    "mannerisms": [
+      "bounces the ball many times before serving, more when under pressure",
+      "long, irregular pre-serve routine"
+    ],
+    "celebrations": [
+      "'heart throwing': hands from the chest out to all four sides of the stadium",
+      "beats his chest and roars"
+    ],
+    "notes": "public media for mannerisms and celebrations; playing style is general knowledge"
   },
   "media": {
     "images": "datasets/players/djokovic/images/ (local only)",
     "video": "datasets/players/djokovic/video/ and datasets/video/djokovic/ (local only)",
     "serves": "datasets/serves/djokovic/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "bounces the ball more under pressure (his own words)",
+      "url": "https://www.tennis365.com/french-open/djokovic-bouncing-french-open-paris"
+    },
+    {
+      "claim": "admits the long bouncing 'is annoying for a lot of people'",
+      "url": "https://tennishead.net/novak-djokovic-admits-issue-annoying-people-french-open/"
+    },
+    {
+      "claim": "heart gesture to all four sides; hits his chest",
+      "url": "https://www.nss-sports.com/en/lifestyle/35121/tennis-celebrations"
+    },
+    {
+      "claim": "'I still believe I can beat them all, otherwise I wouldn't be here' (AO 2026)",
+      "url": "https://www.puntodebreak.com/en/2026/01/24/djokovic-i-still-believe-i-can-beat-them-all-otherwise-i-wouldnt-be-here"
+    },
+    {
+      "claim": "style: one of the best returners in history, most return games won of any active player (ATP)",
+      "url": "https://www.atptour.com/en/news/djokovic-infosys-atp-beyond-the-numbers-january-2026"
+    },
+    {
+      "claim": "style: perhaps the greatest returner in men's history",
+      "url": "https://www.tennis365.com/facts-stats/novak-djokovic-return-stats-behind-recent-drop-off"
+    },
+    {
+      "claim": "style: slides on the stretch into low splits on hard courts (commentary, The Racquet)",
+      "url": "https://theracquet.substack.com/p/sliderman"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

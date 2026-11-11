@@ -2,12 +2,16 @@
   "player": "auger-aliassime",
   "name": "Felix Auger-Aliassime",
   "country": "CAN",
-  "rank": 7,
-  "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "rank": 13,
+  "rankedOn": "2026-11-02",
+  "signature": "tall (1.93 m), athletic build with short dark curly hair",
+  "exaggerate": [
+    "long athletic limbs",
+    "tight dark curls",
+    "big, smooth service motion"
+  ],
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,15 +30,34 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "calm and composed, polite",
+    "style": "big serve and forehand, all-court",
+    "mannerisms": [
+      "composed, steady routine between points"
+    ],
+    "celebrations": [
+      "controlled fist pump"
+    ],
+    "notes": "public media; calm from breathing and meditation work; perfectionist intensity underneath"
   },
   "media": {
     "images": "datasets/players/auger-aliassime/images/ (local only)",
     "video": "datasets/players/auger-aliassime/video/ and datasets/video/auger-aliassime/ (local only)",
     "serves": "datasets/serves/auger-aliassime/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "'We all get blurry when emotions kick in': breathing and meditation for a clear mind",
+      "url": "https://tennisuptodate.com/atp/we-all-get-blurry-when-emotions-kick-in-felix-auger-aliassime-explains-how-he-keeps-his-mind-clear"
+    },
+    {
+      "claim": "calm surface, intensity and perfectionism below (Cero Magazine)",
+      "url": "https://ceromagazine.com/articles/felix-auger-aliassime-tennis-interview-break-point"
+    },
+    {
+      "claim": "'an obsession ... to be great at everything I do'",
+      "url": "https://sportskeeda.com/tennis/news-it-s-obsession-young-age-i-ve-goal-great-everything-i-do-tennis-just-thing-i-best-felix-auger-aliassime"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

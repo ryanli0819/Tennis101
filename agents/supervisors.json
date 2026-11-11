@@ -10,7 +10,8 @@
         "body-animator",
         "animator",
         "racket-coach",
-        "biomechanics-coach"
+        "biomechanics-coach",
+        "body-scout"
       ],
       "mission": "How every body and racket moves: captured serves, joints, frames, racket paths, anatomy.",
       "brief": "Shared facts for every member:\n• Serve motions: SERVE_MOTIONS[id] = {first, second}, joints in body heights, seen from behind (src/serve/motion/).\n• Sinner's 1st serve comes from the slow-motion back-side clip; Alcaraz's 1st from his Indian Wells clip; his 2nd is still hand-keyed.\n• Arms are drawn in depth order: a hand in front of a body seen from behind is hidden by the torso.\n• Return stance: Anim kind “receive” (low, wide, bent forward).\n• Anatomy data: datasets/anatomy/ (US Open Alcaraz vs Shelton pose).",

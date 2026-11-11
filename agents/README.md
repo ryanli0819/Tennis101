@@ -29,6 +29,7 @@ Each agent has its own folder: `agents/<name>/PROMPT.md` (instructions) and `age
 | 16 | Racket Coach | `agent/racket-coach` | `src/racket/`, `datasets/racket/` | 4 PM |
 | 17 | Appearance Scout | `agent/appearance-scout` | `datasets/players/` | 5 PM |
 | 18 | Biomechanics Coach | `agent/biomechanics-coach` | `datasets/anatomy/`, `tests/anatomy.test.mjs` | 6 PM |
+| 19 | Body Scout | `agent/body-scout` | `datasets/players/<id>/body.json`, `datasets/players/BODY_SOURCES.md`, `datasets/players/tools/`, `src/players/bodies.js` | 7 PM |
 
 Give any new agent a row here before it starts.
 
@@ -64,6 +65,8 @@ Keep these stable. Change one only in your own PR, and say so in its description
 **Footage (Footage Scout).** Video goes in `datasets/video/<player>/{serve-first,serve-second,forehand,backhand,slice,running}/` (git-ignored, local only). `datasets/footage/top20.json`: the live ATP top 20 (`rankedOn`) with clip links, strokes, views and time ranges. Links only; Ryan records clips locally (git-ignored).
 
 **Appearance (Appearance Scout).** `datasets/players/<id>/appearance.json` for each top-20 player: `signature` (what makes him identifiable), `exaggerate` (how to make it obvious in pixels), `outfits` per court (`grass` Wimbledon, `hard` US Open, `clay` red clay; hex colours), `personality`, `confidence` and `source`. Photos and video in `datasets/players/<id>/{images,video}` stay local. The Player Artist turns it into `ROSTER[].look` and `outfits`.
+
+**Bodies (Body Scout).** `datasets/players/<id>/body.json` per pro (sourced height, weight, wingspan, segment lengths, hip and shoulder width, build, speed, flexibility) and `window.BODIES` from `src/players/bodies.js` (`BODIES[id].game`: heightM, weightKg, armSpanM, legLengthM, shoulderW, hipW, reachM, eyeHeightM, topSpeed, accel, cod, flex, splitDepth). The physics and the drawn bodies are built from it; the game must run without it.
 
 **Anatomy (Biomechanics Coach).** `datasets/anatomy/joints.json` (ranges of motion) and `movements/<name>.json` (timing, angles, kinetic chain, where each arm is relative to the body). Raw pose of Alcaraz vs Shelton at the US Open: `datasets/anatomy/uso/`.
 

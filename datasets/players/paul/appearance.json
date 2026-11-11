@@ -3,11 +3,15 @@
   "name": "Tommy Paul",
   "country": "USA",
   "rank": 14,
-  "rankedOn": "2026-10-26",
-  "signature": null,
-  "exaggerate": [],
-  "confidence": "to research",
-  "source": "general knowledge, unverified: the Appearance Scout confirms it from images",
+  "rankedOn": "2026-11-02",
+  "signature": "compact, athletic and very quick, with short dark-brown hair; easy, relaxed body language",
+  "exaggerate": [
+    "stocky, muscular legs",
+    "springy run with long slides on clay",
+    "relaxed shoulders between points"
+  ],
+  "confidence": "public",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -26,15 +30,35 @@
     }
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "laid-back and easygoing, but loud on big points",
+    "style": "athletic all-court player: great movement, heavy forehand, comfortable at the net",
+    "mannerisms": [
+      "unhurried walk back to the line",
+      "towel between most points (to confirm)"
+    ],
+    "celebrations": [
+      "roar and fist pump to the crowd on big points"
+    ],
+    "notes": "public media; calls himself more relaxed than a typical tennis player; Philly sports fan; matured after a 'party phase'"
   },
   "media": {
     "images": "datasets/players/paul/images/ (local only)",
     "video": "datasets/players/paul/video/ and datasets/video/paul/ (local only)",
     "serves": "datasets/serves/paul/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "ATP: more relaxed than a typical player, personable",
+      "url": "https://www.atptour.com/en/news/paul-indian-wells-2021-feature"
+    },
+    {
+      "claim": "taking the job seriously while having fun",
+      "url": "https://liveblogging-dapi.tennis.com/news/articles/tommy-paul-unlocks-happy-medium-taking-job-seriously-having-fun-interview-top-10"
+    },
+    {
+      "claim": "SI: down-to-earth, authentic",
+      "url": "https://www.si.com/onsi/serve/interviews/tommy-paul-talks-tennis-culture-matthew-mcconaughey-us-open"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

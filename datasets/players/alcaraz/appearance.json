@@ -3,7 +3,7 @@
   "name": "Carlos Alcaraz",
   "country": "ESP",
   "rank": 3,
-  "rankedOn": "2026-10-26",
+  "rankedOn": "2026-11-02",
   "signature": "his current look: long, outgrown dark hair and a full beard, held back with a hairband",
   "exaggerate": [
     "long wavy hair falling past the ears to the neck, puffing up over the band",
@@ -56,15 +56,44 @@
     ]
   },
   "personality": {
-    "temperament": null,
-    "style": null,
-    "mannerisms": [],
-    "celebrations": [],
-    "notes": "to research"
+    "temperament": "joyful and expressive; plays with a smile and calls it the key to everything he does",
+    "style": "all-court shot-maker: huge forehand, drop shots, rushes the net, plays for the crowd",
+    "mannerisms": [
+      "smiles and jokes with his box, even when behind",
+      "points to his temple after big points (to confirm from clips)"
+    ],
+    "celebrations": [
+      "arms wide, roar to the crowd",
+      "falls on his back on court after a big title (to confirm from clips)"
+    ],
+    "notes": "public media for temperament; style is general knowledge; mannerisms marked to confirm need clips"
   },
   "media": {
     "images": "datasets/players/alcaraz/images/ (local only)",
     "video": "datasets/players/alcaraz/video/ and datasets/video/alcaraz/ (local only)",
     "serves": "datasets/serves/alcaraz/"
-  }
+  },
+  "sources": [
+    {
+      "claim": "the smile is 'the key to everything I manage to do' (Le Figaro, via Tennis Majors)",
+      "url": "https://tennismajors.com/atp/alcaraz-a-smile-that-is-the-key-to-everything-i-manage-to-do-735577.html"
+    },
+    {
+      "claim": "'I feel happiness every time I step on the court' (2026)",
+      "url": "https://www.puntodebreak.com/en/2026/02/21/alcaraz-at-the-peak-on-personal-level-i-feel-happiness-every-time-i-step-on-the-court-i-love-what-i"
+    },
+    {
+      "claim": "plays some shots 'just for the crowd'",
+      "url": "https://sportskeeda.com/tennis/news-sometimes-just-crowd-carlos-alcaraz-admits-looking-beyond-scorelines-entertain-fans-skills"
+    },
+    {
+      "claim": "peers describe him as friendly and easy-going",
+      "url": "https://www.tennis365.com/atp-tour/what-carlos-alcaraz-like"
+    },
+    {
+      "claim": "style: no one in the top 100 hits the forehand drop shot as well and as often (ATP)",
+      "url": "https://www.atptour.com/en/news/forehand-drop-shot-success-alcaraz-2023"
+    }
+  ],
+  "sourcedOn": "2026-11-05"
 }

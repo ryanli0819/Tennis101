@@ -1,0 +1,94 @@
+{
+  "player": "federer",
+  "name": "Roger Federer",
+  "country": "SUI",
+  "rank": null,
+  "rankedOn": "2026-11-02",
+  "rankNote": "retired legend; on the roster as Ryan's pick (Nov 9 2026), not in the live top 20",
+  "era": "peak headband era, about 2004–2012 (white headband, short tousled dark hair). Earlier look, 2001: short ponytail with a headband or bandana and a bead necklace, worn when he beat Sampras at Wimbledon",
+  "signature": "the white headband over short, tousled dark hair, plus a smooth, upright one-handed backhand; looks calm and almost effortless",
+  "exaggerate": [
+    "bright white headband, a little thicker than real, with hair flopping over it",
+    "long, flowing one-handed backhand follow-through with the free arm stretched back",
+    "upright, relaxed posture; light, gliding footwork (no grunting, few big gestures)"
+  ],
+  "confidence": "public",
+  "source": "personality and looks: public media, one link per claim in `sources` (Nov 9 2026); build and height (about 1.85 m) are general knowledge and still need to be checked; outfits wait on stills (#18)",
+  "outfits": {
+    "grass": {
+      "event": "Wimbledon",
+      "shirt": "#f4f4f0",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "headband": "#f4f4f0",
+      "notes": "all-white dress code. Walk-on: a cardigan (2008) and an all-white military-style jacket with gold details (2009), a possible walk-on animation. Trim colours to research"
+    },
+    "hard": {
+      "event": "US Open",
+      "notes": "to research; he switched from the bandana to a headband at the 2001 US Open"
+    },
+    "clay": {
+      "event": "Roland-Garros (red clay)",
+      "notes": "to research"
+    }
+  },
+  "personality": {
+    "temperament": "calm and composed at his peak, rarely angry or pumped up; as a teenager he was hot-headed and smashed rackets, then taught himself to stay calm",
+    "style": "elegant attacker built around a one-handed backhand",
+    "mannerisms": [],
+    "celebrations": [
+      "tears on court after the biggest wins"
+    ],
+    "notes": "public media for temperament, the calm-after-2001 change, tears and his backhand; mannerisms need clips",
+    "toConfirm": [
+      "flicks hair away and adjusts the headband between points",
+      "short, quick pre-serve routine",
+      "quiet fist pump rather than a big roar",
+      "all-court game, comes in to volley"
+    ]
+  },
+  "media": {
+    "images": "datasets/players/federer/images/ (local only)",
+    "video": "datasets/players/federer/video/ and datasets/video/federer/ (local only)",
+    "serves": "datasets/serves/federer/"
+  },
+  "sources": [
+    {
+      "claim": "hot-headed as a teenager; smashed a racket in 2001, then worked on staying calm",
+      "url": "https://tennishead.net/the-important-change-roger-federer-made-in-2001-that-revolutionised-his-tennis-career/"
+    },
+    {
+      "claim": "'the hothead discovers his zen': went from tantrums to composure",
+      "url": "https://www.tennisnet.com/en/news/roger-federer-the-hothead-discovers-his-zen"
+    },
+    {
+      "claim": "stays calm on purpose ('you have to really force yourself')",
+      "url": "https://www.tennis.com/baseline/articles/federer-raonic-on-the-art-of-staying-calm"
+    },
+    {
+      "claim": "hair over the headband; does not grunt or wail",
+      "url": "https://www.pressreader.com/canada/ottawa-citizen/20190813/281535112625676"
+    },
+    {
+      "claim": "hairstyle timeline: ponytail and bandana in 2001, then the headband",
+      "url": "https://www.tennis365.com/atp-tour/two-decades-of-roger-federer-the-hairstyle-evolution-of-the-swiss-great"
+    },
+    {
+      "claim": "2001 Wimbledon v Sampras: white headband, short ponytail, bead necklace",
+      "url": "https://www.espn.com/magazine/curry_20010702.html"
+    },
+    {
+      "claim": "the one-handed backhand as the most beautiful part of his game",
+      "url": "https://www.irishtimes.com/sport/tennis/2022/09/16/style-with-substance-grace-with-athleticism-roger-federer-had-it-all"
+    },
+    {
+      "claim": "Wimbledon walk-on: cardigan (2008), white military-style jacket with gold details (2009)",
+      "url": "https://www.euronews.com/culture/2023/07/06/the-effortless-style-of-roger-federer-8-of-his-most-iconic-looks"
+    },
+    {
+      "claim": "tears on court after big wins",
+      "url": "https://www.tennis365.com/tennis-features/top-10-tracks-of-their-tears-when-tennis-stars-broke-down-featuring-andy-murrays-waterworks"
+    }
+  ],
+  "sourcedOn": "2026-11-09"
+}
