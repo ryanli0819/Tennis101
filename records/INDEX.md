@@ -10,7 +10,7 @@ Open-PR task ids on stub rows are **keeper mappings** to today's orders (reasone
 | HQ-20261111-005 | First PM order: one skeleton; Player Artist and PR #44; racket paths waiting on stroke keypoints | PM | working | Nov 11, 2026, 6:30 PM ET |  | #44, #28, #27, #26, #16 |  | records/2026-11-11/HQ-20261111-005.md |
 | HQ-20261111-004 | First WF order: fix locker-room "RIGHT-HANDED" label | WF | working | Nov 11, 2026, 6:30 PM ET |  | #29, #31, #24, #4 |  | records/2026-11-11/HQ-20261111-004.md |
 | HQ-20261111-003 | First RD order: continue 22-player anatomy; settle Cobolli and Sinner heights; serve-data gaps | RD | working | Nov 11, 2026, 6:30 PM ET |  | #42, #21 |  | records/2026-11-11/HQ-20261111-003.md |
-| HQ-20261111-002 | First RR order: QA health table for 17 open PRs; records setup; reconcile PR #43 version notes | RR | working | Nov 11, 2026, 6:30 PM ET |  | #43 |  | records/2026-11-11/HQ-20261111-002.md |
+| HQ-20261111-002 | First RR order: QA health table for 17 open PRs; records setup; reconcile PR #43 version notes | RR | in-review | Nov 11, 2026, 6:30 PM ET |  | #43 |  | records/2026-11-11/HQ-20261111-002.md |
 | HQ-20261111-001 | Design the Grok Bot HQ team, prompts, review chain and records protocol | EX | approved | Nov 11, 2026, 6:05 PM ET |  |  |  | records/2026-11-11/HQ-20261111-001.md |
 | HQ-20261111-005.PM.2 | Pixel characters for the rest of the roster | PM | open | Nov 11, 2026, 2:57 PM ET |  | #44 |  | records/2026-11-11/PR-44.md |
 | HQ-20261111-002.RR.1 | HQ campus and pixel buildings around the court | RR | open | Nov 11, 2026, 2:47 PM ET |  | #43 |  | records/2026-11-11/PR-43.md |
