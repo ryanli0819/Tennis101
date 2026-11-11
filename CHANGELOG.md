@@ -4,6 +4,13 @@ Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it 
 
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
 
+## v0.11.0 — Nov 11, 2026, 2 PM
+- The serve starts side-on: Like the pros in Ryan's serve compilation, the server starts turned at an angle to the court, front shoulder and front foot toward the net, and only turns square to the net as he swings up to hit. (Nov 4, 7 PM · Claude for Ryan, 8a979e2)
+- The server looks at his target: Before the toss the server's head turns toward the service box he is aiming at, looks up at the ball during the toss, and back at the box after contact. (Nov 4, 7 PM · Claude for Ryan, 8a979e2)
+- The racket stays in the right hand on both sides: Serving from the ad (left) side no longer flips the server into a left-hander. Sinner and Alcaraz hold the racket in their right hand from both sides, stand side-on the same way, and only turn their head toward the box they serve to. (Nov 11, 2 PM · Claude for Ryan, 0957229)
+- One shadow per player and per ball: Under the night floodlights a player now casts one shadow instead of four, and the ball one instead of several; the extra dark patch under each player's feet is gone too. (Nov 11, 2 PM · Claude for Ryan, 0957229)
+- Rounder bodies that turn: Arms, legs, torso, shorts and head are shaded like round shapes under the light instead of flat boxes. When a player turns, by running sideways or taking the racket back, the seams, collar and logo slide round the body, so you can see him rotate. (Nov 11, 2 PM · Claude for Ryan, 0957229)
+
 ## v0.10.0 — Nov 2, 2026, 10 AM
 - Arms in front of the body: Seen from behind, an arm that reaches in front of the body (to the racket's throat, across for a backhand, in the follow-through) is hidden by the torso, with only the top of the arm showing at the shoulder, instead of being painted across the player's back. (Nov 1, 7 PM · Claude for Ryan, 7c9c31b)
 - A real bounce routine: Before serving, the hand pushes the ball down and meets it on the way back up, the knees give a little and the body leans over the ball. (Nov 1, 7 PM · Claude for Ryan, 7c9c31b)
