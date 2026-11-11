@@ -231,6 +231,7 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/animation/run-cycle.js?v=0.11.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.11.0"></script>
 <script src="src/serve/motion/alcaraz-serve.js?v=0.11.0"></script>
+<script src="src/buildings/buildings.js?v=0.11.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -568,6 +569,9 @@ function drawCourt() {
   sc.sky.forEach((c, k) => { b.fillStyle = c; b.fillRect(0, Math.floor(skyEnd * k / sc.sky.length), BW, Math.ceil(skyEnd / sc.sky.length) + 1); });
   b.fillStyle = su.runoff; b.fillRect(0, skyEnd, BW, BH - skyEnd);
   drawStadium();
+  // Scenery only (src/buildings/): clubhouse, grandstand, scoreboard tower, umpire chair, locker entrance.
+  // Paints into this buffer. It does not move the ball, the players, the camera or the score.
+  if (window.Buildings) Buildings.draw(b, proj, cfg.surface, CAM_BACK);
   poly([proj(-COURT.DBL, COURT.L), proj(COURT.DBL, COURT.L), proj(COURT.DBL, -COURT.L), proj(-COURT.DBL, -COURT.L)], su.court); // playing surface
   if (su.stripe) {                                        // grass: mowing stripes across the court, worn patches behind the baselines
     for (let y0 = -19.5, k = 0; y0 < 19.5; y0 += 1.5, k++) if (k % 2) {     // stays inside the bowl's back wall
