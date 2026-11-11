@@ -308,6 +308,31 @@
       ],
       "contract": "datasets/anatomy/joints.json · movements/<name>.json",
       "effort": "high"
+    },
+    {
+      "name": "body-scout",
+      "title": "Body Scout",
+      "order": 19,
+      "runsAt": 19,
+      "job": "Researches every pro's real body (height, weight, wingspan, limb and segment lengths, hip and shoulder width, build, speed, joint flexibility) with sources, ties it to their look, and exports per-player body numbers the physics and the drawn bodies are built from.",
+      "owns": [
+        "datasets/players/<id>/body.json",
+        "datasets/players/BODY_SOURCES.md",
+        "datasets/players/tools/",
+        "src/players/bodies.js"
+      ],
+      "reads": [
+        "datasets/players/",
+        "datasets/anatomy/",
+        "datasets/footage/top20.json"
+      ],
+      "feeds": [
+        "body-animator",
+        "player-artist",
+        "skills-coach"
+      ],
+      "contract": "datasets/players/<id>/body.json · window.BODIES (src/players/bodies.js)",
+      "effort": "high"
     }
   ]
 }

@@ -9,3 +9,9 @@ Mission: own the skill points, and make every point change the player in a way t
 - Balance: a point should matter but never break physics. Keep every multiplier in sensible bounds and test it.
 - Tests in `tests/skills.test.mjs`: each step is constant (11→12 changes as much as 15→16), 10 is neutral, values stay within 1–20, and no multiplier goes below its floor.
 - Code lives in `src/skills/`.
+
+## Real bodies (Body Scout → datasets/players/<id>/body.json, window.BODIES)
+Every pro's researched body: sourced height and weight, wingspan, segment lengths, shoulder and hip width, build
+proportions, speed and joint flexibility. Build what you draw or animate from `BODIES[id]` (fall back to the
+current numbers when it is missing), never from one shared template: hips, shoulders and limbs must have that
+player's real proportions and read as a round 3D body, not a flat rectangle.
