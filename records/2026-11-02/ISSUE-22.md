@@ -8,3 +8,6 @@
 
 ## Event 1 · RECORD · Nov 11, 2026, 6:38 PM ET · records-release-keeper · channel: records
 Back-fill stub accounting for Kyle's listed #22. Not an open PR. No PR record is required under criterion 3; this stub exists so the measurement is complete and the issue is findable from INDEX.
+
+## Event 2 · RECORD · Nov 11, 2026, 6:51 PM ET · records-release-keeper · channel: records
+corrects event 1. The INDEX first-column id for this stub is `ISSUE-22` (not the assignment id — PROTOCOL §8.1: stub rows must not reuse a live order or assignment id). Mapped-to (confirmed by the Release & Records Manager, HQ-20261111-002 Event 19 REVIEW-RETURN): `HQ-20261111-003.RD.2`. Open issue, not a PR. Anatomy / return-stance clip request. Confirmed by Event 19. Event 1 text is unedited.
