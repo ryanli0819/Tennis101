@@ -1,5 +1,31 @@
 # Appearance Scout · log
 
+## Run 6 · 2026-11-11 (pixel characters, branch agent/pixel-characters) · briefSeen: look-world v1
+
+The roster is still the 22 in `datasets/footage/top20.json` `players` (Cerúndolo stays in `extra`). Sinner and Alcaraz were already finished, so this pass is the other 20. No new teammate logs changed the look. Body Scout has a prompt and no `body.json` yet.
+
+**Done**
+- Every one of the 20 `appearance.json` files now has a `body` block: height, weight, hand, backhand, with a source link. Active players are from the 2026 ATP media guide (player bios PDF). Nadal: Wikipedia height and hand, plus the ATP overview archived in Dec 2018 for 185 cm / 85 kg. Federer: Wikipedia height and one-handed backhand; weight 85 kg is the Tennis Companion ATP-derived table, because the media guide's legends page does not print it.
+- `game` block: reach is the game's own formula (`0.44 * height + 0.69`), marked derived. `letRate` and the eight skill points are marked `game-design` or `estimate`, not measurements. Favourite serve is a one-line summary of the style already in the file, or `withheld`.
+- Outfits: grass stays all white (dress code, `hexKind: dress-code`). Hard-court colours that a 2025 US Open article actually names are filled and marked `named-colour-approximate` (the hex is not a photo sample): Zverev grape purple, Shelton space grey and white with pink shoes, Medvedev purple, Tiafoe red, Fritz dark grey and black with blue shoes, Djokovic all black. Nadal's clay yellow shirt and white trousers were already cited. Kyrgios's red backwards cap and red shoes are the 2022 statement look already in his file. Everything else is `game-design-default` or `withheld`, not a guessed kit presented as fact.
+- Menšík's signature said 1.93 m. The media guide says 1.96 m / 86 kg. The signature line now says 1.96 m, and the old figure is in `body.conflicts`.
+
+**Conflicts**
+- Cobolli: the media guide says 1.73 m (5'8") / 74 kg. Wikipedia says 1.83 m. Weight agrees. The game uses 1.83 m and keeps the guide figure in `body.conflicts`.
+- Jódar: guide, Australian Open and US Open pages say 1.91 m / 70 kg. Roland-Garros says 69 kg. The game uses 70 kg. The old "about 1.91 m" note is confirmed.
+- Small weight gaps vs Tennis Companion (guide used): de Minaur 68 not 69, Paul 81 not 82, Davidovich Fokina 79 not 80, Nakashima 83 not 84.
+- Sinner and Alcaraz were not edited. The same guide lists Sinner at 1.88 m / 77 kg (the game has 1.91 m / 77 kg) and Alcaraz at 1.83 m / 73 kg (the game has 74 kg). Left as they are so the finished sprites do not shift.
+- Shelton: `style.json` (Paris 2026, indoor hard) shows a dark navy kit and a white headband. The US Open 2025 day-1 report shows space grey, white, sleeveless, pink shoes. Hard-court kit in the game is the US Open one. The headband and dark wavy hair come from the Paris clip.
+- Alcaraz in `style.json` (Paris 2026) has no hairband and a navy shirt with neon-yellow shorts. `ROSTER` still uses Ryan's long-hair, white-band, US Open look. Not changed.
+
+**Still open**
+- Hex values for the default kits need stills (issue #18). Do not treat `game-design-default` as a real shirt.
+- Federer's US Open and clay shirts were left white on purpose (`hexKind: withheld`).
+- Mannerisms marked to confirm still need clips.
+
+**Next step**
+When #18 stills arrive, sample the real hex and set `hexKind` to `clips`, starting with the players still on the neutral default: Fils, Cobolli, de Minaur, Jódar, Auger-Aliassime, Paul, Lehečka, Menšík, Davidovich Fokina, Nakashima, Tien, and Nadal's hard-court colour.
+
 ## Run 5 · 2026-11-09 (local pipeline, CEO order #35) · briefSeen: look-world v1
 
 Order #35: the roster is now 22 (Cerúndolo out; Federer, Nadal and Kyrgios in). Ratings: none yet. Teammates: no new log entries that change my work. Other open issues for me: #18 (stills, still waiting on Ryan).

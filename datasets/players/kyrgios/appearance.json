@@ -14,7 +14,7 @@
     "loose, slouchy walk between points"
   ],
   "confidence": "public",
-  "source": "personality and looks: public media, one link per claim in `sources` (Nov 9 2026); height (about 1.93 m) and hair are general knowledge and still need to be checked; outfits wait on stills (#18)",
+  "source": "personality and looks: public media, one link per claim in `sources` (Nov 9 2026); height (about 1.93 m) and hair are general knowledge and still need to be checked; outfits wait on stills (#18) Body numbers added Nov 11 2026 from the 2026 ATP media guide where the player is listed, otherwise the source named in body.",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
@@ -22,15 +22,26 @@
       "shorts": "#f4f4f0",
       "shoes": "#f4f4f0",
       "cap": "#f4f4f0",
-      "notes": "all-white dress code, cap worn backwards. 2022: red shoes and a red cap after matches, against the dress code (a possible post-match animation; hex to read from stills)"
+      "notes": "All-white dress code, cap worn backwards. Red shoes were a post-match gesture, not the in-point kit.",
+      "hexKind": "dress-code"
     },
     "hard": {
       "event": "US Open",
-      "notes": "to research"
+      "notes": "2022 statement look already in this file: cap backwards, red cap and red shoes. A specific US Open shirt colour was not sourced; black is the field behind the red cap. Hex approximates those colour names.",
+      "shirt": "#1a1a1e",
+      "shorts": "#1a1a1e",
+      "shoes": "#c4362c",
+      "cap": "#c4362c",
+      "hexKind": "named-colour-approximate"
     },
     "clay": {
       "event": "Roland-Garros (red clay)",
-      "notes": "to research; he rarely plays on clay"
+      "notes": "He rarely plays clay. Cap stays backwards; other colours are the neutral default.",
+      "cap": "#f4f4f0",
+      "shirt": "#3e4c5c",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "hexKind": "game-design-default"
     }
   },
   "personality": {
@@ -81,7 +92,58 @@
     {
       "claim": "tweener, leaping winner and a bottle thrown towards the umpire (Citi Open)",
       "url": "https://www.tennis365.com/tennis-videos/video-highlights-nick-kyrgios-hits-tweener-leaping-winner-and-throws-a-water-bottle-at-umpire-in-citi-open-win"
+    },
+    {
+      "claim": "1.93 m / 84 kg, right-handed, two-handed backhand",
+      "url": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf"
     }
   ],
-  "sourcedOn": "2026-11-09"
+  "sourcedOn": "2026-11-11",
+  "body": {
+    "heightM": 1.93,
+    "weightKg": 84,
+    "hand": "right",
+    "backhand": "two-handed",
+    "confidence": "public",
+    "heightSource": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf",
+    "weightSource": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf",
+    "plays": "Right-handed, two-handed backhand"
+  },
+  "game": {
+    "reachM": {
+      "value": 1.54,
+      "kind": "derived",
+      "formula": "0.44 * heightM + 0.69",
+      "note": "Same formula as bodyStats() in index.html. Not a measured wingspan. datasets/players/<id>/body.json does not exist yet (Body Scout has not run)."
+    },
+    "letRate": {
+      "value": 0.02,
+      "kind": "estimate",
+      "note": "Same range already used for Sinner (0.02) and Alcaraz (0.03): lets on roughly 1–3% of pro serves. Not counted from a match log."
+    },
+    "skills": {
+      "values": {
+        "speed": 14,
+        "agility": 14,
+        "endurance": 12,
+        "strength": 17,
+        "serve": 19,
+        "control": 13,
+        "reflexes": 15,
+        "netPlay": 16
+      },
+      "kind": "game-design",
+      "scale": "1–20, 10 = neutral, the Skills Coach scale in src/skills/skills.js",
+      "note": "Not a measured rating. Set from the published style already in this file (serve size, footspeed, touch) so the locker room is not all 10s."
+    },
+    "torsoScale": {
+      "kind": "game-design",
+      "note": "look.torso in src/players/roster.js is a pixel width multiplier taken from words already in signature/exaggerate (lanky, broad, slim). It is not a measured shoulder width."
+    },
+    "favouriteServes": {
+      "summary": "Fast first serve with a low toss; underarm serve as a surprise.",
+      "kind": "summary-of-published-style",
+      "from": "signature and the existing sources in this file"
+    }
+  }
 }

@@ -10,22 +10,31 @@
     "big serve-forehand one-two"
   ],
   "confidence": "public",
-  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18) Body numbers added Nov 11 2026 from the 2026 ATP media guide where the player is listed, otherwise the source named in body.",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
       "shirt": "#f4f4f0",
       "shorts": "#f4f4f0",
       "shoes": "#f4f4f0",
-      "notes": "all-white dress code; trim colours to research"
+      "notes": "all-white dress code; trim colours to research",
+      "hexKind": "dress-code"
     },
     "hard": {
       "event": "US Open",
-      "notes": "to research"
+      "notes": "Neutral default kit (navy shirt, white shorts). A citable US Open colour was not found for this run.",
+      "shirt": "#1c2a44",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "hexKind": "game-design-default"
     },
     "clay": {
       "event": "Roland-Garros (red clay)",
-      "notes": "to research"
+      "notes": "Neutral default kit. A citable clay colour was not found for this run.",
+      "shirt": "#3e4c5c",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "hexKind": "game-design-default"
     }
   },
   "personality": {
@@ -53,7 +62,68 @@
     {
       "claim": "Rolex profile: fist clench celebration, career-high No. 11 (Aug 2026)",
       "url": "https://www.rolex.com/it/rolex-family/tennis/rafael-jodar"
+    },
+    {
+      "claim": "1.91 m / 70 kg, right-handed, two-handed backhand (2026 ATP media guide)",
+      "url": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf"
+    },
+    {
+      "claim": "Australian Open page: 191 cm, 70 kg, right hand",
+      "url": "https://ausopen.com/players/spain/rafael-jodar"
+    },
+    {
+      "claim": "2026 US Open page: 1.91 m, 70 kg",
+      "url": "https://www.usopen.org/en_US/players/overview/rafael-jodar/atpj0dz.html"
     }
   ],
-  "sourcedOn": "2026-11-05"
+  "sourcedOn": "2026-11-11",
+  "body": {
+    "heightM": 1.91,
+    "weightKg": 70,
+    "hand": "right",
+    "backhand": "two-handed",
+    "confidence": "public",
+    "heightSource": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf",
+    "weightSource": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf",
+    "plays": "Right-handed, two-handed backhand",
+    "conflicts": [
+      "Australian Open player page and the 2026 US Open page both say 191 cm / 70 kg. Roland-Garros' page says 69 kg. The game uses 70 kg. An earlier appearance note ('about 1.91 m') is now confirmed."
+    ]
+  },
+  "game": {
+    "reachM": {
+      "value": 1.53,
+      "kind": "derived",
+      "formula": "0.44 * heightM + 0.69",
+      "note": "Same formula as bodyStats() in index.html. Not a measured wingspan. datasets/players/<id>/body.json does not exist yet (Body Scout has not run)."
+    },
+    "letRate": {
+      "value": 0.02,
+      "kind": "estimate",
+      "note": "Same range already used for Sinner (0.02) and Alcaraz (0.03): lets on roughly 1–3% of pro serves. Not counted from a match log."
+    },
+    "skills": {
+      "values": {
+        "speed": 15,
+        "agility": 14,
+        "endurance": 13,
+        "strength": 15,
+        "serve": 14,
+        "control": 12,
+        "reflexes": 13,
+        "netPlay": 11
+      },
+      "kind": "game-design",
+      "scale": "1–20, 10 = neutral, the Skills Coach scale in src/skills/skills.js",
+      "note": "Not a measured rating. Set from the published style already in this file (serve size, footspeed, touch) so the locker room is not all 10s."
+    },
+    "torsoScale": {
+      "kind": "game-design",
+      "note": "look.torso in src/players/roster.js is a pixel width multiplier taken from words already in signature/exaggerate (lanky, broad, slim). It is not a measured shoulder width."
+    },
+    "favouriteServes": {
+      "summary": "Big forehand noted by Roland-Garros; serve mix not separately sourced.",
+      "kind": "summary-of-published-style"
+    }
+  }
 }

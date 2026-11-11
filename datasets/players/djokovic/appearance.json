@@ -10,22 +10,31 @@
     "short dark hair"
   ],
   "confidence": "public",
-  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18)",
+  "source": "personality: public media, one link per claim in `sources` (Nov 5 2026); signature/build: general public knowledge, still to check against images; outfits wait on uploads (#18) Body numbers added Nov 11 2026 from the 2026 ATP media guide where the player is listed, otherwise the source named in body.",
   "outfits": {
     "grass": {
       "event": "Wimbledon",
       "shirt": "#f4f4f0",
       "shorts": "#f4f4f0",
       "shoes": "#f4f4f0",
-      "notes": "all-white dress code; trim colours to research"
+      "notes": "all-white dress code; trim colours to research",
+      "hexKind": "dress-code"
     },
     "hard": {
       "event": "US Open",
-      "notes": "to research"
+      "notes": "2025 US Open: all black with gold piping (Lacoste's collection note, and Sports Illustrated). The piping is not drawn as a logo.",
+      "shirt": "#161616",
+      "shorts": "#161616",
+      "shoes": "#161616",
+      "hexKind": "named-colour-approximate"
     },
     "clay": {
       "event": "Roland-Garros (red clay)",
-      "notes": "to research"
+      "notes": "Neutral default kit. A citable clay colour was not found for this run.",
+      "shirt": "#3e4c5c",
+      "shorts": "#f4f4f0",
+      "shoes": "#f4f4f0",
+      "hexKind": "game-design-default"
     }
   },
   "personality": {
@@ -74,7 +83,66 @@
     {
       "claim": "style: slides on the stretch into low splits on hard courts (commentary, The Racquet)",
       "url": "https://theracquet.substack.com/p/sliderman"
+    },
+    {
+      "claim": "1.88 m / 77 kg, right-handed, two-handed backhand",
+      "url": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf"
+    },
+    {
+      "claim": "2025 US Open: he asked to play in black; black kit with gold piping",
+      "url": "https://www.lacoste.com/ch/en/news/sports/team-and-collections-at-the-new-york-tournament.html"
+    },
+    {
+      "claim": "all-black night kit at the 2025 US Open",
+      "url": "https://www.si.com/tennis/ranking-the-five-best-on-court-us-open-mens-kits"
     }
   ],
-  "sourcedOn": "2026-11-05"
+  "sourcedOn": "2026-11-11",
+  "body": {
+    "heightM": 1.88,
+    "weightKg": 77,
+    "hand": "right",
+    "backhand": "two-handed",
+    "confidence": "public",
+    "heightSource": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf",
+    "weightSource": "https://www.atptour.com/-/media/files/media-guide/2026/2026-atp-media-guide-player-bios-birthdays-updated.pdf",
+    "plays": "Right-handed, two-handed backhand"
+  },
+  "game": {
+    "reachM": {
+      "value": 1.52,
+      "kind": "derived",
+      "formula": "0.44 * heightM + 0.69",
+      "note": "Same formula as bodyStats() in index.html. Not a measured wingspan. datasets/players/<id>/body.json does not exist yet (Body Scout has not run)."
+    },
+    "letRate": {
+      "value": 0.02,
+      "kind": "estimate",
+      "note": "Same range already used for Sinner (0.02) and Alcaraz (0.03): lets on roughly 1–3% of pro serves. Not counted from a match log."
+    },
+    "skills": {
+      "values": {
+        "speed": 16,
+        "agility": 17,
+        "endurance": 19,
+        "strength": 15,
+        "serve": 16,
+        "control": 18,
+        "reflexes": 19,
+        "netPlay": 14
+      },
+      "kind": "game-design",
+      "scale": "1–20, 10 = neutral, the Skills Coach scale in src/skills/skills.js",
+      "note": "Not a measured rating. Set from the published style already in this file (serve size, footspeed, touch) so the locker room is not all 10s."
+    },
+    "torsoScale": {
+      "kind": "game-design",
+      "note": "look.torso in src/players/roster.js is a pixel width multiplier taken from words already in signature/exaggerate (lanky, broad, slim). It is not a measured shoulder width."
+    },
+    "favouriteServes": {
+      "summary": "Accurate serve, not the biggest; the return is the famous shot.",
+      "kind": "summary-of-published-style",
+      "from": "personality.style and its ATP/Tennis365 sources"
+    }
+  }
 }
