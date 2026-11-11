@@ -62,7 +62,7 @@
       card.setAttribute("aria-checked", String(P.id === selected)); card.dataset.id = P.id;
       card.innerHTML = `<span class="lr-pick">SELECTED</span>
         <div class="lr-top"><span class="slot"></span>
-          <div class="lr-name">${esc(P.first)} ${esc(P.last.charAt(0) + P.last.slice(1).toLowerCase())}<small>${esc(P.code)} · RIGHT-HANDED</small></div></div>
+          <div class="lr-name">${esc(P.first)} ${esc(P.last.charAt(0) + P.last.slice(1).toLowerCase())}<small>${esc(P.code)} · ${P.lefty ? "LEFT-HANDED" : "RIGHT-HANDED"}</small></div></div>
         <div class="lr-body">
           <div><b>${P.heightM.toFixed(2)}</b><span>HEIGHT M</span></div>
           <div><b>${P.weightKg}</b><span>WEIGHT KG</span></div>

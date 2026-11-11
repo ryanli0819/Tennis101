@@ -2,6 +2,9 @@
 
 Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it was published (Eastern time, to the hour).
 
+## Unreleased
+- Every pro serves with his own captured motion: all 22 players in the locker room use a serve taken from checked footage. Speed, spin and serve type are unchanged, because the footage did not measure them. A player with only one filmed serve (Fils) uses it for both. (Nov 11, 6 PM · captured serves)
+
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
 
 ## v0.11.0 — Nov 11, 2026, 2 PM
