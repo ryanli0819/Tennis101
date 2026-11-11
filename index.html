@@ -472,14 +472,15 @@ const SCENES = {
 const SCENE = () => SCENES[cfg.surface] || SCENES.hard;
 /* LIGHT. shadows: where a shadow falls on the ground, per metre of height (court x, y); a = darkness.
    Daytime has one sun (grass: high summer sun from the left; clay: low late-afternoon sun from the right, long
-   shadows). The night match has four floodlights: four short, faint shadows. sun: where the sun glows on screen
+   shadows). The night match has one main floodlight bank: one short shadow (Ryan: a player or ball must never
+   cast more than one shadow). sun: where the sun glows on screen
    (fractions of the width/height), warm: how golden the light is. stand: the part of the court in the stands' shade. */
 const LIGHTS = {
   grass: { shadows: [{ x: 0.55, y: -0.32, a: 0.34 }], sun: { x: 0.06, y: 0.02 }, warm: 0.07, glow: 0.22,
            stand: { x0: -14, x1: 14, y0: 7.5, y1: 20, a: 0.16 } },
   clay:  { shadows: [{ x: -1.05, y: -0.5, a: 0.3 }], sun: { x: 0.96, y: 0.06 }, warm: 0.14, glow: 0.3,
            stand: { x0: -14, x1: -3.2, y0: -20, y1: 20, a: 0.2 } },
-  hard:  { shadows: [{ x: 0.32, y: 0.3, a: 0.1 }, { x: -0.32, y: 0.3, a: 0.1 }, { x: 0.32, y: -0.3, a: 0.1 }, { x: -0.32, y: -0.3, a: 0.1 }],
+  hard:  { shadows: [{ x: 0.34, y: 0.36, a: 0.2 }],
            sun: null, warm: 0, glow: 0, stand: null },
 };
 const LIGHT = () => LIGHTS[cfg.surface] || LIGHTS.hard;
@@ -681,27 +682,73 @@ function drawCapturedFigure(i, p, W) {
   };
   const mid = (a, c, u) => { const A = at(a), C = at(c); return A && C ? { x: A.x + (C.x - A.x) * u, y: A.y + (C.y - A.y) * u } : null; };
   const quad = (pts, col) => { if (!pts.every(Boolean)) return; b.fillStyle = col; b.beginPath(); pts.forEach((v, k) => (k ? b.lineTo(v.x, v.y) : b.moveTo(v.x, v.y))); b.closePath(); b.fill(); };
-  b.fillStyle = "rgba(0,0,0,0.32)"; b.beginPath(); b.ellipse(Math.round(g.x), Math.round(g.y), g.s * 0.32, Math.max(1, g.s * 0.09), 0, 0, Math.PI * 2); b.fill();
-  // legs, shoes, shorts
+  /* VOLUME (Ryan, Nov 11: "a 3D-looking figure, not boxes and a triangle"). Limbs are round: a shaded edge, the
+     base colour and a highlight on the side the light comes from, tapering from thigh to ankle. The torso and shorts
+     are shaded like a cylinder, and the spine seam sits where the back's middle really is: as the shoulders turn
+     (one nearer the net than the other), it slides across and the far flank darkens, so a turn reads as a turn. */
+  const lit = litLeft() ? -1 : 1;
+  const limb = (a, c, col, w) => {
+    const A = typeof a === "string" ? at(a) : a, C = typeof c === "string" ? at(c) : c;
+    if (!A || !C) return;
+    const o = lit * w * 0.17;
+    seg(A, C, shade(col, -0.24), w);
+    seg({ x: A.x + o, y: A.y }, { x: C.x + o, y: C.y }, col, w * 0.62);
+    seg({ x: A.x + o * 2.3, y: A.y }, { x: C.x + o * 2.3, y: C.y }, shade(col, 0.16), w * 0.22);
+  };
+  const cylFill = (pts, col, spine) => {                 // pts: a closed outline; fill it with vertical shading bands
+    if (!pts.every(Boolean)) return;
+    const xs = pts.map(v => v.x), ys = pts.map(v => v.y), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    b.save(); b.beginPath(); pts.forEach((v, k) => (k ? b.lineTo(v.x, v.y) : b.moveTo(v.x, v.y))); b.closePath(); b.clip();
+    const NB = 7, bw = (x1 - x0) / NB;
+    for (let k = 0; k < NB; k++) {
+      const u = -1 + (2 * k + 1) / NB + spine * 0.5, th = Math.asin(Math.max(-1, Math.min(1, u)));
+      const Lt = 0.6 * Math.cos(th) + 0.5 * lit * Math.sin(th);
+      b.fillStyle = shade(col, -0.27 + 0.36 * Math.max(0, (Lt + 0.45) / 1.45));
+      b.fillRect(x0 + k * bw, y0, bw + 1 / AS, y1 - y0);
+    }
+    b.restore();
+  };
+  // how far the shoulders are turned: −1…1 (0 = square to the camera), from how much nearer the net one shoulder is
+  const LS = W.leftShoulder, RS = W.rightShoulder;
+  const twist = LS && RS ? Math.max(-1, Math.min(1, ((RS.y - LS.y) * sideSign(i)) / (Math.hypot(RS.x - LS.x, RS.y - LS.y) || 1))) : 0;
+  // legs and shoes
   for (const s of ["left", "right"]) {
-    seg(s + "Hip", s + "Knee", skin); seg(s + "Knee", s + "Ankle", skin);
+    limb(s + "Hip", s + "Knee", skin, lw * 1.3); limb(s + "Knee", s + "Ankle", skin, lw * 1.0);
     const Kn = at(s + "Knee"), A0 = at(s + "Ankle");
-    if (Kn && A0) seg({ x: A0.x + (Kn.x - A0.x) * 0.18, y: A0.y + (Kn.y - A0.y) * 0.18 }, A0, "#f1f1ee", lw * 1.05);   // sock
-    const A = at(s + "Ankle"); if (A) { b.fillStyle = shade(P.shoes || "#f2f2f2", -0.45); b.fillRect(Math.round(A.x - lw * 0.75), Math.round(A.y + lw * 0.35), Math.ceil(lw * 1.6), Math.max(1, Math.ceil(lw * 0.3))); b.fillStyle = P.shoes || "#f2f2f2"; b.fillRect(Math.round(A.x - lw * 0.7), Math.round(A.y - lw * 0.4), Math.ceil(lw * 1.5), Math.ceil(lw * 0.8)); }
-    seg(s + "Hip", mid(s + "Hip", s + "Knee", 0.42), P.shorts, lw * 1.5);
+    if (Kn && A0) limb({ x: A0.x + (Kn.x - A0.x) * 0.18, y: A0.y + (Kn.y - A0.y) * 0.18 }, A0, "#f1f1ee", lw * 1.05);   // sock
+    const A = at(s + "Ankle"); if (A) { b.fillStyle = shade(P.shoes || "#f2f2f2", -0.45); b.fillRect(Math.round(A.x - lw * 0.75), Math.round(A.y + lw * 0.35), Math.ceil(lw * 1.6), Math.max(1, Math.ceil(lw * 0.3))); b.fillStyle = P.shoes || "#f2f2f2"; b.fillRect(Math.round(A.x - lw * 0.7), Math.round(A.y - lw * 0.4), Math.ceil(lw * 1.5), Math.ceil(lw * 0.8)); b.fillStyle = shade(P.shoes || "#f2f2f2", 0.2); b.fillRect(Math.round(A.x - lw * 0.7 + (lit > 0 ? lw * 0.8 : 0)), Math.round(A.y - lw * 0.4), Math.ceil(lw * 0.7), 1 / AS); }
   }
-  // torso (shirt) between shoulders and hips
-  quad([at("leftShoulder"), at("rightShoulder"), at("rightHip"), at("leftHip")], P.shirt);
-  { const ls = at("leftShoulder"), lh = at("leftHip"), rs = at("rightShoulder"), rh = at("rightHip");   // shaded side of the jersey
-    if (ls && lh && rs && rh) quad([ls, { x: ls.x + (rs.x - ls.x) * 0.28, y: ls.y + (rs.y - ls.y) * 0.28 }, { x: lh.x + (rh.x - lh.x) * 0.28, y: lh.y + (rh.y - lh.y) * 0.28 }, lh], shade(P.shirt, -0.16)); }
-  seg("leftHip", "rightHip", P.shorts, lw * 1.4);
-  // arms, with short sleeves
+  // SHORTS: a waist that wraps round the hips and two round legs down to mid-thigh
+  const lh = at("leftHip"), rh = at("rightHip"), lk = mid("leftHip", "leftKnee", 0.45), rk = mid("rightHip", "rightKnee", 0.45);
+  if (lh && rh && lk && rk) {
+    const out = (A, C, k) => ({ x: A.x + (A.x - C.x) * k, y: A.y + (A.y - C.y) * k });
+    const lho = out(lh, rh, 0.28), rho = out(rh, lh, 0.28), crotch = { x: (lh.x + rh.x) / 2, y: (lh.y + rh.y) / 2 + lw * 1.1 };
+    for (const [H0, K0] of [[lho, lk], [rho, rk]]) limb(H0, K0, P.shorts, lw * 1.9);
+    cylFill([{ x: lho.x, y: lho.y - lw * 0.5 }, { x: rho.x, y: rho.y - lw * 0.5 }, rho, { x: rk.x + (rho.x - rk.x) * 0.2, y: rk.y - lw }, crotch, { x: lk.x + (lho.x - lk.x) * 0.2, y: lk.y - lw }, lho], P.shorts, -twist);
+    seg({ x: lho.x, y: lho.y - lw * 0.45 }, { x: rho.x, y: rho.y - lw * 0.45 }, shade(P.shorts, -0.3), Math.max(1 / AS, lw * 0.3));   // waistband
+  }
+  // TORSO: shoulders rounded off, ribs narrowing to the waist, shaded like a cylinder
+  const ls = at("leftShoulder"), rs = at("rightShoulder");
+  if (ls && rs && lh && rh) {
+    const ext = (A, C, k) => ({ x: A.x + (A.x - C.x) * k, y: A.y + (A.y - C.y) * k });
+    const lso = ext(ls, rs, 0.16), rso = ext(rs, ls, 0.16), lwst = ext(lh, rh, 0.1), rwst = ext(rh, lh, 0.1);
+    const chest = (A, C) => ({ x: A.x + (C.x - A.x) * 0.38, y: A.y + (C.y - A.y) * 0.38 });
+    const outline = [{ x: lso.x, y: lso.y + lw * 0.2 }, { x: (lso.x + rso.x) / 2, y: (lso.y + rso.y) / 2 - lw * 0.35 }, { x: rso.x, y: rso.y + lw * 0.2 },
+                     ext(chest(rs, rh), chest(ls, lh), 0.08), rwst, lwst, ext(chest(ls, lh), chest(rs, rh), 0.08)];
+    cylFill(outline, P.shirt, -twist);
+    // the spine seam (from behind) or the placket (from the front) sits at the back's / chest's middle, which slides as he turns
+    const u = 0.5 - twist * 0.42 * (P.side === "near" ? 1 : -1), top = { x: lso.x + (rso.x - lso.x) * u, y: lso.y + (rso.y - lso.y) * u }, bot = { x: lwst.x + (rwst.x - lwst.x) * u, y: lwst.y + (rwst.y - lwst.y) * u };
+    seg(top, bot, shade(P.shirt, -0.3), Math.max(1 / AS, lw * 0.18));
+    seg({ x: top.x - lw * 0.6, y: top.y + lw * 0.1 }, { x: top.x + lw * 0.6, y: top.y + lw * 0.1 }, shade(P.shirt, -0.35), Math.max(1 / AS, lw * 0.3));   // collar
+    for (const S0 of [ls, rs]) { b.fillStyle = shade(P.shirt, 0.04); b.beginPath(); b.arc(S0.x, S0.y + lw * 0.15, lw * 0.75, 0, Math.PI * 2); b.fill(); }   // round shoulders
+  }
+  // arms, with short sleeves; the racket forearm can wear a sleeve
   for (const s of ["left", "right"]) {
-    seg(s + "Shoulder", s + "Elbow", skin); seg(s + "Elbow", s + "Wrist", s === "right" && P.sleeve ? P.sleeve : skin);   // racket forearm: sleeve if he wears one
-    seg(s + "Shoulder", mid(s + "Shoulder", s + "Elbow", 0.4), P.shirt, lw * 1.3);
+    limb(s + "Shoulder", s + "Elbow", skin, lw * 0.95); limb(s + "Elbow", s + "Wrist", s === "right" && P.sleeve ? P.sleeve : skin, lw * 0.85);
+    limb(s + "Shoulder", mid(s + "Shoulder", s + "Elbow", 0.42), P.shirt, lw * 1.35);
     const wr = mid(s + "Wrist", s + "Elbow", 0.18); if (wr) seg(wr, mid(s + "Wrist", s + "Elbow", 0.05), P.ui || "#f2f2f2", lw * 1.1);   // wristband
   }
-  if (W.leftHand) seg("leftWrist", "leftHand", skin, lw * 1.15);   // the bouncing hand, flexing at the wrist
+  if (W.leftHand) limb("leftWrist", "leftHand", skin, lw * 1.1);   // the bouncing hand, flexing at the wrist
   // racket: a real 3D racket continuing the right forearm (the same drawRacket as every other stroke)
   if (W.rightElbow && W.rightWrist) {
     const e = W.rightElbow, r = W.rightWrist, u = V3.norm({ x: r.x - e.x, y: r.y - e.y, z: r.z - e.z });
@@ -715,6 +762,8 @@ function drawCapturedFigure(i, p, W) {
     if (P.side !== "near") {                                                                 // FAR server, seen from the front: a face
       const px = 1 / AS, skinD = shade(skin, -0.18);
       b.fillStyle = skin; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();
+      b.save(); b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.clip();                    // round head: the side away from the light in shade
+      b.fillStyle = shade(skin, -0.2); b.fillRect(lit > 0 ? hx - r : hx + r * 0.35, hy - r, r * 0.65, r * 2); b.restore();
       b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.15, r * 1.0, Math.PI, Math.PI * 2); b.fill();   // hair / cap crown
       if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(q(hx - r * 1.2), q(hy - r * 0.2), q(r * 2.4), Math.max(px, q(r * 0.18))); }   // brim
       else { b.fillStyle = hr; b.fillRect(q(hx - r), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); b.fillRect(q(hx + r * 0.7), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); }
@@ -730,7 +779,9 @@ function drawCapturedFigure(i, p, W) {
     b.fillStyle = hr; b.beginPath(); b.arc(hx, hy + r * 0.15, r * 0.98, Math.PI * 0.05, Math.PI * 0.95); b.fill();   // hair below the cap
     for (let k = -2; k <= 2; k++) { b.fillStyle = k % 2 ? hrL : hrD; b.fillRect(hx + k * r * 0.35 - 0.5 / AS, hy + r * 0.55, 1 / AS, r * 0.3); }  // curls
     b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.1, r * 0.98, Math.PI, Math.PI * 2); b.fill();     // cap crown
-    if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(hx - 0.5 / AS, hy - r * 1.05, 1 / AS, r * 0.95); }  // seam
+    b.save(); b.beginPath(); b.arc(hx, hy, r * 1.02, 0, Math.PI * 2); b.clip();               // round head: shade on the side away from the light
+    b.fillStyle = "rgba(10,14,30,0.22)"; b.fillRect(lit > 0 ? hx - r * 1.05 : hx + r * 0.4, hy - r * 1.1, r * 0.65, r * 2.2); b.restore();
+    if (P.cap) { const sx = hx - (L0 => (L0 && Math.abs(L0.x) > 0.15 ? L0.x * r * 0.45 : 0))(W._look); b.fillStyle = shade(P.cap, -0.25); b.fillRect(sx - 0.5 / AS, hy - r * 1.05, 1 / AS, r * 0.95); }  // seam: turns with the head
     sigHead(P, true, hx, hy, r, hr, hrD, hrL);
     const L = W._look;
     if (L && Math.abs(L.x) > 0.15) {                     // seen from behind, his head turned: cheek, nose and the cap's brim show on that side
@@ -932,9 +983,15 @@ function drawPlayer(i, pos, swing) {
   const h = Math.max(6, P.heightM * s), w = h * 0.30, skin = "#e1b48b", skinD = shade(skin, -0.18), skinL = shade(skin, 0.12);
   const A = window.Anim ? Anim.frame(pos, BODY[i], near, P.id)
     : { bob: 0, lean: 0, crouch: 0.02, turn: 0, feet: [{ dx: -0.26, dy: 0, lift: 0 }, { dx: 0.26, dy: 0, lift: 0 }], knees: [{ dx: 0, dy: 0 }, { dx: 0, dy: 0 }], arms: [0, 0] };
-  const turn = A.turn || 0, tw = 1 - 0.36 * Math.abs(turn), DEP = 0.42;   // body turned sideways = narrower; depth → screen height
+  const turn = A.turn || 0, DEP = 0.42;                    // depth → screen height
   const look = RACKET_LOOK[P.id] || RACKET_LOOK.sinner;
   const rp = racketPose(i, pos);
+  /* YAW: how far the body is turned (−1…1, screen sense: + = toward screen right). Running sideways turns the whole
+     body (turn); taking the racket back turns the shoulders (the unit turn), so a swing reads as a rotation too.
+     Turned sideways = narrower, and the seams, logo and shading slide round the body (see cyl below). */
+  const dxR = (rp.g.x - pos.x) * R, dyR = (rp.g.y - pos.y) * R;
+  const twistS = Math.max(0, Math.min(1, -dyR * 2.6)) * Math.sign(dxR) * 0.8 * R;
+  const yaw = Math.max(-1, Math.min(1, turn + twistS * (1 - Math.abs(turn)))), tw = 1 - 0.36 * Math.abs(yaw);
   const hop = pos.air > 0 ? h * 0.07 : 0, drop = (A.crouch + (rp.crouch || 0) - A.bob) * h;
   const tiltR = (rp.tilt || 0) * h;                         // + = racket shoulder lower (a slice finishing low), − = higher
   const x = g.x, y = g.y - hop, lx = A.lean * h, tx = x + lx;
@@ -944,11 +1001,28 @@ function drawPlayer(i, pos, swing) {
   const behind = rp.g.y + rp.u.y * RACKET.len * 0.7 > pos.y + 0.05;   // head farther than the body?
   const gs = proj(rp.g.x, rp.g.y, rp.g.z), grip = { x: gs.x + lx * 0.5, y: gs.y - hop + drop };
 
-  b.fillStyle = "rgba(0,0,0,0.22)"; b.beginPath(); b.ellipse(q(g.x), q(g.y), w * 0.7, Math.max(1 / AS, w * 0.22), 0, 0, Math.PI * 2); b.fill();   // contact shadow
   if (behind) drawRacket(rp.g, rp.u, rp.n, look, lx * 0.5, -hop + drop);
 
   const hipY = y - h * 0.5 + drop;
   const lit = litLeft() ? -1 : 1;                          // which screen side faces the sun / main light
+  const Lr = (x1, y1, x2, y2, c, lw) => {                  // a ROUND limb: shaded edge, base colour, highlight toward the light
+    const o = lit * lw * 0.17;
+    Ln(x1, y1, x2, y2, shade(c, -0.24), lw); Ln(x1 + o, y1, x2 + o, y2, c, lw * 0.62); Ln(x1 + o * 2.3, y1, x2 + o * 2.3, y2, shade(c, 0.16), lw * 0.22);
+  };
+  /* CYLINDER: fill the current path with vertical shading bands, lit on the light side and dark round the far edge,
+     like a real round body under one light. mark(beta) = where a line drawn on the body at angle beta (0 = the middle
+     of the back from behind / of the chest from the front) shows on screen as the body turns, or null when it has
+     gone round the far side. */
+  const yawA = yaw * Math.PI / 2 * 0.85, ys = near ? -1 : 1;
+  const cyl = (x0, x1, y0, y1, col) => {
+    b.save(); b.clip(); const NB = 8, bw = (x1 - x0) / NB;
+    for (let k = 0; k < NB; k++) {
+      const th = Math.asin(-1 + (2 * k + 1) / NB), Lt = 0.6 * Math.cos(th) + 0.5 * lit * Math.sin(th);
+      b.fillStyle = shade(col, -0.27 + 0.36 * Math.max(0, (Lt + 0.45) / 1.45)); b.fillRect(x0 + k * bw, y0, bw + 1 / AS, y1 - y0);
+    }
+    b.restore();
+  };
+  const mark = (beta, half) => { const th = beta + ys * yawA; return Math.cos(th) > 0.12 ? tx + Math.sin(th) * half : null; };
   const mixHex = (a, c, t) => { const A = parseInt(a.slice(1), 16), C = parseInt(c.slice(1), 16), m = sh => Math.round(((A >> sh) & 255) * (1 - t) + ((C >> sh) & 255) * t);
     return "#" + [16, 8, 0].map(sh => m(sh).toString(16).padStart(2, "0")).join(""); };
   // LEGS: thigh and shin (lit and shaded sides), white socks, shoes with a sole and an accent stripe
@@ -957,8 +1031,7 @@ function drawPlayer(i, pos, swing) {
     const side = k ? 1 : -1, f = A.feet[k], kn = (A.knees || [])[k] || { dx: 0, dy: 0 };
     const hx = x + side * w * 0.2 * tw + lx * 0.3, fx = x + f.dx * w + lx * 0.1, fy = y - f.lift * h - (f.dy || 0) * h * DEP;
     const kx = (hx + fx) / 2 + side * w * 0.06 * tw + kn.dx * w, ky = (hipY + fy) / 2 - f.lift * h * 0.6 - kn.dy * h * DEP * 1.6;
-    Ln(hx, hipY, kx, ky, skin, w * 0.27); Ln(kx, ky, fx, fy - h * 0.06, skin, w * 0.22);
-    Ln(kx + side * w * 0.06, ky, fx + side * w * 0.05, fy - h * 0.08, skinD, w * 0.07);       // calf shadow
+    Lr(hx, hipY, kx, ky, skin, w * 0.29); Lr(kx, ky, fx, fy - h * 0.06, skin, w * 0.23);    // thigh and shin, round
     Ln(fx, fy - h * 0.085, fx, fy - h * 0.05, P.socks || "#f1f1ee", w * 0.21);              // sock
     Rr(fx - w * 0.19, fy - h * 0.058, w * 0.38, h * 0.045, P.shoes || "#f2f2f2");            // shoe upper
     Rr(fx - w * 0.2, fy - h * 0.016, w * 0.4, h * 0.016, shade(P.shoes || "#f2f2f2", -0.45)); // sole
@@ -983,8 +1056,8 @@ function drawPlayer(i, pos, swing) {
   // ARMS: sleeve, upper arm, forearm, wristband, hand. Racket arm reaches the grip; the other swings (or joins a backhand).
   const arm = (sx, sy, hx2, hy2, out, sleeve) => {
     const ex = (sx + hx2) / 2 + out * w * 0.18, ey = (sy + hy2) / 2 + h * 0.02;
-    Ln(sx, sy, ex, ey, skin, w * 0.2); Ln(ex, ey, hx2, hy2, sleeve || skin, w * 0.17);         // forearm (or a compression sleeve over it)
-    Ln(sx, sy, sx + (ex - sx) * 0.45, sy + (ey - sy) * 0.45, shirt, w * 0.26);              // short sleeve
+    Lr(sx, sy, ex, ey, skin, w * 0.21); Lr(ex, ey, hx2, hy2, sleeve || skin, w * 0.18);         // forearm (or a compression sleeve over it)
+    Lr(sx, sy, sx + (ex - sx) * 0.45, sy + (ey - sy) * 0.45, shirt, w * 0.28);              // short sleeve
     Ln(hx2 + (ex - hx2) * 0.22, hy2 + (ey - hy2) * 0.22, hx2 + (ex - hx2) * 0.08, hy2 + (ey - hy2) * 0.08, P.ui || "#f2f2f2", w * 0.2);  // wristband
     Rr(hx2 - w * 0.08, hy2 - w * 0.08, w * 0.16, w * 0.16, skinL);                           // hand
   };
@@ -1020,32 +1093,38 @@ function drawPlayer(i, pos, swing) {
   };
   drawArms(false);                                                                           // arms hidden behind the torso first
   b.save(); b.translate(q(tx), 0); b.scale(tw, 1); b.translate(-q(tx), 0);               // turned sideways: the torso narrows
-  // SHORTS: waistband, shaded side, the split between the legs
-  Rr(tx - w * 0.44, hipY - h * 0.06, w * 0.88, h * 0.16, P.shorts);
-  Rr(tx - w * 0.44, hipY - h * 0.06, w * 0.88, h * 0.022, shade(P.shorts, -0.22));
-  Rr(lit < 0 ? tx + w * 0.26 : tx - w * 0.44, hipY - h * 0.04, w * 0.18, h * 0.14, shade(P.shorts, -0.12));
-  Rr(tx - 0.5 / AS, hipY + h * 0.05, 1 / AS, h * 0.05, shade(P.shorts, -0.3));
-  // JERSEY: broad at the shoulders, shaded on one side, lit on the other; collar; chest logo seen from the front
-  b.fillStyle = shirt; b.beginPath();
+  // SHORTS: round (cylinder shading), a waistband, the split between the legs and a side seam that turn with the hips
+  b.beginPath(); b.moveTo(q(tx - w * 0.45), q(hipY - h * 0.06)); b.lineTo(q(tx + w * 0.45), q(hipY - h * 0.06));
+  b.lineTo(q(tx + w * 0.47), q(hipY + h * 0.1)); b.lineTo(q(tx - w * 0.47), q(hipY + h * 0.1)); b.closePath();
+  cyl(tx - w * 0.47, tx + w * 0.47, hipY - h * 0.06, hipY + h * 0.1, P.shorts);
+  Rr(tx - w * 0.45, hipY - h * 0.06, w * 0.9, h * 0.022, shade(P.shorts, -0.24));
+  { const m0 = mark(0, w * 0.45); if (m0 != null) Rr(m0 - 0.5 / AS, hipY + h * 0.045, 1 / AS, h * 0.055, shade(P.shorts, -0.34)); }   // the split
+  for (const sd of [-1, 1]) { const ms = mark(sd * Math.PI / 2 * 0.92, w * 0.46); if (ms != null) Rr(ms - 0.5 / AS, hipY - h * 0.04, 1 / AS, h * 0.13, shade(P.shorts, -0.3)); }   // side seams
+  // JERSEY: broad round shoulders narrowing to the waist, shaded like a cylinder; the collar, spine seam, side seams and
+  // chest logo sit on the body, so they slide round as he turns
   const tR = R > 0 ? tiltR : -tiltR;                        // tilt seen on screen: right corner down by tR, left corner up
-  b.moveTo(q(tx - w * 0.56), q(shY + h * 0.02 - tR)); b.lineTo(q(tx + w * 0.56), q(shY + h * 0.02 + tR));
-  b.lineTo(q(tx + w * 0.46), q(hipY - h * 0.03)); b.lineTo(q(tx - w * 0.46), q(hipY - h * 0.03)); b.closePath(); b.fill();
-  Rr(tx - lit * w * 0.3 - (lit < 0 ? 0 : w * 0.2), shY + h * 0.03, w * 0.2, h * 0.28, shade(shirt, -0.18));   // side away from the light
-  Rr(tx + lit * w * 0.3 - (lit < 0 ? w * 0.12 : 0), shY + h * 0.04, w * 0.12, h * 0.24, shade(shirt, 0.14));  // side in the light
-  if (P.shirtLow) for (let k = 1; k <= 4; k++)                                                // a fade: dark at the shoulders, light at the waist
-    Rr(tx - w * (0.53 - k * 0.018), shY + h * (0.04 + k * 0.064), w * (1.06 - k * 0.036), h * 0.066, mixHex(shirt, P.shirtLow, k / 4));
+  b.beginPath();
+  b.moveTo(q(tx - w * 0.52), q(shY + h * 0.0 - tR)); b.quadraticCurveTo(q(tx), q(shY - h * 0.025), q(tx + w * 0.52), q(shY + h * 0.0 + tR));
+  b.quadraticCurveTo(q(tx + w * 0.6), q(shY + h * 0.03 + tR), q(tx + w * 0.54), q(shY + h * 0.09 + tR * 0.7));
+  b.lineTo(q(tx + w * 0.46), q(hipY - h * 0.03)); b.lineTo(q(tx - w * 0.46), q(hipY - h * 0.03));
+  b.lineTo(q(tx - w * 0.54), q(shY + h * 0.09 - tR * 0.7)); b.quadraticCurveTo(q(tx - w * 0.6), q(shY + h * 0.03 - tR), q(tx - w * 0.52), q(shY - tR));
+  b.closePath();
+  cyl(tx - w * 0.6, tx + w * 0.6, shY - h * 0.03 - Math.abs(tR), hipY, shirt);
+  if (P.shirtLow) for (let k = 1; k <= 4; k++) {                                              // a fade: dark at the shoulders, light at the waist
+    b.globalAlpha = 0.75; Rr(tx - w * (0.53 - k * 0.018), shY + h * (0.04 + k * 0.064), w * (1.06 - k * 0.036), h * 0.066, mixHex(shirt, P.shirtLow, k / 4)); b.globalAlpha = 1; }
   Rr(tx - w * 0.46, hipY - h * 0.06, w * 0.92, h * 0.025, shade(P.shirtLow || shirt, -0.1));   // hem
-  if (near) {                                                                                // BACK of the jersey: plain, a spine seam, shoulder blades
-    Rr(tx - w * 0.14, shY, w * 0.28, h * 0.025, shade(shirt, -0.28));                        // collar, from behind
-    Rr(tx - 0.5 / AS, shY + h * 0.03, 1 / AS, h * 0.27, shade(shirt, -0.2));                  // spine seam
-    Rr(tx - w * 0.36, shY + h * 0.07, w * 0.26, h * 0.012, shade(shirt, -0.12));             // shoulder-blade folds
-    Rr(tx + w * 0.1, shY + h * 0.07, w * 0.26, h * 0.012, shade(shirt, -0.12));
+  for (const sd of [-1, 1]) { const ms = mark(sd * Math.PI / 2 * 0.9, w * 0.5); if (ms != null) Rr(ms - 0.5 / AS, shY + h * 0.08, 1 / AS, h * 0.22, shade(shirt, -0.26)); }   // side seams
+  const m0 = mark(0, w * 0.5);
+  if (near) {                                                                                // BACK of the jersey: a spine seam, collar, shoulder blades
+    if (m0 != null) { Rr(m0 - w * 0.14, shY, w * 0.28, h * 0.025, shade(shirt, -0.28)); Rr(m0 - 0.5 / AS, shY + h * 0.03, 1 / AS, h * 0.27, shade(shirt, -0.2)); }
+    for (const sd of [-1, 1]) { const mb = mark(sd * 0.55, w * 0.5); if (mb != null) Rr(mb - w * 0.12, shY + h * 0.07, w * 0.24, h * 0.012, shade(shirt, -0.12)); }   // shoulder-blade folds
+  } else if (m0 != null) {                                                                   // FRONT: V-neck, placket, buttons, chest logo
+    Ln(m0 - w * 0.12, shY, m0, shY + h * 0.05, shade(shirt, -0.3), 1 / AS); Ln(m0 + w * 0.12, shY, m0, shY + h * 0.05, shade(shirt, -0.3), 1 / AS);
+    Rr(m0 - w * 0.07, shY, w * 0.14, h * 0.035, skin);
+    Rr(m0 - 0.5 / AS, shY + h * 0.035, 1 / AS, h * 0.07, shade(shirt, -0.3));
+    Rr(m0 + 1 / AS, shY + h * 0.05, 1 / AS, 1 / AS, "#f4f4ef"); Rr(m0 + 1 / AS, shY + h * 0.085, 1 / AS, 1 / AS, "#f4f4ef");
+    const ml = mark(-R * 0.48, w * 0.5); if (ml != null) Rr(ml - w * 0.05, shY + h * 0.08, w * 0.1, h * 0.03, shade(shirt, shirt === "#f4f4f0" ? -0.25 : 0.55));   // chest logo
   }
-  else { Ln(tx - w * 0.12, shY, tx, shY + h * 0.05, shade(shirt, -0.3), 1 / AS); Ln(tx + w * 0.12, shY, tx, shY + h * 0.05, shade(shirt, -0.3), 1 / AS);
-         Rr(tx + R * -w * 0.22, shY + h * 0.08, w * 0.1, h * 0.03, shade(shirt, shirt === "#f4f4f0" ? -0.25 : 0.55));   // chest logo
-         Rr(tx - w * 0.07, shY, w * 0.14, h * 0.035, skin);                                   // FRONT: V-neck showing the throat
-         Rr(tx - 0.5 / AS, shY + h * 0.035, 1 / AS, h * 0.07, shade(shirt, -0.3));            // placket
-         Rr(tx + 1 / AS, shY + h * 0.05, 1 / AS, 1 / AS, "#f4f4ef"); Rr(tx + 1 / AS, shY + h * 0.085, 1 / AS, 1 / AS, "#f4f4ef"); }   // buttons
   b.restore();
   drawArms(true);                                                                            // then the ones in front of it
   // HEAD: neck, ears, hair with strands (or cap with seams and the hair showing under it); face from the front
@@ -1053,6 +1132,7 @@ function drawPlayer(i, pos, swing) {
   const [hair, hairD, hairL] = HAIR[P.id] || [P.hair, shade(P.hair, -0.35), shade(P.hair, 0.25)];
   Rr(tx - w * 0.12, shY - h * 0.03, w * 0.24, h * 0.04, skinD);                              // neck
   Rr(hx0, hy0, hw, hh, skin);                                                                // head
+  Rr(lit > 0 ? hx0 : hx0 + hw * 0.74, hy0 + hh * 0.08, hw * 0.26, hh * 0.86, skinD);         // round: the side away from the light in shade
   Rr(hx0 - 1 / AS, hy0 + hh * 0.4, 1 / AS, hh * 0.25, skinD); Rr(hx0 + hw, hy0 + hh * 0.4, 1 / AS, hh * 0.25, skinD);   // ears
   const strands = (x0, y0, ww, hh2) => {                                                     // hair texture: base, shadow, highlights
     Rr(x0, y0, ww, hh2, hair);
@@ -1297,8 +1377,10 @@ function poseToWorld(i, p, pose) {
   return w;
 }
 /* Which way a captured serve faces (+1 = toward the player's right): where the tossing hand reaches before the toss.
-   The server faces the outside of the court, toward the nearest stands: his right on the deuce side, his left on the
-   ad side, so the motion is mirrored when he switches sides (CEO order). */
+   Used for the bouncing hand's direction. The motion itself is NEVER mirrored: Sinner and Alcaraz are right-handed,
+   so on both the deuce and the ad side the racket stays in the right hand and the body stays side-on the same way
+   (left shoulder to the net); only the head turns to the box he serves to (CEO order, Nov 11: mirroring put the
+   racket in the left hand on the ad side). */
 function motionFacing(m) {
   if (m.facing == null) {
     const E = m.events, a = E.routine ?? E.start - 0.3, z = E.tossRelease;
@@ -1308,8 +1390,7 @@ function motionFacing(m) {
   return m.facing;
 }
 function serveFlip(i, m) {
-  const right = PLAYERS[i].side === "near" ? 1 : -1, deuce = pos[i].x * right >= 0;
-  return (deuce ? 1 : -1) * motionFacing(m);
+  return PLAYERS[i].lefty ? -1 : 1;                      // a left-hander's captured motion would be mirrored; nobody else's
 }
 /* SIDE-ON START (from Ryan's serve compilation): every server begins turned at an angle to the court, front shoulder
    toward the net, front foot ahead, and turns square to the net only as he swings up to contact; after contact the
