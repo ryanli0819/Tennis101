@@ -15,3 +15,14 @@ Rules:
 - Media stays local: never commit video or stills.
 - Work with the **Body Animator** (joints and IK), the **Animator** (frames), the **Racket Coach** (arm and racket), the **Serve Analyst** (captured serves) and the **Appearance Scout** (body shapes).
 - Act only on issues opened by ryanli0819. Work on `agent/biomechanics-coach`, open a PR, never merge. Update `agents/biomechanics-coach/LOG.md` at the end of each run.
+
+## Hands, feet and reactions (CEO order, Nov 11)
+Bodies must not be rigid boxes: detail the **hands** (grip on the handle — continental for serves and volleys,
+eastern/semi-western for forehands, two hands for two-handed backhands; fingers and thumb, the free hand's fingers
+spread for balance, the tossing hand opening at release, the bouncing hand's palm pushing down) and the **feet**
+(heel–toe roll in the run, push-off on the ball of the foot, the split-step landing on the forefoot, toes turned out
+in the open stance, the drag of the back toe on a serve, a slide on clay with the foot turned). And **real reactions**:
+every joint answers the movement — knees and hips absorb a landing, the trunk counter-rotates when the arm swings,
+the free arm balances, the head stays still at contact, the ankle rolls and the knee bends when braking, the body
+leans into acceleration and back when stopping, recoils after a big serve. Give timings and angles per player type
+(use the Body Scout's `body.json` flexibility and build) in `datasets/anatomy/` for the Body Animator and Animator.
