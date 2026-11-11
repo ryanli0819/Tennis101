@@ -1,0 +1,336 @@
+{
+  "_about": "Body Scout. `official` (sourced, one link per number) and `research` (judgement calls with their why and evidence) are written by hand. `reach`, `segments`, `build`, `movement`, `flexibility` and `game` are derived from them by datasets/players/tools/build_bodies.py: do not edit those by hand, change `research` and run the tool. A block marked \"estimate\": true is an estimate in every number, by the method it states. Method and references: datasets/players/BODY_SOURCES.md.",
+  "player": "djokovic",
+  "name": "Novak Djokovic",
+  "sourcedOn": "2026-11-11",
+  "official": {
+    "heightM": 1.88,
+    "weightKg": 82,
+    "born": "1987-05-22",
+    "hand": "right",
+    "backhand": "two-handed",
+    "sources": {
+      "heightM": "https://www.atptour.com/en/players/novak-djokovic/d643/overview",
+      "weightKg": "https://www.atptour.com/en/players/novak-djokovic/d643/overview",
+      "born": "https://www.atptour.com/en/players/novak-djokovic/d643/overview",
+      "hand": "https://www.atptour.com/en/players/novak-djokovic/d643/overview",
+      "backhand": "https://www.atptour.com/en/players/novak-djokovic/d643/overview"
+    },
+    "readFrom": "https://www.atptour.com/en/-/www/players/hero/d643",
+    "readOn": "2026-11-11",
+    "how": "The ATP Tour profile's own data (HeightCm, WeightKg, BirthDate, PlayHand, BackHand), read from the JSON the profile page loads."
+  },
+  "research": {
+    "armSpanRatio": {
+      "value": 1.03,
+      "why": "the traditional ratio for men (1.03); nothing in his look says longer or shorter arms",
+      "publishedM": null,
+      "searched": "No published wingspan found (searched Nov 11, 2026; only unsourced fan-site guesses)."
+    },
+    "legShift": {
+      "value": 0.0,
+      "why": "standard leg share: no evidence of an unusually long- or short-legged build"
+    },
+    "build": {
+      "massSits": "evenly spread; long, lean muscle and a narrow waist",
+      "look": "appearance.json: 'lean, flexible build', 'very lean torso'",
+      "type": "lean",
+      "typeWhy": "appearance.json calls his build lean and flexible with a very lean torso; the ATP's 82 kg gives BMI 23.2, which on its own would read athletic. Drawn lean.",
+      "mul": {
+        "waist": 0.95
+      },
+      "mulWhy": "appearance.json: very lean torso"
+    },
+    "movement": {
+      "mover": 1.04,
+      "quick": 1.04,
+      "cod": 1.12,
+      "why": "The highest speed Tennis Australia's tracking saw from any man (36.02 km/h) and the tour's reference for sliding defence; then slowed for age (39).",
+      "slides": "Open-stance slides into near-splits on every surface, hard courts included; he warns that extreme slides need strong, flexible ankles.",
+      "evidence": [
+        {
+          "claim": "Djokovic 36.02 km/h, the highest top speed of the 12 men listed",
+          "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+          "read": "page"
+        }
+      ],
+      "published": [
+        {
+          "what": "highest speed seen in a match",
+          "value": 36.02,
+          "unit": "km/h",
+          "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+          "note": "Tennis Australia Game Insight Group, three Australian Opens, runs of 3 m or more (tennis.com, Nov 29 2016). A speed seen in matches, not a sprint test, and the method was not published: recorded, not used as his top speed.",
+          "read": "page"
+        },
+        {
+          "what": "average top speed",
+          "value": 14.89,
+          "unit": "km/h",
+          "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+          "note": "Tennis Australia Game Insight Group, three Australian Opens, runs of 3 m or more (tennis.com, Nov 29 2016). A speed seen in matches, not a sprint test, and the method was not published: recorded, not used as his top speed.",
+          "read": "page"
+        }
+      ]
+    },
+    "flexibility": {
+      "flex": 1.2,
+      "spreadDeg": 165,
+      "why": "'I always have worked a lot on my flexibility, since a young age'; 'known for his elasticity'; filmed doing the splits. Top of the scale; no goniometer numbers published",
+      "spreadWhy": "Near a full split: he is filmed pulling the splits, and slides into them in matches.",
+      "evidence": [
+        {
+          "claim": "'I always have worked a lot on my flexibility, since a young age. I was taught this was extremely important because that's going to give me longevity.' (Wimbledon 2023); the article calls him 'known for his elasticity'",
+          "url": "https://www.tennis365.com/tennis-news/novak-djokovic-optimal-weight-longevity-flexibility-injury",
+          "read": "page"
+        },
+        {
+          "claim": "headline: 'Watch 6'2\" Tennis Star Novak Djokovic Pull the Splits With Belgian Gymnasts'",
+          "url": "https://www.yahoo.com/lifestyle/watch-62-tennis-star-novak-155000686.html",
+          "read": "search result (headline only)"
+        },
+        {
+          "claim": "sliding on hard courts: ankle flexibility matters, and Djokovic warns players with fragile ankles to be careful with extreme slides",
+          "url": "https://www.inkl.com/news/sliding-in-tennis-the-game-s-defining-evolution-is-gliding-on-to-hard-courts",
+          "read": "search result"
+        }
+      ]
+    },
+    "modelAge": "current"
+  },
+  "reach": {
+    "armSpanM": 1.936,
+    "armSpanRatio": 1.03,
+    "estimate": true,
+    "method": "no published wingspan found: arm span = 1.030 x height. the traditional ratio for men (1.03); nothing in his look says longer or shorter arms",
+    "standingReachM": 2.37,
+    "standingReachHow": "flat-footed, fingertips overhead: shoulder height + arm + 3% of height for the raised shoulder girdle (estimate)",
+    "racketReachM": 1.277,
+    "racketReachHow": "body centre line to the racket's sweet spot, arm straight out at shoulder height, no lean or step: half the shoulder-joint spacing + upper arm + forearm + 0.50 m (wrist to sweet spot of a 68.6 cm racket). Estimate.",
+    "overheadRacketReachM": 2.679,
+    "overheadRacketReachHow": "sweet spot height with the arm straight up, feet flat (a serve adds the jump). Estimate."
+  },
+  "segments": {
+    "estimate": true,
+    "method": "standard ratios x his sourced height (Drillis & Contini via Winter; widths as in BODY_SOURCES.md), moved only by research.legShift, research.armSpanRatio and research.build.mul. Not measured on him.",
+    "headNeckM": 0.342,
+    "headM": 0.244,
+    "neckM": 0.098,
+    "trunkM": 0.541,
+    "thighM": 0.461,
+    "shinM": 0.462,
+    "footHeightM": 0.073,
+    "legLengthM": 0.996,
+    "shoulderHeightM": 1.537,
+    "eyeHeightM": 1.76,
+    "upperArmM": 0.328,
+    "forearmM": 0.258,
+    "handM": 0.191,
+    "armLengthM": 0.777,
+    "footLengthM": 0.286,
+    "shoulderWidthM": 0.442,
+    "shoulderJointSpacingM": 0.382,
+    "chestDepthM": 0.254,
+    "pelvisWidthM": 0.282,
+    "hipWidthM": 0.359,
+    "hipJointSpacingM": 0.179,
+    "check": {
+      "what": "head+neck + trunk + thigh + shin + foot height must equal his height (within 1 cm); shoulder-joint spacing + 2 x (upper arm + forearm + hand) must equal his arm span",
+      "sumM": 1.879,
+      "heightM": 1.88,
+      "diffM": -0.001,
+      "ok": true,
+      "spanSumM": 1.936,
+      "armSpanM": 1.936,
+      "spanOk": true
+    }
+  },
+  "build": {
+    "bmi": 23.2,
+    "bmiHow": "weight / height^2 from the official numbers",
+    "type": "lean",
+    "typeHow": "appearance.json calls his build lean and flexible with a very lean torso; the ATP's 82 kg gives BMI 23.2, which on its own would read athletic. Drawn lean.",
+    "massSits": "evenly spread; long, lean muscle and a narrow waist",
+    "look": "appearance.json: 'lean, flexible build', 'very lean torso'",
+    "proportions": {
+      "estimate": true,
+      "method": "fractions of his height, seen from the front. Widths: Drillis & Contini outer widths; thickness baselines are estimates for an average tour build, scaled by sqrt(BMI / 23.25) and by research.build.mul (the features the Appearance Scout and the video notes call out).",
+      "headW": 0.084,
+      "headH": 0.13,
+      "neckW": 0.065,
+      "shoulderW": 0.259,
+      "biacromialW": 0.235,
+      "chestW": 0.174,
+      "waistW": 0.152,
+      "hipW": 0.191,
+      "thighW": 0.1,
+      "calfW": 0.063,
+      "upperArmW": 0.055,
+      "forearmW": 0.045,
+      "racketArm": "right",
+      "racketArmUpperW": 0.055,
+      "racketArmForearmW": 0.045,
+      "legToHeight": 0.53,
+      "armSpanToHeight": 1.03
+    }
+  },
+  "movement": {
+    "estimate": true,
+    "method": "no per-player tracking speeds are published for most of the tour, so: the game's own body formula (top = 6.6 x sqrt(h) / w^0.25, accel = 8.6 / w / sqrt(h), h = height / 1.85, w = weight / 75; its 6.6 m/s matches the ATP's 23.58 km/h maximum speed for men's tennis) x a small rating from the evidence below x age (after 30: -0.6% top speed and -0.8% first step per year; legends are modelled at their prime).",
+    "ageOn": {
+      "date": "2026-11-11",
+      "years": 39,
+      "modelled": "current"
+    },
+    "ratings": {
+      "mover": 1.04,
+      "quick": 1.04,
+      "cod": 1.12,
+      "why": "The highest speed Tennis Australia's tracking saw from any man (36.02 km/h) and the tour's reference for sliding defence; then slowed for age (39)."
+    },
+    "ageFactor": {
+      "topSpeed": 0.946,
+      "firstStep": 0.928
+    },
+    "topSpeedMps": 6.4,
+    "topSpeedKmh": 23.0,
+    "accelMps2": 7.53,
+    "changeOfDirection": 1.03,
+    "changeOfDirectionHow": "1 = average tour player: sqrt(80.8 kg / his weight) x rating x age (a lighter body stops and restarts faster)",
+    "slides": "Open-stance slides into near-splits on every surface, hard courts included; he warns that extreme slides need strong, flexible ankles.",
+    "published": [
+      {
+        "what": "highest speed seen in a match",
+        "value": 36.02,
+        "unit": "km/h",
+        "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+        "note": "Tennis Australia Game Insight Group, three Australian Opens, runs of 3 m or more (tennis.com, Nov 29 2016). A speed seen in matches, not a sprint test, and the method was not published: recorded, not used as his top speed.",
+        "read": "page"
+      },
+      {
+        "what": "average top speed",
+        "value": 14.89,
+        "unit": "km/h",
+        "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+        "note": "Tennis Australia Game Insight Group, three Australian Opens, runs of 3 m or more (tennis.com, Nov 29 2016). A speed seen in matches, not a sprint test, and the method was not published: recorded, not used as his top speed.",
+        "read": "page"
+      }
+    ],
+    "evidence": [
+      {
+        "claim": "Djokovic 36.02 km/h, the highest top speed of the 12 men listed",
+        "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+        "read": "page"
+      }
+    ]
+  },
+  "flexibility": {
+    "estimate": true,
+    "method": "normal active ranges (AAOS, from the Biomechanics Coach's datasets/anatomy/joints.json), changed per player only with evidence; nobody on the roster has published goniometer numbers.",
+    "flex": 1.2,
+    "flexWhy": "'I always have worked a lot on my flexibility, since a young age'; 'known for his elasticity'; filmed doing the splits. Top of the scale; no goniometer numbers published",
+    "rangesDeg": {
+      "hip_abduction": {
+        "deg": 54,
+        "source": "estimate: normal range x his flex 1.20 ('I always have worked a lot on my flexibility, since a young age'; 'known for his elasticity'; filmed doing the splits. Top of the scale; no goniometer numbers published)"
+      },
+      "hip_internal_rotation": {
+        "deg": 54,
+        "source": "estimate: normal range x his flex 1.20 ('I always have worked a lot on my flexibility, since a young age'; 'known for his elasticity'; filmed doing the splits. Top of the scale; no goniometer numbers published)"
+      },
+      "hip_external_rotation": {
+        "deg": 54,
+        "source": "estimate: normal range x his flex 1.20 ('I always have worked a lot on my flexibility, since a young age'; 'known for his elasticity'; filmed doing the splits. Top of the scale; no goniometer numbers published)"
+      },
+      "hip_flexion": {
+        "deg": 144,
+        "source": "estimate: normal range x his flex 1.20 ('I always have worked a lot on my flexibility, since a young age'; 'known for his elasticity'; filmed doing the splits. Top of the scale; no goniometer numbers published)"
+      },
+      "trunk_rotation": {
+        "deg": 54,
+        "source": "estimate: normal range x his flex 1.20 ('I always have worked a lot on my flexibility, since a young age'; 'known for his elasticity'; filmed doing the splits. Top of the scale; no goniometer numbers published)"
+      },
+      "ankle_dorsiflexion": {
+        "deg": 24,
+        "source": "estimate: normal range x his flex 1.20 ('I always have worked a lot on my flexibility, since a young age'; 'known for his elasticity'; filmed doing the splits. Top of the scale; no goniometer numbers published)"
+      },
+      "wrist_flexion": {
+        "deg": 80,
+        "source": "typical elite range"
+      },
+      "wrist_extension": {
+        "deg": 70,
+        "source": "typical elite range"
+      },
+      "shoulder_external_rotation": {
+        "deg": 100,
+        "arm": "right",
+        "source": "typical elite range (playing shoulder of tour players: about +10 external, -10 internal rotation; Ellenbecker)"
+      },
+      "shoulder_internal_rotation": {
+        "deg": 60,
+        "arm": "right",
+        "source": "typical elite range (playing shoulder of tour players: about +10 external, -10 internal rotation; Ellenbecker)"
+      }
+    },
+    "widestStance": {
+      "spreadDeg": 165,
+      "spreadHow": "angle between the legs in his widest slide or stretch (110 = typical tour player, 180 = full split). Near a full split: he is filmed pulling the splits, and slides into them in matches.",
+      "widthM": 1.97,
+      "hipDropM": 0.87
+    },
+    "evidence": [
+      {
+        "claim": "'I always have worked a lot on my flexibility, since a young age. I was taught this was extremely important because that's going to give me longevity.' (Wimbledon 2023); the article calls him 'known for his elasticity'",
+        "url": "https://www.tennis365.com/tennis-news/novak-djokovic-optimal-weight-longevity-flexibility-injury",
+        "read": "page"
+      },
+      {
+        "claim": "headline: 'Watch 6'2\" Tennis Star Novak Djokovic Pull the Splits With Belgian Gymnasts'",
+        "url": "https://www.yahoo.com/lifestyle/watch-62-tennis-star-novak-155000686.html",
+        "read": "search result (headline only)"
+      },
+      {
+        "claim": "sliding on hard courts: ankle flexibility matters, and Djokovic warns players with fragile ankles to be careful with extreme slides",
+        "url": "https://www.inkl.com/news/sliding-in-tennis-the-game-s-defining-evolution-is-gliding-on-to-hard-courts",
+        "read": "search result"
+      }
+    ]
+  },
+  "game": {
+    "heightM": 1.88,
+    "weightKg": 82,
+    "armSpanM": 1.936,
+    "legLengthM": 0.996,
+    "shoulderW": 0.442,
+    "hipW": 0.359,
+    "shoulderJointW": 0.382,
+    "hipJointW": 0.179,
+    "reachM": 1.277,
+    "overheadReachM": 2.679,
+    "eyeHeightM": 1.76,
+    "topSpeed": 6.4,
+    "accel": 7.53,
+    "cod": 1.03,
+    "flex": 1.2,
+    "splitDepth": 0.87,
+    "why": {
+      "heightM": "official (ATP Tour profile)",
+      "weightKg": "official (ATP Tour profile)",
+      "armSpanM": "estimate: 1.030 x height, the traditional ratio for men (1.03); nothing in his look says longer or shorter arms",
+      "legLengthM": "hip joint to floor: (0.530) x height (Drillis & Contini)",
+      "shoulderW": "bone width acromion to acromion: 0.235 x height",
+      "hipW": "outer hip width: 0.191 x height, scaled by build",
+      "shoulderJointW": "shoulder joint centres: shoulderW minus ~3 cm a side (for the skeleton)",
+      "hipJointW": "hip joint centres: 0.095 x height (for the skeleton: the legs hang from here, not from the hip's outer edge)",
+      "reachM": "body centre to sweet spot, arm straight out, standing still; a lean or a step adds to it",
+      "overheadReachM": "sweet spot height with the arm straight up, feet flat (serve contact before the jump)",
+      "eyeHeightM": "0.936 x height (Drillis & Contini)",
+      "topSpeed": "m/s, estimate: body formula x mover 1.04 x age 0.946. The highest speed Tennis Australia's tracking saw from any man (36.02 km/h) and the tour's reference for sliding defence; then slowed for age (39).",
+      "accel": "m/s^2, estimate: body formula x first step 1.04 x age 0.928",
+      "cod": "1 = average: sqrt(80.8 / weight) x 1.12 x age 0.928",
+      "flex": "'I always have worked a lot on my flexibility, since a young age'; 'known for his elasticity'; filmed doing the splits. Top of the scale; no goniometer numbers published",
+      "splitDepth": "share of his leg length the hips drop in his widest stance: 1 - cos(165 deg / 2)"
+    }
+  }
+}

@@ -1,0 +1,286 @@
+{
+  "_about": "Body Scout. `official` (sourced, one link per number) and `research` (judgement calls with their why and evidence) are written by hand. `reach`, `segments`, `build`, `movement`, `flexibility` and `game` are derived from them by datasets/players/tools/build_bodies.py: do not edit those by hand, change `research` and run the tool. A block marked \"estimate\": true is an estimate in every number, by the method it states. Method and references: datasets/players/BODY_SOURCES.md.",
+  "player": "de-minaur",
+  "name": "Alex de Minaur",
+  "sourcedOn": "2026-11-11",
+  "official": {
+    "heightM": 1.83,
+    "weightKg": 69,
+    "born": "1999-02-17",
+    "hand": "right",
+    "backhand": "two-handed",
+    "sources": {
+      "heightM": "https://www.atptour.com/en/players/alex-de-minaur/dh58/overview",
+      "weightKg": "https://www.atptour.com/en/players/alex-de-minaur/dh58/overview",
+      "born": "https://www.atptour.com/en/players/alex-de-minaur/dh58/overview",
+      "hand": "https://www.atptour.com/en/players/alex-de-minaur/dh58/overview",
+      "backhand": "https://www.atptour.com/en/players/alex-de-minaur/dh58/overview"
+    },
+    "readFrom": "https://www.atptour.com/en/-/www/players/hero/dh58",
+    "readOn": "2026-11-11",
+    "how": "The ATP Tour profile's own data (HeightCm, WeightKg, BirthDate, PlayHand, BackHand), read from the JSON the profile page loads."
+  },
+  "research": {
+    "armSpanRatio": {
+      "value": 1.02,
+      "why": "appearance.json: a slight, compact frame, so slightly under the 1.03 norm; not measured",
+      "publishedM": null,
+      "searched": "No published wingspan found (searched Nov 11, 2026; only unsourced fan-site guesses)."
+    },
+    "legShift": {
+      "value": 0.0,
+      "why": "standard leg share: no evidence of an unusually long- or short-legged build"
+    },
+    "build": {
+      "massSits": "very little of it: the lightest body on the roster (69 kg), thin arms, runner's legs",
+      "look": "appearance.json: 'slight, wiry build and very fast', 'slim, light frame'",
+      "mul": {
+        "shoulders": 0.98,
+        "upperArm": 0.96
+      },
+      "mulWhy": "appearance.json: slight, wiry build"
+    },
+    "movement": {
+      "mover": 1.07,
+      "quick": 1.12,
+      "cod": 1.15,
+      "why": "Thiem: 'definitely one of the fastest players on Tour ... moving not only super fast, but also very accurately'; named by Fils for a 40 m race; Roland-Garros lists movement and agility as his greatest strengths.",
+      "slides": "Nothing found this run: assume the tour's usual, slides on clay and short controlled slides on hard courts.",
+      "evidence": [
+        {
+          "claim": "Thiem: 'definitely one of the fastest players on Tour, but I think that he also is moving not only super fast, but also very accurately' (ATP Tour feature, US Open 2020)",
+          "url": "https://www.atptour.com/en/news/de-minaur-us-open-2020-speed-feature",
+          "read": "search result"
+        },
+        {
+          "claim": "Arthur Fils, asked for the quickest men on tour (Tennis Channel, Indian Wells 2026), named Davidovich Fokina, Mpetshi Perricard, himself, Shelton, Monfils, Alcaraz and de Minaur: 'I think 40m I'd take myself, or Carlos, or Demon.'",
+          "url": "https://www.hitc.com/arthur-fils-picks-the-seven-quickest-players-in-mens-tennis/",
+          "read": "page"
+        },
+        {
+          "claim": "'His movement, agility, endurance and early ball-striking are undoubtedly his greatest strengths.' (Roland-Garros player page)",
+          "url": "https://www.rolandgarros.com/en-us/players/36276-a.de-minaur",
+          "read": "search result"
+        }
+      ]
+    },
+    "flexibility": {
+      "flex": 1.0,
+      "spreadDeg": 110,
+      "why": "typical elite range: no evidence found this run that he is more or less flexible than the tour"
+    },
+    "modelAge": "current"
+  },
+  "reach": {
+    "armSpanM": 1.867,
+    "armSpanRatio": 1.02,
+    "estimate": true,
+    "method": "no published wingspan found: arm span = 1.020 x height. appearance.json: a slight, compact frame, so slightly under the 1.03 norm; not measured",
+    "standingReachM": 2.304,
+    "standingReachHow": "flat-footed, fingertips overhead: shoulder height + arm + 3% of height for the raised shoulder girdle (estimate)",
+    "racketReachM": 1.249,
+    "racketReachHow": "body centre line to the racket's sweet spot, arm straight out at shoulder height, no lean or step: half the shoulder-joint spacing + upper arm + forearm + 0.50 m (wrist to sweet spot of a 68.6 cm racket). Estimate.",
+    "overheadRacketReachM": 2.619,
+    "overheadRacketReachHow": "sweet spot height with the arm straight up, feet flat (a serve adds the jump). Estimate."
+  },
+  "segments": {
+    "estimate": true,
+    "method": "standard ratios x his sourced height (Drillis & Contini via Winter; widths as in BODY_SOURCES.md), moved only by research.legShift, research.armSpanRatio and research.build.mul. Not measured on him.",
+    "headNeckM": 0.333,
+    "headM": 0.238,
+    "neckM": 0.095,
+    "trunkM": 0.527,
+    "thighM": 0.448,
+    "shinM": 0.45,
+    "footHeightM": 0.071,
+    "legLengthM": 0.969,
+    "shoulderHeightM": 1.496,
+    "eyeHeightM": 1.713,
+    "upperArmM": 0.318,
+    "forearmM": 0.25,
+    "handM": 0.185,
+    "armLengthM": 0.753,
+    "footLengthM": 0.278,
+    "shoulderWidthM": 0.421,
+    "shoulderJointSpacingM": 0.362,
+    "chestDepthM": 0.233,
+    "pelvisWidthM": 0.275,
+    "hipWidthM": 0.339,
+    "hipJointSpacingM": 0.174,
+    "check": {
+      "what": "head+neck + trunk + thigh + shin + foot height must equal his height (within 1 cm); shoulder-joint spacing + 2 x (upper arm + forearm + hand) must equal his arm span",
+      "sumM": 1.829,
+      "heightM": 1.83,
+      "diffM": -0.001,
+      "ok": true,
+      "spanSumM": 1.868,
+      "armSpanM": 1.867,
+      "spanOk": true
+    }
+  },
+  "build": {
+    "bmi": 20.6,
+    "bmiHow": "weight / height^2 from the official numbers",
+    "type": "lean",
+    "typeHow": "from BMI: under 21.8 lean, 21.8-24.2 athletic, above powerful (men's Olympic tennis mean 23.25)",
+    "massSits": "very little of it: the lightest body on the roster (69 kg), thin arms, runner's legs",
+    "look": "appearance.json: 'slight, wiry build and very fast', 'slim, light frame'",
+    "proportions": {
+      "estimate": true,
+      "method": "fractions of his height, seen from the front. Widths: Drillis & Contini outer widths; thickness baselines are estimates for an average tour build, scaled by sqrt(BMI / 23.25) and by research.build.mul (the features the Appearance Scout and the video notes call out).",
+      "headW": 0.084,
+      "headH": 0.13,
+      "neckW": 0.061,
+      "shoulderW": 0.246,
+      "biacromialW": 0.23,
+      "chestW": 0.161,
+      "waistW": 0.151,
+      "hipW": 0.185,
+      "thighW": 0.094,
+      "calfW": 0.059,
+      "upperArmW": 0.05,
+      "forearmW": 0.041,
+      "racketArm": "right",
+      "racketArmUpperW": 0.05,
+      "racketArmForearmW": 0.041,
+      "legToHeight": 0.53,
+      "armSpanToHeight": 1.02
+    }
+  },
+  "movement": {
+    "estimate": true,
+    "method": "no per-player tracking speeds are published for most of the tour, so: the game's own body formula (top = 6.6 x sqrt(h) / w^0.25, accel = 8.6 / w / sqrt(h), h = height / 1.85, w = weight / 75; its 6.6 m/s matches the ATP's 23.58 km/h maximum speed for men's tennis) x a small rating from the evidence below x age (after 30: -0.6% top speed and -0.8% first step per year; legends are modelled at their prime).",
+    "ageOn": {
+      "date": "2026-11-11",
+      "years": 27,
+      "modelled": "current"
+    },
+    "ratings": {
+      "mover": 1.07,
+      "quick": 1.12,
+      "cod": 1.15,
+      "why": "Thiem: 'definitely one of the fastest players on Tour ... moving not only super fast, but also very accurately'; named by Fils for a 40 m race; Roland-Garros lists movement and agility as his greatest strengths."
+    },
+    "ageFactor": {
+      "topSpeed": 1.0,
+      "firstStep": 1.0
+    },
+    "topSpeedMps": 7.17,
+    "topSpeedKmh": 25.8,
+    "accelMps2": 10.53,
+    "changeOfDirection": 1.24,
+    "changeOfDirectionHow": "1 = average tour player: sqrt(80.8 kg / his weight) x rating x age (a lighter body stops and restarts faster)",
+    "slides": "Nothing found this run: assume the tour's usual, slides on clay and short controlled slides on hard courts.",
+    "published": [],
+    "evidence": [
+      {
+        "claim": "Thiem: 'definitely one of the fastest players on Tour, but I think that he also is moving not only super fast, but also very accurately' (ATP Tour feature, US Open 2020)",
+        "url": "https://www.atptour.com/en/news/de-minaur-us-open-2020-speed-feature",
+        "read": "search result"
+      },
+      {
+        "claim": "Arthur Fils, asked for the quickest men on tour (Tennis Channel, Indian Wells 2026), named Davidovich Fokina, Mpetshi Perricard, himself, Shelton, Monfils, Alcaraz and de Minaur: 'I think 40m I'd take myself, or Carlos, or Demon.'",
+        "url": "https://www.hitc.com/arthur-fils-picks-the-seven-quickest-players-in-mens-tennis/",
+        "read": "page"
+      },
+      {
+        "claim": "'His movement, agility, endurance and early ball-striking are undoubtedly his greatest strengths.' (Roland-Garros player page)",
+        "url": "https://www.rolandgarros.com/en-us/players/36276-a.de-minaur",
+        "read": "search result"
+      }
+    ]
+  },
+  "flexibility": {
+    "estimate": true,
+    "method": "normal active ranges (AAOS, from the Biomechanics Coach's datasets/anatomy/joints.json), changed per player only with evidence; nobody on the roster has published goniometer numbers.",
+    "flex": 1.0,
+    "flexWhy": "typical elite range: no evidence found this run that he is more or less flexible than the tour",
+    "rangesDeg": {
+      "hip_abduction": {
+        "deg": 45,
+        "source": "typical elite range"
+      },
+      "hip_internal_rotation": {
+        "deg": 45,
+        "source": "typical elite range"
+      },
+      "hip_external_rotation": {
+        "deg": 45,
+        "source": "typical elite range"
+      },
+      "hip_flexion": {
+        "deg": 120,
+        "source": "typical elite range"
+      },
+      "trunk_rotation": {
+        "deg": 45,
+        "source": "typical elite range"
+      },
+      "ankle_dorsiflexion": {
+        "deg": 20,
+        "source": "typical elite range"
+      },
+      "wrist_flexion": {
+        "deg": 80,
+        "source": "typical elite range"
+      },
+      "wrist_extension": {
+        "deg": 70,
+        "source": "typical elite range"
+      },
+      "shoulder_external_rotation": {
+        "deg": 100,
+        "arm": "right",
+        "source": "typical elite range (playing shoulder of tour players: about +10 external, -10 internal rotation; Ellenbecker)"
+      },
+      "shoulder_internal_rotation": {
+        "deg": 60,
+        "arm": "right",
+        "source": "typical elite range (playing shoulder of tour players: about +10 external, -10 internal rotation; Ellenbecker)"
+      }
+    },
+    "widestStance": {
+      "spreadDeg": 110,
+      "spreadHow": "angle between the legs in his widest slide or stretch (110 = typical tour player, 180 = full split). Typical value: no evidence he goes wider or less wide.",
+      "widthM": 1.59,
+      "hipDropM": 0.41
+    },
+    "evidence": []
+  },
+  "game": {
+    "heightM": 1.83,
+    "weightKg": 69,
+    "armSpanM": 1.867,
+    "legLengthM": 0.969,
+    "shoulderW": 0.421,
+    "hipW": 0.339,
+    "shoulderJointW": 0.362,
+    "hipJointW": 0.174,
+    "reachM": 1.249,
+    "overheadReachM": 2.619,
+    "eyeHeightM": 1.713,
+    "topSpeed": 7.17,
+    "accel": 10.53,
+    "cod": 1.24,
+    "flex": 1.0,
+    "splitDepth": 0.43,
+    "why": {
+      "heightM": "official (ATP Tour profile)",
+      "weightKg": "official (ATP Tour profile)",
+      "armSpanM": "estimate: 1.020 x height, appearance.json: a slight, compact frame, so slightly under the 1.03 norm; not measured",
+      "legLengthM": "hip joint to floor: (0.530) x height (Drillis & Contini)",
+      "shoulderW": "bone width acromion to acromion: 0.235 x height x 0.98 (appearance.json: slight, wiry build)",
+      "hipW": "outer hip width: 0.191 x height, scaled by build",
+      "shoulderJointW": "shoulder joint centres: shoulderW minus ~3 cm a side (for the skeleton)",
+      "hipJointW": "hip joint centres: 0.095 x height (for the skeleton: the legs hang from here, not from the hip's outer edge)",
+      "reachM": "body centre to sweet spot, arm straight out, standing still; a lean or a step adds to it",
+      "overheadReachM": "sweet spot height with the arm straight up, feet flat (serve contact before the jump)",
+      "eyeHeightM": "0.936 x height (Drillis & Contini)",
+      "topSpeed": "m/s, estimate: body formula x mover 1.07 x age 1.000. Thiem: 'definitely one of the fastest players on Tour ... moving not only super fast, but also very accurately'; named by Fils for a 40 m race; Roland-Garros lists movement and agility as his greatest strengths.",
+      "accel": "m/s^2, estimate: body formula x first step 1.12 x age 1.000",
+      "cod": "1 = average: sqrt(80.8 / weight) x 1.15 x age 1.000",
+      "flex": "typical elite range: no evidence found this run that he is more or less flexible than the tour",
+      "splitDepth": "share of his leg length the hips drop in his widest stance: 1 - cos(110 deg / 2)"
+    }
+  }
+}

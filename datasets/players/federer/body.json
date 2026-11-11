@@ -1,0 +1,299 @@
+{
+  "_about": "Body Scout. `official` (sourced, one link per number) and `research` (judgement calls with their why and evidence) are written by hand. `reach`, `segments`, `build`, `movement`, `flexibility` and `game` are derived from them by datasets/players/tools/build_bodies.py: do not edit those by hand, change `research` and run the tool. A block marked \"estimate\": true is an estimate in every number, by the method it states. Method and references: datasets/players/BODY_SOURCES.md.",
+  "player": "federer",
+  "name": "Roger Federer",
+  "sourcedOn": "2026-11-11",
+  "official": {
+    "heightM": 1.85,
+    "weightKg": 85,
+    "born": "1981-08-08",
+    "hand": "right",
+    "backhand": "one-handed",
+    "sources": {
+      "heightM": "https://www.atptour.com/en/players/roger-federer/f324/overview",
+      "weightKg": "https://www.atptour.com/en/players/roger-federer/f324/overview",
+      "born": "https://www.atptour.com/en/players/roger-federer/f324/overview",
+      "hand": "https://www.atptour.com/en/players/roger-federer/f324/overview",
+      "backhand": "https://www.atptour.com/en/players/roger-federer/f324/overview"
+    },
+    "readFrom": "https://www.atptour.com/en/-/www/players/hero/f324",
+    "readOn": "2026-11-11",
+    "how": "The ATP Tour profile's own data (HeightCm, WeightKg, BirthDate, PlayHand, BackHand), read from the JSON the profile page loads.",
+    "retired": true
+  },
+  "research": {
+    "armSpanRatio": {
+      "value": 1.03,
+      "why": "the traditional ratio for men (1.03); nothing in his look says longer or shorter arms",
+      "publishedM": null,
+      "searched": "No published wingspan found (searched Nov 11, 2026; only unsourced fan-site guesses)."
+    },
+    "legShift": {
+      "value": 0.0,
+      "why": "standard leg share: no evidence of an unusually long- or short-legged build"
+    },
+    "build": {
+      "massSits": "evenly spread; nothing bulky",
+      "look": "appearance.json: 'smooth, upright one-handed backhand; looks calm and almost effortless'; no build feature called out",
+      "type": "athletic",
+      "typeWhy": "The ATP's 85 kg gives BMI 24.8, just over the 'powerful' line, but nothing in appearance.json calls out bulk (smooth, upright, effortless). Drawn athletic."
+    },
+    "movement": {
+      "mover": 1.02,
+      "quick": 1.04,
+      "cod": 1.06,
+      "why": "A legend, modelled at his prime rather than his age. Tennis Australia's tracking has match speeds for him (below), but they are not sprint tests, so the rating is a small one.",
+      "slides": "Nothing found this run: assume the tour's usual, slides on clay and short controlled slides on hard courts.",
+      "evidence": [
+        {
+          "claim": "Federer: top 26.03 km/h, average top speed 15.55 km/h (second highest average of the 12 men listed)",
+          "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+          "read": "page"
+        }
+      ],
+      "published": [
+        {
+          "what": "highest speed seen in a match",
+          "value": 26.03,
+          "unit": "km/h",
+          "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+          "note": "Tennis Australia Game Insight Group, three Australian Opens, runs of 3 m or more (tennis.com, Nov 29 2016). A speed seen in matches, not a sprint test, and the method was not published: recorded, not used as his top speed.",
+          "read": "page"
+        },
+        {
+          "what": "average top speed",
+          "value": 15.55,
+          "unit": "km/h",
+          "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+          "note": "Tennis Australia Game Insight Group, three Australian Opens, runs of 3 m or more (tennis.com, Nov 29 2016). A speed seen in matches, not a sprint test, and the method was not published: recorded, not used as his top speed.",
+          "read": "page"
+        }
+      ]
+    },
+    "flexibility": {
+      "flex": 1.0,
+      "spreadDeg": 110,
+      "why": "typical elite range: no evidence found this run that he is more or less flexible than the tour"
+    },
+    "modelAge": "prime"
+  },
+  "reach": {
+    "armSpanM": 1.906,
+    "armSpanRatio": 1.03,
+    "estimate": true,
+    "method": "no published wingspan found: arm span = 1.030 x height. the traditional ratio for men (1.03); nothing in his look says longer or shorter arms",
+    "standingReachM": 2.334,
+    "standingReachHow": "flat-footed, fingertips overhead: shoulder height + arm + 3% of height for the raised shoulder girdle (estimate)",
+    "racketReachM": 1.265,
+    "racketReachHow": "body centre line to the racket's sweet spot, arm straight out at shoulder height, no lean or step: half the shoulder-joint spacing + upper arm + forearm + 0.50 m (wrist to sweet spot of a 68.6 cm racket). Estimate.",
+    "overheadRacketReachM": 2.646,
+    "overheadRacketReachHow": "sweet spot height with the arm straight up, feet flat (a serve adds the jump). Estimate."
+  },
+  "segments": {
+    "estimate": true,
+    "method": "standard ratios x his sourced height (Drillis & Contini via Winter; widths as in BODY_SOURCES.md), moved only by research.legShift, research.armSpanRatio and research.build.mul. Not measured on him.",
+    "headNeckM": 0.337,
+    "headM": 0.241,
+    "neckM": 0.096,
+    "trunkM": 0.533,
+    "thighM": 0.453,
+    "shinM": 0.455,
+    "footHeightM": 0.072,
+    "legLengthM": 0.98,
+    "shoulderHeightM": 1.513,
+    "eyeHeightM": 1.732,
+    "upperArmM": 0.323,
+    "forearmM": 0.254,
+    "handM": 0.188,
+    "armLengthM": 0.765,
+    "footLengthM": 0.281,
+    "shoulderWidthM": 0.435,
+    "shoulderJointSpacingM": 0.376,
+    "chestDepthM": 0.258,
+    "pelvisWidthM": 0.278,
+    "hipWidthM": 0.359,
+    "hipJointSpacingM": 0.176,
+    "check": {
+      "what": "head+neck + trunk + thigh + shin + foot height must equal his height (within 1 cm); shoulder-joint spacing + 2 x (upper arm + forearm + hand) must equal his arm span",
+      "sumM": 1.85,
+      "heightM": 1.85,
+      "diffM": 0.0,
+      "ok": true,
+      "spanSumM": 1.906,
+      "armSpanM": 1.906,
+      "spanOk": true
+    }
+  },
+  "build": {
+    "bmi": 24.8,
+    "bmiHow": "weight / height^2 from the official numbers",
+    "type": "athletic",
+    "typeHow": "The ATP's 85 kg gives BMI 24.8, just over the 'powerful' line, but nothing in appearance.json calls out bulk (smooth, upright, effortless). Drawn athletic.",
+    "massSits": "evenly spread; nothing bulky",
+    "look": "appearance.json: 'smooth, upright one-handed backhand; looks calm and almost effortless'; no build feature called out",
+    "proportions": {
+      "estimate": true,
+      "method": "fractions of his height, seen from the front. Widths: Drillis & Contini outer widths; thickness baselines are estimates for an average tour build, scaled by sqrt(BMI / 23.25) and by research.build.mul (the features the Appearance Scout and the video notes call out).",
+      "headW": 0.084,
+      "headH": 0.13,
+      "neckW": 0.067,
+      "shoulderW": 0.263,
+      "biacromialW": 0.235,
+      "chestW": 0.18,
+      "waistW": 0.165,
+      "hipW": 0.194,
+      "thighW": 0.103,
+      "calfW": 0.065,
+      "upperArmW": 0.057,
+      "forearmW": 0.047,
+      "racketArm": "right",
+      "racketArmUpperW": 0.057,
+      "racketArmForearmW": 0.047,
+      "legToHeight": 0.53,
+      "armSpanToHeight": 1.03
+    }
+  },
+  "movement": {
+    "estimate": true,
+    "method": "no per-player tracking speeds are published for most of the tour, so: the game's own body formula (top = 6.6 x sqrt(h) / w^0.25, accel = 8.6 / w / sqrt(h), h = height / 1.85, w = weight / 75; its 6.6 m/s matches the ATP's 23.58 km/h maximum speed for men's tennis) x a small rating from the evidence below x age (after 30: -0.6% top speed and -0.8% first step per year; legends are modelled at their prime).",
+    "ageOn": {
+      "date": "2026-11-11",
+      "years": 45,
+      "modelled": "prime"
+    },
+    "ratings": {
+      "mover": 1.02,
+      "quick": 1.04,
+      "cod": 1.06,
+      "why": "A legend, modelled at his prime rather than his age. Tennis Australia's tracking has match speeds for him (below), but they are not sprint tests, so the rating is a small one."
+    },
+    "ageFactor": {
+      "topSpeed": 1.0,
+      "firstStep": 1.0
+    },
+    "topSpeedMps": 6.52,
+    "topSpeedKmh": 23.5,
+    "accelMps2": 7.89,
+    "changeOfDirection": 1.03,
+    "changeOfDirectionHow": "1 = average tour player: sqrt(80.8 kg / his weight) x rating x age (a lighter body stops and restarts faster)",
+    "slides": "Nothing found this run: assume the tour's usual, slides on clay and short controlled slides on hard courts.",
+    "published": [
+      {
+        "what": "highest speed seen in a match",
+        "value": 26.03,
+        "unit": "km/h",
+        "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+        "note": "Tennis Australia Game Insight Group, three Australian Opens, runs of 3 m or more (tennis.com, Nov 29 2016). A speed seen in matches, not a sprint test, and the method was not published: recorded, not used as his top speed.",
+        "read": "page"
+      },
+      {
+        "what": "average top speed",
+        "value": 15.55,
+        "unit": "km/h",
+        "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+        "note": "Tennis Australia Game Insight Group, three Australian Opens, runs of 3 m or more (tennis.com, Nov 29 2016). A speed seen in matches, not a sprint test, and the method was not published: recorded, not used as his top speed.",
+        "read": "page"
+      }
+    ],
+    "evidence": [
+      {
+        "claim": "Federer: top 26.03 km/h, average top speed 15.55 km/h (second highest average of the 12 men listed)",
+        "url": "https://www.tennis.com/news/articles/tennis-australia-djokovic-halep-are-the-sport-s-fastest-players",
+        "read": "page"
+      }
+    ]
+  },
+  "flexibility": {
+    "estimate": true,
+    "method": "normal active ranges (AAOS, from the Biomechanics Coach's datasets/anatomy/joints.json), changed per player only with evidence; nobody on the roster has published goniometer numbers.",
+    "flex": 1.0,
+    "flexWhy": "typical elite range: no evidence found this run that he is more or less flexible than the tour",
+    "rangesDeg": {
+      "hip_abduction": {
+        "deg": 45,
+        "source": "typical elite range"
+      },
+      "hip_internal_rotation": {
+        "deg": 45,
+        "source": "typical elite range"
+      },
+      "hip_external_rotation": {
+        "deg": 45,
+        "source": "typical elite range"
+      },
+      "hip_flexion": {
+        "deg": 120,
+        "source": "typical elite range"
+      },
+      "trunk_rotation": {
+        "deg": 45,
+        "source": "typical elite range"
+      },
+      "ankle_dorsiflexion": {
+        "deg": 20,
+        "source": "typical elite range"
+      },
+      "wrist_flexion": {
+        "deg": 80,
+        "source": "typical elite range"
+      },
+      "wrist_extension": {
+        "deg": 70,
+        "source": "typical elite range"
+      },
+      "shoulder_external_rotation": {
+        "deg": 100,
+        "arm": "right",
+        "source": "typical elite range (playing shoulder of tour players: about +10 external, -10 internal rotation; Ellenbecker)"
+      },
+      "shoulder_internal_rotation": {
+        "deg": 60,
+        "arm": "right",
+        "source": "typical elite range (playing shoulder of tour players: about +10 external, -10 internal rotation; Ellenbecker)"
+      }
+    },
+    "widestStance": {
+      "spreadDeg": 110,
+      "spreadHow": "angle between the legs in his widest slide or stretch (110 = typical tour player, 180 = full split). Typical value: no evidence he goes wider or less wide.",
+      "widthM": 1.61,
+      "hipDropM": 0.42
+    },
+    "evidence": []
+  },
+  "game": {
+    "heightM": 1.85,
+    "weightKg": 85,
+    "armSpanM": 1.906,
+    "legLengthM": 0.98,
+    "shoulderW": 0.435,
+    "hipW": 0.359,
+    "shoulderJointW": 0.376,
+    "hipJointW": 0.176,
+    "reachM": 1.265,
+    "overheadReachM": 2.646,
+    "eyeHeightM": 1.732,
+    "topSpeed": 6.52,
+    "accel": 7.89,
+    "cod": 1.03,
+    "flex": 1.0,
+    "splitDepth": 0.43,
+    "why": {
+      "heightM": "official (ATP Tour profile)",
+      "weightKg": "official (ATP Tour profile)",
+      "armSpanM": "estimate: 1.030 x height, the traditional ratio for men (1.03); nothing in his look says longer or shorter arms",
+      "legLengthM": "hip joint to floor: (0.530) x height (Drillis & Contini)",
+      "shoulderW": "bone width acromion to acromion: 0.235 x height",
+      "hipW": "outer hip width: 0.191 x height, scaled by build",
+      "shoulderJointW": "shoulder joint centres: shoulderW minus ~3 cm a side (for the skeleton)",
+      "hipJointW": "hip joint centres: 0.095 x height (for the skeleton: the legs hang from here, not from the hip's outer edge)",
+      "reachM": "body centre to sweet spot, arm straight out, standing still; a lean or a step adds to it",
+      "overheadReachM": "sweet spot height with the arm straight up, feet flat (serve contact before the jump)",
+      "eyeHeightM": "0.936 x height (Drillis & Contini)",
+      "topSpeed": "m/s, estimate: body formula x mover 1.02 x age 1.000. A legend, modelled at his prime rather than his age. Tennis Australia's tracking has match speeds for him (below), but they are not sprint tests, so the rating is a small one.",
+      "accel": "m/s^2, estimate: body formula x first step 1.04 x age 1.000",
+      "cod": "1 = average: sqrt(80.8 / weight) x 1.06 x age 1.000",
+      "flex": "typical elite range: no evidence found this run that he is more or less flexible than the tour",
+      "splitDepth": "share of his leg length the hips drop in his widest stance: 1 - cos(110 deg / 2)"
+    }
+  }
+}

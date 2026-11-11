@@ -1,0 +1,290 @@
+{
+  "_about": "Body Scout. `official` (sourced, one link per number) and `research` (judgement calls with their why and evidence) are written by hand. `reach`, `segments`, `build`, `movement`, `flexibility` and `game` are derived from them by datasets/players/tools/build_bodies.py: do not edit those by hand, change `research` and run the tool. A block marked \"estimate\": true is an estimate in every number, by the method it states. Method and references: datasets/players/BODY_SOURCES.md.",
+  "player": "alcaraz",
+  "name": "Carlos Alcaraz",
+  "sourcedOn": "2026-11-11",
+  "official": {
+    "heightM": 1.83,
+    "weightKg": 74,
+    "born": "2003-05-05",
+    "hand": "right",
+    "backhand": "two-handed",
+    "sources": {
+      "heightM": "https://www.atptour.com/en/players/carlos-alcaraz/a0e2/overview",
+      "weightKg": "https://www.atptour.com/en/players/carlos-alcaraz/a0e2/overview",
+      "born": "https://www.atptour.com/en/players/carlos-alcaraz/a0e2/overview",
+      "hand": "https://www.atptour.com/en/players/carlos-alcaraz/a0e2/overview",
+      "backhand": "https://www.atptour.com/en/players/carlos-alcaraz/a0e2/overview"
+    },
+    "readFrom": "https://www.atptour.com/en/-/www/players/hero/a0e2",
+    "readOn": "2026-11-11",
+    "how": "The ATP Tour profile's own data (HeightCm, WeightKg, BirthDate, PlayHand, BackHand), read from the JSON the profile page loads."
+  },
+  "research": {
+    "armSpanRatio": {
+      "value": 1.02,
+      "why": "style.json: a compact build (video notes), so slightly under the 1.03 norm; not measured",
+      "publishedM": null,
+      "searched": "No published wingspan found (searched Nov 11, 2026; only unsourced fan-site guesses)."
+    },
+    "legShift": {
+      "value": 0.0,
+      "why": "standard leg share: no evidence of an unusually long- or short-legged build"
+    },
+    "build": {
+      "massSits": "legs: thick thighs and strong calves under a compact trunk",
+      "look": "style.json (video): 'compact and powerful, thick thighs'; appearance.json: long hair, hairband, beard, black sleeve on the racket forearm",
+      "mul": {
+        "thigh": 1.1,
+        "calf": 1.05
+      },
+      "mulWhy": "style.json build note 'thick thighs' (US Open clips)"
+    },
+    "movement": {
+      "mover": 1.06,
+      "quick": 1.1,
+      "cod": 1.12,
+      "why": "Named by Fils among the quickest ('Carlos is fast'; over 40 m he would take himself, Carlos or de Minaur); style.json: 'explosive crossover into a huge first stride'.",
+      "slides": "Low lunging slides on the outside leg, hard courts included (style.json: 'plants low on the outside leg and hits from the lunge; bends right down to dig out low balls on the run').",
+      "evidence": [
+        {
+          "claim": "Arthur Fils, asked for the quickest men on tour (Tennis Channel, Indian Wells 2026), named Davidovich Fokina, Mpetshi Perricard, himself, Shelton, Monfils, Alcaraz and de Minaur: 'I think 40m I'd take myself, or Carlos, or Demon.'",
+          "url": "https://www.hitc.com/arthur-fils-picks-the-seven-quickest-players-in-mens-tennis/",
+          "read": "page"
+        },
+        {
+          "claim": "running/firstStep: 'explosive crossover into a huge first stride; back leg fully stretched behind'",
+          "url": "datasets/players/alcaraz/style.json",
+          "read": "file"
+        }
+      ]
+    },
+    "flexibility": {
+      "flex": 1.06,
+      "spreadDeg": 130,
+      "why": "style.json (video): plants low on the outside leg and bends right down on the run; a little above the tour norm, not measured",
+      "spreadWhy": "Wider than typical: the low lunge in his US Open clips (style.json running/braking).",
+      "evidence": [
+        {
+          "claim": "running/braking: 'plants low on the outside leg and hits from the lunge; bends right down to dig out low balls on the run (v1 129.0)'",
+          "url": "datasets/players/alcaraz/style.json",
+          "read": "file"
+        }
+      ]
+    },
+    "modelAge": "current"
+  },
+  "reach": {
+    "armSpanM": 1.867,
+    "armSpanRatio": 1.02,
+    "estimate": true,
+    "method": "no published wingspan found: arm span = 1.020 x height. style.json: a compact build (video notes), so slightly under the 1.03 norm; not measured",
+    "standingReachM": 2.299,
+    "standingReachHow": "flat-footed, fingertips overhead: shoulder height + arm + 3% of height for the raised shoulder girdle (estimate)",
+    "racketReachM": 1.25,
+    "racketReachHow": "body centre line to the racket's sweet spot, arm straight out at shoulder height, no lean or step: half the shoulder-joint spacing + upper arm + forearm + 0.50 m (wrist to sweet spot of a 68.6 cm racket). Estimate.",
+    "overheadRacketReachM": 2.615,
+    "overheadRacketReachHow": "sweet spot height with the arm straight up, feet flat (a serve adds the jump). Estimate."
+  },
+  "segments": {
+    "estimate": true,
+    "method": "standard ratios x his sourced height (Drillis & Contini via Winter; widths as in BODY_SOURCES.md), moved only by research.legShift, research.armSpanRatio and research.build.mul. Not measured on him.",
+    "headNeckM": 0.333,
+    "headM": 0.238,
+    "neckM": 0.095,
+    "trunkM": 0.527,
+    "thighM": 0.448,
+    "shinM": 0.45,
+    "footHeightM": 0.071,
+    "legLengthM": 0.969,
+    "shoulderHeightM": 1.496,
+    "eyeHeightM": 1.713,
+    "upperArmM": 0.316,
+    "forearmM": 0.248,
+    "handM": 0.184,
+    "armLengthM": 0.748,
+    "footLengthM": 0.278,
+    "shoulderWidthM": 0.43,
+    "shoulderJointSpacingM": 0.371,
+    "chestDepthM": 0.241,
+    "pelvisWidthM": 0.275,
+    "hipWidthM": 0.345,
+    "hipJointSpacingM": 0.174,
+    "check": {
+      "what": "head+neck + trunk + thigh + shin + foot height must equal his height (within 1 cm); shoulder-joint spacing + 2 x (upper arm + forearm + hand) must equal his arm span",
+      "sumM": 1.829,
+      "heightM": 1.83,
+      "diffM": -0.001,
+      "ok": true,
+      "spanSumM": 1.867,
+      "armSpanM": 1.867,
+      "spanOk": true
+    }
+  },
+  "build": {
+    "bmi": 22.1,
+    "bmiHow": "weight / height^2 from the official numbers",
+    "type": "athletic",
+    "typeHow": "from BMI: under 21.8 lean, 21.8-24.2 athletic, above powerful (men's Olympic tennis mean 23.25)",
+    "massSits": "legs: thick thighs and strong calves under a compact trunk",
+    "look": "style.json (video): 'compact and powerful, thick thighs'; appearance.json: long hair, hairband, beard, black sleeve on the racket forearm",
+    "proportions": {
+      "estimate": true,
+      "method": "fractions of his height, seen from the front. Widths: Drillis & Contini outer widths; thickness baselines are estimates for an average tour build, scaled by sqrt(BMI / 23.25) and by research.build.mul (the features the Appearance Scout and the video notes call out).",
+      "headW": 0.084,
+      "headH": 0.13,
+      "neckW": 0.063,
+      "shoulderW": 0.256,
+      "biacromialW": 0.235,
+      "chestW": 0.17,
+      "waistW": 0.156,
+      "hipW": 0.189,
+      "thighW": 0.107,
+      "calfW": 0.064,
+      "upperArmW": 0.054,
+      "forearmW": 0.044,
+      "racketArm": "right",
+      "racketArmUpperW": 0.054,
+      "racketArmForearmW": 0.044,
+      "legToHeight": 0.53,
+      "armSpanToHeight": 1.02
+    }
+  },
+  "movement": {
+    "estimate": true,
+    "method": "no per-player tracking speeds are published for most of the tour, so: the game's own body formula (top = 6.6 x sqrt(h) / w^0.25, accel = 8.6 / w / sqrt(h), h = height / 1.85, w = weight / 75; its 6.6 m/s matches the ATP's 23.58 km/h maximum speed for men's tennis) x a small rating from the evidence below x age (after 30: -0.6% top speed and -0.8% first step per year; legends are modelled at their prime).",
+    "ageOn": {
+      "date": "2026-11-11",
+      "years": 23,
+      "modelled": "current"
+    },
+    "ratings": {
+      "mover": 1.06,
+      "quick": 1.1,
+      "cod": 1.12,
+      "why": "Named by Fils among the quickest ('Carlos is fast'; over 40 m he would take himself, Carlos or de Minaur); style.json: 'explosive crossover into a huge first stride'."
+    },
+    "ageFactor": {
+      "topSpeed": 1.0,
+      "firstStep": 1.0
+    },
+    "topSpeedMps": 6.98,
+    "topSpeedKmh": 25.1,
+    "accelMps2": 9.64,
+    "changeOfDirection": 1.17,
+    "changeOfDirectionHow": "1 = average tour player: sqrt(80.8 kg / his weight) x rating x age (a lighter body stops and restarts faster)",
+    "slides": "Low lunging slides on the outside leg, hard courts included (style.json: 'plants low on the outside leg and hits from the lunge; bends right down to dig out low balls on the run').",
+    "published": [],
+    "evidence": [
+      {
+        "claim": "Arthur Fils, asked for the quickest men on tour (Tennis Channel, Indian Wells 2026), named Davidovich Fokina, Mpetshi Perricard, himself, Shelton, Monfils, Alcaraz and de Minaur: 'I think 40m I'd take myself, or Carlos, or Demon.'",
+        "url": "https://www.hitc.com/arthur-fils-picks-the-seven-quickest-players-in-mens-tennis/",
+        "read": "page"
+      },
+      {
+        "claim": "running/firstStep: 'explosive crossover into a huge first stride; back leg fully stretched behind'",
+        "url": "datasets/players/alcaraz/style.json",
+        "read": "file"
+      }
+    ]
+  },
+  "flexibility": {
+    "estimate": true,
+    "method": "normal active ranges (AAOS, from the Biomechanics Coach's datasets/anatomy/joints.json), changed per player only with evidence; nobody on the roster has published goniometer numbers.",
+    "flex": 1.06,
+    "flexWhy": "style.json (video): plants low on the outside leg and bends right down on the run; a little above the tour norm, not measured",
+    "rangesDeg": {
+      "hip_abduction": {
+        "deg": 48,
+        "source": "estimate: normal range x his flex 1.06 (style.json (video): plants low on the outside leg and bends right down on the run; a little above the tour norm, not measured)"
+      },
+      "hip_internal_rotation": {
+        "deg": 48,
+        "source": "estimate: normal range x his flex 1.06 (style.json (video): plants low on the outside leg and bends right down on the run; a little above the tour norm, not measured)"
+      },
+      "hip_external_rotation": {
+        "deg": 48,
+        "source": "estimate: normal range x his flex 1.06 (style.json (video): plants low on the outside leg and bends right down on the run; a little above the tour norm, not measured)"
+      },
+      "hip_flexion": {
+        "deg": 127,
+        "source": "estimate: normal range x his flex 1.06 (style.json (video): plants low on the outside leg and bends right down on the run; a little above the tour norm, not measured)"
+      },
+      "trunk_rotation": {
+        "deg": 48,
+        "source": "estimate: normal range x his flex 1.06 (style.json (video): plants low on the outside leg and bends right down on the run; a little above the tour norm, not measured)"
+      },
+      "ankle_dorsiflexion": {
+        "deg": 21,
+        "source": "estimate: normal range x his flex 1.06 (style.json (video): plants low on the outside leg and bends right down on the run; a little above the tour norm, not measured)"
+      },
+      "wrist_flexion": {
+        "deg": 80,
+        "source": "typical elite range"
+      },
+      "wrist_extension": {
+        "deg": 70,
+        "source": "typical elite range"
+      },
+      "shoulder_external_rotation": {
+        "deg": 100,
+        "arm": "right",
+        "source": "typical elite range (playing shoulder of tour players: about +10 external, -10 internal rotation; Ellenbecker)"
+      },
+      "shoulder_internal_rotation": {
+        "deg": 60,
+        "arm": "right",
+        "source": "typical elite range (playing shoulder of tour players: about +10 external, -10 internal rotation; Ellenbecker)"
+      }
+    },
+    "widestStance": {
+      "spreadDeg": 130,
+      "spreadHow": "angle between the legs in his widest slide or stretch (110 = typical tour player, 180 = full split). Wider than typical: the low lunge in his US Open clips (style.json running/braking).",
+      "widthM": 1.76,
+      "hipDropM": 0.56
+    },
+    "evidence": [
+      {
+        "claim": "running/braking: 'plants low on the outside leg and hits from the lunge; bends right down to dig out low balls on the run (v1 129.0)'",
+        "url": "datasets/players/alcaraz/style.json",
+        "read": "file"
+      }
+    ]
+  },
+  "game": {
+    "heightM": 1.83,
+    "weightKg": 74,
+    "armSpanM": 1.867,
+    "legLengthM": 0.969,
+    "shoulderW": 0.43,
+    "hipW": 0.345,
+    "shoulderJointW": 0.371,
+    "hipJointW": 0.174,
+    "reachM": 1.25,
+    "overheadReachM": 2.615,
+    "eyeHeightM": 1.713,
+    "topSpeed": 6.98,
+    "accel": 9.64,
+    "cod": 1.17,
+    "flex": 1.06,
+    "splitDepth": 0.58,
+    "why": {
+      "heightM": "official (ATP Tour profile)",
+      "weightKg": "official (ATP Tour profile)",
+      "armSpanM": "estimate: 1.020 x height, style.json: a compact build (video notes), so slightly under the 1.03 norm; not measured",
+      "legLengthM": "hip joint to floor: (0.530) x height (Drillis & Contini)",
+      "shoulderW": "bone width acromion to acromion: 0.235 x height",
+      "hipW": "outer hip width: 0.191 x height, scaled by build",
+      "shoulderJointW": "shoulder joint centres: shoulderW minus ~3 cm a side (for the skeleton)",
+      "hipJointW": "hip joint centres: 0.095 x height (for the skeleton: the legs hang from here, not from the hip's outer edge)",
+      "reachM": "body centre to sweet spot, arm straight out, standing still; a lean or a step adds to it",
+      "overheadReachM": "sweet spot height with the arm straight up, feet flat (serve contact before the jump)",
+      "eyeHeightM": "0.936 x height (Drillis & Contini)",
+      "topSpeed": "m/s, estimate: body formula x mover 1.06 x age 1.000. Named by Fils among the quickest ('Carlos is fast'; over 40 m he would take himself, Carlos or de Minaur); style.json: 'explosive crossover into a huge first stride'.",
+      "accel": "m/s^2, estimate: body formula x first step 1.10 x age 1.000",
+      "cod": "1 = average: sqrt(80.8 / weight) x 1.12 x age 1.000",
+      "flex": "style.json (video): plants low on the outside leg and bends right down on the run; a little above the tour norm, not measured",
+      "splitDepth": "share of his leg length the hips drop in his widest stance: 1 - cos(130 deg / 2)"
+    }
+  }
+}
