@@ -230,7 +230,6 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/skills/skills.js?v=0.11.0"></script>
 <script src="src/animation/run-cycle.js?v=0.11.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.11.0"></script>
-<script src="src/serve/motion/alcaraz-serve.js?v=0.11.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -1464,8 +1463,9 @@ function say(i, text) {
 
 /* =====================================================================
    SERVE MOTIONS — every pro with a motion file serves his own way.
-   src/serve/motion/roster-serves.js sets SERVE_MOTIONS[id] = { first, second } for all 22
-   roster ids, from captured 3D serves. Joints are body heights ({x, y, z} or the older [x, up]).
+   src/serve/motion/roster-serves.js sets SERVE_MOTIONS[id] = { first, second } for the roster.
+   Alcaraz's first serve is only src/serve/motion/alcaraz-poetry.js. The roster does not fill that slot.
+   Joints are body heights ({x, y, z} or the older [x, up]).
    Speed, spin and serve type stay the game's own numbers: the footage did not measure them.
    ===================================================================== */
 const servesOf = i => window.SERVE_MOTIONS?.[PLAYERS[i].id] || null;          // { first, second } for player i
@@ -2288,8 +2288,8 @@ resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
 <!-- Locker room (Locker Room Designer) and the start flow (Start Page Builder) -->
 <script src="src/lockerroom/lockerroom.js?v=0.11.0"></script>
 <script src="src/start/flow.js?v=0.11.0"></script>
-<!-- Captured serves for all 22 pros. Loaded after the match script so it can extend ROSTER
-     without touching the player list above (that list is also extended by the pixel-character roster). -->
-<script src="src/serve/motion/roster-serves.js?v=0.11.0"></script>
-<script src="src/serve/motion/alcaraz-poetry.js?v=0.11.0"></script>
+<!-- Captured serves. Roster loads first and does not set Alcaraz's first serve.
+     alcaraz-poetry.js is the only writer of SERVE_MOTIONS.alcaraz.first. -->
+<script src="src/serve/motion/roster-serves.js?v=0.12.0"></script>
+<script src="src/serve/motion/alcaraz-poetry.js?v=0.12.0"></script>
 <script>StartFlow.open();</script>
