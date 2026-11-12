@@ -1469,7 +1469,7 @@ function sideOn(i, W, m, t) {
       (BODIES hipW or ~0.19 × height) for the shorts.
    2. Knees: stay near the line from hip to ankle (at most ~3.5% of height to the side, inward or outward), so a
       loading server's knees bend over his feet, not out like a frog. Heights (z) and depth are untouched. */
-function anatomize(i, W) {
+function anatomize(i, W, t) {
   const P = PLAYERS[i], H = P.heightM, B = (window.BODIES && window.BODIES[P.id] && window.BODIES[P.id].game) || {};
   const lh = W.leftHip, rh = W.rightHip; if (!lh || !rh) return;
   const cx = (lh.x + rh.x) / 2, cy = (lh.y + rh.y) / 2, cz = (lh.z + rh.z) / 2;
@@ -1483,6 +1483,33 @@ function anatomize(i, W) {
     const u = Math.max(0, Math.min(1, (Hp.z - K.z) / ((Hp.z - A.z) || 1)));     // how far down the leg the knee is
     const lineX = Hp.x + (A.x - Hp.x) * u;
     K.x = lineX + Math.max(-maxOff, Math.min(maxOff, K.x - lineX));
+  }
+  /* 3. SHOULDERS (Ryan, Nov 12). The shoulder girdle is a rigid frame ~0.21 × height between the joints
+     (BODIES shoulderJointW). In the flat clips the shoulder line flipped through zero as he turned to the net, so at
+     contact the hitting shoulder sat LEFT of the tossing one: the racket arm grew out of the middle of the back,
+     behind the head, and the other arm out of the chest. Now the frame keeps its real width, the hitting shoulder
+     stays on his right (on the mirrored far-end start, on the side the motion shows it), and the cartwheel tilt the
+     clip has (hitting shoulder up at contact) is kept. Each arm moves with its own shoulder, so its shape is kept. */
+  const ls = W.leftShoulder, rs = W.rightShoulder;
+  if (ls && rs) {
+    const own = P.side === "near" ? 1 : -1, mo = pos[i].motion;
+    const fl = mo ? Math.sign(flipAt(i, mo, t ?? mo.t)) || 1 : 1;
+    const want = own * fl;                                                  // court-x sign of "his right" as drawn now
+    const sw = B.shoulderJointW || 0.21 * H, dz = rs.z - ls.z;
+    const mx = (ls.x + rs.x) / 2, my = (ls.y + rs.y) / 2;
+    let hx = Math.max(Math.abs(rs.x - ls.x), 0.02 * H) * want, hy = rs.y - ls.y;   // horizontal part, hitting side out
+    const hNeed = Math.sqrt(Math.max(sw * sw - dz * dz, (0.4 * sw) ** 2)), hl = Math.hypot(hx, hy) || 1;
+    hx *= hNeed / hl; hy *= hNeed / hl;
+    for (const [s, k] of [["left", -0.5], ["right", 0.5]]) {
+      const S0 = W[s + "Shoulder"], ddx = mx + hx * k - S0.x, ddy = my + hy * k - S0.y;
+      for (const n of ["Shoulder", "Elbow", "Wrist", "Hand", "Index"]) if (W[s + n]) { W[s + n].x += ddx; W[s + n].y += ddy; }
+    }
+    /* 4. NECK AND HEAD: the base of the neck sits a little above the shoulder joints and the head on top of it,
+       never sunk between the shoulders (at contact the clips dropped the nose to shoulder height). */
+    const nz = (ls.z + rs.z) / 2 + 0.025 * H;
+    if (W.neck) { W.neck.x = mx; W.neck.y = my; W.neck.z = Math.max(W.neck.z, nz); }
+    const lift = Math.max(0, nz + 0.075 * H - (W.nose ? W.nose.z : 1e9));
+    for (const n of ["nose", "head", "leftEar", "rightEar", "leftEye", "rightEye"]) if (W[n]) W[n].z += lift;
   }
 }
 function stepMotion(i, dt) {
@@ -1518,6 +1545,7 @@ function stepMotion(i, dt) {
     } else {
       if (!sv.release) {                                 // solve the toss once: release point → contact point
         const C = poseToWorld(i, pos[i], motionPose(m, E.contact), E.contact);
+        anatomize(i, C, E.contact);                      // aim the toss at the corrected racket hand
         const T = Math.max(0.2, E.contact - E.tossRelease);
         sv.release = { ...W[toss + "Wrist"] };
         sv.hit = { x: C[hit + "Wrist"].x, z: C[hit + "Wrist"].z + RACKET_M * 0.9 };
