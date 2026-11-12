@@ -1397,7 +1397,14 @@ window.motionPose = motionPose;
 /* Body heights → court metres for a player standing at p (scaled by their real height). */
 function poseToWorld(i, p, pose, t) {
   const h = PLAYERS[i].heightM, right = (PLAYERS[i].side === "near" ? 1 : -1) * (p.motion ? flipAt(i, p.motion, t ?? p.motion.t) : 1), w = {};
-  for (const n in pose) w[n] = { x: p.x + pose[n][0] * h * right, y: p.y, z: Math.max(0, pose[n][1] * h) };
+  // Measured depth is on for one staged serve (Alcaraz's poetry-in-motion first serve).
+  // Every other motion still drops pose z and lets sideOn() supply the side-on depth.
+  const depth = !!(p.motion && p.motion.m && p.motion.m.measuredDepth);
+  const fwd = PLAYERS[i].side === "near" ? 1 : -1;
+  for (const n in pose) {
+    const into = depth ? (pose[n][2] || 0) : 0;
+    w[n] = { x: p.x + pose[n][0] * h * right, y: p.y + into * h * fwd, z: Math.max(0, pose[n][1] * h) };
+  }
   return w;
 }
 /* Which way a captured serve faces (+1 = toward the player's right): where the tossing hand reaches before the toss.
@@ -1448,6 +1455,14 @@ window.flipAt = flipAt;
    the lead side (tossing arm, front foot) forward, the racket side back. He looks across at the box he serves to,
    up at the ball during the toss, and at the box again after contact (W._look: screen side −1…1, up 0…1). */
 function sideOn(i, W, m, t) {
+  if (m.measuredDepth) {
+    // This serve already carries measured depth. The flat-clip side-on offset would tilt it.
+    const E = m.events, box = serviceBox(i), dx = box.mid - pos[i].x;
+    const across = clamp(dx / 2.6, -1, 1);
+    const up = t >= E.tossRelease && t < E.contact ? ease((t - E.tossRelease) / 0.18) : 0;
+    W._look = { x: across * (1 - up), up };
+    return;
+  }
   const E = m.events, H = PLAYERS[i].heightM, fwd = -sideSign(i);
   const k = t < E.trophy ? 1 : t < E.contact ? 1 - ease((t - E.trophy) / (E.contact - E.trophy)) : -0.45 * ease((t - E.contact) / ((E.finish - E.contact) || 1));
   const D = 0.12 * H * k * fwd;                          // half the depth between the lead and the racket side
@@ -1470,6 +1485,8 @@ function sideOn(i, W, m, t) {
    2. Knees: stay near the line from hip to ankle (at most ~3.5% of height to the side, inward or outward), so a
       loading server's knees bend over his feet, not out like a frog. Heights (z) and depth are untouched. */
 function anatomize(i, W, t) {
+  const mo = pos[i] && pos[i].motion;
+  if (mo && mo.m && mo.m.measuredDepth) return;   // real 3D on this one serve; the flat-clip shoulder fix would move it
   const P = PLAYERS[i], H = P.heightM, B = (window.BODIES && window.BODIES[P.id] && window.BODIES[P.id].game) || {};
   const lh = W.leftHip, rh = W.rightHip; if (!lh || !rh) return;
   const cx = (lh.x + rh.x) / 2, cy = (lh.y + rh.y) / 2, cz = (lh.z + rh.z) / 2;
@@ -2172,4 +2189,5 @@ resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
 <!-- Captured serves for all 22 pros. Loaded after the match script so it can extend ROSTER
      without touching the player list above (that list is also extended by the pixel-character roster). -->
 <script src="src/serve/motion/roster-serves.js?v=0.11.0"></script>
+<script src="src/serve/motion/alcaraz-poetry.js?v=0.11.0"></script>
 <script>StartFlow.open();</script>
