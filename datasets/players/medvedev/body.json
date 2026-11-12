@@ -261,6 +261,7 @@
     "cod": 1.01,
     "flex": 1.06,
     "splitDepth": 0.54,
+    "lefty": false,
     "why": {
       "heightM": "official (ATP Tour profile)",
       "weightKg": "official (ATP Tour profile)",
@@ -277,7 +278,8 @@
       "accel": "m/s^2, estimate: body formula x first step 1.00 x age 1.000",
       "cod": "1 = average: sqrt(80.8 / weight) x 1.02 x age 1.000",
       "flex": "Swiatek's nickname 'Pretzel' for the way his limbs look in match photos; loose and long, a little above the tour norm, not measured",
-      "splitDepth": "share of his leg length the hips drop in his widest stance: 1 - cos(125 deg / 2)"
+      "splitDepth": "share of his leg length the hips drop in his widest stance: 1 - cos(125 deg / 2)",
+      "lefty": "official.hand (ATP Tour profile): the racket is in his right hand, he bounces and tosses with the other; the game mirrors captured serves for left-handers from this flag"
     }
   }
 }

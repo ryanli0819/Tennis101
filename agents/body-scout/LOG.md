@@ -1,5 +1,44 @@
 # Body Scout · log
 
+## Nov 11, 2026 · run 2 (local, Ryan's Mac) · review round 2 on PR #42
+briefSeen: 1 (Motion & Body, share team)
+
+**Read first:** CLAUDE.md, agents/README.md, RULES.md, PROMPT.md, supervisors.json (brief 1, unchanged), ratings.json
+(still no ratings), issue **#39** with Ryan's addition on handedness, and the Motion & Body review on PR #42 ("round 1:
+changes (small)"). Teammates' logs on `main` have no runs yet. Rebased on `origin/main` (clean). Nothing in the repo told
+me to act outside my files.
+
+**Done (exactly the two review points):**
+1. `game.lefty` (true / false) for all 22 players, derived by `build_bodies.py` from the sourced `official.hand`, with a
+   `why`, and regenerated into `src/players/bodies.js` as `BODIES[id].game.lefty`.
+   - `true`: **Shelton, Tien, Nadal**. `false`: the other 19.
+   - The tool now also fails if `official.hand` is not `"right"` or `"left"`, if `game.lefty` is missing or disagrees
+     with it, or if `bodies.js` carries a flag that does not match the hand. It prints the left-handers at the end.
+2. **Learner Tien is left-handed** per his ATP Tour profile (https://www.atptour.com/en/players/learner-tien/t0ha/overview,
+   `PlayHand` read in run 1). He was not on the manager's list of known lefties (Shelton, Nadal), so the roster has
+   **three** left-handers, not two. `tien/appearance.json` agrees ("slim young left-hander").
+
+`BODY_SOURCES.md` says what `game.lefty` is. No change to `index.html` in this round.
+
+**Checks run:** `python3 -I datasets/players/tools/build_bodies.py --check` passes (22 of 22 up to date, segment and
+span sums, `bodies.js` parses back with 3 `lefty: true` and 19 `lefty: false`, `ROSTER` agrees).
+
+**Still not checked:** `node --check src/players/bodies.js` and the browser load (desktop and 400 px). There is no
+`node` on this Mac and the system JavaScript engine is not allowed for this agent, same as run 1. The manager should
+load the page once.
+
+**For the manager and teammates**
+- `index.html` on `main` reads `PLAYERS[i].lefty` to mirror serves, and nothing sets it from `BODIES` yet. The hook
+  would be `lefty: !!((window.BODIES || {})[id] || {}).game?.lefty` where `PLAYERS` is filled (`choosePlayers`). That
+  is game code, not mine: I left it for the manager to assign.
+- `agents/README.md` lists the `game` fields without `lefty`, `shoulderJointW`, `hipJointW`, `overheadReachM`. Not my
+  file: please add them when this merges.
+- Not sourced, so not written: Ryan's note that Nadal "plays left, writes right". The ATP profile only gives the
+  playing hand. If the game needs the natural hand (it does not today), it needs its own link.
+
+**Exact next step:** unchanged from run 1 (below): ANSUR II widths first, then movement evidence for the ten neutral
+players.
+
 ## Nov 11, 2026 · run 1 (local, Ryan's Mac)
 briefSeen: 1 (Motion & Body, share team)
 

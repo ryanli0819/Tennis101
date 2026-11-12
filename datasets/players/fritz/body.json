@@ -230,6 +230,7 @@
     "cod": 0.97,
     "flex": 1.0,
     "splitDepth": 0.43,
+    "lefty": false,
     "why": {
       "heightM": "official (ATP Tour profile)",
       "weightKg": "official (ATP Tour profile)",
@@ -246,7 +247,8 @@
       "accel": "m/s^2, estimate: body formula x first step 1.00 x age 1.000",
       "cod": "1 = average: sqrt(80.8 / weight) x 1.00 x age 1.000",
       "flex": "typical elite range: no evidence found this run that he is more or less flexible than the tour",
-      "splitDepth": "share of his leg length the hips drop in his widest stance: 1 - cos(110 deg / 2)"
+      "splitDepth": "share of his leg length the hips drop in his widest stance: 1 - cos(110 deg / 2)",
+      "lefty": "official.hand (ATP Tour profile): the racket is in his right hand, he bounces and tosses with the other; the game mirrors captured serves for left-handers from this flag"
     }
   }
 }

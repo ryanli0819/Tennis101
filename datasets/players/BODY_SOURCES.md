@@ -137,7 +137,9 @@ dorsiflexion are multiplied by `flex` only for players with evidence:
 ## What the game gets (`window.BODIES[id]`)
 `game` (the contract in `agents/README.md`, plus `shoulderJointW`, `hipJointW` and `overheadReachM`), `proportions`
 (fractions of height, for the Player Artist), `segments` (metres, for the Body Animator's skeleton), `flexDeg`,
-`widestStance`, `hand`, `backhand`, `build`. `reachM` is the standing reach to the sweet spot with the arm straight out
+`widestStance`, `hand`, `backhand`, `build`. `game.lefty` is `true` when `official.hand` is `"left"` (Shelton, Tien,
+Nadal) and `false` for everyone else: the racket hand, sourced from the ATP's playing hand, which the game uses to
+mirror captured serves. `reachM` is the standing reach to the sweet spot with the arm straight out
 (about 1.25–1.33 m); the game's current reach ring (`0.44 · height + 0.69`) is about 0.25 m longer because it includes a lean.
 
 ## Rules kept
