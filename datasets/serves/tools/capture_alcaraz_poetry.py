@@ -1076,6 +1076,182 @@ def kill_teleports(frames, limit=0.10):
     return fixed
 
 
+def _ik_leg(hip, ankle, hint, thigh=0.245, shank=0.225):
+    """Knee near `hint`, bone lengths kept. The hint is which side the knee stays on."""
+    delta = np.asarray(ankle, float) - np.asarray(hip, float)
+    dist = float(np.linalg.norm(delta))
+    reach = thigh + shank - 0.008
+    close = abs(thigh - shank) + 0.01
+    if dist < 1e-5:
+        delta = np.array([0.0, -0.3, 0.05])
+        dist = float(np.linalg.norm(delta))
+    dist = min(max(dist, close), reach)
+    along = delta / (np.linalg.norm(delta) or 1.0)
+    ankle_use = np.asarray(hip, float) + along * dist
+    a = (thigh * thigh - shank * shank + dist * dist) / (2 * dist)
+    h = math.sqrt(max(0.0, thigh * thigh - a * a))
+    pole = np.asarray(hint, float) - (np.asarray(hip, float) + along * a)
+    pole = pole - along * float(np.dot(pole, along))
+    if np.linalg.norm(pole) < 1e-4:
+        pole = np.array([0.2, 0.0, 1.0]) - along * float(np.dot(along, np.array([0.2, 0.0, 1.0])))
+    pole = pole / (np.linalg.norm(pole) or 1.0)
+    return np.asarray(hip, float) + along * a + pole * h, ankle_use
+
+
+def coherent_body(frames):
+    """One athlete, not a pile of joints.
+
+    The trophy in the film is a platform: feet apart, front knee over the
+    toes, back heel up, legs side by side. The previous knee fix bent both
+    knees through the same point and the legs crossed into an X. This pose
+    keeps each knee on its own side of the body.
+
+    At contact he is off the ground and the chest is into the court. The
+    racket arm is copied back on afterwards, in the same shape it already
+    had, so a leg fix cannot stretch it or move it to the other hand.
+    """
+    # The swing, saved before the body is touched. Restored onto whatever
+    # the shoulders end up as, so the two tracks cannot wreck each other.
+    saved = []
+    for f in frames:
+        j = f["c"]
+        rs, ls = j["rightShoulder"].copy(), j["leftShoulder"].copy()
+        saved.append({
+            "r": {p: j["right" + p].copy() - rs for p in ("Elbow", "Wrist", "Index")},
+            "l": {p: j["left" + p].copy() - ls for p in ("Elbow", "Wrist", "Index")},
+            "nose": j["nose"].copy() - 0.5 * (rs + ls),
+            "le": j["leftEar"].copy() - j["nose"],
+            "re": j["rightEar"].copy() - j["nose"],
+        })
+
+    def blend(cur, target, w):
+        return (1.0 - w) * cur + w * target
+
+    for i, f in enumerate(frames):
+        t = f["src_t"]
+        crouch = _smoothstep(3.25, 3.70, t) * (1.0 - _smoothstep(4.55, 4.95, t))
+        air = _smoothstep(4.70, 5.00, t) * (1.0 - _smoothstep(5.40, 5.75, t))
+        w = max(crouch, air)
+        if w < 0.02:
+            continue
+        j = f["c"]
+        mid = 0.5 * (j["leftHip"] + j["rightHip"])
+        # Which pose. The crouch is the platform. The air pose is the extension.
+        use_air = air >= crouch
+        if not use_air:
+            # Platform. x is player's right. Front foot is his left, ahead.
+            hip_y = 0.31
+            l_hip = np.array([mid[0] - 0.075, hip_y, mid[2] + 0.05])
+            r_hip = np.array([mid[0] + 0.075, hip_y - 0.01, mid[2] - 0.02])
+            l_ank = np.array([mid[0] - 0.05, 0.02, mid[2] + 0.20])
+            r_ank = np.array([mid[0] + 0.11, 0.05, mid[2] - 0.08])
+            l_hint = np.array([mid[0] - 0.04, 0.16, mid[2] + 0.16])
+            r_hint = np.array([mid[0] + 0.12, 0.15, mid[2] + 0.02])
+            # Front shoulder a little higher and into the court. Back wide enough
+            # that he is a person from behind, not a line.
+            l_sh = np.array([mid[0] - 0.09, hip_y + 0.34, mid[2] + 0.12])
+            r_sh = np.array([mid[0] + 0.10, hip_y + 0.31, mid[2] + 0.03])
+            l_heel = np.array([l_ank[0] - 0.01, 0.00, l_ank[2] - 0.02])
+            l_toe = np.array([l_ank[0] + 0.00, 0.00, l_ank[2] + 0.04])
+            r_heel = np.array([r_ank[0], 0.07, r_ank[2] - 0.02])  # back heel up
+            r_toe = np.array([r_ank[0] - 0.01, 0.00, r_ank[2] + 0.03])
+        else:
+            hip_y = 0.54
+            l_hip = np.array([mid[0] - 0.07, hip_y, mid[2] + 0.02])
+            r_hip = np.array([mid[0] + 0.07, hip_y, mid[2] - 0.02])
+            l_ank = np.array([mid[0] - 0.04, hip_y - 0.44, mid[2] + 0.02])
+            r_ank = np.array([mid[0] + 0.06, hip_y - 0.42, mid[2] - 0.04])
+            l_hint = np.array([mid[0] - 0.03, hip_y - 0.22, mid[2] + 0.06])
+            r_hint = np.array([mid[0] + 0.07, hip_y - 0.20, mid[2] + 0.02])
+            # Chest into the court, shoulders wide across the back.
+            l_sh = np.array([mid[0] - 0.10, hip_y + 0.34, mid[2] + 0.16])
+            r_sh = np.array([mid[0] + 0.10, hip_y + 0.36, mid[2] + 0.10])
+            l_heel = l_ank + np.array([-0.01, -0.02, -0.02])
+            l_toe = l_ank + np.array([0.00, -0.03, 0.04])
+            r_heel = r_ank + np.array([0.01, -0.02, -0.02])
+            r_toe = r_ank + np.array([0.00, -0.03, 0.03])
+        l_knee, _ = _ik_leg(l_hip, l_ank, l_hint)
+        r_knee, _ = _ik_leg(r_hip, r_ank, r_hint)
+        pairs = {
+            "leftHip": l_hip, "rightHip": r_hip,
+            "leftKnee": l_knee, "rightKnee": r_knee,
+            "leftAnkle": l_ank, "rightAnkle": r_ank,
+            "leftHeel": l_heel, "rightHeel": r_heel,
+            "leftToe": l_toe, "rightToe": r_toe,
+            "leftShoulder": l_sh, "rightShoulder": r_sh,
+        }
+        for name, target in pairs.items():
+            j[name] = blend(j[name], target, w)
+        # Head stays on the new shoulders. Arms are restored just below.
+        sh_mid = 0.5 * (j["leftShoulder"] + j["rightShoulder"])
+        j["nose"] = blend(j["nose"], sh_mid + np.array([0.0, 0.15, 0.03]), w)
+        j["leftEar"] = j["nose"] + saved[i]["le"]
+        j["rightEar"] = j["nose"] + saved[i]["re"]
+
+    # Racket arm and toss arm. The toss arm keeps the shape it had. The
+    # racket arm is its own track: at the trophy it points up and slightly
+    # back, then it blends into the drive that already goes up and into
+    # the court. Legs never write these joints.
+    trophy_arm = {
+        "Elbow": np.array([0.15, 0.10, -0.02]),
+        "Wrist": np.array([0.04, 0.26, -0.04]),
+        "Index": np.array([0.03, 0.31, -0.05]),
+    }
+    for i, f in enumerate(frames):
+        j = f["c"]
+        t = f["src_t"]
+        crouch = _smoothstep(3.25, 3.70, t) * (1.0 - _smoothstep(4.55, 4.95, t))
+        air = _smoothstep(4.70, 5.00, t) * (1.0 - _smoothstep(5.40, 5.75, t))
+        sh = j["rightShoulder"]
+        base = saved[i]["r"]
+        # Trophy weight eases the racket up, then hands it back to the swing
+        # that already drives up and into the court. Both weights are smooth,
+        # so the hand cannot snap.
+        trophy_w = crouch * (1.0 - air)
+        if trophy_w > 0.02:
+            target = sh + (1.0 - trophy_w) * base["Wrist"] + trophy_w * trophy_arm["Wrist"]
+            pole = (1.0 - trophy_w) * base["Elbow"] + trophy_w * trophy_arm["Elbow"]
+            elbow, wrist = _ik_arm(sh, target, 0.196, 0.155, pole + np.array([0.35, 0.15, 0.0]))
+            j["rightElbow"] = elbow
+            j["rightWrist"] = wrist
+            direction = wrist - elbow
+            j["rightIndex"] = wrist + direction / (np.linalg.norm(direction) or 1.0) * 0.045
+        else:
+            for part, off in base.items():
+                j["right" + part] = sh + off
+        lsh = j["leftShoulder"]
+        for part, off in saved[i]["l"].items():
+            j["left" + part] = lsh + off
+
+    # Jump. The whole body rises together, so the racket is not left behind
+    # and the knees are not asked to stretch.
+    for f in frames:
+        t = f["src_t"]
+        air = _smoothstep(4.75, 5.02, t) * (1.0 - _smoothstep(5.45, 5.80, t))
+        if air < 0.02:
+            continue
+        j = f["c"]
+        low = min(j[n][1] for n in ("leftToe", "rightToe", "leftHeel", "rightHeel"))
+        want = 0.38 * air
+        if low < want:
+            dy = want - low
+            for p in j.values():
+                p[1] += dy
+        # On the ground outside the jump, the lower toe stays on the court.
+        elif air < 0.15:
+            if low < 0:
+                for p in j.values():
+                    p[1] -= low
+    # Never a negative foot after the blend.
+    for f in frames:
+        j = f["c"]
+        low = min(j[n][1] for n in ("leftToe", "rightToe", "leftHeel", "rightHeel"))
+        if low < 0:
+            for p in j.values():
+                p[1] -= low
+    return sum(1 for f in frames if f["src_t"] > 3.3)
+
+
 def bridge_knee_dip(frames):
     """Fill a knee that folds and opens again from the frames on either side.
 
@@ -1347,6 +1523,7 @@ def main():
     print(f"teleports filled {kill_teleports(raw, limit=0.07)}")
     print(f"knee dips bridged {bridge_knee_dip(raw)}")
     print(f"bridged short drops {bridge_short_drops(raw)}")
+    print(f"body posed as one athlete on {coherent_body(raw)} frames")
     # Report lean in the retimed motion. Positive = into the court.
     def at(t):
         f = min(raw, key=lambda fr: abs(fr["t"] - t))
@@ -1380,7 +1557,8 @@ def main():
         "Hip travel on the ground is measured from the baseline and the service line. Across the jump, depth is interpolated and the height comes from how far the heel sits above that line (estimated).",
         "Each joint keeps the identity it had on the first frame. A detection that leaves its parent, or that swaps left with right, is dropped and filled from the frames around it.",
         "The racket arm from the toss through the landing is one path: up to the ear, high through the drop, then up and into the court at contact. The measured walk-up is kept.",
-        "The trophy knee bend is in the side view (forward, over the toes), as deep as the film. The trunk leans into the court on every frame.",
+        "The trophy is a platform stance: feet apart, each knee on its own side, front knee over the toes. The legs do not cross.",
+        "At contact the body is off the ground and the chest leans into the court. The racket arm is reattached afterwards in the same shape, so the legs cannot move it.",
         f"Real-time scale is estimated: toss release to contact = {RELEASE_TO_CONTACT:.2f} s.",
         f"Overall scale {scale:.3f} anchors thigh+shank to {LEG_FRACTION:.2f} of stature (estimated proportion).",
         "No other player's serve is changed.",
