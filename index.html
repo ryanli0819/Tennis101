@@ -664,105 +664,162 @@ function sigHead(P, near, hx, hy, r, hr, hrD, hrL) {
     if (!near) R(hx - r * 1.6, hy - r * 0.16, r * 3.2, r * 0.26, shade(cap, -0.2));                        // long brim toward you
   }
   if (L.style === "long-band") {
-    b.fillStyle = hr; b.beginPath(); b.arc(hx, hy - r * 0.35, r * 1.2, Math.PI, Math.PI * 2); b.fill();    // volume over the band
-    if (near) R(hx - r * 1.15, hy - r * 0.2, r * 2.3, r * 1.9, hr);                                         // long hair to the neck
-    else { R(hx - r * 1.25, hy - r * 0.2, r * 0.42, r * 1.6, hr); R(hx + r * 0.83, hy - r * 0.2, r * 0.42, r * 1.6, hr);
-           if (L.beard) { R(hx - r * 0.85, hy + r * 0.35, r * 1.7, r * 0.75, hrD); R(hx - r * 0.25, hy + r * 0.6, r * 0.5, 1 / AS, "#b8695a"); } }
-    R(hx - r * 1.2, hy - r * 0.45, r * 2.4, r * 0.3, L.band || "#f6f6f2");                                  // hairband
+    b.fillStyle = hr; b.beginPath(); b.arc(hx, hy - r * 0.2, r * 1.08, Math.PI * 0.15, Math.PI * 0.85); b.fill();   // hair down the nape
+    b.beginPath(); b.arc(hx, hy - r * 0.28, r * 1.12, Math.PI, Math.PI * 2); b.fill();                              // crown
+    if (!near) { R(hx - r * 1.15, hy - r * 0.15, r * 0.38, r * 1.35, hr); R(hx + r * 0.78, hy - r * 0.15, r * 0.38, r * 1.35, hr);
+      if (L.beard) { R(hx - r * 0.7, hy + r * 0.32, r * 1.4, r * 0.62, hrD); R(hx - r * 0.22, hy + r * 0.55, r * 0.44, 1 / AS, "#b8695a"); } }
+    b.strokeStyle = L.band || "#f6f6f2"; b.lineWidth = Math.max(1 / AS, r * 0.2); b.lineCap = "round";
+    b.beginPath(); b.arc(hx, hy - r * 0.02, r * 0.9, Math.PI * 1.12, Math.PI * 1.88); b.stroke();                   // band follows the skull
   }
 }
 
 function drawCapturedFigure(i, p, W) {
-  const P = PLAYERS[i], at = n => W[n] && proj(W[n].x, W[n].y, W[n].z);
-  const g = proj(p.x, p.y), lw = Math.max(2 / AS, q(g.s * 0.12)), skin = "#e1b48b";
-  const seg = (a, c, col, w = lw) => {
-    const A = typeof a === "string" ? at(a) : a, C = typeof c === "string" ? at(c) : c;
-    if (!A || !C) return;
-    b.strokeStyle = col; b.lineWidth = w; b.lineCap = "round";
-    b.beginPath(); b.moveTo(q(A.x), q(A.y)); b.lineTo(q(C.x), q(C.y)); b.stroke();
-  };
-  const mid = (a, c, u) => { const A = at(a), C = at(c); return A && C ? { x: A.x + (C.x - A.x) * u, y: A.y + (C.y - A.y) * u } : null; };
-  const quad = (pts, col) => { if (!pts.every(Boolean)) return; b.fillStyle = col; b.beginPath(); pts.forEach((v, k) => (k ? b.lineTo(v.x, v.y) : b.moveTo(v.x, v.y))); b.closePath(); b.fill(); };
-  /* VOLUME (Ryan, Nov 11: "a 3D-looking figure, not boxes and a triangle"). Limbs are round: a shaded edge, the
-     base colour and a highlight on the side the light comes from, tapering from thigh to ankle. The torso and shorts
-     are shaded like a cylinder, and the spine seam sits where the back's middle really is: as the shoulders turn
-     (one nearer the net than the other), it slides across and the far flank darkens, so a turn reads as a turn. */
+  const P = PLAYERS[i], skin = "#e1b48b";
+  const g = proj(p.x, p.y);
+  /* VOLUME. The captured body is a set of world-space solids (tapered torso, round limbs, a skull),
+     projected with whatever camera is on — behind, side, or the review slant. Screen-space cards collapse
+     to a stick from the side; these keep a waist, a back and a face. Joints are not moved. */
   const lit = litLeft() ? -1 : 1;
-  const limb = (a, c, col, w) => {
-    const A = typeof a === "string" ? at(a) : a, C = typeof c === "string" ? at(c) : c;
-    if (!A || !C) return;
-    const o = lit * w * 0.17;
-    seg(A, C, shade(col, -0.24), w);
-    seg({ x: A.x + o, y: A.y }, { x: C.x + o, y: C.y }, col, w * 0.62);
-    seg({ x: A.x + o * 2.3, y: A.y }, { x: C.x + o * 2.3, y: C.y }, shade(col, 0.16), w * 0.22);
-  };
-  const cylFill = (pts, col, spine) => {                 // pts: a closed outline; fill it with vertical shading bands
-    if (!pts.every(Boolean)) return;
-    const xs = pts.map(v => v.x), ys = pts.map(v => v.y), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
-    b.save(); b.beginPath(); pts.forEach((v, k) => (k ? b.lineTo(v.x, v.y) : b.moveTo(v.x, v.y))); b.closePath(); b.clip();
-    const NB = 7, bw = (x1 - x0) / NB;
-    for (let k = 0; k < NB; k++) {
-      const u = -1 + (2 * k + 1) / NB + spine * 0.5, th = Math.asin(Math.max(-1, Math.min(1, u)));
-      const Lt = 0.6 * Math.cos(th) + 0.5 * lit * Math.sin(th);
-      b.fillStyle = shade(col, -0.27 + 0.36 * Math.max(0, (Lt + 0.45) / 1.45));
-      b.fillRect(x0 + k * bw, y0, bw + 1 / AS, y1 - y0);
+  const Hm = P.heightM;
+  const add3 = (a, c) => ({ x: a.x + c.x, y: a.y + c.y, z: a.z + c.z });
+  const sub3 = (a, c) => ({ x: a.x - c.x, y: a.y - c.y, z: a.z - c.z });
+  const mul3 = (a, s) => ({ x: a.x * s, y: a.y * s, z: a.z * s });
+  const dot3 = (a, c) => a.x * c.x + a.y * c.y + a.z * c.z;
+  const cross3 = (a, c) => ({ x: a.y * c.z - a.z * c.y, y: a.z * c.x - a.x * c.z, z: a.x * c.y - a.y * c.x });
+  const depthKey = wpt => { const r = proj(wpt.x, wpt.y, wpt.z); return r.d != null ? r.d : -r.s; };
+  const nearer = (wpt, than, slack = 0) => depthKey(wpt) < depthKey(than) + slack;
+  const pxRadius = (wpt, rad) => {
+    const c = proj(wpt.x, wpt.y, wpt.z);
+    let w = 1.4 / AS;
+    for (const d of [[rad, 0, 0], [0, rad, 0], [0, 0, rad]]) {
+      const q = proj(wpt.x + d[0], wpt.y + d[1], wpt.z + d[2]);
+      w = Math.max(w, Math.hypot(q.x - c.x, q.y - c.y));
     }
-    b.restore();
+    return w;
   };
-  // how far the shoulders are turned: −1…1 (0 = square to the camera), from how much nearer the net one shoulder is
-  const LS = W.leftShoulder, RS = W.rightShoulder;
-  const twist = LS && RS ? Math.max(-1, Math.min(1, ((RS.y - LS.y) * sideSign(i)) / (Math.hypot(RS.x - LS.x, RS.y - LS.y) || 1))) : 0;
-  // legs and shoes
+  const fillPoly = (pts, col) => {
+    if (!pts.every(Boolean)) return;
+    b.fillStyle = col; b.beginPath();
+    pts.forEach((v, k) => (k ? b.lineTo(v.x, v.y) : b.moveTo(v.x, v.y)));
+    b.closePath(); b.fill();
+  };
+  const capsule = (Aw, Cw, col, r0, r1) => {
+    if (!Aw || !Cw) return;
+    const A = proj(Aw.x, Aw.y, Aw.z), C = proj(Cw.x, Cw.y, Cw.z);
+    const dx = C.x - A.x, dy = C.y - A.y, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L;
+    const wA = pxRadius(Aw, r0), wC = pxRadius(Cw, r1);
+    fillPoly([
+      { x: A.x + nx * wA, y: A.y + ny * wA }, { x: C.x + nx * wC, y: C.y + ny * wC },
+      { x: C.x - nx * wC, y: C.y - ny * wC }, { x: A.x - nx * wA, y: A.y - ny * wA },
+    ], shade(col, -0.18));
+    const o = lit * 0.28;
+    fillPoly([
+      { x: A.x + nx * wA * o, y: A.y + ny * wA * o }, { x: C.x + nx * wC * o, y: C.y + ny * wC * o },
+      { x: C.x - nx * wC * 0.35, y: C.y - ny * wC * 0.35 }, { x: A.x - nx * wA * 0.35, y: A.y - ny * wA * 0.35 },
+    ], col);
+    b.fillStyle = shade(col, -0.08); b.beginPath(); b.arc(A.x, A.y, wA, 0, Math.PI * 2); b.fill();
+    b.beginPath(); b.arc(C.x, C.y, wC, 0, Math.PI * 2); b.fill();
+  };
+  const LS = W.leftShoulder, RS = W.rightShoulder, LH = W.leftHip, RH = W.rightHip;
+  const midW = (a, c) => a && c ? { x: (a.x + c.x) / 2, y: (a.y + c.y) / 2, z: (a.z + c.z) / 2 } : null;
+  const sMid = midW(LS, RS), hMid = midW(LH, RH);
+  let ax = 1, ay = 0, fx = 0, fy = 1;
+  if (sMid && LS && RS) {
+    ax = RS.x - LS.x; ay = RS.y - LS.y;
+    const al = Math.hypot(ax, ay) || 1; ax /= al; ay /= al;
+    fx = -ay; fy = ax;
+    const nose = W.nose || { x: sMid.x, y: sMid.y + 0.05 * Hm };
+    if ((nose.x - sMid.x) * fx + (nose.y - sMid.y) * fy < 0) { fx = -fx; fy = -fy; }
+    if (Math.hypot(nose.x - sMid.x, nose.y - sMid.y) < 0.02 * Hm) { fx = 0; fy = -sideSign(i); }
+  }
+  const light = V3.norm({ x: lit < 0 ? -0.7 : 0.7, y: -0.2, z: 0.62 });
+  const ringAt = (u, n = 8) => {
+    const keys = [[0, 0.24, 0.15], [0.40, 0.145, 0.090], [0.72, 0.21, 0.17], [1, 0.28, 0.12]];
+    let a = keys[0], c = keys[keys.length - 1];
+    for (let k = 0; k < keys.length - 1; k++) if (u >= keys[k][0] && u <= keys[k + 1][0]) { a = keys[k]; c = keys[k + 1]; break; }
+    const t = (u - a[0]) / ((c[0] - a[0]) || 1);
+    const fw = (a[1] + (c[1] - a[1]) * t) * Hm, fd = (a[2] + (c[2] - a[2]) * t) * Hm;
+    const ctr = V3.lerp(hMid, sMid, u);
+    const pts = [];
+    for (let k = 0; k < n; k++) {
+      const ang = (k / n) * Math.PI * 2, side = Math.cos(ang) * fw / 2, fore = Math.sin(ang) * fd / 2;
+      pts.push({ x: ctr.x + ax * side + fx * fore, y: ctr.y + ay * side + fy * fore, z: ctr.z, fore });
+    }
+    return { pts, ctr };
+  };
+  const drawTube = (us, col) => {
+    if (!sMid || !hMid) return;
+    const rings = us.map(u => ringAt(u));
+    const quads = [];
+    for (let s = 0; s < rings.length - 1; s++) {
+      const A = rings[s].pts, C = rings[s + 1].pts, ctr = V3.lerp(rings[s].ctr, rings[s + 1].ctr, 0.5);
+      for (let k = 0; k < A.length; k++) {
+        const k2 = (k + 1) % A.length;
+        quads.push({ pts: [A[k], A[k2], C[k2], C[k]], ctr });
+      }
+    }
+    quads.sort((a, c) => (c.pts.reduce((s, p) => s + depthKey(p), 0)) - (a.pts.reduce((s, p) => s + depthKey(p), 0)));
+    for (const qd of quads) {
+      const e1 = sub3(qd.pts[1], qd.pts[0]), e2 = sub3(qd.pts[3], qd.pts[0]);
+      let n = cross3(e1, e2), mid = qd.pts.reduce((s, p) => add3(s, p), { x: 0, y: 0, z: 0 });
+      mid = mul3(mid, 1 / 4);
+      if (dot3(n, sub3(mid, qd.ctr)) < 0) n = mul3(n, -1);
+      n = V3.norm(n);
+      const nd = Math.max(0, (dot3(n, light) + 0.35) / 1.25);
+      fillPoly(qd.pts.map(p => proj(p.x, p.y, p.z)), shade(col, -0.30 + 0.46 * nd));
+    }
+    return rings;
+  };
+  const backOf = ring => ring.pts.reduce((m, p) => (p.fore < m.fore ? p : m), ring.pts[0]);
+  // legs: thigh and shin as volumes, sock, then a shoe that points into the court
   for (const s of ["left", "right"]) {
-    limb(s + "Hip", s + "Knee", skin, lw * 1.3); limb(s + "Knee", s + "Ankle", skin, lw * 1.0);
-    const Kn = at(s + "Knee"), A0 = at(s + "Ankle");
-    if (Kn && A0) limb({ x: A0.x + (Kn.x - A0.x) * 0.18, y: A0.y + (Kn.y - A0.y) * 0.18 }, A0, "#f1f1ee", lw * 1.05);   // sock
-    const A = at(s + "Ankle"); if (A) { b.fillStyle = shade(P.shoes || "#f2f2f2", -0.45); b.fillRect(Math.round(A.x - lw * 0.75), Math.round(A.y + lw * 0.35), Math.ceil(lw * 1.6), Math.max(1, Math.ceil(lw * 0.3))); b.fillStyle = P.shoes || "#f2f2f2"; b.fillRect(Math.round(A.x - lw * 0.7), Math.round(A.y - lw * 0.4), Math.ceil(lw * 1.5), Math.ceil(lw * 0.8)); b.fillStyle = shade(P.shoes || "#f2f2f2", 0.2); b.fillRect(Math.round(A.x - lw * 0.7 + (lit > 0 ? lw * 0.8 : 0)), Math.round(A.y - lw * 0.4), Math.ceil(lw * 0.7), 1 / AS); }
+    const Hp = W[s + "Hip"], Kn = W[s + "Knee"], An = W[s + "Ankle"];
+    if (Hp && Kn) capsule(Hp, Kn, skin, 0.072 * Hm, 0.050 * Hm);
+    if (Kn && An) capsule(Kn, An, skin, 0.048 * Hm, 0.036 * Hm);
+    if (Kn && An) {
+      const sockTop = V3.lerp(An, Kn, 0.22);
+      capsule(sockTop, An, P.socks || "#f1f1ee", 0.040 * Hm, 0.034 * Hm);
+    }
+    if (An) {
+      const toe = { x: An.x + fx * 0.13, y: An.y + fy * 0.13, z: Math.max(0.012, An.z - 0.01) };
+      const heel = { x: An.x - fx * 0.045, y: An.y - fy * 0.045, z: Math.max(0.012, An.z - 0.008) };
+      capsule(heel, toe, shade(P.shoes || "#f2f2f2", -0.42), 0.030 * Hm, 0.022 * Hm);
+      capsule({ x: heel.x, y: heel.y, z: heel.z + 0.018 }, { x: toe.x, y: toe.y, z: toe.z + 0.012 }, P.shoes || "#f2f2f2", 0.034 * Hm, 0.026 * Hm);
+    }
   }
-  /* SHORTS on a real PELVIS (Ryan, Nov 12: "the thighs are connected to the outside of the hip"). The hip joints sit
-     INSIDE the pelvis (anatomize() puts them ~0.095 × height apart); the pelvis around them is about twice as wide.
-     So: one garment, waistband across the full pelvis, outer hips and glutes filling the top, the crotch just below
-     the hip joints, and a leg opening round each thigh, the thighs coming out underneath and converging to the knees. */
-  const lh = at("leftHip"), rh = at("rightHip"), lk = mid("leftHip", "leftKnee", 0.42), rk = mid("rightHip", "rightKnee", 0.42), pel = W._pelvis;
-  if (lh && rh && lk && rk && pel) {
-    const H = P.heightM, half = pel.w / 2;
-    const side = (k, dz) => proj(pel.x + pel.dx * half * k, pel.y + pel.dy * half * k, pel.z + dz * H);   // k: −1 left edge … +1 right edge
-    const wl = side(-0.96, 0.045), wr = side(0.96, 0.045);                  // waistband, a little above the hip joints
-    const hl = side(-1, -0.01), hr = side(1, -0.01);                         // the widest point: outer hips (greater trochanters)
-    const crotch = proj(pel.x, pel.y, pel.z - 0.05 * H);
-    const thighR = lw * 0.95;                                                // half the thigh's width where the shorts end
-    const open = (Kp, Hp) => { const ux = Kp.x - Hp.x, uy = Kp.y - Hp.y, L = Math.hypot(ux, uy) || 1, nx = -uy / L * thighR, ny = ux / L * thighR;
-      return [{ x: Kp.x + nx, y: Kp.y + ny }, { x: Kp.x - nx, y: Kp.y - ny }]; };   // the two edges of a leg opening
-    const [l1, l2] = open(lk, lh), [r1, r2] = open(rk, rh);
-    const lOut = Math.abs(l1.x - crotch.x) > Math.abs(l2.x - crotch.x) ? l1 : l2, lIn = lOut === l1 ? l2 : l1;
-    const rOut = Math.abs(r1.x - crotch.x) > Math.abs(r2.x - crotch.x) ? r1 : r2, rIn = rOut === r1 ? r2 : r1;
-    for (const [H0, K0] of [[lh, lk], [rh, rk]]) limb(H0, K0, P.shorts, thighR * 2.1);    // each leg of the shorts, round
-    cylFill([wl, wr, hr, rOut, rIn, crotch, lIn, lOut, hl], P.shorts, -twist);          // one garment over the pelvis
-    seg(wl, wr, shade(P.shorts, -0.3), Math.max(1 / AS, lw * 0.3));                     // waistband
-    seg(crotch, { x: crotch.x, y: crotch.y - lw * 0.9 }, shade(P.shorts, -0.32), Math.max(1 / AS, lw * 0.14));   // centre seam
+  // hips and waist: shorts are wider at the pelvis and pinch at the waist
+  if (sMid && hMid) {
+    drawTube([0, 0.2, 0.42], P.shorts || "#1f2024");
+    const shirtRings = drawTube([0.34, 0.55, 0.78, 1], P.shirt);
+    const chest = ringAt(0.72), hip = ringAt(0.08);
+    const front = chest.pts.reduce((m, p) => (p.fore > m.fore ? p : m), chest.pts[0]);
+    if (shirtRings && nearer(backOf(chest), front, 0.05 * Hm)) {
+      const seam = [hip, ringAt(0.38), chest, ringAt(1)].map(backOf);
+      b.strokeStyle = shade(P.shirt, -0.38); b.lineWidth = Math.max(1.4 / AS, pxRadius(chest.ctr, 0.012 * Hm) * 2); b.lineCap = "round";
+      b.beginPath();
+      seam.forEach((p, k) => { const s = proj(p.x, p.y, p.z); k ? b.lineTo(s.x, s.y) : b.moveTo(s.x, s.y); });
+      b.stroke();
+    }
+    for (const S0 of [LS, RS]) if (S0) {
+      const c = proj(S0.x, S0.y, S0.z), rad = pxRadius(S0, 0.055 * Hm);
+      b.fillStyle = shade(P.shirt, -0.06); b.beginPath(); b.arc(c.x, c.y, rad, 0, Math.PI * 2); b.fill();
+    }
   }
-  // TORSO: shoulders rounded off, ribs narrowing to the waist, shaded like a cylinder
-  const ls = at("leftShoulder"), rs = at("rightShoulder");
-  if (ls && rs && lh && rh) {
-    const ext = (A, C, k) => ({ x: A.x + (A.x - C.x) * k, y: A.y + (A.y - C.y) * k });
-    const lso = ext(ls, rs, 0.16), rso = ext(rs, ls, 0.16), lwst = ext(lh, rh, 0.1), rwst = ext(rh, lh, 0.1);
-    const chest = (A, C) => ({ x: A.x + (C.x - A.x) * 0.38, y: A.y + (C.y - A.y) * 0.38 });
-    const outline = [{ x: lso.x, y: lso.y + lw * 0.2 }, { x: (lso.x + rso.x) / 2, y: (lso.y + rso.y) / 2 - lw * 0.35 }, { x: rso.x, y: rso.y + lw * 0.2 },
-                     ext(chest(rs, rh), chest(ls, lh), 0.08), rwst, lwst, ext(chest(ls, lh), chest(rs, rh), 0.08)];
-    cylFill(outline, P.shirt, -twist);
-    // the spine seam (from behind) or the placket (from the front) sits at the back's / chest's middle, which slides as he turns
-    const u = 0.5 - twist * 0.42 * (P.side === "near" ? 1 : -1), top = { x: lso.x + (rso.x - lso.x) * u, y: lso.y + (rso.y - lso.y) * u }, bot = { x: lwst.x + (rwst.x - lwst.x) * u, y: lwst.y + (rwst.y - lwst.y) * u };
-    seg(top, bot, shade(P.shirt, -0.3), Math.max(1 / AS, lw * 0.18));
-    seg({ x: top.x - lw * 0.6, y: top.y + lw * 0.1 }, { x: top.x + lw * 0.6, y: top.y + lw * 0.1 }, shade(P.shirt, -0.35), Math.max(1 / AS, lw * 0.3));   // collar
-    for (const S0 of [ls, rs]) { b.fillStyle = shade(P.shirt, 0.04); b.beginPath(); b.arc(S0.x, S0.y + lw * 0.15, lw * 0.75, 0, Math.PI * 2); b.fill(); }   // round shoulders
+  // arms, farther one first, so the near arm overlaps the chest. Sleeve on the hitting forearm.
+  const arms = ["left", "right"].filter(s => W[s + "Shoulder"] && W[s + "Elbow"]);
+  arms.sort((a, c) => depthKey(W[c + "Elbow"]) - depthKey(W[a + "Elbow"]));
+  for (const s of arms) {
+    const Sh = W[s + "Shoulder"], El = W[s + "Elbow"], Wr = W[s + "Wrist"];
+    const sleeveEnd = V3.lerp(Sh, El, 0.46);
+    capsule(Sh, El, skin, 0.046 * Hm, 0.038 * Hm);
+    capsule(Sh, sleeveEnd, P.shirt, 0.052 * Hm, 0.044 * Hm);
+    if (Wr) capsule(El, Wr, s === "right" && P.sleeve ? P.sleeve : skin, 0.036 * Hm, 0.028 * Hm);
+    if (Wr) {
+      const band = V3.lerp(Wr, El, 0.14);
+      capsule(band, V3.lerp(Wr, El, 0.04), "#f3f3f0", 0.022 * Hm, 0.020 * Hm);
+    }
+    if (W[s + "Hand"] && Wr) capsule(Wr, W[s + "Hand"], skin, 0.026 * Hm, 0.020 * Hm);
   }
-  // arms, with short sleeves; the racket forearm can wear a sleeve
-  for (const s of ["left", "right"]) {
-    limb(s + "Shoulder", s + "Elbow", skin, lw * 0.95); limb(s + "Elbow", s + "Wrist", s === "right" && P.sleeve ? P.sleeve : skin, lw * 0.85);
-    limb(s + "Shoulder", mid(s + "Shoulder", s + "Elbow", 0.42), P.shirt, lw * 1.35);
-    const wr = mid(s + "Wrist", s + "Elbow", 0.18); if (wr) seg(wr, mid(s + "Wrist", s + "Elbow", 0.05), P.ui || "#f2f2f2", lw * 1.1);   // wristband
-  }
-  for (const s of ["left", "right"]) if (W[s + "Hand"]) limb(s + "Wrist", s + "Hand", skin, lw * 1.1);   // the bouncing hand, flexing at the wrist
   // racket: a real 3D racket continuing the hitting forearm (right for a right-hander, left for Shelton, Nadal, Tien)
   const hitArm = (p.motion && p.motion.m && p.motion.m.hand === "L") ? "left" : "right";
   if (W[hitArm + "Elbow"] && W[hitArm + "Wrist"]) {
@@ -770,43 +827,88 @@ function drawCapturedFigure(i, p, W) {
     const n = V3.norm({ x: 0, y: u.z, z: -u.y });          // face square to the forearm, toward the net
     drawRacket(r, u, n, RACKET_LOOK[P.id] || RACKET_LOOK.sinner);
   }
-  // head (seen from behind: cap or hair with strands) between the neck and the nose
-  const N = at("neck"), H = at("nose");
-  if (N && H) {
-    const r = Math.max(2, g.s * 0.12), hx = H.x, hy = H.y - g.s * 0.04, [hr, hrD, hrL] = HAIR[P.id] || [P.hair, P.hair, P.hair];
-    if (P.side !== "near") {                                                                 // FAR server, seen from the front: a face
-      const px = 1 / AS, skinD = shade(skin, -0.18);
-      b.fillStyle = skin; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();
-      b.save(); b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.clip();                    // round head: the side away from the light in shade
-      b.fillStyle = shade(skin, -0.2); b.fillRect(lit > 0 ? hx - r : hx + r * 0.35, hy - r, r * 0.65, r * 2); b.restore();
-      b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.15, r * 1.0, Math.PI, Math.PI * 2); b.fill();   // hair / cap crown
-      if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(q(hx - r * 1.2), q(hy - r * 0.2), q(r * 2.4), Math.max(px, q(r * 0.18))); }   // brim
-      else { b.fillStyle = hr; b.fillRect(q(hx - r), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); b.fillRect(q(hx + r * 0.7), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); }
-      const lk = W._look ? W._look.x * r * 0.38 : 0, lu = W._look ? W._look.up * r * 0.3 : 0;   // the face turns to where he looks
-      b.fillStyle = "#1b1b1f"; b.fillRect(q(hx - r * 0.45 + lk), q(hy + r * 0.1 - lu), px * 2, px * 2); b.fillRect(q(hx + r * 0.25 + lk), q(hy + r * 0.1 - lu), px * 2, px * 2);   // eyes
-      b.fillStyle = skinD; b.fillRect(q(hx - px * 0.5 + lk * 1.3), q(hy + r * 0.3 - lu), px, q(r * 0.25));                                  // nose
-      b.fillStyle = "#a4574a"; b.fillRect(q(hx - r * 0.25 + lk), q(hy + r * 0.62 - lu), q(r * 0.5), px);                             // mouth
-      sigHead(P, false, hx, hy, r, hr, hrD, hrL);
-      return;
+  // head: a skull with depth. The face is on the front hemisphere, so a slant or side camera sees it and a behind camera sees hair.
+  const neck = W.neck || (sMid && { x: sMid.x, y: sMid.y, z: sMid.z + 0.04 * Hm });
+  const noseW = W.nose;
+  if (neck && noseW && P.side === "near") {
+    const [hr, hrD, hrL] = HAIR[P.id] || [P.hair, P.hair, P.hair];
+    const R = 0.105 * Hm;
+    const center = { x: neck.x + fx * 0.02 * Hm, y: neck.y + fy * 0.02 * Hm, z: neck.z + 0.100 * Hm };
+    capsule(sMid || neck, { x: center.x - fx * 0.01 * Hm, y: center.y - fy * 0.01 * Hm, z: center.z - R * 0.72 }, skin, 0.050 * Hm, 0.040 * Hm);
+    const onSkull = (faceAmt, sideAmt, upAmt) => {
+      const x = fx * faceAmt + ax * sideAmt, y = fy * faceAmt + ay * sideAmt, z = upAmt;
+      const l = Math.hypot(x, y, z) || 1;
+      return { x: center.x + x / l * R, y: center.y + y / l * R, z: center.z + z / l * R };
+    };
+    const longBand = P.look && P.look.style === "long-band";
+    if (longBand) {
+      const nape = onSkull(-0.9, 0, -0.2), tail = { x: nape.x - fx * R * 0.35, y: nape.y - fy * R * 0.35, z: neck.z };
+      capsule(nape, tail, hr, R * 0.28, R * 0.16);
     }
-    b.fillStyle = hrD; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();             // back of the head: hair, no face
-    b.fillStyle = skin; b.fillRect(q(hx - r * 1.08), q(hy), 1 / AS, q(r * 0.35)); b.fillRect(q(hx + r * 1.08) - 1 / AS, q(hy), 1 / AS, q(r * 0.35));   // ears
-    b.fillStyle = hr; b.beginPath(); b.arc(hx, hy + r * 0.15, r * 0.98, Math.PI * 0.05, Math.PI * 0.95); b.fill();   // hair below the cap
-    for (let k = -2; k <= 2; k++) { b.fillStyle = k % 2 ? hrL : hrD; b.fillRect(hx + k * r * 0.35 - 0.5 / AS, hy + r * 0.55, 1 / AS, r * 0.3); }  // curls
-    b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.1, r * 0.98, Math.PI, Math.PI * 2); b.fill();     // cap crown
-    b.save(); b.beginPath(); b.arc(hx, hy, r * 1.02, 0, Math.PI * 2); b.clip();               // round head: shade on the side away from the light
-    b.fillStyle = "rgba(10,14,30,0.22)"; b.fillRect(lit > 0 ? hx - r * 1.05 : hx + r * 0.4, hy - r * 1.1, r * 0.65, r * 2.2); b.restore();
-    if (P.cap) { const sx = hx - (L0 => (L0 && Math.abs(L0.x) > 0.15 ? L0.x * r * 0.45 : 0))(W._look); b.fillStyle = shade(P.cap, -0.25); b.fillRect(sx - 0.5 / AS, hy - r * 1.05, 1 / AS, r * 0.95); }  // seam: turns with the head
-    sigHead(P, true, hx, hy, r, hr, hrD, hrL);
-    const L = W._look;
-    if (L && Math.abs(L.x) > 0.15) {                     // seen from behind, his head turned: cheek, nose and the cap's brim show on that side
-      const sd = Math.sign(L.x), a = Math.min(1, Math.abs(L.x)), px = 1 / AS;
-      b.fillStyle = skin; b.beginPath(); b.ellipse(hx + sd * r * 0.72, hy + r * 0.28, r * 0.34 * a + px, r * 0.5, 0, 0, Math.PI * 2); b.fill();   // cheek
-      b.fillRect(q(hx + sd * r * (1.02 + 0.12 * a)) - (sd < 0 ? px : 0), q(hy + r * 0.25), px * 2, px * 2);                             // nose tip past the outline
-      b.fillStyle = shade(skin, -0.2); b.fillRect(q(hx + sd * r * 0.62), q(hy + r * 0.62), q(r * 0.3), px);                                 // jaw shadow
-      const brim = P.cap ? shade(P.cap, -0.2) : (P.look && P.look.band) || hrD;
-      if (P.cap) b.fillStyle = brim, b.fillRect(q(sd > 0 ? hx + r * 0.5 : hx - r * (0.5 + 1.0 * a)), q(hy - r * 0.12), q(r * (0.4 + a)), Math.max(px, q(r * 0.22)));   // brim
+    const c = proj(center.x, center.y, center.z), rad = pxRadius(center, R);
+    b.fillStyle = hrD; b.beginPath(); b.arc(c.x, c.y, rad, 0, Math.PI * 2); b.fill();
+    b.fillStyle = hr; b.beginPath(); b.arc(c.x, c.y - rad * 0.08, rad * 0.92, Math.PI, Math.PI * 2); b.fill();
+    const facePt = onSkull(0.9, 0.22, 0.02), fc = proj(facePt.x, facePt.y, facePt.z);
+    const faceOff = Math.hypot(fc.x - c.x, fc.y - c.y);
+    const seeFace = nearer(facePt, center, R * 0.02) || faceOff > rad * 0.22;
+    if (seeFace) {
+      b.save(); b.beginPath(); b.arc(c.x, c.y, rad * 0.98, 0, Math.PI * 2); b.clip();
+      b.fillStyle = skin; b.beginPath(); b.arc(fc.x, fc.y, rad * 0.74, 0, Math.PI * 2); b.fill();
+      if (P.look && P.look.beard) {
+        b.fillStyle = hrD;
+        for (const jaw of [onSkull(0.62, 0.38, -0.5), onSkull(0.78, 0.12, -0.58), onSkull(0.5, 0, -0.82)]) {
+          if (!nearer(jaw, center, R * 0.04) && Math.hypot(proj(jaw.x, jaw.y, jaw.z).x - c.x, proj(jaw.x, jaw.y, jaw.z).y - c.y) < rad * 0.2) continue;
+          const j = proj(jaw.x, jaw.y, jaw.z);
+          b.beginPath(); b.arc(j.x, j.y, rad * 0.32, 0, Math.PI * 2); b.fill();
+        }
+      }
+      const dot = (wpt, col, sz) => {
+        const d = proj(wpt.x, wpt.y, wpt.z);
+        if (!nearer(wpt, center, R * 0.04) && Math.hypot(d.x - c.x, d.y - c.y) < rad * 0.18) return;
+        b.fillStyle = col; b.fillRect(q(d.x - sz / 2), q(d.y - sz / 2), Math.max(1.4 / AS, sz), Math.max(1.4 / AS, sz));
+      };
+      dot(onSkull(0.78, 0.36, 0.16), "#1b1b1f", Math.max(2 / AS, rad * 0.2));
+      dot(onSkull(0.78, -0.16, 0.16), "#1b1b1f", Math.max(2 / AS, rad * 0.2));
+      dot(onSkull(0.8, 0.06, -0.4), "#a4574a", Math.max(1.6 / AS, rad * 0.18));
+      b.restore();
+      const nose = onSkull(1.15, 0.12, -0.02), np = proj(nose.x, nose.y, nose.z);
+      b.fillStyle = shade(skin, -0.14); b.beginPath(); b.arc(np.x, np.y, Math.max(1.2 / AS, rad * 0.2), 0, Math.PI * 2); b.fill();
     }
+    for (const sd of [1, -1]) {
+      const ear = onSkull(0.02, sd, -0.08);
+      if (!nearer(ear, center, -R * 0.01)) continue;
+      const e = proj(ear.x, ear.y, ear.z);
+      b.fillStyle = shade(skin, -0.08); b.beginPath(); b.ellipse(e.x, e.y, rad * 0.14, rad * 0.24, 0, 0, Math.PI * 2); b.fill();
+    }
+    if (longBand) {
+      b.save(); b.beginPath(); b.arc(c.x, c.y, rad * 1.02, 0, Math.PI * 2); b.clip();
+      b.strokeStyle = P.look.band || "#f6f6f2"; b.lineWidth = Math.max(1.4 / AS, rad * 0.18); b.lineCap = "round";
+      b.beginPath();
+      let pen = false;
+      for (let k = 0; k <= 20; k++) {
+        const ang = (k / 20) * Math.PI * 2;
+        const wpt = { x: center.x + (ax * Math.cos(ang) + fx * Math.sin(ang) * 0.92) * R * 0.9, y: center.y + (ay * Math.cos(ang) + fy * Math.sin(ang) * 0.92) * R * 0.9, z: center.z + R * 0.22 };
+        if (!nearer(wpt, center, -R * 0.015)) { pen = false; continue; }
+        const d = proj(wpt.x, wpt.y, wpt.z);
+        if (!pen) { b.moveTo(d.x, d.y); pen = true; } else b.lineTo(d.x, d.y);
+      }
+      b.stroke(); b.restore();
+    } else sigHead(P, true, c.x, c.y, rad, hr, hrD, hrL);
+  } else if (neck && noseW) {
+    const r = Math.max(2, g.s * 0.12), hx = proj(noseW.x, noseW.y, noseW.z).x, hy = proj(noseW.x, noseW.y, noseW.z).y - g.s * 0.04;
+    const [hr, hrD, hrL] = HAIR[P.id] || [P.hair, P.hair, P.hair];
+    const px = 1 / AS, skinD = shade(skin, -0.18);
+    b.fillStyle = skin; b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.fill();
+    b.save(); b.beginPath(); b.arc(hx, hy, r, 0, Math.PI * 2); b.clip();
+    b.fillStyle = shade(skin, -0.2); b.fillRect(lit > 0 ? hx - r : hx + r * 0.35, hy - r, r * 0.65, r * 2); b.restore();
+    b.fillStyle = P.cap || hr; b.beginPath(); b.arc(hx, hy - r * 0.15, r * 1.0, Math.PI, Math.PI * 2); b.fill();
+    if (P.cap) { b.fillStyle = shade(P.cap, -0.25); b.fillRect(q(hx - r * 1.2), q(hy - r * 0.2), q(r * 2.4), Math.max(px, q(r * 0.18))); }
+    else { b.fillStyle = hr; b.fillRect(q(hx - r), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); b.fillRect(q(hx + r * 0.7), q(hy - r * 0.2), q(r * 0.3), q(r * 0.6)); }
+    const lk = W._look ? W._look.x * r * 0.38 : 0, lu = W._look ? W._look.up * r * 0.3 : 0;
+    b.fillStyle = "#1b1b1f"; b.fillRect(q(hx - r * 0.45 + lk), q(hy + r * 0.1 - lu), px * 2, px * 2); b.fillRect(q(hx + r * 0.25 + lk), q(hy + r * 0.1 - lu), px * 2, px * 2);
+    b.fillStyle = skinD; b.fillRect(q(hx - px * 0.5 + lk * 1.3), q(hy + r * 0.3 - lu), px, q(r * 0.25));
+    b.fillStyle = "#a4574a"; b.fillRect(q(hx - r * 0.25 + lk), q(hy + r * 0.62 - lu), q(r * 0.5), px);
+    sigHead(P, false, hx, hy, r, hr, hrD, hrL);
   }
 }
 
