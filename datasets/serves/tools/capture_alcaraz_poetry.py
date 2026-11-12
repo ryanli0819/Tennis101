@@ -1127,51 +1127,85 @@ def coherent_body(frames):
     def blend(cur, target, w):
         return (1.0 - w) * cur + w * target
 
+    # One moving pose. Offsets are from the hip centre in x and z. y is absolute.
+    # Left stays on the player's left and ahead. Right stays on his right.
+    # The back leg only goes behind him at contact (the kick), so the thighs
+    # cannot swap places on the way up.
+    # (src time, hip_y, left offsets (x,y,z) for hip/knee-hint/ankle, right the same, shoulder offsets)
+    def leg_keys():
+        # hip, knee hint, ankle — each (x, y, z). y absolute, x/z relative to mid.
+        return [
+            (3.45, dict(
+                l_hip=(-0.07, 0.42, 0.04), l_knee=(-0.05, 0.22, 0.10), l_ank=(-0.05, 0.02, 0.14),
+                r_hip=(0.07, 0.41, -0.02), r_knee=(0.11, 0.20, 0.02), r_ank=(0.10, 0.04, -0.06),
+                l_sh=(-0.09, 0.34, 0.08), r_sh=(0.10, 0.32, 0.02),
+            )),
+            (4.30, dict(  # trophy platform
+                l_hip=(-0.075, 0.31, 0.05), l_knee=(-0.05, 0.16, 0.16), l_ank=(-0.05, 0.02, 0.20),
+                r_hip=(0.075, 0.30, -0.02), r_knee=(0.12, 0.15, 0.02), r_ank=(0.11, 0.05, -0.08),
+                l_sh=(-0.09, 0.34, 0.10), r_sh=(0.10, 0.31, 0.03),
+            )),
+            (4.72, dict(  # still loaded, starting up. knees stay on their own sides
+                l_hip=(-0.07, 0.38, 0.04), l_knee=(-0.05, 0.22, 0.12), l_ank=(-0.05, 0.06, 0.14),
+                r_hip=(0.07, 0.37, -0.02), r_knee=(0.12, 0.20, 0.00), r_ank=(0.11, 0.08, -0.08),
+                l_sh=(-0.10, 0.36, 0.12), r_sh=(0.10, 0.34, 0.05),
+            )),
+            (5.08, dict(  # contact: extended, up, back leg kicked behind
+                l_hip=(-0.07, 0.86, 0.03), l_knee=(-0.05, 0.62, 0.06), l_ank=(-0.04, 0.38, 0.04),
+                r_hip=(0.07, 0.86, -0.02), r_knee=(0.12, 0.70, -0.12), r_ank=(0.14, 0.55, -0.20),
+                l_sh=(-0.10, 0.38, 0.16), r_sh=(0.10, 0.40, 0.12),
+            )),
+            (5.45, dict(  # coming down, kick still trailing
+                l_hip=(-0.06, 0.58, 0.02), l_knee=(-0.04, 0.32, 0.04), l_ank=(-0.04, 0.08, 0.02),
+                r_hip=(0.07, 0.58, -0.02), r_knee=(0.12, 0.48, -0.08), r_ank=(0.13, 0.32, -0.14),
+                l_sh=(-0.10, 0.34, 0.10), r_sh=(0.10, 0.34, 0.06),
+            )),
+        ]
+
+    def at_keys(keys, t):
+        if t <= keys[0][0]:
+            return keys[0][1]
+        if t >= keys[-1][0]:
+            return keys[-1][1]
+        for (t0, a), (t1, b) in zip(keys, keys[1:]):
+            if t0 <= t <= t1:
+                u = 0 if t1 == t0 else (t - t0) / (t1 - t0)
+                u = u * u * (3 - 2 * u)
+                return {k: (1 - u) * np.array(a[k], float) + u * np.array(b[k], float) for k in a}
+        return {k: np.array(v, float) for k, v in keys[-1][1].items()}
+
+    body_keys = leg_keys()
     for i, f in enumerate(frames):
         t = f["src_t"]
-        crouch = _smoothstep(3.25, 3.70, t) * (1.0 - _smoothstep(4.55, 4.95, t))
-        air = _smoothstep(4.70, 5.00, t) * (1.0 - _smoothstep(5.40, 5.75, t))
-        w = max(crouch, air)
+        w = _smoothstep(3.20, 3.55, t) * (1.0 - _smoothstep(5.50, 5.90, t))
         if w < 0.02:
             continue
         j = f["c"]
         mid = 0.5 * (j["leftHip"] + j["rightHip"])
-        # Which pose. The crouch is the platform. The air pose is the extension.
-        use_air = air >= crouch
-        if not use_air:
-            # Platform. x is player's right. Front foot is his left, ahead.
-            hip_y = 0.31
-            l_hip = np.array([mid[0] - 0.075, hip_y, mid[2] + 0.05])
-            r_hip = np.array([mid[0] + 0.075, hip_y - 0.01, mid[2] - 0.02])
-            l_ank = np.array([mid[0] - 0.05, 0.02, mid[2] + 0.20])
-            r_ank = np.array([mid[0] + 0.11, 0.05, mid[2] - 0.08])
-            l_hint = np.array([mid[0] - 0.04, 0.16, mid[2] + 0.16])
-            r_hint = np.array([mid[0] + 0.12, 0.15, mid[2] + 0.02])
-            # Front shoulder a little higher and into the court. Back wide enough
-            # that he is a person from behind, not a line.
-            l_sh = np.array([mid[0] - 0.09, hip_y + 0.34, mid[2] + 0.12])
-            r_sh = np.array([mid[0] + 0.10, hip_y + 0.31, mid[2] + 0.03])
-            l_heel = np.array([l_ank[0] - 0.01, 0.00, l_ank[2] - 0.02])
-            l_toe = np.array([l_ank[0] + 0.00, 0.00, l_ank[2] + 0.04])
-            r_heel = np.array([r_ank[0], 0.07, r_ank[2] - 0.02])  # back heel up
-            r_toe = np.array([r_ank[0] - 0.01, 0.00, r_ank[2] + 0.03])
-        else:
-            hip_y = 0.54
-            l_hip = np.array([mid[0] - 0.07, hip_y, mid[2] + 0.02])
-            r_hip = np.array([mid[0] + 0.07, hip_y, mid[2] - 0.02])
-            l_ank = np.array([mid[0] - 0.04, hip_y - 0.44, mid[2] + 0.02])
-            r_ank = np.array([mid[0] + 0.06, hip_y - 0.42, mid[2] - 0.04])
-            l_hint = np.array([mid[0] - 0.03, hip_y - 0.22, mid[2] + 0.06])
-            r_hint = np.array([mid[0] + 0.07, hip_y - 0.20, mid[2] + 0.02])
-            # Chest into the court, shoulders wide across the back.
-            l_sh = np.array([mid[0] - 0.10, hip_y + 0.34, mid[2] + 0.16])
-            r_sh = np.array([mid[0] + 0.10, hip_y + 0.36, mid[2] + 0.10])
-            l_heel = l_ank + np.array([-0.01, -0.02, -0.02])
-            l_toe = l_ank + np.array([0.00, -0.03, 0.04])
-            r_heel = r_ank + np.array([0.01, -0.02, -0.02])
-            r_toe = r_ank + np.array([0.00, -0.03, 0.03])
+        k = at_keys(body_keys, t)
+        def P(name):
+            x, y, z = k[name]
+            return np.array([mid[0] + x, y, mid[2] + z])
+        l_hip, r_hip = P("l_hip"), P("r_hip")
+        l_ank, r_ank = P("l_ank"), P("r_ank")
+        l_hint, r_hint = P("l_knee"), P("r_knee")
+        # Keep a gap so the knees cannot meet in the middle and cross.
+        if l_hint[0] > r_hint[0] - 0.08:
+            c = 0.5 * (l_hint[0] + r_hint[0])
+            l_hint = l_hint.copy(); r_hint = r_hint.copy()
+            l_hint[0] = c - 0.06
+            r_hint[0] = c + 0.06
         l_knee, _ = _ik_leg(l_hip, l_ank, l_hint)
         r_knee, _ = _ik_leg(r_hip, r_ank, r_hint)
+        l_sh = P("l_sh"); r_sh = P("r_sh")
+        # Shoulder y in the keys is an offset above the hip for the contact
+        # pose (the hip is already high). For the crouch it is also an offset.
+        l_sh = np.array([l_sh[0], l_hip[1] + k["l_sh"][1], l_sh[2]])
+        r_sh = np.array([r_sh[0], r_hip[1] + k["r_sh"][1], r_sh[2]])
+        l_heel = l_ank + np.array([-0.01, -0.02, -0.03])
+        l_toe = l_ank + np.array([0.0, -0.02, 0.04])
+        r_heel = r_ank + np.array([0.01, 0.02 if t < 4.9 else -0.02, -0.03])
+        r_toe = r_ank + np.array([0.0, -0.02, 0.03])
         pairs = {
             "leftHip": l_hip, "rightHip": r_hip,
             "leftKnee": l_knee, "rightKnee": r_knee,
@@ -1188,61 +1222,67 @@ def coherent_body(frames):
         j["leftEar"] = j["nose"] + saved[i]["le"]
         j["rightEar"] = j["nose"] + saved[i]["re"]
 
-    # Racket arm and toss arm. The toss arm keeps the shape it had. The
-    # racket arm is its own track: at the trophy it points up and slightly
-    # back, then it blends into the drive that already goes up and into
-    # the court. Legs never write these joints.
-    trophy_arm = {
-        "Elbow": np.array([0.15, 0.10, -0.02]),
-        "Wrist": np.array([0.04, 0.26, -0.04]),
-        "Index": np.array([0.03, 0.31, -0.05]),
-    }
+    # Racket track, keyed on its own. Trophy (up), drop (down the back),
+    # contact (up and into the court). The legs never write these joints.
+    arm_keys = [
+        (3.50, np.array([0.12, -0.05, -0.02]), np.array([0.08, 0.02, -0.04])),
+        (4.30, np.array([0.14, 0.12, -0.04]), np.array([0.05, 0.28, -0.07])),   # trophy, racket up
+        (4.72, np.array([0.10, 0.00, -0.12]), np.array([0.02, -0.08, -0.18])),  # drop down the back
+        (5.08, np.array([0.04, 0.18, 0.10]), np.array([0.02, 0.36, 0.20])),     # up and into the court
+        (5.50, np.array([-0.02, 0.06, 0.12]), np.array([-0.12, -0.04, 0.14])),  # across and down
+    ]
+    left_keys = [
+        (3.50, np.array([-0.04, 0.20, 0.08])),
+        (4.30, np.array([-0.02, 0.34, 0.06])),  # toss still up
+        (4.72, np.array([-0.22, 0.10, 0.04])),  # out to his left
+        (5.08, np.array([-0.30, 0.00, 0.02])),  # balance arm wide
+        (5.50, np.array([-0.16, -0.06, 0.06])),
+    ]
+
+    def arm_at(keys, t):
+        if t <= keys[0][0]:
+            return keys[0][1:]
+        if t >= keys[-1][0]:
+            return keys[-1][1:]
+        for (t0, *a), (t1, *b) in zip(keys, keys[1:]):
+            if t0 <= t <= t1:
+                u = 0 if t1 == t0 else (t - t0) / (t1 - t0)
+                u = u * u * (3 - 2 * u)
+                return tuple((1 - u) * np.array(aa, float) + u * np.array(bb, float) for aa, bb in zip(a, b))
+        return keys[-1][1:]
+
     for i, f in enumerate(frames):
         j = f["c"]
         t = f["src_t"]
-        crouch = _smoothstep(3.25, 3.70, t) * (1.0 - _smoothstep(4.55, 4.95, t))
-        air = _smoothstep(4.70, 5.00, t) * (1.0 - _smoothstep(5.40, 5.75, t))
+        w = _smoothstep(3.35, 3.70, t) * (1.0 - _smoothstep(5.45, 5.85, t))
         sh = j["rightShoulder"]
-        base = saved[i]["r"]
-        # Trophy weight eases the racket up, then hands it back to the swing
-        # that already drives up and into the court. Both weights are smooth,
-        # so the hand cannot snap.
-        trophy_w = crouch * (1.0 - air)
-        if trophy_w > 0.02:
-            target = sh + (1.0 - trophy_w) * base["Wrist"] + trophy_w * trophy_arm["Wrist"]
-            pole = (1.0 - trophy_w) * base["Elbow"] + trophy_w * trophy_arm["Elbow"]
-            elbow, wrist = _ik_arm(sh, target, 0.196, 0.155, pole + np.array([0.35, 0.15, 0.0]))
+        if w < 0.02:
+            for part, off in saved[i]["r"].items():
+                j["right" + part] = sh + off
+        else:
+            elbow_off, wrist_off = arm_at(arm_keys, t)
+            base_w = saved[i]["r"]["Wrist"]
+            target = sh + (1.0 - w) * base_w + w * wrist_off
+            pole = (1.0 - w) * saved[i]["r"]["Elbow"] + w * elbow_off
+            elbow, wrist = _ik_arm(sh, target, 0.196, 0.155, pole + np.array([0.3, 0.1, 0.0]))
             j["rightElbow"] = elbow
             j["rightWrist"] = wrist
             direction = wrist - elbow
             j["rightIndex"] = wrist + direction / (np.linalg.norm(direction) or 1.0) * 0.045
-        else:
-            for part, off in base.items():
-                j["right" + part] = sh + off
         lsh = j["leftShoulder"]
-        for part, off in saved[i]["l"].items():
-            j["left" + part] = lsh + off
-
-    # Jump. The whole body rises together, so the racket is not left behind
-    # and the knees are not asked to stretch.
-    for f in frames:
-        t = f["src_t"]
-        air = _smoothstep(4.75, 5.02, t) * (1.0 - _smoothstep(5.45, 5.80, t))
-        if air < 0.02:
-            continue
-        j = f["c"]
-        low = min(j[n][1] for n in ("leftToe", "rightToe", "leftHeel", "rightHeel"))
-        want = 0.38 * air
-        if low < want:
-            dy = want - low
-            for p in j.values():
-                p[1] += dy
-        # On the ground outside the jump, the lower toe stays on the court.
-        elif air < 0.15:
-            if low < 0:
-                for p in j.values():
-                    p[1] -= low
-    # Never a negative foot after the blend.
+        if w < 0.02:
+            for part, off in saved[i]["l"].items():
+                j["left" + part] = lsh + off
+        else:
+            (lwrist,) = arm_at(left_keys, t)
+            target = lsh + (1.0 - w) * saved[i]["l"]["Wrist"] + w * lwrist
+            pole = np.array([-0.2, 0.15, 0.0])
+            elbow, wrist = _ik_arm(lsh, target, 0.19, 0.15, pole)
+            j["leftElbow"] = elbow
+            j["leftWrist"] = wrist
+            direction = wrist - elbow
+            j["leftIndex"] = wrist + direction / (np.linalg.norm(direction) or 1.0) * 0.04
+    # Feet that sank through the court come back up. An airborne pose stays up.
     for f in frames:
         j = f["c"]
         low = min(j[n][1] for n in ("leftToe", "rightToe", "leftHeel", "rightHeel"))
