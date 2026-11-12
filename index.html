@@ -719,14 +719,27 @@ function drawCapturedFigure(i, p, W) {
     if (Kn && A0) limb({ x: A0.x + (Kn.x - A0.x) * 0.18, y: A0.y + (Kn.y - A0.y) * 0.18 }, A0, "#f1f1ee", lw * 1.05);   // sock
     const A = at(s + "Ankle"); if (A) { b.fillStyle = shade(P.shoes || "#f2f2f2", -0.45); b.fillRect(Math.round(A.x - lw * 0.75), Math.round(A.y + lw * 0.35), Math.ceil(lw * 1.6), Math.max(1, Math.ceil(lw * 0.3))); b.fillStyle = P.shoes || "#f2f2f2"; b.fillRect(Math.round(A.x - lw * 0.7), Math.round(A.y - lw * 0.4), Math.ceil(lw * 1.5), Math.ceil(lw * 0.8)); b.fillStyle = shade(P.shoes || "#f2f2f2", 0.2); b.fillRect(Math.round(A.x - lw * 0.7 + (lit > 0 ? lw * 0.8 : 0)), Math.round(A.y - lw * 0.4), Math.ceil(lw * 0.7), 1 / AS); }
   }
-  // SHORTS: a waist that wraps round the hips and two round legs down to mid-thigh
-  const lh = at("leftHip"), rh = at("rightHip"), lk = mid("leftHip", "leftKnee", 0.45), rk = mid("rightHip", "rightKnee", 0.45);
-  if (lh && rh && lk && rk) {
-    const out = (A, C, k) => ({ x: A.x + (A.x - C.x) * k, y: A.y + (A.y - C.y) * k });
-    const lho = out(lh, rh, 0.28), rho = out(rh, lh, 0.28), crotch = { x: (lh.x + rh.x) / 2, y: (lh.y + rh.y) / 2 + lw * 1.1 };
-    for (const [H0, K0] of [[lho, lk], [rho, rk]]) limb(H0, K0, P.shorts, lw * 1.9);
-    cylFill([{ x: lho.x, y: lho.y - lw * 0.5 }, { x: rho.x, y: rho.y - lw * 0.5 }, rho, { x: rk.x + (rho.x - rk.x) * 0.2, y: rk.y - lw }, crotch, { x: lk.x + (lho.x - lk.x) * 0.2, y: lk.y - lw }, lho], P.shorts, -twist);
-    seg({ x: lho.x, y: lho.y - lw * 0.45 }, { x: rho.x, y: rho.y - lw * 0.45 }, shade(P.shorts, -0.3), Math.max(1 / AS, lw * 0.3));   // waistband
+  /* SHORTS on a real PELVIS (Ryan, Nov 12: "the thighs are connected to the outside of the hip"). The hip joints sit
+     INSIDE the pelvis (anatomize() puts them ~0.095 × height apart); the pelvis around them is about twice as wide.
+     So: one garment, waistband across the full pelvis, outer hips and glutes filling the top, the crotch just below
+     the hip joints, and a leg opening round each thigh, the thighs coming out underneath and converging to the knees. */
+  const lh = at("leftHip"), rh = at("rightHip"), lk = mid("leftHip", "leftKnee", 0.42), rk = mid("rightHip", "rightKnee", 0.42), pel = W._pelvis;
+  if (lh && rh && lk && rk && pel) {
+    const H = P.heightM, half = pel.w / 2;
+    const side = (k, dz) => proj(pel.x + pel.dx * half * k, pel.y + pel.dy * half * k, pel.z + dz * H);   // k: −1 left edge … +1 right edge
+    const wl = side(-0.96, 0.045), wr = side(0.96, 0.045);                  // waistband, a little above the hip joints
+    const hl = side(-1, -0.01), hr = side(1, -0.01);                         // the widest point: outer hips (greater trochanters)
+    const crotch = proj(pel.x, pel.y, pel.z - 0.05 * H);
+    const thighR = lw * 0.95;                                                // half the thigh's width where the shorts end
+    const open = (Kp, Hp) => { const ux = Kp.x - Hp.x, uy = Kp.y - Hp.y, L = Math.hypot(ux, uy) || 1, nx = -uy / L * thighR, ny = ux / L * thighR;
+      return [{ x: Kp.x + nx, y: Kp.y + ny }, { x: Kp.x - nx, y: Kp.y - ny }]; };   // the two edges of a leg opening
+    const [l1, l2] = open(lk, lh), [r1, r2] = open(rk, rh);
+    const lOut = Math.abs(l1.x - crotch.x) > Math.abs(l2.x - crotch.x) ? l1 : l2, lIn = lOut === l1 ? l2 : l1;
+    const rOut = Math.abs(r1.x - crotch.x) > Math.abs(r2.x - crotch.x) ? r1 : r2, rIn = rOut === r1 ? r2 : r1;
+    for (const [H0, K0] of [[lh, lk], [rh, rk]]) limb(H0, K0, P.shorts, thighR * 2.1);    // each leg of the shorts, round
+    cylFill([wl, wr, hr, rOut, rIn, crotch, lIn, lOut, hl], P.shorts, -twist);          // one garment over the pelvis
+    seg(wl, wr, shade(P.shorts, -0.3), Math.max(1 / AS, lw * 0.3));                     // waistband
+    seg(crotch, { x: crotch.x, y: crotch.y - lw * 0.9 }, shade(P.shorts, -0.32), Math.max(1 / AS, lw * 0.14));   // centre seam
   }
   // TORSO: shoulders rounded off, ribs narrowing to the waist, shaded like a cylinder
   const ls = at("leftShoulder"), rs = at("rightShoulder");
@@ -1448,6 +1461,30 @@ function sideOn(i, W, m, t) {
 }
 /* Advance player i's serve motion. During the serve the ball bounces in the routine, rides in the tossing hand,
    is tossed on one real throw that meets the racket at the motion's contact moment, and is then struck. */
+/* ANATOMY of the hips and knees on a captured serve (Ryan, Nov 12). Pose trackers put the "hip" points near the
+   outside of the hips and the clips are flat, so drawn as-is the thighs hung from the corners of a wide box and the
+   knees splayed outward when he loaded (the forward knee bend toward the net turns sideways in a flat clip).
+   1. Hip joints: pulled in to the real spacing of the femoral heads, BODIES[id].game.hipJointW (Body Scout) or
+      ~0.095 × height; never pushed apart. W._pelvis keeps the centre, direction and the outer pelvis width
+      (BODIES hipW or ~0.19 × height) for the shorts.
+   2. Knees: stay near the line from hip to ankle (at most ~3.5% of height to the side, inward or outward), so a
+      loading server's knees bend over his feet, not out like a frog. Heights (z) and depth are untouched. */
+function anatomize(i, W) {
+  const P = PLAYERS[i], H = P.heightM, B = (window.BODIES && window.BODIES[P.id] && window.BODIES[P.id].game) || {};
+  const lh = W.leftHip, rh = W.rightHip; if (!lh || !rh) return;
+  const cx = (lh.x + rh.x) / 2, cy = (lh.y + rh.y) / 2, cz = (lh.z + rh.z) / 2;
+  let dx = rh.x - lh.x, dy = rh.y - lh.y; const d = Math.hypot(dx, dy) || 1; dx /= d; dy /= d;
+  const half = Math.min(d, B.hipJointW || 0.095 * H) / 2;
+  lh.x = cx - dx * half; lh.y = cy - dy * half; rh.x = cx + dx * half; rh.y = cy + dy * half;
+  W._pelvis = { x: cx, y: cy, z: cz, dx, dy, w: B.hipW || 0.19 * H };
+  const maxOff = 0.035 * H;
+  for (const s of ["left", "right"]) {
+    const Hp = W[s + "Hip"], K = W[s + "Knee"], A = W[s + "Ankle"]; if (!Hp || !K || !A) continue;
+    const u = Math.max(0, Math.min(1, (Hp.z - K.z) / ((Hp.z - A.z) || 1)));     // how far down the leg the knee is
+    const lineX = Hp.x + (A.x - Hp.x) * u;
+    K.x = lineX + Math.max(-maxOff, Math.min(maxOff, K.x - lineX));
+  }
+}
 function stepMotion(i, dt) {
   const mo = pos[i].motion, m = mo.m, E = m.events, bouncesEnd = E.set ?? E.start;
   const toss = m.hand === "L" ? "right" : "left", hit = m.hand === "L" ? "left" : "right";   // lefties toss right, hit left
@@ -1455,6 +1492,7 @@ function stepMotion(i, dt) {
   const W = mo.world = poseToWorld(i, pos[i], motionPose(m, mo.t));
   const sv = rally && rally.serve;
   sideOn(i, W, m, mo.t);
+  anatomize(i, W);
   if (sv && mo.t < bouncesEnd) {                         // BOUNCING: the tossing hand pushes the ball down and meets it coming back up
     const H = PLAYERS[i].heightM, P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1;
     const wgt = Math.min(1, (bouncesEnd - mo.t) / 0.2) * Math.min(1, (mo.t - mo.t0) / 0.2);   // ease in and out of the routine
