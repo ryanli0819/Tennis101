@@ -1,5 +1,59 @@
 # Body Scout · log
 
+## Nov 11, 2026 · run 3 (local, Ryan's Mac) · round 2 landed on PR #42
+briefSeen: 1 (Motion & Body, share team)
+
+**Read first:** CLAUDE.md, agents/README.md, RULES.md, PROMPT.md, supervisors.json (brief 1, unchanged; none of the
+standing scripts applied to this run), ratings.json (no ratings), issue **#39** and PR **#42** (the only review is still
+"round 1: changes (small)"; nothing newer), and my teammates' logs on `main` (the Serve Analyst's captured-serve entry
+is new; the others have no runs). Nothing in the repo told me to act outside my files.
+
+**What happened:** run 2 made the two review changes but stopped before committing, so PR #42 still showed round 1.
+This run committed that work unchanged, rebased on `origin/main` (now with PR #45, the captured serves for all 22
+players; no conflicts), re-ran the check and pushed. No new data and no new numbers: the review asked for exactly two
+things and the PR has exactly those.
+
+**Checks run (after the rebase):** `python3 -I datasets/players/tools/build_bodies.py --check` passes: 22 of 22 up to
+date, segment and span sums, `bodies.js` parses back, left-handers Shelton, Tien, Nadal, `ROSTER` in `index.html`
+(Sinner, Alcaraz) agrees with the ATP.
+
+**Still not checked:** `node --check src/players/bodies.js`, `tests/serve-motion.test.mjs` and the browser load at
+desktop and 400 px. No `node` on this Mac, and the system JavaScript engine was refused again. The manager should load
+the page once.
+
+**New on `main` that touches my data (for the manager and the Serve Analyst)**
+- `src/serve/motion/roster-serves.js` now carries its own `heightM`, `weightKg` and `lefty` for all 22 players and
+  pushes the 20 players missing from `ROSTER` into it with those numbers, so the game's physics uses them.
+- **Handedness agrees:** the same three left-handers (Shelton, Tien, Nadal). `ROSTER[].lefty` is now set from that
+  file, so my run 2 note that nothing sets it is out of date. `BODIES[id].game.lefty` is the same fact with its source.
+- **Height and weight differ from the ATP profiles for 10 of 22** (ATP numbers read Nov 11, 2026; links in each
+  `body.json` → `official.sources`). Not my file, so I changed nothing:
+
+  | Player | roster-serves.js | ATP profile |
+  |---|---|---|
+  | Djokovic | 77 kg | 82 kg |
+  | Mensik | 1.93 m, 86 kg | 1.96 m, 87 kg |
+  | Davidovich Fokina | 1.83 m, 79 kg | 1.80 m, 82 kg |
+  | Zverev | 89 kg | 90 kg |
+  | Medvedev | 82 kg | 83 kg |
+  | Fils | 82 kg | 83 kg |
+  | De Minaur | 68 kg | 69 kg |
+  | Paul | 81 kg | 82 kg |
+  | Tien | 72 kg | 73 kg |
+  | Kyrgios | 84 kg | 85 kg |
+
+  The first three change how the player moves and looks (5 kg, 3 cm); the rest are 1 kg. Cleanest fix: that file reads
+  height and weight from `(window.BODIES || {})[id].game` when it is loaded, and keeps its own numbers as the fallback.
+  `bodies.js` already loads before the main script.
+- Carried over from run 2: `agents/README.md` lists the `game` fields without `lefty`, `shoulderJointW`, `hipJointW`,
+  `overheadReachM`.
+
+**Exact next step**
+1. If the manager sends PR #42 back, fix exactly what the review says.
+2. Add the comparison above to `build_bodies.py` (it only compares `index.html`'s `ROSTER` today), so the check
+   reports every place the game holds a height or weight that differs from the sourced one.
+3. Then the run 1 list (below): ANSUR II widths, then movement evidence for the ten neutral players.
+
 ## Nov 11, 2026 · run 2 (local, Ryan's Mac) · review round 2 on PR #42
 briefSeen: 1 (Motion & Body, share team)
 
