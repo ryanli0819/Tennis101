@@ -98,7 +98,7 @@
       id: "alcaraz", name: "Carlos Alcaraz", hand: "R",
       heightM: 1.83, weightKg: 74, lefty: false,
       first: "Carlos", last: "ALCARAZ", code: "ESP",
-      gap: "", defaultId: "alcaraz_YwBC3QeCnvc_0131-0241_serve06",
+      gap: "", defaultId: null,
       serves: [
         {
           id: "alcaraz_YwBC3QeCnvc_0131-0241_serve06", quality: "best", lowConfidence: false,
@@ -1049,6 +1049,26 @@
   window.SERVE_MOTIONS = window.SERVE_MOTIONS || {};
   PLAYERS.forEach((player) => {
     const motions = player.serves.map((s) => expand(player, s, s.id === player.defaultId ? "first" : "extra"));
+    if (player.id === "alcaraz") {
+      // The AO clips stay in the catalog as extra footage. None of them is the first serve.
+      // alcaraz-poetry.js, loaded after this file, is the only writer of .first.
+      motions.forEach((m) => { m.role = "extra"; });
+      const second = motions.find((m) => m.id === "alcaraz_YwBC3QeCnvc_0131-0241_serve03") || null;
+      if (second) {
+        second.role = "second";
+        second.reused = false;
+        second.note += " Played as the second serve because it is another captured overhead motion. Serve type was not classified, so this is not a measured kick serve.";
+      }
+      const slot = window.SERVE_MOTIONS.alcaraz || (window.SERVE_MOTIONS.alcaraz = {});
+      delete slot.first;
+      slot.second = second;
+      catalog.push({
+        id: player.id, name: player.name, hand: player.hand, heightM: player.heightM, weightKg: player.weightKg,
+        lefty: player.lefty, first: player.first, last: player.last, code: player.code, gap: player.gap,
+        serves: motions, firstId: null, secondId: second ? second.id : null, secondReused: false,
+      });
+      return;
+    }
     const first = motions.find((m) => m.id === player.defaultId) || motions[0];
     first.role = "first";
     let second = motions.find((m) => m !== first && !m.lowConfidence) || motions.find((m) => m !== first) || null;
