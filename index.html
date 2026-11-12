@@ -1289,7 +1289,7 @@ function slide(i) {
   let [dx, dy] = i === 0 ? userInput() : [0, 0];
   if (!dx && !dy) { dx = p.vx; dy = p.vy; }           // no key held: slide the way you're running
   const m = Math.hypot(dx, dy); if (m < 0.1) return;
-  const dist = (SLIDE.dist[cfg.surface] || 1.6) * (1 + 0.03 * ((getSkills(PLAYERS[i].id).agility || 10) - 10));
+  const dist = (SLIDE.dist[cfg.surface] || 1.6) * (B.slideMul || 1);   // Agility: longer slides (skills.js)
   const v0 = 2 * dist / SLIDE.dur;                    // linear slow-down: distance = v0 × dur / 2
   p.slideV = { x: dx / m * v0, y: dy / m * v0 };
   p.slide = SLIDE.dur; p.slideCD = SLIDE.cooldown;
