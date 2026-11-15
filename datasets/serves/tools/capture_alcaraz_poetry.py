@@ -1133,32 +1133,36 @@ def coherent_body(frames):
     # cannot swap places on the way up.
     # (src time, hip_y, left offsets (x,y,z) for hip/knee-hint/ankle, right the same, shoulder offsets)
     def leg_keys():
+        # GAME-DESIGN layout, not a new measurement. y stays the loaded heights.
+        # x/z keep him side-on (left shoulder and left foot toward the net, +z)
+        # through the knee bend and the push. The chest opens toward the net
+        # only after the legs have driven, at contact and the landing.
         # hip, knee hint, ankle — each (x, y, z). y absolute, x/z relative to mid.
         return [
             (3.45, dict(
-                l_hip=(-0.07, 0.42, 0.04), l_knee=(-0.05, 0.22, 0.10), l_ank=(-0.05, 0.02, 0.14),
-                r_hip=(0.07, 0.41, -0.02), r_knee=(0.11, 0.20, 0.02), r_ank=(0.10, 0.04, -0.06),
-                l_sh=(-0.09, 0.34, 0.08), r_sh=(0.10, 0.32, 0.02),
+                l_hip=(0.01, 0.42, 0.08), l_knee=(0.02, 0.22, 0.13), l_ank=(0.01, 0.02, 0.17),
+                r_hip=(0.02, 0.41, -0.08), r_knee=(0.03, 0.20, -0.03), r_ank=(0.02, 0.04, -0.11),
+                l_sh=(0.04, 0.34, 0.16), r_sh=(0.00, 0.32, -0.06),
             )),
-            (4.30, dict(  # trophy platform
-                l_hip=(-0.075, 0.31, 0.05), l_knee=(-0.05, 0.16, 0.16), l_ank=(-0.05, 0.02, 0.20),
-                r_hip=(0.075, 0.30, -0.02), r_knee=(0.12, 0.15, 0.02), r_ank=(0.11, 0.05, -0.08),
-                l_sh=(-0.09, 0.34, 0.10), r_sh=(0.10, 0.31, 0.03),
+            (4.30, dict(  # trophy platform, still side-on, knees forward of the feet
+                l_hip=(0.01, 0.31, 0.00), l_knee=(0.02, 0.12, 0.20), l_ank=(0.01, 0.02, 0.15),
+                r_hip=(0.02, 0.30, -0.14), r_knee=(0.03, 0.12, 0.00), r_ank=(0.02, 0.05, -0.06),
+                l_sh=(0.05, 0.34, 0.16), r_sh=(-0.01, 0.31, -0.08),
             )),
-            (4.72, dict(  # still loaded, starting up. knees stay on their own sides
-                l_hip=(-0.07, 0.38, 0.04), l_knee=(-0.05, 0.22, 0.12), l_ank=(-0.05, 0.06, 0.14),
-                r_hip=(0.07, 0.37, -0.02), r_knee=(0.12, 0.20, 0.00), r_ank=(0.11, 0.08, -0.08),
-                l_sh=(-0.10, 0.36, 0.12), r_sh=(0.10, 0.34, 0.05),
+            (4.85, dict(  # legs driving, hips and shoulders still side-on
+                l_hip=(0.01, 0.48, 0.08), l_knee=(0.02, 0.28, 0.12), l_ank=(0.01, 0.10, 0.14),
+                r_hip=(0.02, 0.47, -0.08), r_knee=(0.03, 0.26, -0.05), r_ank=(0.02, 0.14, -0.12),
+                l_sh=(0.04, 0.36, 0.16), r_sh=(0.00, 0.34, -0.04),
             )),
-            (5.08, dict(  # contact: extended, up, back leg kicked behind
-                l_hip=(-0.07, 0.86, 0.03), l_knee=(-0.05, 0.62, 0.06), l_ank=(-0.04, 0.38, 0.04),
-                r_hip=(0.07, 0.86, -0.02), r_knee=(0.12, 0.70, -0.12), r_ank=(0.14, 0.55, -0.20),
-                l_sh=(-0.10, 0.38, 0.16), r_sh=(0.10, 0.40, 0.12),
+            (5.08, dict(  # after the push: chest opens to the net, back leg kicked behind
+                l_hip=(-0.04, 0.86, 0.05), l_knee=(-0.03, 0.62, 0.06), l_ank=(-0.03, 0.38, 0.03),
+                r_hip=(0.05, 0.86, -0.05), r_knee=(0.10, 0.70, -0.14), r_ank=(0.12, 0.55, -0.22),
+                l_sh=(-0.09, 0.38, 0.14), r_sh=(0.10, 0.40, 0.04),
             )),
-            (5.45, dict(  # coming down, kick still trailing
-                l_hip=(-0.06, 0.58, 0.02), l_knee=(-0.04, 0.32, 0.04), l_ank=(-0.04, 0.08, 0.02),
-                r_hip=(0.07, 0.58, -0.02), r_knee=(0.12, 0.48, -0.08), r_ank=(0.13, 0.32, -0.14),
-                l_sh=(-0.10, 0.34, 0.10), r_sh=(0.10, 0.34, 0.06),
+            (5.45, dict(  # lands on the front foot, back leg still up, chest toward the court
+                l_hip=(-0.05, 0.58, 0.03), l_knee=(-0.04, 0.32, 0.03), l_ank=(-0.04, 0.08, 0.01),
+                r_hip=(0.06, 0.58, -0.02), r_knee=(0.11, 0.48, -0.08), r_ank=(0.12, 0.32, -0.14),
+                l_sh=(-0.10, 0.34, 0.08), r_sh=(0.10, 0.34, 0.02),
             )),
         ]
 
@@ -1189,12 +1193,13 @@ def coherent_body(frames):
         l_hip, r_hip = P("l_hip"), P("r_hip")
         l_ank, r_ank = P("l_ank"), P("r_ank")
         l_hint, r_hint = P("l_knee"), P("r_knee")
-        # Keep a gap so the knees cannot meet in the middle and cross.
-        if l_hint[0] > r_hint[0] - 0.08:
-            c = 0.5 * (l_hint[0] + r_hint[0])
+        # Front (left) knee stays toward the net. Do not spread the knees
+        # across x: that squares the hips before the legs have pushed.
+        if l_hint[2] < r_hint[2] + 0.06:
+            c = 0.5 * (l_hint[2] + r_hint[2])
             l_hint = l_hint.copy(); r_hint = r_hint.copy()
-            l_hint[0] = c - 0.06
-            r_hint[0] = c + 0.06
+            l_hint[2] = c + 0.05
+            r_hint[2] = c - 0.05
         l_knee, _ = _ik_leg(l_hip, l_ank, l_hint)
         r_knee, _ = _ik_leg(r_hip, r_ank, r_hint)
         l_sh = P("l_sh"); r_sh = P("r_sh")
