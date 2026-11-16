@@ -618,7 +618,7 @@ function drawShadows() {
     }
   }
   if (ball) for (const d of L.shadows) {                  // the ball's shadow slides away from the light as it rises
-    const sx = ball.x + d.x * ball.z, sy = ball.y + d.y * ball.z, g = proj(sx, sy), r = Math.max(1.2, 0.1 * g.s);
+    const sx = ball.x + d.x * ball.z, sy = ball.y + d.y * ball.z, g = proj(sx, sy), r = ballRadiusPx(g);
     b.fillStyle = `rgba(8,12,24,${Math.max(0.06, d.a * 1.2 - ball.z * 0.04).toFixed(3)})`;
     b.beginPath(); b.ellipse(q(g.x), q(g.y), r, r * 0.42, 0, 0, Math.PI * 2); b.fill();
   }
@@ -1312,9 +1312,15 @@ function drawPlayer(i, pos, swing) {
 
 /* THE BALL: round, optic yellow felt, lit from the light side and shaded on the other, a white seam that turns
    with its spin, a fuzzy edge, and a faint trail when it flies fast. (Its shadow is drawn by drawShadows.) */
-const BALL_R = 0.1;                                      // drawn radius in metres: ~3× real, so it reads at any distance
+const BALL_R = 0.2;                                      // drawn radius in metres: about 6× real (GAME-DESIGN), so it reads at any distance
+// Real ITF ball diameter is 6.54–6.86 cm (SOURCED, Rules of Tennis Appendix I,
+// https://www.itftennis.com/en/about-us/governance/rules-and-regulations/).
+const BALL_R_PX_MIN = 1.6;                               // GAME-DESIGN: floor so a far ball doesn't vanish
+const BALL_R_PX_MAX = 36;                                // GAME-DESIGN: safety cap so net/pov cameras don't draw a giant ball
+// Any camera, including a future review slant camera, gets its scale through proj().s.
+function ballRadiusPx(p) { return Math.min(BALL_R_PX_MAX, Math.max(BALL_R_PX_MIN, BALL_R * p.s)); }
 function drawBall(ball, inset = false) {
-  const p = proj(ball.x, ball.y, ball.z), r = Math.min(9, Math.max(2.2, BALL_R * p.s)), cx = q(p.x), cy = q(p.y);
+  const p = proj(ball.x, ball.y, ball.z), r = ballRadiusPx(p), cx = q(p.x), cy = q(p.y);
   const tr = ball._trail || (ball._trail = []);
   const sp = tr.length ? Math.hypot(ball.x - tr[0].x, ball.y - tr[0].y, ball.z - tr[0].z) : 0;
   if (sp > 0.12 && !matchMedia("(prefers-reduced-motion: reduce)").matches)      // moving fast: a short fading trail
