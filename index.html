@@ -230,6 +230,9 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/skills/skills.js?v=0.11.0"></script>
 <script src="src/animation/run-cycle.js?v=0.11.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.11.0"></script>
+<!-- Fixed-length 3D skeleton (body-motion-engineer, HQ-20261117-002): limits from datasets/anatomy/joints.json. Off for players without a skeleton. -->
+<script src="src/body/joints.js?v=0.14.0"></script>
+<script src="src/body/skeleton.js?v=0.14.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -1661,6 +1664,9 @@ function stepMotion(i, dt) {
     }
     for (const n of ["leftKnee", "rightKnee"]) if (W[n]) W[n].z -= 0.012 * H * wgt * (1 + bump(0.06, 0.08));   // a little knee give
   }
+  // BODY SKELETON (HQ-20261117-002): refit the displayed joints onto the player's fixed-length skeleton (bones keep their
+  // length, joints stay in SOURCED limits). Guarded: only players with a skeleton (Alcaraz, Sinner), only once limits load.
+  if (window.BodySkeleton) BodySkeleton.fitWorld(i, PLAYERS[i], pos[i], W, mo);
   if (sv) {
     if (mo.t < bouncesEnd) {                             // ROUTINE: he bounces the ball ROUTINE.bounces times
       const P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1, h = W[toss + "Hand"] || W[toss + "Wrist"];
@@ -1671,6 +1677,7 @@ function stepMotion(i, dt) {
       if (!sv.release) {                                 // solve the toss once: release point → contact point
         const C = poseToWorld(i, pos[i], motionPose(m, E.contact), E.contact);
         anatomize(i, C, E.contact);                      // aim the toss at the corrected racket hand
+        if (window.BodySkeleton) BodySkeleton.fitWorld(i, PLAYERS[i], pos[i], C, mo, { t: E.contact, stateless: true });   // same skeleton as drawn
         const T = Math.max(0.2, E.contact - E.tossRelease);
         sv.release = { ...W[toss + "Wrist"] };
         sv.hit = { x: C[hit + "Wrist"].x, z: C[hit + "Wrist"].z + RACKET_M * 0.9 };
