@@ -1,4 +1,4 @@
-// HQ-20261117-002.PM.1 — fixed-length skeleton, SOURCED joint limits, per-segment draw order. Run: node --test src/body/test/
+// HQ-20261117-002.PM.1 — fixed-length skeleton, SOURCED joint limits, per-segment draw order. Run: node --test src/body/test/skeleton.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
@@ -153,4 +153,22 @@ test("draw order invariant: for every overlapping pair, the farther overlapping 
     for (const p of o.pairs) { pairs++; if (idx[p.far] > idx[p.near]) assert.fail(`cycle-broken pair ${p.far}/${p.near} must be rare`); }
   }
   assert.ok(pairs > 50);
+});
+
+test("left-handers: every live serve mirrored (x → −x, left ↔ right, hand L) keeps lengths, ZERO violations, and the LEFT shoulder gets the dominant 105.4", () => {
+  const swap = k => k.startsWith("left") ? "right" + k.slice(4) : k.startsWith("right") ? "left" + k.slice(5) : k;
+  let frames = 0;
+  for (const run of runs.filter(r => r.live)) {
+    const m = { ...run.m, hand: "L", frames: run.m.frames.map(f => { const J = f.joints || f.j, O = {};
+      for (const k in J) { const v = J[k]; O[swap(k)] = Array.isArray(v) ? [-v[0], ...v.slice(1)] : { ...v, x: -v.x }; }
+      return { ...f, joints: O, j: undefined }; }) };
+    const mir = { ...run, m, res: SK.solveMotion(m, run.sk, { mode: run.mode }) };
+    const r = lengthAndLimits(mir);
+    assert.ok(r.maxErr <= TOL_M, run.clip + " mirrored max bone error " + r.maxErr);
+    assert.equal(r.viol.length, 0, run.clip + " mirrored violations " + JSON.stringify(r.viol.slice(0, 2)));
+    frames += mir.res.length;
+  }
+  const rg = SK.ranges(null, "L", SK.skeletonFor("alcaraz"));
+  assert.ok(frames > 400);
+  assert.deepEqual([rg.leftShoulder.rotation[1], rg.rightShoulder.rotation[1]], [BJ.table.dominantShoulderER.deg, 90], "left-hander: LEFT shoulder dominant 105.4, right 90");
 });
