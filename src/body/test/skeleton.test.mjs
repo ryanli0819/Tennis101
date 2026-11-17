@@ -148,11 +148,14 @@ test("Root cause guard (r2): an airborne back leg keeps the capture's side of th
   }
 });
 
-test("depth-sign audit 325–342: every thigh/shank pick that goes against the capture's depth hint carries a reason", () => {
+test("depth-sign audit 325–342: every cos-rule pick against the capture's depth hint carries a reason; the solve itself never goes against the captured depth", () => {
+  let audited = 0;
   for (const mode of ["direction", "image"]) for (const row of depthSignAudit(runs, mode)) for (const b of Object.values(row.bones)) {
-    if (b.againstHint) assert.match(b.why, /clamps .* vs .* chosen sign/);
-    if (mode === "direction") assert.equal(b.againstHint, false, "direction mode keeps the captured direction");
+    if (b.cosRuleAgainstHint) assert.match(b.why, /clamps .* vs .* chosen sign/);
+    assert.equal(b.usedAgainstHint, false, `frame ${row.frame} ${mode}: the used direction keeps the captured depth sign`);
+    if (b.cosRule) audited++;
   }
+  assert.equal(audited, 2 * 2 * (RYAN_FRAMES[1] - RYAN_FRAMES[0] + 1), "both bones, both modes, every frame audited");
 });
 
 test("pelvis pitch (r2 fix 1): solved as part of the root rotation, NOT clamped (null row), smooth, and it frees a back leg past hip extension when the trunk leans", () => {

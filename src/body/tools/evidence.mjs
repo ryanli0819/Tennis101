@@ -10,8 +10,8 @@ export function solveAll() {
   const live = liveMotions(), extra = extraMotions(), runs = [];
   for (const id of ["alcaraz", "sinner"]) {
     const sk = SK.skeletonFor(id);
-    for (const c of live[id]) for (const mode of ["direction", "image"]) runs.push({ id, sk, clip: c.clip, live: true, mode, m: c.m, res: SK.solveMotion(c.m, sk, { mode }) });
-    for (const c of extra[id]) runs.push({ id, sk, clip: c.clip, live: false, mode: "image", m: c.m, res: SK.solveMotion(c.m, sk, { mode: "image" }) });
+    for (const c of live[id]) for (const mode of ["direction", "image"]) runs.push({ id, sk, clip: c.clip, live: true, mode, m: c.m, res: SK.solveMotion(c.m, sk, { mode, audit: true }) });
+    for (const c of extra[id]) runs.push({ id, sk, clip: c.clip, live: false, mode: "image", m: c.m, res: SK.solveMotion(c.m, sk, { mode: "image", audit: true }) });
   }
   return runs;
 }
@@ -68,22 +68,25 @@ export function ryanCase(runs, mode = "direction") {
   return out;
 }
 // RETURN fix 2: back-leg depth-sign audit. For each frame, thigh and shank: the capture's depth hint (sign of the captured
-// bone's z), every candidate pick() saw with its clamp cost (MEASURED by the solver), the chosen sign and why.
+// bone's z), the two cos-rule candidates pick() sees (±sqrt(L² − L2D²)) with the clamp cost of each (MEASURED by the solver),
+// the sign pick() would choose and why, and what r2 actually uses (the captured 3D direction when the bone's joints have
+// depth; pick()'s choice only for a clip without depth).
 export function depthSignAudit(runs, mode) {
   const run = runs.find(r => r.id === "alcaraz" && /poetry/.test(r.clip) && r.mode === mode), out = [];
+  const sgn = v => v > 0 ? "+" : v < 0 ? "−" : "0";
   run.res.forEach((r, k) => {
     if (k < RYAN_FRAMES[0] || k > RYAN_FRAMES[1]) return;
     const cap = SK.frameToLocal(run.m.frames[k], run.sk.heightM);
     const row = { frame: k, t: +r.t.toFixed(4), mode, pelvisPitchDeg: +r.pelvisPitchDeg.toFixed(1), pelvisYawSolvedDeg: r.pelvisYawSolvedDeg, airW: +r.legSolve.right.airW.toFixed(2), bones: {} };
     for (const [b, a, c] of [["rightThigh", "rightHip", "rightKnee"], ["rightShank", "rightKnee", "rightAnkle"]]) {
       const p = r.picks[b], dz = cap[c][2] - cap[a][2], hint = Math.abs(dz) > 1e-9 ? Math.sign(dz) : 0;
-      if (!p) { row.bones[b] = { captureDzM: +dz.toFixed(3), hint, candidates: [], chosen: null, why: "IK to the planted ankle (no sign choice)", againstHint: false }; continue; }
-      const chosen = p.sign || 0, against = !!(hint && chosen && chosen !== hint);
-      const cs = p.all.map(x => ({ sign: x.sign, clampDeg: +x.clampDeg.toFixed(1) }));
-      let why = p.why === "single" ? "direction mode: one candidate = the capture's own 3D direction" : p.why;
-      if (against) { const w = cs.find(x => x.sign === chosen), h = cs.find(x => x.sign === hint);
-        why = `hinted sign ${hint > 0 ? "+" : "−"} (${b === "rightThigh" ? (hint < 0 ? "knee behind the hip: hip extension" : "knee in front: hip flexion") : (hint < 0 ? "ankle behind the knee" : "ankle in front of the knee")}) clamps ${h.clampDeg}° vs ${w.clampDeg}° for the chosen sign at pelvis pitch ${row.pelvisPitchDeg}° (limit rule: least clamping wins when the gap is > 1°)`; }
-      row.bones[b] = { captureDzM: +dz.toFixed(3), hint, candidates: cs, chosen, why, againstHint: against };
+      if (!p) { row.bones[b] = { captureDzM: +dz.toFixed(3), hint, cosRule: null, used: "IK to the planted ankle (no sign choice)", usedClampDeg: null, cosRuleAgainstHint: false, usedAgainstHint: false, why: "planted foot" }; continue; }
+      const cr = p.cosRule, cs = cr ? cr.all.map(x => ({ sign: x.sign, clampDeg: +x.clampDeg.toFixed(1) })) : [];
+      const crSign = cr ? cr.sign : null, crAgainst = !!(cr && hint && crSign && crSign !== hint);
+      let why = cr ? (cr.why === "single" ? "cos rule: bone not foreshortened, one candidate" : "cos rule chose by " + cr.why) : "no audit";
+      if (crAgainst) { const w = cs.find(x => x.sign === crSign), h = cs.find(x => x.sign === hint);
+        why = `cos rule: hinted sign ${sgn(hint)} (${b === "rightThigh" ? (hint < 0 ? "knee behind the hip = hip extension" : "knee in front = hip flexion") : (hint < 0 ? "ankle behind the knee" : "ankle in front of the knee")}) clamps ${h.clampDeg}° vs ${w.clampDeg}° for the chosen sign at pelvis pitch ${row.pelvisPitchDeg}° (pick(): least clamping wins when the gap is > 1°). r2 does NOT use this pick here: the bone has captured depth, so its captured 3D direction is used`; }
+      row.bones[b] = { captureDzM: +dz.toFixed(3), hint, cosRule: { candidates: cs, chosen: crSign, why: cr && cr.why }, used: p.why === "single" ? "captured 3D direction" : "cos rule pick " + sgn(p.sign), usedClampDeg: +p.all[0].clampDeg.toFixed(1), cosRuleAgainstHint: crAgainst, usedAgainstHint: p.why !== "single" && !!(hint && p.sign && p.sign !== hint), why };
     }
     out.push(row);
   });

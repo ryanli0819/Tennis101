@@ -12,8 +12,8 @@
    - Pelvis and thorax are solved separately (waist rotation = thorax yaw about the spine relative to the pelvis).
    - r2 (RETURN of r1): the pelvis also PITCHES (anterior/posterior tilt), solved with the yaw as the root rotation; hip and
      trunk angles are measured against the pitched pelvis; pelvis.tiltObliquity is a NULL row, so the pitch is not clamped.
-   - r2: a leg whose captured ankle is in the air takes its bones' directions from the capture (direction mode) or the cos
-     rule (image mode); IK to the captured ankle is kept only for a planted foot (see AIR_LO_M / AIR_HI_M).
+   - r2: a leg whose captured ankle is in the air takes its bones' captured 3D directions (the cos rule only for a clip with
+     no depth); IK to the captured ankle is kept only for a planted foot (see AIR_LO_M / AIR_HI_M).
    - Hinges (knee, elbow) bend one way: the knee folds toward the back of the thigh, with the kneecap direction set
      by hip rotation, so a sideways/forward knee would need an impossible hip rotation and is clamped.
    - segmentsInDrawOrder(): far-to-near order of limb segments and the torso for any camera, so a folded calf is
@@ -448,14 +448,18 @@
          bones can only reach that ankle by folding the knee to the limit and swinging it 0.20–0.27 m off the captured knee,
          forward of the hip (hip flexion the capture does not have). IK is right for a PLANTED foot (it keeps the foot on the
          court); a foot in the air has no position to keep. So: weight w = smoothstep of the captured ankle height above the
-         court from AIR_LO_M to AIR_HI_M (GAME-DESIGN). w = 0 → r1's IK; w = 1 → each bone takes its own captured direction
-         (direction mode) or the cos rule with the capture's depth sign as the hint (image mode, pick()); in between the two
-         directions are blended and renormalised (lengths stay fixed). Every angle then goes through the same clamps. */
+         court from AIR_LO_M to AIR_HI_M (GAME-DESIGN). w = 0 → r1's IK; w = 1 → each bone takes its own captured 3D direction
+         whenever both of its joints have a captured depth (any mode: r1 also used that depth, through the IK), and the cos
+         rule + pick() only for a clip without depth (2D); in between the two directions are blended and renormalised
+         (lengths stay fixed). Every angle then goes through the same clamps. opts.audit additionally logs what the cos rule
+         + pick() would have chosen (depth-sign audit, RETURN fix 2) without using it. */
       const capAn = get(side + "Ankle"), airW = capAn && opts.groundY != null ? smooth01((capAn[1] - opts.groundY - AIR_LO_M) / (AIR_HI_M - AIR_LO_M)) : 1;
       const legIK = has3(side + "Knee", side + "Ankle") && airW < 1 ? ik2(Hp, L.thigh, L.shank, capAn, get(side + "Knee"), P.F) : null;
-      const thP = legIK && airW <= 0 ? null : pick(candidates(imgVec(side + "Hip", side + "Knee"), L.thigh, mode), hipCost, prevSign(side + "Thigh"));
+      const bMode = (a, b) => hasZ(a) && hasZ(b) ? "direction" : mode;
+      const cosAudit = (a, b, Lb, cost, key) => opts.audit && hasZ(a) && hasZ(b) ? (({ all, sign, why }) => ({ all, sign: sign || 0, why }))(pick(candidates(imgVec(a, b), Lb, "image"), cost, prevSign(key))) : null;
+      const thP = legIK && airW <= 0 ? null : pick(candidates(imgVec(side + "Hip", side + "Knee"), L.thigh, bMode(side + "Hip", side + "Knee")), hipCost, prevSign(side + "Thigh"));
       const thc = !legIK ? thP : !thP ? { d: unit(sub(legIK, Hp)) } : { d: unit(add(mul(unit(sub(legIK, Hp)), 1 - airW), mul(thP.d, airW))), sign: thP.sign };
-      signs[side + "Thigh"] = thc.sign || 0; legSolve[side] = { airW, ik: !!legIK }; if (thP) picks[side + "Thigh"] = { all: thP.all, sign: thP.sign || 0, why: thP.why || "single", w: airW };
+      signs[side + "Thigh"] = thc.sign || 0; legSolve[side] = { airW, ik: !!legIK }; if (thP) picks[side + "Thigh"] = { all: thP.all, sign: thP.sign || 0, why: thP.why || "single", w: airW, cosRule: cosAudit(side + "Hip", side + "Knee", L.thigh, hipCost, side + "Thigh") };
       const ha = hipAngles(thc.d, P, Oh);
       const hf = cl(side + "Hip", "flexion", ha.flexion, rg.hip.flexion), hb = cl(side + "Hip", "abduction", ha.abduction, rg.hip.abduction);
       const a = unit(hipFromAngles(hf, hb, P, Oh)), Kn = add(Hp, mul(a, L.thigh)); J[side + "Knee"] = Kn;
@@ -463,9 +467,9 @@
       const kneeCost = s => { const kf = angBetween(a, s), bk = perp(s, a); let c2 = Math.max(0, kf - rg.knee.flexion[1]);
         if (kf >= 15 && len(bk) > 1e-6) { const tw2 = twistOf(mul(unit(bk), -1), refs.r0, refs.oo); c2 += Math.max(0, rg.hip.rotation[0] - tw2, tw2 - rg.hip.rotation[1]); }
         return { clampDeg: c2 }; };
-      const shP = legIK && airW <= 0 ? null : pick(candidates(imgVec(side + "Knee", side + "Ankle"), L.shank, mode), kneeCost, prevSign(side + "Shank"));
+      const shP = legIK && airW <= 0 ? null : pick(candidates(imgVec(side + "Knee", side + "Ankle"), L.shank, bMode(side + "Knee", side + "Ankle")), kneeCost, prevSign(side + "Shank"));
       const skc = !legIK ? shP : !shP ? { d: unit(sub(capAn, Kn)) } : { d: unit(add(mul(unit(sub(capAn, Kn)), 1 - airW), mul(shP.d, airW))), sign: shP.sign };
-      signs[side + "Shank"] = skc.sign || 0; if (shP) picks[side + "Shank"] = { all: shP.all, sign: shP.sign || 0, why: shP.why || "single", w: airW };
+      signs[side + "Shank"] = skc.sign || 0; if (shP) picks[side + "Shank"] = { all: shP.all, sign: shP.sign || 0, why: shP.why || "single", w: airW, cosRule: cosAudit(side + "Knee", side + "Ankle", L.shank, kneeCost, side + "Shank") };
       const kf = cl(side + "Knee", "flexion", angBetween(a, skc.d), rg.knee.flexion);
       let bk = perp(skc.d, a), kc;
       if (kf >= 15 && len(bk) > 1e-6) {
