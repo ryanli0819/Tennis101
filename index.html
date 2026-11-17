@@ -1350,7 +1350,7 @@ function drawBall(ball, inset = false) {
       b.fillStyle = `rgba(216,238,76,${0.22 - k * 0.06})`; b.beginPath(); b.arc(q(t.x), q(t.y), r * (0.9 - k * 0.15), 0, Math.PI * 2); b.fill(); });
   if (!inset) { tr.unshift({ x: ball.x, y: ball.y, z: ball.z }); tr.length = Math.min(tr.length, 4); }
   const lx = litLeft() ? -1 : 1;
-  const R_TINY = 2.5, R_SEAM = 4.5;                      // GAME-DESIGN: under 2.5 px, skip seam/halo (they turn to mush); seam only when the two-arc curve can read
+  const R_TINY = 2.5 * PX, R_SEAM = 4.5 * PX;            // GAME-DESIGN: under 2.5 design-px, skip seam/halo (they turn to mush); seam only when the two-arc curve can read. *PX so the CSS thresholds hold on the 2× buffer.
   const th = (clock || gameT) * 11 + ball.x;                                               // the seam turns with the spin
   if (r < R_TINY) {                                      // floor-sized: solid optic-yellow disc and a one-pixel shade side
     b.fillStyle = "#d8e244"; b.beginPath(); b.arc(cx, cy, r, 0, Math.PI * 2); b.fill();
