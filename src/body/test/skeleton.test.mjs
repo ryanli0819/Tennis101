@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { measurementClips } from "../tools/load-motions.mjs";
-import { solveAll, lengthAndLimits, ryanCase } from "../tools/evidence.mjs";
+import { solveAll, lengthAndLimits, ryanCase, depthSignAudit, RYAN_FRAMES } from "../tools/evidence.mjs";
 const require = createRequire(import.meta.url);
 const SK = require("../skeleton.js"), BJ = require("../joints.js");
 const JSON_TABLE = JSON.parse(readFileSync(new URL("../../../datasets/anatomy/joints.json", import.meta.url), "utf8"));
@@ -77,7 +77,7 @@ test("hinge knee bends one way only: a forward-bent knee is turned back by the h
   // right shank folds FORWARD (toward +z, the front): impossible for a knee
   const cap = { ...base, leftKnee: [-0.09, 0.26 * H, 0.02], leftAnkle: [-0.09, 0.03 * H, 0], rightKnee: [0.09, 0.26 * H, 0], rightAnkle: [0.09, 0.15 * H, 0.35] };
   const r = SK.solveFrame(cap, sk, { mode: "direction", hand: "R", noYawSearch: true });
-  const a = SK.measureAngles(r.joints, sk);
+  const a = SK.measureAngles(r.joints, sk, { pelvisPitchDeg: r.pelvisPitchDeg });
   assert.ok(r.clamps.some(c => c.joint === "rightHip" && c.axis === "rotation"), "hip rotation clamp recorded");
   assert.ok(a.rightHip.rotation >= -45 - 1e-6 && a.rightHip.rotation <= 45 + 1e-6);
   assert.ok(a.rightKnee.flexion <= 137.7 + 1e-6);
@@ -89,11 +89,11 @@ test("waist rotation: pelvis and thorax yaw separately; X-factor clamped to the 
     leftElbow: [-0.25, 0.65 * H, 0], rightElbow: [0.25, 0.65 * H, 0], leftWrist: [-0.25, 0.5 * H, 0.05], rightWrist: [0.25, 0.5 * H, 0.05],
     leftKnee: [-0.09, 0.27 * H, 0.03], rightKnee: [0.09, 0.27 * H, 0.03], leftAnkle: [-0.09, 0.04 * H, 0], rightAnkle: [0.09, 0.04 * H, 0] };
   const r = SK.solveFrame(cap, sk, { mode: "direction", hand: "R", noYawSearch: true });
-  const a = SK.measureAngles(r.joints, sk);
+  const a = SK.measureAngles(r.joints, sk, { pelvisPitchDeg: r.pelvisPitchDeg });
   assert.ok(Math.abs(Math.abs(a.trunk.rotation) - 30) < 1e-6, "clamped to 30: " + a.trunk.rotation);
   assert.ok(r.clamps.some(c => c.joint === "trunk" && c.axis === "rotation" && Math.abs(Math.abs(c.captured) - 50) < 1));
   const r2 = SK.solveFrame(cap, sk, { mode: "direction", hand: "R" });   // with the pelvis-yaw search the pelvis turns to share the 50°
-  const a2 = SK.measureAngles(r2.joints, sk);
+  const a2 = SK.measureAngles(r2.joints, sk, { pelvisPitchDeg: r2.pelvisPitchDeg });
   assert.ok(Math.abs(a2.trunk.rotation) <= 30 + 1e-6 && r2.pelvisYawSolvedDeg !== 0, "pelvis yaw solved separately: " + r2.pelvisYawSolvedDeg);
 });
 
@@ -110,7 +110,8 @@ test("cos rule: a foreshortened bone keeps its image-plane projection and gets d
 });
 
 test("Ryan's case: Alcaraz back (right) leg folded at landing — shank drawn AFTER thigh from the back-leg slant and the game's behind cameras", () => {
-  const rows = ryanCase(runs);
+  const all = ryanCase(runs), rows = all.filter(r => r.folded);
+  assert.equal(all.length, RYAN_FRAMES[1] - RYAN_FRAMES[0] + 1, "every frame 325–342 reported");
   assert.ok(rows.length >= 3, "landing frames with solved knee flexion ≥ 120° exist: " + rows.length);
   const sk = SK.skeletonFor("alcaraz");
   let overlapped = 0;
@@ -120,11 +121,63 @@ test("Ryan's case: Alcaraz back (right) leg folded at landing — shank drawn AF
     for (const cn of ["slantRight", "serveCam", "broadcast"]) { const c = r.cams[cn];
       assert.ok(c.thighIdx >= 0 && c.shankIdx >= 0, "both segments drawn (none deleted)");
       if (c.overlap) { overlapped++; assert.ok(c.shankOverThigh, `frame ${r.frame} ${cn}: shank must be drawn after (over) the thigh`); } }
-    for (const cn of ["topDown", "slantLeft"]) assert.ok(r.cams[cn].thighIdx >= 0 && r.cams[cn].shankIdx >= 0);   // reported, geometry decides (see ryan-case.json)
+    for (const cn of ["topDown", "slantLeft"]) assert.ok(r.cams[cn].thighIdx >= 0 && r.cams[cn].shankIdx >= 0);
   }
   assert.ok(overlapped >= 3, "the fold overlaps on screen in several frames: " + overlapped);
-  // foreshortened on screen while full length in 3D, in at least one frame/camera
   assert.ok(rows.some(r => Object.values(r.cams).some(c => c.shankProjM < 0.6 * sk.L.shank)));
+});
+
+test("Ryan's case from ABOVE (r2): on every folded frame where thigh and calf overlap top-down, the calf is drawn over the thigh unless the capture's own top-down depth puts the thigh on top (then the capture's order is kept, never forced); r2 result per frame is locked", () => {
+  const rows = ryanCase(runs);
+  for (const r of rows.filter(r => r.folded && r.cams.topDown.overlap)) {
+    if (r.cams.topDown.shankOverThigh) continue;
+    assert.ok(r.captureTopDown.overlap && !r.captureTopDown.shankOverThigh, `frame ${r.frame}: thigh drawn on top from above although the capture does not put it there`);
+  }
+  // the frame where calf-over-thigh holds top-down (r1 FAILed here: thigh over, gap 0.098 m)
+  const at = f => rows.find(r => r.frame === f).cams.topDown;
+  assert.ok(at(333).overlap && at(333).shankOverThigh, "frame 333 top-down: calf over thigh");
+  // regression lock of the r2 top-down result, frames 325–342 (see evidence/ryan-case.json)
+  const expect = { 330: "thigh over shank", 331: "thigh over shank", 332: "thigh over shank", 333: "SHANK OVER THIGH" };
+  for (const r of rows) assert.equal(r.cams.topDown.result, expect[r.frame] || "no overlap", "frame " + r.frame);
+});
+
+test("Root cause guard (r2): an airborne back leg keeps the capture's side of the hip — the knee is never swung in front of the hip by IK to an ankle the fixed bones cannot reach", () => {
+  for (const r of ryanCase(runs).filter(r => r.folded && Math.abs(r.thighBackCapturedDeg) >= 5)) {
+    assert.equal(Math.sign(r.thighBackSolvedDeg), Math.sign(r.thighBackCapturedDeg), `frame ${r.frame}: captured thigh ${r.thighBackCapturedDeg}° behind vertical, solved ${r.thighBackSolvedDeg}°`);
+    assert.equal(r.airW, 1, "foot in the air → bone directions from the capture");
+  }
+});
+
+test("depth-sign audit 325–342: every thigh/shank pick that goes against the capture's depth hint carries a reason", () => {
+  for (const mode of ["direction", "image"]) for (const row of depthSignAudit(runs, mode)) for (const b of Object.values(row.bones)) {
+    if (b.againstHint) assert.match(b.why, /clamps .* vs .* chosen sign/);
+    if (mode === "direction") assert.equal(b.againstHint, false, "direction mode keeps the captured direction");
+  }
+});
+
+test("pelvis pitch (r2 fix 1): solved as part of the root rotation, NOT clamped (null row), smooth, and it frees a back leg past hip extension when the trunk leans", () => {
+  assert.equal(BJ.table.rows["pelvis.tiltObliquity"].enforced, false, "pelvis.tiltObliquity null row: no clamp");
+  for (const run of runs.filter(r => r.live)) {
+    for (let k = 1; k < run.res.length; k++) { const a = run.res[k - 1], b = run.res[k], dt = Math.abs(b.t - a.t);
+      assert.ok(Math.abs(b.pelvisPitchDeg - a.pelvisPitchDeg) <= Math.max(0.5, SK.PITCH_RATE_DEG_S * dt) + 1e-9, `${run.clip} ${run.mode} frame ${k}: pitch step ${b.pelvisPitchDeg - a.pelvisPitchDeg}`); }
+    assert.ok(run.res.every(r => r.pelvisPitchDeg >= SK.PELVIS_PITCH_MIN && r.pelvisPitchDeg <= SK.PELVIS_PITCH_MAX));
+    assert.ok(run.res.every(r => !r.clamps.some(c => c.joint === "pelvis")), "no pelvis clamp");
+  }
+  // synthetic: trunk leans 30° forward, right thigh 40° behind vertical (knee 90°), left leg planted
+  const sk = SK.skeletonFor("alcaraz"), D = Math.PI / 180, hy = 0.95, L = sk.L, lean = 30 * D, th = 40 * D;
+  const sm = [0, hy + L.trunk * Math.cos(lean), L.trunk * Math.sin(lean)], rK = [0.087, hy - L.thigh * Math.cos(th), -L.thigh * Math.sin(th)];
+  const cap = { leftHip: [-0.087, hy, 0], rightHip: [0.087, hy, 0], leftShoulder: [sm[0] - 0.2, sm[1], sm[2]], rightShoulder: [sm[0] + 0.2, sm[1], sm[2]],
+    leftElbow: [sm[0] - 0.22, sm[1] - L.upperArm, sm[2]], rightElbow: [sm[0] + 0.22, sm[1] - L.upperArm, sm[2]], leftWrist: [sm[0] - 0.22, sm[1] - L.upperArm - L.forearm * 0.9, sm[2] + 0.1], rightWrist: [sm[0] + 0.22, sm[1] - L.upperArm - L.forearm * 0.9, sm[2] + 0.1],
+    leftKnee: [-0.087, hy - L.thigh, 0.02], leftAnkle: [-0.087, 0.07, 0], rightKnee: rK, rightAnkle: [0.087, rK[1] + L.shank * Math.sin(th), rK[2] - L.shank * Math.cos(th)] };
+  const fixed0 = SK.solveFrame(cap, sk, { mode: "direction", hand: "R", groundY: 0, pelvisPitchDeg: 0, noPitchSearch: true });
+  assert.ok(fixed0.clamps.some(c => c.joint === "rightHip" && c.axis === "flexion"), "upright pelvis (r1): the back thigh is clamped at hip extension");
+  const r = SK.solveFrame(cap, sk, { mode: "direction", hand: "R", groundY: 0 });
+  assert.ok(Math.abs(r.pelvisPitchPriorDeg - 15) < 0.5, "split prior = half the 30° lean: " + r.pelvisPitchPriorDeg);
+  assert.ok(r.pelvisPitchDeg >= 20 - 1e-6, "pelvis tips forward to " + r.pelvisPitchDeg);
+  assert.ok(!r.clamps.some(c => c.joint === "rightHip" && c.axis === "flexion"), "no hip-extension clamp with the pitched pelvis");
+  const a = SK.measureAngles(r.joints, sk, { pelvisPitchDeg: r.pelvisPitchDeg });
+  assert.ok(Math.abs(a.trunk.flexion - (30 - r.pelvisPitchDeg)) < 1.5, "thorax flexion = lean − pitch: " + a.trunk.flexion);
+  assert.equal(SK.violations(a, SK.ranges(null, "R", sk)).length, 0);
 });
 
 test("far limb behind the torso: seen from the player's right, the LEFT upper arm is drawn before the torso", () => {

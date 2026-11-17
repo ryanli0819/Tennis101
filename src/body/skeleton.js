@@ -10,6 +10,10 @@
      L_2D = L_3D cos θ  →  dz = ±sqrt(L² − L_2D²); the sign is chosen by the joint limits, then the depth hint,
      then continuity with the previous frame.
    - Pelvis and thorax are solved separately (waist rotation = thorax yaw about the spine relative to the pelvis).
+   - r2 (RETURN of r1): the pelvis also PITCHES (anterior/posterior tilt), solved with the yaw as the root rotation; hip and
+     trunk angles are measured against the pitched pelvis; pelvis.tiltObliquity is a NULL row, so the pitch is not clamped.
+   - r2: a leg whose captured ankle is in the air takes its bones' directions from the capture (direction mode) or the cos
+     rule (image mode); IK to the captured ankle is kept only for a planted foot (see AIR_LO_M / AIR_HI_M).
    - Hinges (knee, elbow) bend one way: the knee folds toward the back of the thigh, with the kneecap direction set
      by hip rotation, so a sideways/forward knee would need an impossible hip rotation and is clamped.
    - segmentsInDrawOrder(): far-to-near order of limb segments and the torso for any camera, so a folded calf is
@@ -100,14 +104,27 @@
     return add(add(mul(v, c), mul(cross(axis, v), s)), mul(axis, dot(axis, v) * (1 - c)));
   }
   const UP = [0, 1, 0];
+  const smooth01 = x => { const u = Math.max(0, Math.min(1, x)); return u * u * (3 - 2 * u); };
+  /* Captured ankle height above the court where a foot counts as in the air (GAME-DESIGN): below AIR_LO_M the leg is IK'd to
+     the captured ankle (planted foot), above AIR_HI_M each leg bone takes its captured direction, blended in between.
+     A standing ankle joint sits ~0.07–0.09 m up (ESTIMATED), a raised heel ~0.12–0.15 m. */
+  const AIR_LO_M = 0.15, AIR_HI_M = 0.30;
   const mid = (a, b) => mul(add(a, b), 0.5);
 
   /* ---------- joint-angle maths (shared by the solver and the checker) ---------- */
-  function pelvisFrame(lh, rh) {
+  /* Pelvis frame. R = left→right hip. pitchDeg = pelvic tilt about R (+ = anterior: the pelvis's up axis tips forward).
+     r1 had no pitch (U = world up ⊥ R). r2 (RETURN fix 1): pitch is part of the root rotation, solved in solveFrame;
+     hip and trunk angles are measured against the pitched frame. pelvis.tiltObliquity is a NULL row in
+     datasets/anatomy/joints.json, so the pitch has NO clamp; PELVIS_PITCH_MIN/MAX only bound the search (GAME-DESIGN). */
+  function pelvisFrame(lh, rh, pitchDeg = 0) {
     const R = unit(sub(rh, lh), [1, 0, 0]);
-    const U = unit(perp(UP, R), UP);
-    return { R, U, F: cross(R, U) };
+    const U0 = unit(perp(UP, R), UP), F0 = cross(R, U0), a = (pitchDeg || 0) * D2R;
+    const U = pitchDeg ? unit(add(mul(U0, Math.cos(a)), mul(F0, Math.sin(a)))) : U0;
+    return { R, U, F: cross(R, U), pitchDeg: pitchDeg || 0 };
   }
+  /* Sagittal trunk lean vs an UNPITCHED pelvis frame (deg, + = forward): the quantity fix 1 splits between pelvic tilt
+     and thorax.flexionExtension. Measured on the capture's own hip line and shoulder midpoint. */
+  function trunkLeanDeg(lh, rh, sm) { const P = pelvisFrame(lh, rh, 0), t = unit(sub(sm, mid(lh, rh))); return Math.atan2(dot(t, P.F), dot(t, P.U)) * R2D; }
   function trunkAngles(t, P) { return { flexion: Math.atan2(dot(t, P.F), dot(t, P.U)) * R2D, sideBend: Math.asin(clamp(dot(t, P.R), -1, 1)) * R2D }; }
   function trunkFromAngles(fl, sb, P) {
     const a = fl * D2R, b = sb * D2R;
@@ -140,12 +157,12 @@
   const fromTwist = (tw, r0, oo) => add(mul(r0, Math.cos(tw * D2R)), mul(oo, Math.sin(tw * D2R)));
 
   /* All joint angles of a solved pose (local metres). Returns { name: { axis: deg } } with null where undefined. */
-  function measureAngles(J, sk) {
+  function measureAngles(J, sk, o = {}) {   // o.pelvisPitchDeg: the solved pelvic tilt (not observable from two hip points; 0 for a raw capture)
     const out = {};
-    const P = pelvisFrame(J.leftHip, J.rightHip), hm = mid(J.leftHip, J.rightHip), sm = mid(J.leftShoulder, J.rightShoulder);
+    const P = pelvisFrame(J.leftHip, J.rightHip, o.pelvisPitchDeg || 0), hm = mid(J.leftHip, J.rightHip), sm = mid(J.leftShoulder, J.rightShoulder);
     const t = unit(sub(sm, hm)), Rt = unit(perp(sub(J.rightShoulder, J.leftShoulder), t));
     out.trunk = { ...trunkAngles(t, P), rotation: waistRotation(t, Rt, P) };
-    out.pelvis = { yawDeg: Math.atan2(P.R[2], P.R[0]) * R2D };   // reported only (pelvis.axialRotation ESTIMATED, not clamped)
+    out.pelvis = { yawDeg: Math.atan2(P.R[2], P.R[0]) * R2D, pitchDeg: P.pitchDeg };   // reported only: pelvis.axialRotation ESTIMATED and pelvis.tiltObliquity NULL — neither is clamped
     const T = thoraxFrame(t, Rt);
     if (J.nose) { const n = unit(sub(J.nose, sm)); out.neck = { flexion: Math.atan2(dot(n, T.F), dot(n, T.U)) * R2D - sk.neckNeutralDeg, sideBend: Math.asin(clamp(dot(n, T.R), -1, 1)) * R2D }; }
     for (const s of ["left", "right"]) {
@@ -179,7 +196,7 @@
     "ankle.inversionEversion": "ESTIMATED row; needs foot width (heel/toe of one foot give no inversion axis reliably) — not solved, not clamped",
     "neck.axialRotation": "needs a face plane; one nose point gives no head yaw — not solved, not clamped",
     "pelvis.axialRotation": "ESTIMATED row (pelvis vs ground/feet). The pelvis is the free root; its yaw is measured and reported, NOT clamped (clamping it would re-solve the feet on the ground) — known gap",
-    "pelvis.tiltObliquity": "null row: NO clamp (pelvic tilt is also not observable from two hip points)",
+    "pelvis.tiltObliquity": "null row: NO clamp. Pelvic tilt is not observable from two hip points, so r2 SOLVES the sagittal tilt (pitch) as part of the root rotation (solveFrame: split prior + search, GAME-DESIGN) and reports it per frame (angles.pelvis.pitchDeg, result.pelvisPitchDeg); obliquity is not solved",
     "shoulder.horizontalAbductionAdduction": "null row: NO clamp",
     "knee.flexionExtension(min)": "hyperextension (−1°) is not observable from three points (angle 0..180); only the flexion max is enforced",
     "elbow.flexionExtension(min)": "hyperextension (−0.8°) not observable from three points; only the flexion max is enforced",
@@ -229,7 +246,7 @@
   }
   /* Choose among candidates: least clamping (degrees) → depth-hint sign → previous frame's sign → +. */
   function pick(cands, cost, prevSign) {
-    if (cands.length === 1) return { ...cands[0], ...cost(cands[0].d) };
+    if (cands.length === 1) { const c = { ...cands[0], ...cost(cands[0].d) }; return { ...c, all: [{ sign: c.sign || 0, hint: c.hint || 0, clampDeg: c.clampDeg }], why: "single" }; }
     const r = cands.map(c => ({ ...c, ...cost(c.d) }));
     r.sort((A, B) => {
       if (Math.abs(A.clampDeg - B.clampDeg) > 1) return A.clampDeg - B.clampDeg;
@@ -238,7 +255,9 @@
       if (prevSign) return (B.sign === prevSign) - (A.sign === prevSign);
       return B.sign - A.sign;
     });
-    return r[0];
+    // why the winner won (depth-sign audit, RETURN fix 2): "clamp" = the other sign clamps > 1° more; else hint / prev / default
+    const w = r[0], o = r[1], why = Math.abs(w.clampDeg - o.clampDeg) > 1 ? "clamp" : (w.hint ? "hint" : (prevSign ? "prev" : "default"));
+    return { ...w, all: r.map(c => ({ sign: c.sign, hint: c.hint || 0, clampDeg: c.clampDeg })), why };
   }
 
   /* Two-bone IK with fixed lengths (skill §1: solve angles, never stretch): the middle joint sits in the plane of
@@ -262,23 +281,52 @@
      cost = total clamping (deg) + YAW_COST_PER_M × mean joint displacement from the capture (m) + |δ| × YAW_COST_PER_DEG.
      The weights are GAME-DESIGN (1 cm of displacement ≈ 1° of clamping; 0.05 per degree of turn so ties keep the capture). */
   const PELVIS_YAW_TRIES = [0, -10, 10, -20, 20, -30, 30, -45, 45, -60, 60], YAW_COST_PER_M = 100, YAW_COST_PER_DEG = 0.05;
+  /* PELVIS PITCH IS SOLVED TOO (r2, RETURN fix 1). Two hip points give no pelvic tilt, so it is a free part of the root
+     rotation, like the yaw. Rule (GAME-DESIGN, stated in JOINT_LIMITS.md):
+     - split prior: the capture's sagittal trunk lean λ (shoulder midpoint vs hip midpoint, against an upright pelvis) is
+       split PITCH_SPLIT = 0.5 to the pelvis (θ0 = 0.5 λ) and the rest to thorax.flexionExtension (trunk vs pitched pelvis);
+     - search: after the yaw search, θ = θ0 + PITCH_OFFSETS and θ_prev + steps are tried at the winning yaw and at yaw 0, same cost as
+       the yaw plus |θ − θ0| × PITCH_COST_PER_DEG, so the pelvis tips only where that cuts clamping clearly (e.g. a back leg
+       past hip extension) and drifts back to the split prior otherwise;
+     - no snapping (skill §2): with a previous frame, |θ − θ_prev| ≤ PITCH_RATE_DEG_S × dt (dt from the frame times; 5° per
+       frame if unknown);
+     - θ stays within PELVIS_PITCH_MIN..MAX (search bound only; pelvis.tiltObliquity is a NULL row: NO clamp, not a limit). */
+  const PITCH_SPLIT = 0.5, PITCH_OFFSETS = [-20, -10, -5, 5, 10, 20, 30, 40], PITCH_COST_PER_DEG = 0.25, PITCH_RATE_DEG_S = 300, PELVIS_PITCH_MIN = -30, PELVIS_PITCH_MAX = 60;
   function solveFrame(cap, sk, opts = {}) {
-    if (opts.noYawSearch) return solveFrameSigns(cap, sk, opts);
+    const lh = cap.leftHip, rh = cap.rightHip, z0 = p => [p[0], p[1], p[2] || 0];
+    const smC = cap.leftShoulder && cap.rightShoulder ? mid(z0(cap.leftShoulder), z0(cap.rightShoulder)) : null;
+    const lean = smC ? trunkLeanDeg(z0(lh), z0(rh), smC) : 0;
+    const theta0 = opts.pelvisPitchDeg != null ? opts.pelvisPitchDeg : clamp(PITCH_SPLIT * lean, PELVIS_PITCH_MIN, PELVIS_PITCH_MAX);
+    const fin = r => { r.trunkLeanCapturedDeg = lean; r.pelvisPitchPriorDeg = theta0; return r; };
+    if (opts.noYawSearch) return fin(Object.assign(solveFrameSigns(cap, sk, { ...opts, pelvisPitchDeg: theta0 }), { pelvisYawSolvedDeg: 0 }));
     let best = null;
-    const lh = cap.leftHip, rh = cap.rightHip;
-    for (const dDeg of PELVIS_YAW_TRIES) {
+    const prevPitch = opts.prev && opts.prev.pelvisPitchDeg != null ? opts.prev.pelvisPitchDeg : null;
+    const dt = opts.t != null && opts.prev && opts.prev.t != null ? Math.abs(opts.t - opts.prev.t) : null;
+    const maxStep = prevPitch == null ? Infinity : (dt != null && dt > 0 ? Math.max(0.5, PITCH_RATE_DEG_S * dt) : 5);
+    const lim = th => prevPitch == null ? th : clamp(th, prevPitch - maxStep, prevPitch + maxStep);
+    const th1 = clamp(lim(theta0), PELVIS_PITCH_MIN, PELVIS_PITCH_MAX);
+    const tryOne = (dDeg, pitch) => {
       let c2 = cap;
       if (dDeg) {
         const a = dDeg * D2R, cx = (lh[0] + rh[0]) / 2, cz = ((lh[2] || 0) + (rh[2] || 0)) / 2, rot = p => p && [cx + (p[0] - cx) * Math.cos(a) + ((p[2] || 0) - cz) * Math.sin(a), p[1], p[2] == null ? null : cz - (p[0] - cx) * Math.sin(a) + ((p[2] || 0) - cz) * Math.cos(a)];
         c2 = { ...cap, leftHip: rot(lh), rightHip: rot(rh) };
         if (lh[2] == null) { c2.leftHip[2] = null; c2.rightHip[2] = null; }   // 2D clips: only the image-plane part turns
       }
-      const r = solveFrameSigns(c2, sk, opts);
+      const r = solveFrameSigns(c2, sk, { ...opts, pelvisPitchDeg: pitch });
       let mv = 0, n = 0; for (const k in r.joints) { const C = cap[k]; if (!C) continue; mv += Math.hypot(r.joints[k][0] - C[0], r.joints[k][1] - C[1], C[2] == null ? 0 : r.joints[k][2] - C[2]); n++; }
       r.pelvisYawSolvedDeg = dDeg;
-      r.cost = r.clamps.reduce((a, c) => a + Math.abs(c.captured - c.solved), 0) + YAW_COST_PER_M * mv / Math.max(1, n) + Math.abs(dDeg) * YAW_COST_PER_DEG;
+      r.cost = r.clamps.reduce((a, c) => a + Math.abs(c.captured - c.solved), 0) + YAW_COST_PER_M * mv / Math.max(1, n) + Math.abs(dDeg) * YAW_COST_PER_DEG + Math.abs(pitch - theta0) * PITCH_COST_PER_DEG;
       if (!best || r.cost < best.cost - 1e-9) best = r;
-    }
+    };
+    for (const dDeg of PELVIS_YAW_TRIES) tryOne(dDeg, th1);
+    // the pitch only changes angles measured in the pelvis frame (hips, trunk): with none of those clamped and θ already at
+    // the prior, no other θ can lower the cost, so the search is skipped (speed; same result)
+    const pitchMatters = best.clamps.some(c => /Hip$|^trunk$/.test(c.joint)) || Math.abs(th1 - theta0) > 1e-9;
+    if (!opts.noPitchSearch && pitchMatters) { const y = best.pelvisYawSolvedDeg;
+      const ths = new Set(PITCH_OFFSETS.map(o => theta0 + o));
+      if (prevPitch != null) for (const f of [-1, -0.5, 0, 0.5, 1]) ths.add(prevPitch + f * Math.min(maxStep, 40));
+      for (const yy of y ? [y, 0] : [0]) for (const th0 of ths) { const th = clamp(lim(th0), PELVIS_PITCH_MIN, PELVIS_PITCH_MAX); if (Math.abs(th - th1) > 1e-9) tryOne(yy, th); } }
+    fin(best);
     // moved is always measured against the ORIGINAL capture
     for (const k in best.joints) { const C = cap[k]; if (!C) continue; best.moved[k] = { xy: Math.hypot(best.joints[k][0] - C[0], best.joints[k][1] - C[1]), xyz: C[2] == null ? null : Math.hypot(best.joints[k][0] - C[0], best.joints[k][1] - C[1], best.joints[k][2] - C[2]) }; }
     return best;
@@ -304,7 +352,7 @@
   }
   function solveFrameOnce(cap, sk, opts = {}) {
     const mode = opts.mode || "direction", prev = opts.prev || null, L = sk.L, rg = ranges(sk.limits || LIMT(), opts.hand, sk);
-    const clamps = [], signs = {}, J = {}; let front = null;
+    const clamps = [], signs = {}, J = {}, legSolve = {}, picks = {}; let front = null;
     const prevSign = k => prev && prev.signs ? prev.signs[k] : 0;
     const note = (joint, axis, captured, solved) => { if (Math.abs(captured - solved) > 1e-9) clamps.push({ joint, axis, captured, solved }); };
     const cl = (joint, axis, v, r) => { const c = clamp(v, r[0], r[1]); note(joint, axis, v, c); return c; };
@@ -320,7 +368,7 @@
     const pc = pick(forceC(candidates(imgVec("leftHip", "rightHip"), L.pelvis, mode), opts.forcePelvis), () => ({ clampDeg: 0 }), prevSign("pelvis"));
     signs.pelvis = pc.sign || 0;
     J.leftHip = sub(c, mul(pc.d, L.pelvis / 2)); J.rightHip = add(c, mul(pc.d, L.pelvis / 2));
-    const P = pelvisFrame(J.leftHip, J.rightHip);
+    const P = pelvisFrame(J.leftHip, J.rightHip, opts.pelvisPitchDeg || 0);
 
     // 2. TRUNK (spine): flexion / side bend in the pelvis frame
     const smCap = mid(get("leftShoulder"), get("rightShoulder"));
@@ -395,8 +443,19 @@
       // 6. LEG: hip (ball: flexion/abduction + rotation via the kneecap), knee (hinge, folds backward), ankle
       const Oh = side === "right" ? P.R : mul(P.R, -1), Hp = J[side + "Hip"];
       const hipCost = a => { const h = hipAngles(a, P, Oh), r = rg.hip; return { clampDeg: Math.max(0, r.flexion[0] - h.flexion, h.flexion - r.flexion[1]) + Math.max(0, r.abduction[0] - h.abduction, h.abduction - r.abduction[1]) }; };
-      const legIK = has3(side + "Knee", side + "Ankle") ? ik2(Hp, L.thigh, L.shank, get(side + "Ankle"), get(side + "Knee"), P.F) : null;
-      const thc = legIK ? { d: unit(sub(legIK, Hp)) } : pick(candidates(imgVec(side + "Hip", side + "Knee"), L.thigh, mode), hipCost, prevSign(side + "Thigh")); signs[side + "Thigh"] = thc.sign || 0;
+      /* r2 (RETURN, root cause): r1 always ran two-bone IK to the CAPTURED ANKLE when knee and ankle had depth. On a clip whose
+         leg bones are far shorter than the fixed ones (alcaraz-poetry landing: captured hip→ankle 0.15–0.25 m), the fixed
+         bones can only reach that ankle by folding the knee to the limit and swinging it 0.20–0.27 m off the captured knee,
+         forward of the hip (hip flexion the capture does not have). IK is right for a PLANTED foot (it keeps the foot on the
+         court); a foot in the air has no position to keep. So: weight w = smoothstep of the captured ankle height above the
+         court from AIR_LO_M to AIR_HI_M (GAME-DESIGN). w = 0 → r1's IK; w = 1 → each bone takes its own captured direction
+         (direction mode) or the cos rule with the capture's depth sign as the hint (image mode, pick()); in between the two
+         directions are blended and renormalised (lengths stay fixed). Every angle then goes through the same clamps. */
+      const capAn = get(side + "Ankle"), airW = capAn && opts.groundY != null ? smooth01((capAn[1] - opts.groundY - AIR_LO_M) / (AIR_HI_M - AIR_LO_M)) : 1;
+      const legIK = has3(side + "Knee", side + "Ankle") && airW < 1 ? ik2(Hp, L.thigh, L.shank, capAn, get(side + "Knee"), P.F) : null;
+      const thP = legIK && airW <= 0 ? null : pick(candidates(imgVec(side + "Hip", side + "Knee"), L.thigh, mode), hipCost, prevSign(side + "Thigh"));
+      const thc = !legIK ? thP : !thP ? { d: unit(sub(legIK, Hp)) } : { d: unit(add(mul(unit(sub(legIK, Hp)), 1 - airW), mul(thP.d, airW))), sign: thP.sign };
+      signs[side + "Thigh"] = thc.sign || 0; legSolve[side] = { airW, ik: !!legIK }; if (thP) picks[side + "Thigh"] = { all: thP.all, sign: thP.sign || 0, why: thP.why || "single", w: airW };
       const ha = hipAngles(thc.d, P, Oh);
       const hf = cl(side + "Hip", "flexion", ha.flexion, rg.hip.flexion), hb = cl(side + "Hip", "abduction", ha.abduction, rg.hip.abduction);
       const a = unit(hipFromAngles(hf, hb, P, Oh)), Kn = add(Hp, mul(a, L.thigh)); J[side + "Knee"] = Kn;
@@ -404,7 +463,9 @@
       const kneeCost = s => { const kf = angBetween(a, s), bk = perp(s, a); let c2 = Math.max(0, kf - rg.knee.flexion[1]);
         if (kf >= 15 && len(bk) > 1e-6) { const tw2 = twistOf(mul(unit(bk), -1), refs.r0, refs.oo); c2 += Math.max(0, rg.hip.rotation[0] - tw2, tw2 - rg.hip.rotation[1]); }
         return { clampDeg: c2 }; };
-      const skc = legIK ? { d: unit(sub(get(side + "Ankle"), Kn)) } : pick(candidates(imgVec(side + "Knee", side + "Ankle"), L.shank, mode), kneeCost, prevSign(side + "Shank")); signs[side + "Shank"] = skc.sign || 0;
+      const shP = legIK && airW <= 0 ? null : pick(candidates(imgVec(side + "Knee", side + "Ankle"), L.shank, mode), kneeCost, prevSign(side + "Shank"));
+      const skc = !legIK ? shP : !shP ? { d: unit(sub(capAn, Kn)) } : { d: unit(add(mul(unit(sub(capAn, Kn)), 1 - airW), mul(shP.d, airW))), sign: shP.sign };
+      signs[side + "Shank"] = skc.sign || 0; if (shP) picks[side + "Shank"] = { all: shP.all, sign: shP.sign || 0, why: shP.why || "single", w: airW };
       const kf = cl(side + "Knee", "flexion", angBetween(a, skc.d), rg.knee.flexion);
       let bk = perp(skc.d, a), kc;
       if (kf >= 15 && len(bk) > 1e-6) {
@@ -440,7 +501,7 @@
     const moved = {};
     for (const n in J) { const C = get(n); if (!C) continue;
       moved[n] = { xy: Math.hypot(J[n][0] - C[0], J[n][1] - C[1]), xyz: C[2] == null ? null : Math.hypot(J[n][0] - C[0], J[n][1] - C[1], J[n][2] - C[2]) }; }
-    return { joints: J, clamps, moved, signs, front, hipMid: cL, shoulderMid: smL, lift, toeBelow };
+    return { joints: J, clamps, moved, signs, front, hipMid: cL, shoulderMid: smL, lift, toeBelow, pelvisPitchDeg: P.pitchDeg, legSolve, picks };
   }
 
   /* boneLengths of a pose: { boneName: metres } */
@@ -460,7 +521,7 @@
   }
   function solveMotion(m, sk, opts = {}) {
     const res = []; let prev = null;
-    for (const f of m.frames) { const r = solveFrame(frameToLocal(f, sk.heightM), sk, { hand: m.hand || "R", groundY: 0, ...opts, prev }); r.t = f.t; res.push(r); prev = r; }
+    for (const f of m.frames) { const r = solveFrame(frameToLocal(f, sk.heightM), sk, { hand: m.hand || "R", groundY: 0, ...opts, prev, t: f.t }); r.t = f.t; res.push(r); prev = r; }
     return res;
   }
 
@@ -595,7 +656,7 @@
     const fwd = near, cap = {};
     for (const n in W) { const v = W[n]; if (v && typeof v.x === "number") cap[n] = [(v.x - p.x) * sR, v.z, (v.y - p.y) * fwd]; }
     const mode = mo && mo.m && mo.m.measuredDepth ? "direction" : "image";
-    const r = solveFrame(cap, sk, { mode, groundY: 0, prev: st.prev, hand: (mo && mo.m && mo.m.hand) || (player.lefty ? "L" : "R") }); st.prev = r;
+    const r = solveFrame(cap, sk, { mode, groundY: 0, prev: st.prev, t, hand: (mo && mo.m && mo.m.hand) || (player.lefty ? "L" : "R") }); r.t = t; st.prev = r;
     const delta = {}, toW = q => ({ x: p.x + q[0] * sR, y: p.y + q[2] * fwd, z: q[1] });
     for (const n in r.joints) { const w = toW(r.joints[n]), o = W[n]; if (!o) continue; delta[n] = { x: w.x - o.x, y: w.y - o.y, z: w.z - o.z }; o.x = w.x; o.y = w.y; o.z = w.z; }
     const follow = { leftEar: "nose", rightEar: "nose", head: "nose", leftEye: "nose", rightEye: "nose", leftHeel: "leftAnkle", rightHeel: "rightAnkle",
@@ -614,7 +675,7 @@
     return delta;
   }
 
-  const API = { PELVIS_YAW_TRIES, YAW_COST_PER_M, YAW_COST_PER_DEG, SKELETONS, NOSE_TO_ANKLE_H, scaleK, BONE_DEFS, SEGMENTS, skeletonFor, solveFrame, solveMotion, measureAngles, ranges, violations, boneLengths, boneKey,
+  const API = { PELVIS_YAW_TRIES, YAW_COST_PER_M, YAW_COST_PER_DEG, PITCH_SPLIT, PITCH_OFFSETS, PITCH_COST_PER_DEG, PITCH_RATE_DEG_S, PELVIS_PITCH_MIN, PELVIS_PITCH_MAX, AIR_LO_M, AIR_HI_M, pelvisFrame, trunkLeanDeg, SKELETONS, NOSE_TO_ANKLE_H, scaleK, BONE_DEFS, SEGMENTS, skeletonFor, solveFrame, solveMotion, measureAngles, ranges, violations, boneLengths, boneKey,
     frameToLocal, measureBoneRatios, measureNeckNeutral, measureAnkleNeutral, segmentsInDrawOrder, orthoCamera, lookAtCamera, gameCamera, fitWorld, UNOBSERVED, limitsTable: LIMT };
   if (typeof module === "object" && module.exports) module.exports = API;
   root.BodySkeleton = API;
