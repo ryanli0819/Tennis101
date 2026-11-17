@@ -909,6 +909,8 @@ function drawCapturedFigure(i, p, W) {
       const faceOff = Math.hypot(fc.x - c.x, fc.y - c.y);
       // the face shows only on the camera's side of the skull (a sliver past side-on reads as a profile); from behind: hair / cap
       const seeFace = nearer(facePt, center, R * 0.3); void faceOff;
+      SegmentPaint.lastHead = SegmentPaint.lastHead || {};   // evidence read-out only (no game state): which way the painted face points
+      SegmentPaint.lastHead[i + "|" + (SegmentPaint.viewOverride || (b === ictx ? "inset" : "main"))] = { fx: +hfx.toFixed(3), fy: +hfy.toFixed(3), seeFace, flipS };
       if (seeFace) {
         b.save(); b.beginPath(); b.arc(c.x, c.y, rad * 0.98, 0, Math.PI * 2); b.clip();
         b.fillStyle = skin; b.beginPath(); b.arc(fc.x, fc.y, rad * 0.74, 0, Math.PI * 2); b.fill();
