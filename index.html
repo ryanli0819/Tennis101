@@ -412,6 +412,12 @@ let b = bMain;                                           // the context every dr
 /* ACTOR LAYER: players, rackets, net and ball are drawn at AS× the court's pixel resolution, so characters get
    real detail while the world keeps its chunky pixel look. Same coordinates (scaled by a transform). */
 const AS = 3;
+/* PX: design-pixel scale in buffer units, picked from the visible-canvas backing store.
+   Backing is W·min(devicePixelRatio, 2); CSS size stays W×H. PX is 2 only when that backing is 2×
+   and the FPS tier is not 30; otherwise PX is 1 (main's buffers). Final blit is ~1:1
+   (1281→1280 at DPR 1, 2562→2560 at DPR 2 — the same 1–2 px crop as 4ba74ac).
+   The 30-FPS tier drops to the 1× buffer to cut fill rate. px is CSS pixels per buffer pixel (basePx / PX). */
+let PX = 1, px = 3, fpsTier = 120, dpr = 1, cssW = 0, cssH = 0;
 const abuf = document.createElement("canvas"), actx = abuf.getContext("2d");
 const q = v => Math.round(v * AS) / AS;                  // snap to the actor layer's finer pixel grid
 let BW = 320, BH = 200, F = 150, HZ = 60;
@@ -450,9 +456,13 @@ function updateCamera(dt) {
 
 function resize() {
   const W = innerWidth, H = innerHeight;
-  const px = W < 700 ? 2 : 3;               // size of one "pixel"
-  canvas.width = W; canvas.height = H;
-  BW = Math.ceil(W / px); BH = Math.ceil(H / px);
+  dpr = Math.min(devicePixelRatio || 1, 2); // cap at 2: that's the 2× quality backing
+  const basePx = W < 700 ? 2 : 3;           // original CSS pixels per design pixel (4ba74ac)
+  PX = (fpsTier === 30 || dpr < 2) ? 1 : 2; // 2× buffers only on a 2× backing; 1× at DPR 1 and at the 30 tier
+  px = basePx / PX;
+  cssW = W; cssH = H;
+  canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);   // backing in device px; CSS stays 100%×100%
+  BW = Math.ceil(W / basePx) * PX; BH = Math.ceil(H / basePx) * PX;           // main's buffers at PX=1; exact 2× at PX=2
   buf.width = BW; buf.height = BH;
   abuf.width = BW * AS; abuf.height = BH * AS;
   F = Math.min(BW * 0.63, BH * 0.95);
@@ -507,16 +517,16 @@ function crowdPattern(surface, big) {
   const key = surface + (big ? "B" : "S");
   if (crowdPatterns[key]) return crowdPatterns[key];
   const sc = SCENES[surface], c = document.createElement("canvas");
-  const cw = big ? 3 : 2, ch = big ? 5 : 3, cols = 16, rows = 4;          // one person = cw × ch pixels
+  const s = PX, cw = (big ? 3 : 2) * s, ch = (big ? 5 : 3) * s, cols = 16, rows = 4;   // one person = cw × ch buffer px (scaled so CSS size holds at 2×)
   c.width = cw * cols; c.height = ch * rows;
   const g = c.getContext("2d"); let seed = surface.length * 97 + (big ? 13 : 7);
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, pick = a => a[rnd() * a.length | 0];
   g.fillStyle = sc.stands; g.fillRect(0, 0, c.width, c.height);
   for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
-    const x = q * cw + (r % 2 ? 1 : 0), y = r * ch;                      // alternate rows sit offset, like real seats
-    g.fillStyle = pick(sc.crowd); g.fillRect(x, y + (big ? 2 : 1), cw, ch - (big ? 3 : 1));   // shoulders
+    const x = q * cw + (r % 2 ? s : 0), y = r * ch;                      // alternate rows sit offset, like real seats
+    g.fillStyle = pick(sc.crowd); g.fillRect(x, y + (big ? 2 : 1) * s, cw, ch - (big ? 3 : 1) * s);   // shoulders
     g.fillStyle = rnd() < 0.25 ? pick(["#2a1c14", "#5a4232", "#c9b48a", "#1b1b1f"]) : pick(sc.skin);
-    g.fillRect(x + (big ? 1 : 0), y + (big ? 0 : 0), big ? 1 : 1, big ? 2 : 1);              // head (hair or skin)
+    g.fillRect(x + (big ? 1 : 0) * s, y, 1 * s, (big ? 2 : 1) * s);                    // head (hair or skin)
   }
   return (crowdPatterns[key] = b.createPattern(c, "repeat"));
 }
@@ -540,12 +550,12 @@ function drawStadium() {
     b.beginPath(); pts.forEach((p, i) => (i ? b.lineTo(p.x, p.y) : b.moveTo(p.x, p.y))); b.closePath(); b.fill();
     if (q.k >= 0 && q.k < S.tiers) {                     // upper tiers sit in shade; a dark line marks each row's front edge
       b.fillStyle = `rgba(0,0,0,${(sc.shade * q.k / S.tiers).toFixed(3)})`; b.fill();
-      b.strokeStyle = "rgba(0,0,0,0.28)"; b.lineWidth = 1; b.beginPath(); b.moveTo(pts[0].x, pts[0].y); b.lineTo(pts[1].x, pts[1].y); b.stroke();
+      b.strokeStyle = "rgba(0,0,0,0.28)"; b.lineWidth = PX; b.beginPath(); b.moveTo(pts[0].x, pts[0].y); b.lineTo(pts[1].x, pts[1].y); b.stroke();
     }
-    if (q.k === -1) { b.strokeStyle = sc.trim; b.lineWidth = 1; b.beginPath(); b.moveTo(pts[3].x, pts[3].y); b.lineTo(pts[2].x, pts[2].y); b.stroke(); }
+    if (q.k === -1) { b.strokeStyle = sc.trim; b.lineWidth = PX; b.beginPath(); b.moveTo(pts[3].x, pts[3].y); b.lineTo(pts[2].x, pts[2].y); b.stroke(); }
     if (q.k === S.tiers && sc.lights && q.j % 6 === 0) { // floodlights along the roof (night session)
-      const m = pts[3]; b.fillStyle = "#fff6c8"; b.fillRect(Math.round(m.x) - 2, Math.round(m.y) - 1, 4, 2);
-      b.fillStyle = "rgba(255,246,200,0.10)"; b.fillRect(Math.round(m.x) - 6, Math.round(m.y) - 3, 12, 6);
+      const m = pts[3], s = PX; b.fillStyle = "#fff6c8"; b.fillRect(Math.round(m.x) - 2 * s, Math.round(m.y) - 1 * s, 4 * s, 2 * s);
+      b.fillStyle = "rgba(255,246,200,0.10)"; b.fillRect(Math.round(m.x) - 6 * s, Math.round(m.y) - 3 * s, 12 * s, 6 * s);
     }
   }
 }
@@ -559,7 +569,9 @@ function line(x1, y1, x2, y2, w = 0.05) {
   const a = proj(x1 - w, y1), c = proj(x2 + w, y2), a2 = proj(x1 + w, y1), c2 = proj(x2 - w, y2);
   // draw as thin quad so far lines stay ~1px
   const p1 = proj(x1, y1), p2 = proj(x2, y2);
-  b.strokeStyle = "#f4f6f8"; b.lineWidth = 1; b.beginPath(); b.moveTo(Math.round(p1.x) + .5, Math.round(p1.y) + .5); b.lineTo(Math.round(p2.x) + .5, Math.round(p2.y) + .5); b.stroke();
+  b.strokeStyle = "#f4f6f8"; b.lineWidth = PX; b.beginPath();
+  const snap = PX % 2 ? 0.5 : 0;                           // odd widths center on a pixel; even widths on the grid (avoids AA fringe at 2×)
+  b.moveTo(Math.round(p1.x) + snap, Math.round(p1.y) + snap); b.lineTo(Math.round(p2.x) + snap, Math.round(p2.y) + snap); b.stroke();
 }
 
 /* Court surfaces. Colours here; pace (ball speed after the bounce) and bounce height used by the point flow.
@@ -609,7 +621,7 @@ function drawShadows() {
         ["rightShoulder", "rightElbow"], ["rightElbow", "rightWrist"], ["neck", "nose"]];
       for (const d of L.shadows) {
         const at = n => W[n] && proj(W[n].x + d.x * W[n].z, W[n].y + d.y * W[n].z);
-        b.strokeStyle = `rgba(8,12,24,${d.a})`; b.lineCap = "round"; b.lineWidth = Math.max(1, proj(pos[i].x, pos[i].y).s * 0.16);
+        b.strokeStyle = `rgba(8,12,24,${d.a})`; b.lineCap = "round"; b.lineWidth = Math.max(PX, proj(pos[i].x, pos[i].y).s * 0.16);
         b.beginPath();
         for (const [m, n] of BONES) { const A = at(m), C = at(n); if (A && C) { b.moveTo(A.x, A.y); b.lineTo(C.x, C.y); } }
         b.stroke();
@@ -636,7 +648,7 @@ function drawShadows() {
 /* Sunshine: a warm grade over the whole picture and a soft glow from where the sun is (daytime courts only). */
 function drawSunlight() {
   const L = LIGHT(); if (!L.sun) return;
-  const W = canvas.width, H = canvas.height;
+  const W = cssW, H = cssH;                  // CSS pixels: ctx is already scaled by dpr, so the wash stays the same on-screen size
   ctx.save();
   ctx.globalCompositeOperation = "soft-light"; ctx.fillStyle = `rgba(255,196,110,${L.warm})`; ctx.fillRect(0, 0, W, H);
   ctx.globalCompositeOperation = "screen";
@@ -651,11 +663,11 @@ function drawNet() {
   const lb = proj(-post, 0, 0), rb = proj(post, 0, 0), lt = proj(-post, 0, hp), rt = proj(post, 0, hp), ct = proj(0, 0, hc), cb = proj(0, 0, 0);
   b.fillStyle = "rgba(20,26,36,0.62)";
   b.beginPath(); b.moveTo(lb.x, lb.y); b.lineTo(lt.x, lt.y); b.lineTo(ct.x, ct.y); b.lineTo(rt.x, rt.y); b.lineTo(rb.x, rb.y); b.closePath(); b.fill();
-  b.strokeStyle = "rgba(200,210,225,0.18)"; b.lineWidth = 1;
+  b.strokeStyle = "rgba(200,210,225,0.18)"; b.lineWidth = PX;
   for (let i = 1; i < 6; i++) { const t = i / 6; b.beginPath(); b.moveTo(lb.x, lb.y + (lt.y - lb.y) * t); b.lineTo(cb.x, cb.y + (ct.y - cb.y) * t); b.lineTo(rb.x, rb.y + (rt.y - rb.y) * t); b.stroke(); }
-  b.strokeStyle = "#f4f6f8"; b.lineWidth = 2;
+  b.strokeStyle = "#f4f6f8"; b.lineWidth = 2 * PX;
   b.beginPath(); b.moveTo(lt.x, lt.y); b.lineTo(ct.x, ct.y); b.lineTo(rt.x, rt.y); b.stroke();
-  b.fillStyle = "#c9ced8"; b.fillRect(lb.x - 1, lt.y, 2, lb.y - lt.y); b.fillRect(rb.x - 1, rt.y, 2, rb.y - rt.y);
+  b.fillStyle = "#c9ced8"; b.fillRect(lb.x - PX, lt.y, 2 * PX, lb.y - lt.y); b.fillRect(rb.x - PX, rt.y, 2 * PX, rb.y - rt.y);
 }
 
 /* Pixel player sprite, scaled from real height. facing: 1 = back to camera (near), -1 = facing camera (far) */
@@ -1328,7 +1340,7 @@ const BALL_R = 0.1;                                      // drawn radius in metr
 const BALL_R_PX_MIN = 1.6;                               // GAME-DESIGN: floor so a far ball doesn't vanish
 const BALL_R_PX_MAX = 36;                                // GAME-DESIGN: safety cap so net/pov cameras don't draw a giant ball
 // Any camera, including a future review slant camera, gets its scale through proj().s.
-function ballRadiusPx(p) { return Math.min(BALL_R_PX_MAX, Math.max(BALL_R_PX_MIN, BALL_R * p.s)); }
+function ballRadiusPx(p) { return Math.min(BALL_R_PX_MAX * PX, Math.max(BALL_R_PX_MIN * PX, BALL_R * p.s)); }  // floors in design pixels, so CSS size holds at 2×
 function drawBall(ball, inset = false) {
   const p = proj(ball.x, ball.y, ball.z), r = ballRadiusPx(p), cx = q(p.x), cy = q(p.y);
   const tr = ball._trail || (ball._trail = []);
@@ -1338,7 +1350,7 @@ function drawBall(ball, inset = false) {
       b.fillStyle = `rgba(216,238,76,${0.22 - k * 0.06})`; b.beginPath(); b.arc(q(t.x), q(t.y), r * (0.9 - k * 0.15), 0, Math.PI * 2); b.fill(); });
   if (!inset) { tr.unshift({ x: ball.x, y: ball.y, z: ball.z }); tr.length = Math.min(tr.length, 4); }
   const lx = litLeft() ? -1 : 1;
-  const R_TINY = 2.5, R_SEAM = 4.5;                      // GAME-DESIGN: under 2.5 px, skip seam/halo (they turn to mush); seam only when the two-arc curve can read
+  const R_TINY = 2.5 * PX, R_SEAM = 4.5 * PX;            // GAME-DESIGN: under 2.5 design-px, skip seam/halo (they turn to mush); seam only when the two-arc curve can read. *PX so the CSS thresholds hold on the 2× buffer.
   const th = (clock || gameT) * 11 + ball.x;                                               // the seam turns with the spin
   if (r < R_TINY) {                                      // floor-sized: solid optic-yellow disc and a one-pixel shade side
     b.fillStyle = "#d8e244"; b.beginPath(); b.arc(cx, cy, r, 0, Math.PI * 2); b.fill();
@@ -2079,20 +2091,68 @@ function retakeServe(no, call) {
 /* =====================================================================
    LOOP
    ===================================================================== */
-let last = performance.now();
+let last = performance.now(), lastDraw = 0, lastRaf = 0, fpsClimb = 0, fpsDrop = 0, fpsSticky = 0;
+const FPS_WIN = 90, fpsWork = [], fpsPaint = [], fpsRaf = [];
+const fpsTierLog = [];                                   // recent tier changes (for evidence)
+function fpsP90(a) { const s = a.slice().sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(0.9 * (s.length - 1)))]; }
+function fpsMean(a) { return a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0; }
+function adaptFps(workMs, paintMs) {
+  fpsWork.push(workMs); if (paintMs > 0) fpsPaint.push(paintMs);
+  if (fpsWork.length < FPS_WIN) return;
+  const qWork = fpsP90(fpsWork), qPaint = fpsPaint.length ? fpsP90(fpsPaint) : 0, qRaf = fpsRaf.length ? fpsP90(fpsRaf) : 0;
+  const avgPaintFps = fpsPaint.length ? 1000 / fpsMean(fpsPaint) : 0;
+  const avgRafFps = fpsRaf.length ? 1000 / fpsMean(fpsRaf) : 0;
+  fpsWork.length = 0; fpsPaint.length = 0; fpsRaf.length = 0;   // consume the window so hysteresis is in windows, not frames
+  if (fpsSticky > 0) fpsSticky--;
+  const budget = 1000 / fpsTier;
+  const workHeavy = qWork > budget * 1.15;
+  const deliveredLow = avgPaintFps < fpsTier * 0.9 || qPaint > budget * 1.15;   // measured paint-to-paint rate, not just work time
+  const next = fpsTier === 30 ? 60 : 120;
+  const workHeadroom = qWork < 1000 / next * 0.75;
+  // Paint is capped at the current tier, so climb must not use the capped interval.
+  // At 30 (~33 ms by design) judge climb on work only. At 60, use uncapped rAF to see if the display can do 120.
+  const deliveredHeadroom = fpsTier === 30 ? true : avgRafFps >= next * 0.9;
+  if (fpsTier > 30 && (workHeavy || deliveredLow)) {
+    fpsClimb = 0;
+    if (++fpsDrop >= 2) {
+      const from = fpsTier; fpsTier = fpsTier === 120 ? 60 : 30;
+      fpsDrop = 0;
+      const rec = { t: +gameT.toFixed(3), from, to: fpsTier, p90_work_ms: +qWork.toFixed(2), p90_paint_ms: +qPaint.toFixed(2), avg_paint_fps: +avgPaintFps.toFixed(2), avg_raf_fps: +avgRafFps.toFixed(2) };
+      fpsTierLog.push(rec); if (fpsTierLog.length > 40) fpsTierLog.shift();
+      console.info("[fps-tier]", from, "->", fpsTier, "p90_work_ms", rec.p90_work_ms, "p90_paint_ms", rec.p90_paint_ms, "avg_paint_fps", rec.avg_paint_fps, "avg_raf_fps", rec.avg_raf_fps);
+      if (fpsTier === 30) { fpsSticky = 8; resize(); }    // 1× buffer; sticky windows so 30↔60 cannot flap after a quality drop
+    }
+  } else if (fpsTier < 120 && workHeadroom && deliveredHeadroom && fpsSticky === 0) {
+    fpsDrop = 0;
+    if (++fpsClimb >= 2) {
+      const from = fpsTier; fpsTier = next;
+      fpsClimb = 0;
+      const rec = { t: +gameT.toFixed(3), from, to: fpsTier, p90_work_ms: +qWork.toFixed(2), p90_paint_ms: +qPaint.toFixed(2), avg_paint_fps: +avgPaintFps.toFixed(2), avg_raf_fps: +avgRafFps.toFixed(2) };
+      fpsTierLog.push(rec); if (fpsTierLog.length > 40) fpsTierLog.shift();
+      console.info("[fps-tier]", from, "->", fpsTier, "p90_work_ms", rec.p90_work_ms, "p90_paint_ms", rec.p90_paint_ms, "avg_paint_fps", rec.avg_paint_fps, "avg_raf_fps", rec.avg_raf_fps);
+      if (from === 30) resize();
+    }
+  } else { fpsClimb = 0; fpsDrop = 0; }
+}
 function frame(now) {
   requestAnimationFrame(frame);                          // schedule first, so one bad frame can't stop the game
+  const work0 = performance.now();
+  if (lastRaf) fpsRaf.push(now - lastRaf); lastRaf = now; // uncapped rAF intervals (display rate, including skipped paints)
   const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = Math.max(last, now);   // never step backwards in time
   if (!innerWidth || !innerHeight) return;              // hidden / zero-size window: nothing to draw
   const serveComing = (nextServe && nextServe.ready && !rally) || (rally && (rally.serve || (rally.shot && rally.shot.isServe)));
   pos.forEach((p, i) => { p.receiving = !!serveComing && i !== S.server && !S.over; });   // the receiver drops into the return stance
-  if (canvas.width !== innerWidth || canvas.height !== innerHeight) resize();
+  if (canvas.width !== Math.round(innerWidth * Math.min(devicePixelRatio || 1, 2)) ||
+      canvas.height !== Math.round(innerHeight * Math.min(devicePixelRatio || 1, 2))) resize();
   if (!paused) {                                          // a pause freezes the game clock, the rally and the serve timer
     gameT += dt; runTimers();
     if (rally) { clock += dt; stepRally(dt); }
     else { pos.forEach(p => { p.moving = false; }); readyStep(dt); }
     updateCamera(dt);
   }
+  if (now - lastDraw < 1000 / fpsTier * 0.9) return;     // adaptive cap: skip the paint only, physics already stepped
+  const paintMs = lastDraw ? now - lastDraw : 0;
+  lastDraw = now;
   drawCourt();
   const firstPerson = camMode === "pov";                  // in first person you don't see yourself
   const items = [
@@ -2108,13 +2168,20 @@ function frame(now) {
   drawShadows();                                         // cast shadows first: everything stands on top of them
   items.sort((a, c) => c.y - a.y).forEach(it => it.draw());
   b = bMain;
+  // Main's two-blit path onto the DPR backing store. With a backing-matched canvas, buf→canvas is ~3:1
+  // (desktop) or 2:1 (narrow) — never the 1.5× blit that shimmered in r1 — so the r2 dest-over composite
+  // of buf onto abuf is unnecessary fill (it was the extra ~3 ms at DPR 1).
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
   ctx.drawImage(abuf, 0, 0, canvas.width, canvas.height);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);                // sunlight + inset are authored in CSS pixels
+  ctx.imageSmoothingEnabled = false;
   drawSunlight();
   drawServeInset();
   renderHud();
   renderReady();
+  adaptFps(performance.now() - work0, paintMs);          // only draw frames count toward work/paint p90
 }
 
 /* SERVE CAM INSET. While your opponent serves you'd only see a small figure at the far baseline, so a zoomed view
@@ -2145,7 +2212,7 @@ function drawServeInset() {
   drawPlayer(i, p, swing[i]);
   if (ball) drawBall(ball, true);
   BW = keep.BW; BH = keep.BH; F = keep.F; HZ = keep.HZ; CAM_X = keep.CAM_X; b = keep.b;
-  const W = canvas.width, H = canvas.height, ih = Math.round(Math.min(H * 0.36, W * 0.42)), iw = Math.round(ih * IW / IH);
+  const W = cssW, H = cssH, ih = Math.round(Math.min(H * 0.36, W * 0.42)), iw = Math.round(ih * IW / IH);
   const x0 = W - iw - 16, y0 = 16;
   ctx.imageSmoothingEnabled = false;
   ctx.fillStyle = "rgba(8,12,24,0.85)"; ctx.fillRect(x0 - 3, y0 - 3, iw + 6, ih + 26);
@@ -2160,11 +2227,11 @@ function drawAim() {
   const aiming = S.server === 0 && ((nextServe && nextServe.ready) || (rally && (rally.serve || (rally.shot && rally.shot.isServe && !rally.shot.bounced))));
   if (!aiming) return;
   const bx = serviceBox(0);
-  b.strokeStyle = "rgba(216,238,76,0.35)"; b.lineWidth = 1;     // the box you must land in
+  b.strokeStyle = "rgba(216,238,76,0.35)"; b.lineWidth = PX;     // the box you must land in
   const c = [proj(bx.xlo, bx.ylo), proj(bx.xhi, bx.ylo), proj(bx.xhi, bx.yhi), proj(bx.xlo, bx.yhi)];
   b.beginPath(); c.forEach((p, i) => (i ? b.lineTo(p.x, p.y) : b.moveTo(p.x, p.y))); b.closePath(); b.stroke();
-  const p = proj(aim.x, aim.y), r = Math.max(2, p.s * 0.35);
-  b.strokeStyle = "#d8ee4c"; b.lineWidth = 2;
+  const p = proj(aim.x, aim.y), r = Math.max(2 * PX, p.s * 0.35);
+  b.strokeStyle = "#d8ee4c"; b.lineWidth = 2 * PX;
   b.beginPath(); b.moveTo(p.x - r, p.y - r * 0.4); b.lineTo(p.x + r, p.y + r * 0.4); b.moveTo(p.x + r, p.y - r * 0.4); b.lineTo(p.x - r, p.y + r * 0.4); b.stroke();
 }
 
@@ -2185,8 +2252,8 @@ function renderReady() {
 function drawReach() {
   const p = pos[0], r = BODY[0].reach, c = proj(p.x, p.y);
   const rx = proj(p.x + r, p.y).x - c.x, ry = Math.abs(proj(p.x, p.y - r).y - proj(p.x, p.y + r).y) / 2;
-  b.strokeStyle = "rgba(216,238,76,0.28)"; b.lineWidth = 1;
-  b.beginPath(); b.ellipse(Math.round(c.x), Math.round(c.y), rx, Math.max(1, ry), 0, 0, Math.PI * 2); b.stroke();
+  b.strokeStyle = "rgba(216,238,76,0.28)"; b.lineWidth = PX;
+  b.beginPath(); b.ellipse(Math.round(c.x), Math.round(c.y), rx, Math.max(PX, ry), 0, 0, Math.PI * 2); b.stroke();
 }
 
 const hudEls = [0, 1].map(i => ({ st: document.getElementById("st" + i), cap: document.getElementById("cap" + i) }));
