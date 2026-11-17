@@ -1327,18 +1327,72 @@ function drawBall(ball, inset = false) {
     tr.slice(0, 3).forEach((o, k) => { const t = proj(o.x, o.y, o.z);
       b.fillStyle = `rgba(216,238,76,${0.22 - k * 0.06})`; b.beginPath(); b.arc(q(t.x), q(t.y), r * (0.9 - k * 0.15), 0, Math.PI * 2); b.fill(); });
   if (!inset) { tr.unshift({ x: ball.x, y: ball.y, z: ball.z }); tr.length = Math.min(tr.length, 4); }
-  const lx = litLeft() ? -1 : 1, night = !LIGHT().sun;
-  b.save(); b.beginPath(); b.arc(cx, cy, r, 0, Math.PI * 2); b.clip();
-  b.fillStyle = "#a9c02c"; b.fillRect(cx - r, cy - r, r * 2, r * 2);                         // shaded side
-  b.fillStyle = "#d6ec3e"; b.beginPath(); b.arc(cx + lx * r * 0.28, cy - r * 0.24, r * 0.95, 0, Math.PI * 2); b.fill();   // lit felt
-  b.fillStyle = "#f2fb9a"; b.beginPath(); b.arc(cx + lx * r * 0.42, cy - r * 0.42, r * (night ? 0.24 : 0.32), 0, Math.PI * 2); b.fill();   // highlight
+  const lx = litLeft() ? -1 : 1;
+  const R_TINY = 2.5, R_SEAM = 4.5;                      // GAME-DESIGN: under 2.5 px, skip seam/halo (they turn to mush); seam only when the two-arc curve can read
   const th = (clock || gameT) * 11 + ball.x;                                               // the seam turns with the spin
-  b.strokeStyle = "rgba(250,250,238,0.95)"; b.lineWidth = Math.max(1 / AS, r * 0.16);
-  b.beginPath(); b.ellipse(cx - Math.cos(th) * r * 0.55, cy - Math.sin(th) * r * 0.55, r * 0.75, r * 0.5, th, -1.1, 1.1); b.stroke();
-  b.beginPath(); b.ellipse(cx + Math.cos(th) * r * 0.55, cy + Math.sin(th) * r * 0.55, r * 0.75, r * 0.5, th + Math.PI, -1.1, 1.1); b.stroke();
-  b.restore();
-  b.fillStyle = "rgba(226,244,120,0.55)";                                                  // felt fuzz around the edge
-  for (let k = 0; k < 10; k++) { const a = k * 0.628 + th * 0.2; b.fillRect(q(cx + Math.cos(a) * r) - 0.5 / AS, q(cy + Math.sin(a) * r) - 0.5 / AS, 1 / AS, 1 / AS); }
+  if (r < R_TINY) {                                      // floor-sized: solid optic-yellow disc and a one-pixel shade side
+    b.fillStyle = "#d8e244"; b.beginPath(); b.arc(cx, cy, r, 0, Math.PI * 2); b.fill();
+    b.fillStyle = "#94ac26"; b.fillRect(q(cx - lx * r * 0.45) - 0.5 / AS, q(cy) - 0.5 / AS, 1 / AS, 1 / AS);
+    return;
+  }
+  // Cached offscreen sprite (keyed by quantized radius + light side): smooth spherical
+  // felt + a dense fuzz halo. Built once, no per-frame gradient or speck loop.
+  if (!drawBall._spr) {
+    drawBall._spr = new Map();
+    // GAME-DESIGN colours: optic-yellow felt, no specular, no near-white spot.
+    // hi #e8ea58, lit #d8e244, mid #c6d438, shade #94ac26, rim #607a16, fuzz #b0c43a.
+    const HI = [232, 234, 88], LIT = [216, 226, 68], MID = [198, 212, 56], SHA = [148, 172, 38], RIM = [96, 122, 22], FUZZ = [176, 196, 58];
+    const mix = (A, B, t) => { t = t < 0 ? 0 : t > 1 ? 1 : t; return [A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t, A[2] + (B[2] - A[2]) * t]; };
+    const colAt = (nl, z) => {
+      let w = nl * 0.85 + 0.2 + 0.15 * z; if (w < 0) w = 0; else if (w > 1) w = 1;
+      if (w > 0.7) return mix(LIT, HI, (w - 0.7) / 0.3);
+      if (w > 0.4) return mix(MID, LIT, (w - 0.4) / 0.3);
+      if (w > 0.18) return mix(SHA, MID, (w - 0.18) / 0.22);
+      return mix(RIM, SHA, w / 0.18);
+    };
+    drawBall._bake = (rQ, lx) => {
+      const fuzz = Math.max(1.2 / AS, rQ * 0.12);        // GAME-DESIGN: soft halo width, as a fraction of r
+      const W = Math.ceil((rQ + fuzz) * 2 * AS) + 2, c = document.createElement("canvas");
+      c.width = c.height = W;
+      const g = c.getContext("2d"), img = g.createImageData(W, W), d = img.data, cx0 = W / 2, Rpix = rQ * AS;
+      const Lx = (lx < 0 ? -0.48 : 0.48), Ly = 0.72, Lz = 0.5, Ln = Math.hypot(Lx, Ly, Lz);
+      const lxn = Lx / Ln, lyn = Ly / Ln, lzn = Lz / Ln, fw = fuzz / rQ;
+      for (let j = 0; j < W; j++) for (let i = 0; i < W; i++) {
+        const x = (i + 0.5 - cx0) / Rpix, y = -(j + 0.5 - cx0) / Rpix, rr = Math.hypot(x, y), o = (j * W + i) * 4;
+        if (rr <= 1) {
+          const z = Math.sqrt(1 - rr * rr), col = colAt(x * lxn + y * lyn + z * lzn, z);
+          d[o] = col[0]; d[o + 1] = col[1]; d[o + 2] = col[2]; d[o + 3] = 255;
+        } else if (rr < 1 + fw) {                          // dense irregular halo (hashed alpha), not separate specks
+          const t = (rr - 1) / fw, h = ((i * 37 + j * 17) * 2654435761 >>> 0) / 4294967296, a = (1 - t) * (1 - t) * (0.5 + 0.45 * h);
+          if (a > 0.04) { d[o] = FUZZ[0]; d[o + 1] = FUZZ[1]; d[o + 2] = FUZZ[2]; d[o + 3] = a * 220; }
+        }
+      }
+      g.putImageData(img, 0, 0);
+      return { c, W };
+    };
+  }
+  const rQ = Math.round(r * AS) / AS, key = (lx < 0 ? "L" : "R") + rQ;
+  let spr = drawBall._spr.get(key);
+  if (!spr) {
+    if (drawBall._spr.size >= 48) drawBall._spr.delete(drawBall._spr.keys().next().value);
+    spr = drawBall._bake(rQ, lx); drawBall._spr.set(key, spr);
+  }
+  b.drawImage(spr.c, cx - spr.W / (2 * AS), cy - spr.W / (2 * AS), spr.W / AS, spr.W / AS);
+  if (r >= R_SEAM) {                                     // 3D two-arc seam (GAME-DESIGN k=1: photo pose at th=0); same spin variable; front-facing only
+    const kSeam = 1, nSeam = r >= 12 ? 72 : 48, cth = Math.cos(th), sth = Math.sin(th);
+    b.beginPath();
+    for (let i = 0, on = false; i <= nSeam; i++) {
+      const t = i / nSeam * Math.PI * 2;
+      let x = Math.cos(t), y = Math.sin(t), z = -kSeam * Math.cos(2 * t);
+      const inv = 1 / Math.hypot(x, y, z); x *= inv; y *= inv; z *= inv;
+      const y2 = y * cth - z * sth, z2 = y * sth + z * cth;
+      if (z2 > 0.04) { const px = cx + x * r, py = cy - y2 * r; if (on) b.lineTo(px, py); else { b.moveTo(px, py); on = true; } }
+      else on = false;
+    }
+    b.lineCap = "round"; b.lineJoin = "round";
+    b.strokeStyle = "rgba(120,132,58,0.85)"; b.lineWidth = Math.max(1.2 / AS, r * 0.11); b.stroke();  // GAME-DESIGN: shallow groove, thick enough to read at r≈5
+    b.strokeStyle = "rgba(236,236,214,0.95)"; b.lineWidth = Math.max(1 / AS, r * 0.08); b.stroke();   // GAME-DESIGN: pale cream stitch (a thin curve, not a specular spot)
+  }
 }
 
 /* =====================================================================
