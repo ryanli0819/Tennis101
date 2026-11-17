@@ -403,9 +403,12 @@ let b = bMain;                                           // the context every dr
 /* ACTOR LAYER: players, rackets, net and ball are drawn at AS× the court's pixel resolution, so characters get
    real detail while the world keeps its chunky pixel look. Same coordinates (scaled by a transform). */
 const AS = 3;
-/* PX: design-pixel scale in buffer units. 2 at the 2× quality (FPS tiers 120 and 60), 1 at the 30-FPS tier
-   (old buffer, to cut fill rate). px is CSS pixels per buffer pixel (basePx / PX). */
-let PX = 2, px = 1.5, fpsTier = 120;
+/* PX: design-pixel scale in buffer units, picked from the visible-canvas backing store.
+   Backing is W·min(devicePixelRatio, 2); CSS size stays W×H. PX is 2 only when that backing is 2×
+   and the FPS tier is not 30; otherwise PX is 1 (main's buffers). Final blit is ~1:1
+   (1281→1280 at DPR 1, 2562→2560 at DPR 2 — the same 1–2 px crop as 4ba74ac).
+   The 30-FPS tier drops to the 1× buffer to cut fill rate. px is CSS pixels per buffer pixel (basePx / PX). */
+let PX = 1, px = 3, fpsTier = 120, dpr = 1, cssW = 0, cssH = 0;
 const abuf = document.createElement("canvas"), actx = abuf.getContext("2d");
 const q = v => Math.round(v * AS) / AS;                  // snap to the actor layer's finer pixel grid
 let BW = 320, BH = 200, F = 150, HZ = 60;
@@ -444,11 +447,13 @@ function updateCamera(dt) {
 
 function resize() {
   const W = innerWidth, H = innerHeight;
+  dpr = Math.min(devicePixelRatio || 1, 2); // cap at 2: that's the 2× quality backing
   const basePx = W < 700 ? 2 : 3;           // original CSS pixels per design pixel (4ba74ac)
-  PX = fpsTier === 30 ? 1 : 2;              // 2× buffers, except at the 30-FPS quality tier
+  PX = (fpsTier === 30 || dpr < 2) ? 1 : 2; // 2× buffers only on a 2× backing; 1× at DPR 1 and at the 30 tier
   px = basePx / PX;
-  canvas.width = W; canvas.height = H;
-  BW = Math.ceil(W / basePx) * PX; BH = Math.ceil(H / basePx) * PX;   // exact 2× (or 1×) the old buffer
+  cssW = W; cssH = H;
+  canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);   // backing in device px; CSS stays 100%×100%
+  BW = Math.ceil(W / basePx) * PX; BH = Math.ceil(H / basePx) * PX;           // main's buffers at PX=1; exact 2× at PX=2
   buf.width = BW; buf.height = BH;
   abuf.width = BW * AS; abuf.height = BH * AS;
   F = Math.min(BW * 0.63, BH * 0.95);
@@ -634,7 +639,7 @@ function drawShadows() {
 /* Sunshine: a warm grade over the whole picture and a soft glow from where the sun is (daytime courts only). */
 function drawSunlight() {
   const L = LIGHT(); if (!L.sun) return;
-  const W = canvas.width, H = canvas.height;
+  const W = cssW, H = cssH;                  // CSS pixels: ctx is already scaled by dpr, so the wash stays the same on-screen size
   ctx.save();
   ctx.globalCompositeOperation = "soft-light"; ctx.fillStyle = `rgba(255,196,110,${L.warm})`; ctx.fillRect(0, 0, W, H);
   ctx.globalCompositeOperation = "screen";
@@ -2043,7 +2048,7 @@ function adaptFps(workMs) {
       fpsDrop = 0;
       fpsTierLog.push({ t: gameT, from, to: fpsTier, p90: +q.toFixed(2) }); if (fpsTierLog.length > 40) fpsTierLog.shift();
       console.info("[fps-tier]", from, "->", fpsTier, "p90_work_ms", +q.toFixed(2));
-      if (fpsTier === 30) resize();                      // drop back to the original buffer at 30, to cut fill rate
+      if (fpsTier === 30) resize();                      // drop back to the 1× (main) buffer at 30, to cut fill rate
     }
   } else if (fpsTier < 120 && q < 1000 / (fpsTier === 30 ? 60 : 120) * 0.75) {
     fpsDrop = 0;
@@ -2063,7 +2068,8 @@ function frame(now) {
   if (!innerWidth || !innerHeight) return;              // hidden / zero-size window: nothing to draw
   const serveComing = (nextServe && nextServe.ready && !rally) || (rally && (rally.serve || (rally.shot && rally.shot.isServe)));
   pos.forEach((p, i) => { p.receiving = !!serveComing && i !== S.server && !S.over; });   // the receiver drops into the return stance
-  if (canvas.width !== innerWidth || canvas.height !== innerHeight) resize();
+  if (canvas.width !== Math.round(innerWidth * Math.min(devicePixelRatio || 1, 2)) ||
+      canvas.height !== Math.round(innerHeight * Math.min(devicePixelRatio || 1, 2))) resize();
   if (!paused) {                                          // a pause freezes the game clock, the rally and the serve timer
     gameT += dt; runTimers();
     if (rally) { clock += dt; stepRally(dt); }
@@ -2087,14 +2093,17 @@ function frame(now) {
   drawShadows();                                         // cast shadows first: everything stands on top of them
   items.sort((a, c) => c.y - a.y).forEach(it => it.draw());
   b = bMain;
-  // Composite the court onto the actor layer at integer AS, then one blit to the CSS-sized canvas.
-  // This avoids a 1.5× nearest-neighbour blit of buf (uneven columns / shimmer) when px is 1.5.
+  // Composite the court onto the actor layer at integer AS, then one ~1:1 blit to the DPR backing store
+  // (1281→1280 at DPR 1, 2562→2560 at DPR 2). Never a 2:1 downsample of a 2× actor layer onto a 1× canvas.
   actx.setTransform(1, 0, 0, 1, 0, 0); actx.imageSmoothingEnabled = false;
   actx.globalCompositeOperation = "destination-over";
   actx.drawImage(buf, 0, 0, abuf.width, abuf.height);
   actx.globalCompositeOperation = "source-over";
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(abuf, 0, 0, canvas.width, canvas.height);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);                // sunlight + inset are authored in CSS pixels
+  ctx.imageSmoothingEnabled = false;
   drawSunlight();
   drawServeInset();
   renderHud();
@@ -2130,7 +2139,7 @@ function drawServeInset() {
   drawPlayer(i, p, swing[i]);
   if (ball) drawBall(ball, true);
   BW = keep.BW; BH = keep.BH; F = keep.F; HZ = keep.HZ; CAM_X = keep.CAM_X; b = keep.b;
-  const W = canvas.width, H = canvas.height, ih = Math.round(Math.min(H * 0.36, W * 0.42)), iw = Math.round(ih * IW / IH);
+  const W = cssW, H = cssH, ih = Math.round(Math.min(H * 0.36, W * 0.42)), iw = Math.round(ih * IW / IH);
   const x0 = W - iw - 16, y0 = 16;
   ctx.imageSmoothingEnabled = false;
   ctx.fillStyle = "rgba(8,12,24,0.85)"; ctx.fillRect(x0 - 3, y0 - 3, iw + 6, ih + 26);
