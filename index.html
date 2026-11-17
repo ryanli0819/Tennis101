@@ -230,19 +230,20 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/skills/skills.js?v=0.11.0"></script>
 <script src="src/animation/run-cycle.js?v=0.11.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.11.0"></script>
+<script src="src/players/handedness.js?v=0.14.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
    ===================================================================== */
 const ROSTER = [
-  { id: "sinner",  last: "SINNER",  first: "Jannik", code: "ITA", heightM: 1.91, weightKg: 77, shirt: "#23b59c", shorts: "#11233a", hair: "#c4672f", letRate: 0.02,
+  { id: "sinner",  last: "SINNER",  first: "Jannik", code: "ITA", heightM: 1.91, weightKg: 77, lefty: HANDEDNESS.lefty("sinner"), shirt: "#23b59c", shorts: "#11233a", hair: "#c4672f", letRate: 0.02,
     // outfit per court, from his clips (datasets/players/sinner/outfits.json); grass = all white (dress code)
     outfits: { clay:  { shirt: "#141418", shorts: "#1e1d22", cap: "#16161b", shoes: "#1c1b20" },
                hard:  { shirt: "#1f2f4a", shorts: "#f5f5f2", cap: "#f2f2ef", shoes: "#f0ece6" },
                grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", cap: "#f4f4f0", shoes: "#f4f4f0" } },
     // SIGNATURE (datasets/players/sinner/appearance.json, Ryan's call): the iconic cap, bright ginger curls flaring out under it
     look: { style: "cap-curls" } },
-  { id: "alcaraz", last: "ALCARAZ", first: "Carlos", code: "ESP", heightM: 1.83, weightKg: 74, shirt: "#e2544a", shorts: "#f1f1ec", hair: "#2a1c14", letRate: 0.03,
+  { id: "alcaraz", last: "ALCARAZ", first: "Carlos", code: "ESP", heightM: 1.83, weightKg: 74, lefty: HANDEDNESS.lefty("alcaraz"), shirt: "#e2544a", shorts: "#f1f1ec", hair: "#2a1c14", letRate: 0.03,
     // outfits from Ryan's clips (datasets/players/alcaraz/appearance.json): US Open grey fade sleeveless top + black, a black arm sleeve;
     // clay stands in with his orange kit until a clay clip exists; all white on grass (dress code)
     outfits: { hard:  { shirt: "#3c3f45", shirtLow: "#a3a7ad", shorts: "#1f2024", shoes: "#1d1d20", socks: "#141416", sleeve: "#121214" },
@@ -271,9 +272,17 @@ function bodyStats(P) {
 let BODY = [];
 /* You pick a pro in the locker room: they go to the near court, the other pro is your opponent.
    Each body = height/weight physics (bodyStats) + skill points (src/skills/skills.js). */
+/* HANDEDNESS (HQ-20261116-001): every player's lefty comes from the SOURCED table in src/players/handedness.js
+   (ATP "Plays:"). No default: an id missing from the table throws. A roster entry that disagrees is reported. */
+function handed(P) {
+  const l = HANDEDNESS.lefty(P.id);
+  if (typeof P.lefty === "boolean" && P.lefty !== l) console.error(`HANDEDNESS: roster says lefty=${P.lefty} for ${P.id}, the sourced table says ${l}; using the table.`);
+  return l;
+}
+const handSign = P => (handed(P) ? -1 : 1);              // +1 right-handed, −1 left-handed
 function choosePlayers(youId, surface = "hard") {
   const you = ROSTER.find(r => r.id === youId) || ROSTER[0], opp = ROSTER.find(r => r !== you);
-  const dress = P => ({ ...P, ui: P.shirt, ...(P.outfits && P.outfits[surface] || {}) });   // outfit for this court; ui keeps the signature colour for the HUD
+  const dress = P => ({ ...P, ui: P.shirt, ...(P.outfits && P.outfits[surface] || {}), lefty: handed(P) });   // outfit for this court; ui keeps the signature colour for the HUD
   PLAYERS.splice(0, 2, { ...dress(you), side: "near" }, { ...dress(opp), side: "far" });
   BODY = PLAYERS.map(P => applySkills(bodyStats(P), getSkills(P.id)));
 }
@@ -986,8 +995,9 @@ function poseTrack(keys, t) {                              // keys: [[time, pose
 }
 function racketPose(i, p, ago = 0) {
   const R = PLAYERS[i].side === "near" ? 1 : -1;        // near player's right is +x and forward is +y; far is the mirror
-  const W = (dx, dy, z) => ({ x: p.x + R * dx, y: p.y + R * dy, z });
-  const D = (dx, dy, dz) => V3.norm({ x: R * dx, y: R * dy, z: dz });
+  const RH = R * handSign(PLAYERS[i]);                   // his racket side: his right, or his left for a left-hander
+  const W = (dx, dy, z) => ({ x: p.x + RH * dx, y: p.y + R * dy, z });
+  const D = (dx, dy, dz) => V3.norm({ x: RH * dx, y: R * dy, z: dz });
   const clk = (c, fwd) => D(Math.sin(c * Math.PI / 6), fwd, Math.cos(c * Math.PI / 6));   // racket top pointing at c o'clock
   const hz = Math.max(0.45, Math.min(1.75, p.hitZ ?? 1.0));                              // contact height of the last ball
   const se = SLICE_END[PLAYERS[i].id] ?? 4.5;
@@ -1033,7 +1043,7 @@ function racketPose(i, p, ago = 0) {
   const sh = rally && rally.shot;
   if (sh && sh.recv === i && !rally.serve && ball) {                              // the ball is coming: swing on the beat of its arrival
     const ttc = sh.t1 + 0.85 * sh.t2 - sh.t + ago;                                // ≈ time left until contact
-    const side = (sh.end.x - p.x) * R >= 0;                                       // forehand if it comes to the racket side
+    const side = (sh.end.x - p.x) * RH >= 0;                                      // forehand if it comes to the racket side
     const slice = i === 0 ? (input.keys.has("e") || input.slice) : !!p.planSlice; // you hold E; the computer decided early
     const zc = Math.max(0.45, Math.min(1.75, sh.end.z));
     const set = (pz) => ({ ...pz, g: { ...pz.g, z: zc } });                       // aim the contact pose at the ball's height
@@ -1094,7 +1104,7 @@ function drawSignature(P, near, H) {
 
 function drawPlayer(i, pos, swing) {
   if (pos.motion && pos.motion.world) return drawCapturedFigure(i, pos, pos.motion.world);
-  const P = PLAYERS[i], near = P.side === "near", R = near ? 1 : -1;
+  const P = PLAYERS[i], near = P.side === "near", R = near ? 1 : -1, RH = R * handSign(P);   // RH: screen side of his racket arm
   const g = proj(pos.x, pos.y), s = g.s;
   const h = Math.max(6, P.heightM * s), w = h * 0.30, skin = "#e1b48b", skinD = shade(skin, -0.18), skinL = shade(skin, 0.12);
   const A = window.Anim ? Anim.frame(pos, BODY[i], near, P.id)
@@ -1105,8 +1115,8 @@ function drawPlayer(i, pos, swing) {
   /* YAW: how far the body is turned (−1…1, screen sense: + = toward screen right). Running sideways turns the whole
      body (turn); taking the racket back turns the shoulders (the unit turn), so a swing reads as a rotation too.
      Turned sideways = narrower, and the seams, logo and shading slide round the body (see cyl below). */
-  const dxR = (rp.g.x - pos.x) * R, dyR = (rp.g.y - pos.y) * R;
-  const twistS = Math.max(0, Math.min(1, -dyR * 2.6)) * Math.sign(dxR) * 0.8 * R;
+  const dxR = (rp.g.x - pos.x) * RH, dyR = (rp.g.y - pos.y) * R;
+  const twistS = Math.max(0, Math.min(1, -dyR * 2.6)) * Math.sign(dxR) * 0.8 * RH;
   const yaw = Math.max(-1, Math.min(1, turn + twistS * (1 - Math.abs(turn)))), tw = 1 - 0.36 * Math.abs(yaw);
   const hop = pos.air > 0 ? h * 0.07 : 0, drop = (A.crouch + (rp.crouch || 0) - A.bob) * h;
   const tiltR = (rp.tilt || 0) * h;                         // + = racket shoulder lower (a slice finishing low), − = higher
@@ -1177,9 +1187,9 @@ function drawPlayer(i, pos, swing) {
     Ln(hx2 + (ex - hx2) * 0.22, hy2 + (ey - hy2) * 0.22, hx2 + (ex - hx2) * 0.08, hy2 + (ey - hy2) * 0.08, P.ui || "#f2f2f2", w * 0.2);  // wristband
     Rr(hx2 - w * 0.08, hy2 - w * 0.08, w * 0.16, w * 0.16, skinL);                           // hand
   };
-  const rS = { x: tx + R * w * 0.5 * tw, y: shY + h * 0.05 + tiltR }, lS = { x: tx - R * w * 0.5 * tw, y: shY + h * 0.05 - tiltR };
+  const rS = { x: tx + RH * w * 0.5 * tw, y: shY + h * 0.05 + tiltR }, lS = { x: tx - RH * w * 0.5 * tw, y: shY + h * 0.05 - tiltR };   // racket / free shoulder
   const swingDir = A.dir === "right" ? 1 : A.dir === "left" ? -1 : 0, swingUp = A.dir === "away" ? 1 : A.dir === "toward" ? -1 : 0;
-  let freeHand = { x: lS.x - R * w * 0.25 * tw + swingDir * A.arms[0] * w * 0.55,           // the free arm pumps with the legs
+  let freeHand = { x: lS.x - RH * w * 0.25 * tw + swingDir * A.arms[0] * w * 0.55,           // the free arm pumps with the legs
                    y: shY + h * 0.33 + A.arms[0] * h * 0.05 - swingUp * A.arms[0] * h * 0.035 - Math.abs(swingDir * A.arms[0]) * h * 0.04 };
   let freeOnThroat = false;
   if (rp.twoHands) freeHand = { x: grip.x, y: grip.y + h * 0.02 };
@@ -1202,10 +1212,10 @@ function drawPlayer(i, pos, swing) {
   };
   const drawArms = (front) => {
     const freeHidden = near ? freeFront : !freeFront, racketHidden = near ? racketFront : !racketFront;
-    if (freeHidden !== front) arm(lS.x, lS.y, freeHand.x, freeHand.y, -R);
-    else if (front && near) stub(lS, freeHand.x, freeHand.y, -R, 0.6);
-    if (racketHidden !== front) arm(rS.x, rS.y, grip.x, grip.y, R, P.sleeve);
-    else if (front && near) stub(rS, grip.x, grip.y, R, 0.6);
+    if (freeHidden !== front) arm(lS.x, lS.y, freeHand.x, freeHand.y, -RH);
+    else if (front && near) stub(lS, freeHand.x, freeHand.y, -RH, 0.6);
+    if (racketHidden !== front) arm(rS.x, rS.y, grip.x, grip.y, RH, P.sleeve);
+    else if (front && near) stub(rS, grip.x, grip.y, RH, 0.6);
   };
   drawArms(false);                                                                           // arms hidden behind the torso first
   b.save(); b.translate(q(tx), 0); b.scale(tw, 1); b.translate(-q(tx), 0);               // turned sideways: the torso narrows
@@ -1587,28 +1597,23 @@ function motionFacing(m) {
   }
   return m.facing;
 }
-/* HANDEDNESS. The captured serves are flat recordings made from BEHIND the server. Played at the near end (seen from
-   behind) they read right. Played at the far end the same flat body is seen from the FRONT, where the side-on toss
-   arm lands on the screen's left and the racket on its right, so a right-hander looks left-handed (Ryan, Nov 11:
-   "Sinner is hitting with the racquet in his left hand and tossing with his right" in the serve-cam inset).
-   So for the opponent (seen from the front) the routine, toss and trophy are mirrored: racket on his right, bounce and
-   toss with his left. From the trophy to contact the body swings back to the true motion, so the racket comes up
-   through the middle and finishes across to his LEFT, as a right-hander's does (a plain mirror would finish it on his
-   right); the body narrows as it passes through, which reads as the turn to the ball. mo.flip: +1 = as captured,
-   −1 = mirrored at the start (far end). A left-hander (PLAYERS[i].lefty) gets the opposite. Never by deuce/ad side. */
+/* HANDEDNESS (root cause of "Sinner serves left-handed", fixed HQ-20261116-001). The captured serves are recorded
+   from BEHIND the server with x + = the player's own right. poseToWorld() turns that body round for the far end by
+   multiplying x by the court side (near +1, far −1), which is a rotation: the far player, seen from the front, keeps
+   his racket in his own right hand (on your screen's left). serveFlip() used to multiply by the court side AGAIN, so
+   the far end was mirrored twice and a right-hander held the racket in his LEFT hand until the trophy, and flipAt()
+   keyed its trophy→contact cross-fade on PLAYERS[i].lefty, which put a left-hander's racket in his right hand at
+   contact on the near end and for the whole serve on the far end. Now the court side is applied once (poseToWorld)
+   and the hand once (here): mo.flip = +1 when the clip's hand matches the player's SOURCED hand, −1 to mirror a
+   clip recorded with the other hand. It is constant for the whole serve, at both ends, in every camera (proj()
+   never mirrors). Never by deuce/ad side. */
 function serveFlip(i, m) {
-  const side = PLAYERS[i].side === "near" ? 1 : -1;
   const motionHand = (m && m.hand) || "R";
-  const playerHand = PLAYERS[i].lefty ? "L" : "R";
-  // A captured clip is already that player's hand. Mirror only when the clip and the player differ
-  // (a right-handed recording played by a left-hander). Shelton, Nadal and Tien are stored left-handed.
-  return side * (motionHand === playerHand ? 1 : -1);
+  const playerHand = handed(PLAYERS[i]) ? "L" : "R";
+  return motionHand === playerHand ? 1 : -1;
 }
 function flipAt(i, mo, t) {
-  const base = PLAYERS[i].lefty ? -1 : 1;
-  if (mo.flip * base > 0) return mo.flip;                // near end: as captured all the way
-  const E = mo.m.events, s = ease((t - E.trophy) / ((E.contact - E.trophy) || 0.1));
-  return base * (2 * s - 1);                             // −base (mirrored) until the trophy → +base (true) at contact
+  return mo.flip;                                        // constant: the court side is poseToWorld's job, not this one's
 }
 window.flipAt = flipAt;
 /* SIDE-ON START (from Ryan's serve compilation): every server begins turned at an angle to the court, front shoulder
@@ -1667,7 +1672,7 @@ function anatomize(i, W, t) {
      (BODIES shoulderJointW). In the flat clips the shoulder line flipped through zero as he turned to the net, so at
      contact the hitting shoulder sat LEFT of the tossing one: the racket arm grew out of the middle of the back,
      behind the head, and the other arm out of the chest. Now the frame keeps its real width, the hitting shoulder
-     stays on his right (on the mirrored far-end start, on the side the motion shows it), and the cartwheel tilt the
+     stays on the side the motion shows it (his right, unless a clip of the other hand is mirrored), and the cartwheel tilt the
      clip has (hitting shoulder up at contact) is kept. Each arm moves with its own shoulder, so its shape is kept. */
   const ls = W.leftShoulder, rs = W.rightShoulder;
   if (ls && rs) {
@@ -1936,7 +1941,7 @@ function hitBall(i, isServe, volley = false) {
   if (type === "slice") { err *= 1.25; if (i === 0) say(0, "SLICE"); }
   if (i === 0 && input.slice) { input.slice = false; sliceBtn.setAttribute("aria-pressed", "false"); sliceBtn.classList.remove("primary"); }
   swing[i] = 1;
-  const Rs = PLAYERS[i].side === "near" ? 1 : -1;
+  const Rs = (PLAYERS[i].side === "near" ? 1 : -1) * handSign(PLAYERS[i]);   // + = his forehand side
   Object.assign(p, { hitT: clock, hitServe: isServe, strokeType: type, hitZ: ball.z, strokeSide: Math.sign((ball.x - p.x) * Rs) || 1 });   // racket follow-through
   if (isServe) {
     const sv = planServe(i, rally.serveNo);
