@@ -2032,31 +2032,45 @@ function retakeServe(no, call) {
 /* =====================================================================
    LOOP
    ===================================================================== */
-let last = performance.now(), lastDraw = 0, fpsClimb = 0, fpsDrop = 0;
-const FPS_WIN = 90, fpsWork = [];                        // p90 work time over 90 draw frames; one decision per filled window
+let last = performance.now(), lastDraw = 0, lastRaf = 0, fpsClimb = 0, fpsDrop = 0, fpsSticky = 0;
+const FPS_WIN = 90, fpsWork = [], fpsPaint = [], fpsRaf = [];
 const fpsTierLog = [];                                   // recent tier changes (for evidence)
 function fpsP90(a) { const s = a.slice().sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(0.9 * (s.length - 1)))]; }
-function adaptFps(workMs) {
-  fpsWork.push(workMs);
+function fpsMean(a) { return a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0; }
+function adaptFps(workMs, paintMs) {
+  fpsWork.push(workMs); if (paintMs > 0) fpsPaint.push(paintMs);
   if (fpsWork.length < FPS_WIN) return;
-  const q = fpsP90(fpsWork); fpsWork.length = 0;          // consume the window so hysteresis is in windows, not frames
+  const qWork = fpsP90(fpsWork), qPaint = fpsPaint.length ? fpsP90(fpsPaint) : 0, qRaf = fpsRaf.length ? fpsP90(fpsRaf) : 0;
+  const avgPaintFps = fpsPaint.length ? 1000 / fpsMean(fpsPaint) : 0;
+  const avgRafFps = fpsRaf.length ? 1000 / fpsMean(fpsRaf) : 0;
+  fpsWork.length = 0; fpsPaint.length = 0; fpsRaf.length = 0;   // consume the window so hysteresis is in windows, not frames
+  if (fpsSticky > 0) fpsSticky--;
   const budget = 1000 / fpsTier;
-  if (q > budget * 1.15 && fpsTier > 30) {               // drop: p90 over budget + 15% for two windows
+  const workHeavy = qWork > budget * 1.15;
+  const deliveredLow = avgPaintFps < fpsTier * 0.9 || qPaint > budget * 1.15;   // measured paint-to-paint rate, not just work time
+  const next = fpsTier === 30 ? 60 : 120;
+  const workHeadroom = qWork < 1000 / next * 0.75;
+  // Paint is capped at the current tier, so climb must not use the capped interval.
+  // At 30 (~33 ms by design) judge climb on work only. At 60, use uncapped rAF to see if the display can do 120.
+  const deliveredHeadroom = fpsTier === 30 ? true : avgRafFps >= next * 0.9;
+  if (fpsTier > 30 && (workHeavy || deliveredLow)) {
     fpsClimb = 0;
     if (++fpsDrop >= 2) {
       const from = fpsTier; fpsTier = fpsTier === 120 ? 60 : 30;
       fpsDrop = 0;
-      fpsTierLog.push({ t: gameT, from, to: fpsTier, p90: +q.toFixed(2) }); if (fpsTierLog.length > 40) fpsTierLog.shift();
-      console.info("[fps-tier]", from, "->", fpsTier, "p90_work_ms", +q.toFixed(2));
-      if (fpsTier === 30) resize();                      // drop back to the 1× (main) buffer at 30, to cut fill rate
+      const rec = { t: +gameT.toFixed(3), from, to: fpsTier, p90_work_ms: +qWork.toFixed(2), p90_paint_ms: +qPaint.toFixed(2), avg_paint_fps: +avgPaintFps.toFixed(2), avg_raf_fps: +avgRafFps.toFixed(2) };
+      fpsTierLog.push(rec); if (fpsTierLog.length > 40) fpsTierLog.shift();
+      console.info("[fps-tier]", from, "->", fpsTier, "p90_work_ms", rec.p90_work_ms, "p90_paint_ms", rec.p90_paint_ms, "avg_paint_fps", rec.avg_paint_fps, "avg_raf_fps", rec.avg_raf_fps);
+      if (fpsTier === 30) { fpsSticky = 8; resize(); }    // 1× buffer; sticky windows so 30↔60 cannot flap after a quality drop
     }
-  } else if (fpsTier < 120 && q < 1000 / (fpsTier === 30 ? 60 : 120) * 0.75) {
+  } else if (fpsTier < 120 && workHeadroom && deliveredHeadroom && fpsSticky === 0) {
     fpsDrop = 0;
-    if (++fpsClimb >= 2) {                               // climb: two windows under 75% of the next tier's budget
-      const from = fpsTier; fpsTier = fpsTier === 30 ? 60 : 120;
+    if (++fpsClimb >= 2) {
+      const from = fpsTier; fpsTier = next;
       fpsClimb = 0;
-      fpsTierLog.push({ t: gameT, from, to: fpsTier, p90: +q.toFixed(2) }); if (fpsTierLog.length > 40) fpsTierLog.shift();
-      console.info("[fps-tier]", from, "->", fpsTier, "p90_work_ms", +q.toFixed(2));
+      const rec = { t: +gameT.toFixed(3), from, to: fpsTier, p90_work_ms: +qWork.toFixed(2), p90_paint_ms: +qPaint.toFixed(2), avg_paint_fps: +avgPaintFps.toFixed(2), avg_raf_fps: +avgRafFps.toFixed(2) };
+      fpsTierLog.push(rec); if (fpsTierLog.length > 40) fpsTierLog.shift();
+      console.info("[fps-tier]", from, "->", fpsTier, "p90_work_ms", rec.p90_work_ms, "p90_paint_ms", rec.p90_paint_ms, "avg_paint_fps", rec.avg_paint_fps, "avg_raf_fps", rec.avg_raf_fps);
       if (from === 30) resize();
     }
   } else { fpsClimb = 0; fpsDrop = 0; }
@@ -2064,6 +2078,7 @@ function adaptFps(workMs) {
 function frame(now) {
   requestAnimationFrame(frame);                          // schedule first, so one bad frame can't stop the game
   const work0 = performance.now();
+  if (lastRaf) fpsRaf.push(now - lastRaf); lastRaf = now; // uncapped rAF intervals (display rate, including skipped paints)
   const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = Math.max(last, now);   // never step backwards in time
   if (!innerWidth || !innerHeight) return;              // hidden / zero-size window: nothing to draw
   const serveComing = (nextServe && nextServe.ready && !rally) || (rally && (rally.serve || (rally.shot && rally.shot.isServe)));
@@ -2077,6 +2092,7 @@ function frame(now) {
     updateCamera(dt);
   }
   if (now - lastDraw < 1000 / fpsTier * 0.9) return;     // adaptive cap: skip the paint only, physics already stepped
+  const paintMs = lastDraw ? now - lastDraw : 0;
   lastDraw = now;
   drawCourt();
   const firstPerson = camMode === "pov";                  // in first person you don't see yourself
@@ -2093,14 +2109,12 @@ function frame(now) {
   drawShadows();                                         // cast shadows first: everything stands on top of them
   items.sort((a, c) => c.y - a.y).forEach(it => it.draw());
   b = bMain;
-  // Composite the court onto the actor layer at integer AS, then one ~1:1 blit to the DPR backing store
-  // (1281→1280 at DPR 1, 2562→2560 at DPR 2). Never a 2:1 downsample of a 2× actor layer onto a 1× canvas.
-  actx.setTransform(1, 0, 0, 1, 0, 0); actx.imageSmoothingEnabled = false;
-  actx.globalCompositeOperation = "destination-over";
-  actx.drawImage(buf, 0, 0, abuf.width, abuf.height);
-  actx.globalCompositeOperation = "source-over";
+  // Main's two-blit path onto the DPR backing store. With a backing-matched canvas, buf→canvas is ~3:1
+  // (desktop) or 2:1 (narrow) — never the 1.5× blit that shimmered in r1 — so the r2 dest-over composite
+  // of buf onto abuf is unnecessary fill (it was the extra ~3 ms at DPR 1).
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
   ctx.drawImage(abuf, 0, 0, canvas.width, canvas.height);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);                // sunlight + inset are authored in CSS pixels
   ctx.imageSmoothingEnabled = false;
@@ -2108,7 +2122,7 @@ function frame(now) {
   drawServeInset();
   renderHud();
   renderReady();
-  adaptFps(performance.now() - work0);                   // only draw frames count toward the p90 (skip-frames would look too cheap)
+  adaptFps(performance.now() - work0, paintMs);          // only draw frames count toward work/paint p90
 }
 
 /* SERVE CAM INSET. While your opponent serves you'd only see a small figure at the far baseline, so a zoomed view
