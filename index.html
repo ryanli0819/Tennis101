@@ -403,6 +403,9 @@ let b = bMain;                                           // the context every dr
 /* ACTOR LAYER: players, rackets, net and ball are drawn at AS× the court's pixel resolution, so characters get
    real detail while the world keeps its chunky pixel look. Same coordinates (scaled by a transform). */
 const AS = 3;
+/* PX: design-pixel scale in buffer units. 2 at the 2× quality (FPS tiers 120 and 60), 1 at the 30-FPS tier
+   (old buffer, to cut fill rate). px is CSS pixels per buffer pixel (basePx / PX). */
+let PX = 2, px = 1.5, fpsTier = 120;
 const abuf = document.createElement("canvas"), actx = abuf.getContext("2d");
 const q = v => Math.round(v * AS) / AS;                  // snap to the actor layer's finer pixel grid
 let BW = 320, BH = 200, F = 150, HZ = 60;
@@ -441,9 +444,11 @@ function updateCamera(dt) {
 
 function resize() {
   const W = innerWidth, H = innerHeight;
-  const px = W < 700 ? 2 : 3;               // size of one "pixel"
+  const basePx = W < 700 ? 2 : 3;           // original CSS pixels per design pixel (4ba74ac)
+  PX = fpsTier === 30 ? 1 : 2;              // 2× buffers, except at the 30-FPS quality tier
+  px = basePx / PX;
   canvas.width = W; canvas.height = H;
-  BW = Math.ceil(W / px); BH = Math.ceil(H / px);
+  BW = Math.ceil(W / basePx) * PX; BH = Math.ceil(H / basePx) * PX;   // exact 2× (or 1×) the old buffer
   buf.width = BW; buf.height = BH;
   abuf.width = BW * AS; abuf.height = BH * AS;
   F = Math.min(BW * 0.63, BH * 0.95);
@@ -498,16 +503,16 @@ function crowdPattern(surface, big) {
   const key = surface + (big ? "B" : "S");
   if (crowdPatterns[key]) return crowdPatterns[key];
   const sc = SCENES[surface], c = document.createElement("canvas");
-  const cw = big ? 3 : 2, ch = big ? 5 : 3, cols = 16, rows = 4;          // one person = cw × ch pixels
+  const s = PX, cw = (big ? 3 : 2) * s, ch = (big ? 5 : 3) * s, cols = 16, rows = 4;   // one person = cw × ch buffer px (scaled so CSS size holds at 2×)
   c.width = cw * cols; c.height = ch * rows;
   const g = c.getContext("2d"); let seed = surface.length * 97 + (big ? 13 : 7);
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, pick = a => a[rnd() * a.length | 0];
   g.fillStyle = sc.stands; g.fillRect(0, 0, c.width, c.height);
   for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
-    const x = q * cw + (r % 2 ? 1 : 0), y = r * ch;                      // alternate rows sit offset, like real seats
-    g.fillStyle = pick(sc.crowd); g.fillRect(x, y + (big ? 2 : 1), cw, ch - (big ? 3 : 1));   // shoulders
+    const x = q * cw + (r % 2 ? s : 0), y = r * ch;                      // alternate rows sit offset, like real seats
+    g.fillStyle = pick(sc.crowd); g.fillRect(x, y + (big ? 2 : 1) * s, cw, ch - (big ? 3 : 1) * s);   // shoulders
     g.fillStyle = rnd() < 0.25 ? pick(["#2a1c14", "#5a4232", "#c9b48a", "#1b1b1f"]) : pick(sc.skin);
-    g.fillRect(x + (big ? 1 : 0), y + (big ? 0 : 0), big ? 1 : 1, big ? 2 : 1);              // head (hair or skin)
+    g.fillRect(x + (big ? 1 : 0) * s, y, 1 * s, (big ? 2 : 1) * s);                    // head (hair or skin)
   }
   return (crowdPatterns[key] = b.createPattern(c, "repeat"));
 }
@@ -531,12 +536,12 @@ function drawStadium() {
     b.beginPath(); pts.forEach((p, i) => (i ? b.lineTo(p.x, p.y) : b.moveTo(p.x, p.y))); b.closePath(); b.fill();
     if (q.k >= 0 && q.k < S.tiers) {                     // upper tiers sit in shade; a dark line marks each row's front edge
       b.fillStyle = `rgba(0,0,0,${(sc.shade * q.k / S.tiers).toFixed(3)})`; b.fill();
-      b.strokeStyle = "rgba(0,0,0,0.28)"; b.lineWidth = 1; b.beginPath(); b.moveTo(pts[0].x, pts[0].y); b.lineTo(pts[1].x, pts[1].y); b.stroke();
+      b.strokeStyle = "rgba(0,0,0,0.28)"; b.lineWidth = PX; b.beginPath(); b.moveTo(pts[0].x, pts[0].y); b.lineTo(pts[1].x, pts[1].y); b.stroke();
     }
-    if (q.k === -1) { b.strokeStyle = sc.trim; b.lineWidth = 1; b.beginPath(); b.moveTo(pts[3].x, pts[3].y); b.lineTo(pts[2].x, pts[2].y); b.stroke(); }
+    if (q.k === -1) { b.strokeStyle = sc.trim; b.lineWidth = PX; b.beginPath(); b.moveTo(pts[3].x, pts[3].y); b.lineTo(pts[2].x, pts[2].y); b.stroke(); }
     if (q.k === S.tiers && sc.lights && q.j % 6 === 0) { // floodlights along the roof (night session)
-      const m = pts[3]; b.fillStyle = "#fff6c8"; b.fillRect(Math.round(m.x) - 2, Math.round(m.y) - 1, 4, 2);
-      b.fillStyle = "rgba(255,246,200,0.10)"; b.fillRect(Math.round(m.x) - 6, Math.round(m.y) - 3, 12, 6);
+      const m = pts[3], s = PX; b.fillStyle = "#fff6c8"; b.fillRect(Math.round(m.x) - 2 * s, Math.round(m.y) - 1 * s, 4 * s, 2 * s);
+      b.fillStyle = "rgba(255,246,200,0.10)"; b.fillRect(Math.round(m.x) - 6 * s, Math.round(m.y) - 3 * s, 12 * s, 6 * s);
     }
   }
 }
@@ -550,7 +555,9 @@ function line(x1, y1, x2, y2, w = 0.05) {
   const a = proj(x1 - w, y1), c = proj(x2 + w, y2), a2 = proj(x1 + w, y1), c2 = proj(x2 - w, y2);
   // draw as thin quad so far lines stay ~1px
   const p1 = proj(x1, y1), p2 = proj(x2, y2);
-  b.strokeStyle = "#f4f6f8"; b.lineWidth = 1; b.beginPath(); b.moveTo(Math.round(p1.x) + .5, Math.round(p1.y) + .5); b.lineTo(Math.round(p2.x) + .5, Math.round(p2.y) + .5); b.stroke();
+  b.strokeStyle = "#f4f6f8"; b.lineWidth = PX; b.beginPath();
+  const snap = PX % 2 ? 0.5 : 0;                           // odd widths center on a pixel; even widths on the grid (avoids AA fringe at 2×)
+  b.moveTo(Math.round(p1.x) + snap, Math.round(p1.y) + snap); b.lineTo(Math.round(p2.x) + snap, Math.round(p2.y) + snap); b.stroke();
 }
 
 /* Court surfaces. Colours here; pace (ball speed after the bounce) and bounce height used by the point flow.
@@ -600,7 +607,7 @@ function drawShadows() {
         ["rightShoulder", "rightElbow"], ["rightElbow", "rightWrist"], ["neck", "nose"]];
       for (const d of L.shadows) {
         const at = n => W[n] && proj(W[n].x + d.x * W[n].z, W[n].y + d.y * W[n].z);
-        b.strokeStyle = `rgba(8,12,24,${d.a})`; b.lineCap = "round"; b.lineWidth = Math.max(1, proj(pos[i].x, pos[i].y).s * 0.16);
+        b.strokeStyle = `rgba(8,12,24,${d.a})`; b.lineCap = "round"; b.lineWidth = Math.max(PX, proj(pos[i].x, pos[i].y).s * 0.16);
         b.beginPath();
         for (const [m, n] of BONES) { const A = at(m), C = at(n); if (A && C) { b.moveTo(A.x, A.y); b.lineTo(C.x, C.y); } }
         b.stroke();
@@ -642,11 +649,11 @@ function drawNet() {
   const lb = proj(-post, 0, 0), rb = proj(post, 0, 0), lt = proj(-post, 0, hp), rt = proj(post, 0, hp), ct = proj(0, 0, hc), cb = proj(0, 0, 0);
   b.fillStyle = "rgba(20,26,36,0.62)";
   b.beginPath(); b.moveTo(lb.x, lb.y); b.lineTo(lt.x, lt.y); b.lineTo(ct.x, ct.y); b.lineTo(rt.x, rt.y); b.lineTo(rb.x, rb.y); b.closePath(); b.fill();
-  b.strokeStyle = "rgba(200,210,225,0.18)"; b.lineWidth = 1;
+  b.strokeStyle = "rgba(200,210,225,0.18)"; b.lineWidth = PX;
   for (let i = 1; i < 6; i++) { const t = i / 6; b.beginPath(); b.moveTo(lb.x, lb.y + (lt.y - lb.y) * t); b.lineTo(cb.x, cb.y + (ct.y - cb.y) * t); b.lineTo(rb.x, rb.y + (rt.y - rb.y) * t); b.stroke(); }
-  b.strokeStyle = "#f4f6f8"; b.lineWidth = 2;
+  b.strokeStyle = "#f4f6f8"; b.lineWidth = 2 * PX;
   b.beginPath(); b.moveTo(lt.x, lt.y); b.lineTo(ct.x, ct.y); b.lineTo(rt.x, rt.y); b.stroke();
-  b.fillStyle = "#c9ced8"; b.fillRect(lb.x - 1, lt.y, 2, lb.y - lt.y); b.fillRect(rb.x - 1, rt.y, 2, rb.y - rt.y);
+  b.fillStyle = "#c9ced8"; b.fillRect(lb.x - PX, lt.y, 2 * PX, lb.y - lt.y); b.fillRect(rb.x - PX, rt.y, 2 * PX, rb.y - rt.y);
 }
 
 /* Pixel player sprite, scaled from real height. facing: 1 = back to camera (near), -1 = facing camera (far) */
@@ -1318,7 +1325,7 @@ const BALL_R = 0.1;                                      // drawn radius in metr
 const BALL_R_PX_MIN = 1.6;                               // GAME-DESIGN: floor so a far ball doesn't vanish
 const BALL_R_PX_MAX = 36;                                // GAME-DESIGN: safety cap so net/pov cameras don't draw a giant ball
 // Any camera, including a future review slant camera, gets its scale through proj().s.
-function ballRadiusPx(p) { return Math.min(BALL_R_PX_MAX, Math.max(BALL_R_PX_MIN, BALL_R * p.s)); }
+function ballRadiusPx(p) { return Math.min(BALL_R_PX_MAX * PX, Math.max(BALL_R_PX_MIN * PX, BALL_R * p.s)); }  // floors in design pixels, so CSS size holds at 2×
 function drawBall(ball, inset = false) {
   const p = proj(ball.x, ball.y, ball.z), r = ballRadiusPx(p), cx = q(p.x), cy = q(p.y);
   const tr = ball._trail || (ball._trail = []);
@@ -2020,9 +2027,38 @@ function retakeServe(no, call) {
 /* =====================================================================
    LOOP
    ===================================================================== */
-let last = performance.now();
+let last = performance.now(), lastDraw = 0, fpsClimb = 0, fpsDrop = 0;
+const FPS_WIN = 90, fpsWork = [];                        // p90 work time over 90 draw frames; one decision per filled window
+const fpsTierLog = [];                                   // recent tier changes (for evidence)
+function fpsP90(a) { const s = a.slice().sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(0.9 * (s.length - 1)))]; }
+function adaptFps(workMs) {
+  fpsWork.push(workMs);
+  if (fpsWork.length < FPS_WIN) return;
+  const q = fpsP90(fpsWork); fpsWork.length = 0;          // consume the window so hysteresis is in windows, not frames
+  const budget = 1000 / fpsTier;
+  if (q > budget * 1.15 && fpsTier > 30) {               // drop: p90 over budget + 15% for two windows
+    fpsClimb = 0;
+    if (++fpsDrop >= 2) {
+      const from = fpsTier; fpsTier = fpsTier === 120 ? 60 : 30;
+      fpsDrop = 0;
+      fpsTierLog.push({ t: gameT, from, to: fpsTier, p90: +q.toFixed(2) }); if (fpsTierLog.length > 40) fpsTierLog.shift();
+      console.info("[fps-tier]", from, "->", fpsTier, "p90_work_ms", +q.toFixed(2));
+      if (fpsTier === 30) resize();                      // drop back to the original buffer at 30, to cut fill rate
+    }
+  } else if (fpsTier < 120 && q < 1000 / (fpsTier === 30 ? 60 : 120) * 0.75) {
+    fpsDrop = 0;
+    if (++fpsClimb >= 2) {                               // climb: two windows under 75% of the next tier's budget
+      const from = fpsTier; fpsTier = fpsTier === 30 ? 60 : 120;
+      fpsClimb = 0;
+      fpsTierLog.push({ t: gameT, from, to: fpsTier, p90: +q.toFixed(2) }); if (fpsTierLog.length > 40) fpsTierLog.shift();
+      console.info("[fps-tier]", from, "->", fpsTier, "p90_work_ms", +q.toFixed(2));
+      if (from === 30) resize();
+    }
+  } else { fpsClimb = 0; fpsDrop = 0; }
+}
 function frame(now) {
   requestAnimationFrame(frame);                          // schedule first, so one bad frame can't stop the game
+  const work0 = performance.now();
   const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = Math.max(last, now);   // never step backwards in time
   if (!innerWidth || !innerHeight) return;              // hidden / zero-size window: nothing to draw
   const serveComing = (nextServe && nextServe.ready && !rally) || (rally && (rally.serve || (rally.shot && rally.shot.isServe)));
@@ -2034,6 +2070,8 @@ function frame(now) {
     else { pos.forEach(p => { p.moving = false; }); readyStep(dt); }
     updateCamera(dt);
   }
+  if (now - lastDraw < 1000 / fpsTier * 0.9) return;     // adaptive cap: skip the paint only, physics already stepped
+  lastDraw = now;
   drawCourt();
   const firstPerson = camMode === "pov";                  // in first person you don't see yourself
   const items = [
@@ -2049,13 +2087,19 @@ function frame(now) {
   drawShadows();                                         // cast shadows first: everything stands on top of them
   items.sort((a, c) => c.y - a.y).forEach(it => it.draw());
   b = bMain;
+  // Composite the court onto the actor layer at integer AS, then one blit to the CSS-sized canvas.
+  // This avoids a 1.5× nearest-neighbour blit of buf (uneven columns / shimmer) when px is 1.5.
+  actx.setTransform(1, 0, 0, 1, 0, 0); actx.imageSmoothingEnabled = false;
+  actx.globalCompositeOperation = "destination-over";
+  actx.drawImage(buf, 0, 0, abuf.width, abuf.height);
+  actx.globalCompositeOperation = "source-over";
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
   ctx.drawImage(abuf, 0, 0, canvas.width, canvas.height);
   drawSunlight();
   drawServeInset();
   renderHud();
   renderReady();
+  adaptFps(performance.now() - work0);                   // only draw frames count toward the p90 (skip-frames would look too cheap)
 }
 
 /* SERVE CAM INSET. While your opponent serves you'd only see a small figure at the far baseline, so a zoomed view
@@ -2101,11 +2145,11 @@ function drawAim() {
   const aiming = S.server === 0 && ((nextServe && nextServe.ready) || (rally && (rally.serve || (rally.shot && rally.shot.isServe && !rally.shot.bounced))));
   if (!aiming) return;
   const bx = serviceBox(0);
-  b.strokeStyle = "rgba(216,238,76,0.35)"; b.lineWidth = 1;     // the box you must land in
+  b.strokeStyle = "rgba(216,238,76,0.35)"; b.lineWidth = PX;     // the box you must land in
   const c = [proj(bx.xlo, bx.ylo), proj(bx.xhi, bx.ylo), proj(bx.xhi, bx.yhi), proj(bx.xlo, bx.yhi)];
   b.beginPath(); c.forEach((p, i) => (i ? b.lineTo(p.x, p.y) : b.moveTo(p.x, p.y))); b.closePath(); b.stroke();
-  const p = proj(aim.x, aim.y), r = Math.max(2, p.s * 0.35);
-  b.strokeStyle = "#d8ee4c"; b.lineWidth = 2;
+  const p = proj(aim.x, aim.y), r = Math.max(2 * PX, p.s * 0.35);
+  b.strokeStyle = "#d8ee4c"; b.lineWidth = 2 * PX;
   b.beginPath(); b.moveTo(p.x - r, p.y - r * 0.4); b.lineTo(p.x + r, p.y + r * 0.4); b.moveTo(p.x + r, p.y - r * 0.4); b.lineTo(p.x - r, p.y + r * 0.4); b.stroke();
 }
 
@@ -2126,8 +2170,8 @@ function renderReady() {
 function drawReach() {
   const p = pos[0], r = BODY[0].reach, c = proj(p.x, p.y);
   const rx = proj(p.x + r, p.y).x - c.x, ry = Math.abs(proj(p.x, p.y - r).y - proj(p.x, p.y + r).y) / 2;
-  b.strokeStyle = "rgba(216,238,76,0.28)"; b.lineWidth = 1;
-  b.beginPath(); b.ellipse(Math.round(c.x), Math.round(c.y), rx, Math.max(1, ry), 0, 0, Math.PI * 2); b.stroke();
+  b.strokeStyle = "rgba(216,238,76,0.28)"; b.lineWidth = PX;
+  b.beginPath(); b.ellipse(Math.round(c.x), Math.round(c.y), rx, Math.max(PX, ry), 0, 0, Math.PI * 2); b.stroke();
 }
 
 const hudEls = [0, 1].map(i => ({ st: document.getElementById("st" + i), cap: document.getElementById("cap" + i) }));
