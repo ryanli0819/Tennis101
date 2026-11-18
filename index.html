@@ -1545,11 +1545,15 @@ function drawPlayer(i, pos, swing) {
 
 /* THE BALL: round, optic yellow felt, lit from the light side and shaded on the other, a white seam that turns
    with its spin, a fuzzy edge, and a faint trail when it flies fast. (Its shadow is drawn by drawShadows.) */
-const BALL_R = 0.1;                                      // drawn radius in metres: about 3× real (GAME-DESIGN), so it reads at any distance
-// Real ITF ball diameter is 6.54–6.86 cm (SOURCED, Rules of Tennis Appendix I,
-// https://www.itftennis.com/en/about-us/governance/rules-and-regulations/).
-const BALL_R_PX_MIN = 1.6;                               // GAME-DESIGN: floor so a far ball doesn't vanish
-const BALL_R_PX_MAX = 36;                                // GAME-DESIGN: safety cap so net/pov cameras don't draw a giant ball
+// TRUE SIZE (HQ-20261118-003, Ryan: "the ball still isn't small enough when it's at the other side of the court,
+// thus when some balls should be on the line, it appears to be out"): the ball is drawn at its real radius through the
+// same proj().s as the court lines, at every depth and on every camera (broadcast, serve cam, inset). The disc stays centred
+// on (x, y, z), so at the bounce (z = 0) it covers its contact point, as a raised camera sees the patch hidden under the ball.
+const BALL_R = 0.0335;                                   // SOURCED: real radius, 6.7 cm diameter; ITF Rules of Tennis 2026 Appendix I: 6.54–6.86 cm,
+                                                         // https://www.world.tennis/media/7221/2026-rules-of-tennis-english.pdf
+const BALL_R_PX_MIN = 0.5;                               // GAME-DESIGN: floor of half a design px, so a far ball is at most one court line wide
+                                                         // (lines are drawn 1 design px) and never vanishes; a line ball still sits on the line
+const BALL_R_PX_MAX = 36;                                // GAME-DESIGN: safety cap so net/pov cameras don't draw a giant ball (only ever shrinks)
 // Any camera, including a future review slant camera, gets its scale through proj().s.
 function ballRadiusPx(p) { return Math.min(BALL_R_PX_MAX * PX, Math.max(BALL_R_PX_MIN * PX, BALL_R * p.s)); }  // floors in design pixels, so CSS size holds at 2×
 function drawBall(ball, inset = false) {
