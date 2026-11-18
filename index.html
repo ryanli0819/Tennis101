@@ -230,6 +230,7 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/skills/skills.js?v=0.11.0"></script>
 <script src="src/animation/run-cycle.js?v=0.11.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.11.0"></script>
+<script src="src/players/handedness.js?v=0.14.0"></script>
 <!-- Fixed-length 3D skeleton (body-motion-engineer, HQ-20261117-002): limits from datasets/anatomy/joints.json. Off for players without a skeleton. -->
 <script src="src/body/joints.js?v=0.14.0"></script>
 <script src="src/body/skeleton.js?v=0.14.0"></script>
@@ -240,14 +241,14 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
    PLAYERS — real measurements drive sprite height (and later, physics)
    ===================================================================== */
 const ROSTER = [
-  { id: "sinner",  last: "SINNER",  first: "Jannik", code: "ITA", heightM: 1.91, weightKg: 77, shirt: "#23b59c", shorts: "#11233a", hair: "#c4672f", letRate: 0.02,
+  { id: "sinner",  last: "SINNER",  first: "Jannik", code: "ITA", heightM: 1.91, weightKg: 77, lefty: HANDEDNESS.lefty("sinner"), shirt: "#23b59c", shorts: "#11233a", hair: "#c4672f", letRate: 0.02,
     // outfit per court, from his clips (datasets/players/sinner/outfits.json); grass = all white (dress code)
     outfits: { clay:  { shirt: "#141418", shorts: "#1e1d22", cap: "#16161b", shoes: "#1c1b20" },
                hard:  { shirt: "#1f2f4a", shorts: "#f5f5f2", cap: "#f2f2ef", shoes: "#f0ece6" },
                grass: { shirt: "#f4f4f0", shorts: "#f4f4f0", cap: "#f4f4f0", shoes: "#f4f4f0" } },
     // SIGNATURE (datasets/players/sinner/appearance.json, Ryan's call): the iconic cap, bright ginger curls flaring out under it
     look: { style: "cap-curls" } },
-  { id: "alcaraz", last: "ALCARAZ", first: "Carlos", code: "ESP", heightM: 1.83, weightKg: 74, shirt: "#e2544a", shorts: "#f1f1ec", hair: "#2a1c14", letRate: 0.03,
+  { id: "alcaraz", last: "ALCARAZ", first: "Carlos", code: "ESP", heightM: 1.83, weightKg: 74, lefty: HANDEDNESS.lefty("alcaraz"), shirt: "#e2544a", shorts: "#f1f1ec", hair: "#2a1c14", letRate: 0.03,
     // outfits from Ryan's clips (datasets/players/alcaraz/appearance.json): US Open grey fade sleeveless top + black, a black arm sleeve;
     // clay stands in with his orange kit until a clay clip exists; all white on grass (dress code)
     outfits: { hard:  { shirt: "#3c3f45", shirtLow: "#a3a7ad", shorts: "#1f2024", shoes: "#1d1d20", socks: "#141416", sleeve: "#121214" },
@@ -276,9 +277,17 @@ function bodyStats(P) {
 let BODY = [];
 /* You pick a pro in the locker room: they go to the near court, the other pro is your opponent.
    Each body = height/weight physics (bodyStats) + skill points (src/skills/skills.js). */
+/* HANDEDNESS (HQ-20261116-001): every player's lefty comes from the SOURCED table in src/players/handedness.js
+   (ATP "Plays:"). No default: an id missing from the table throws. A roster entry that disagrees is reported. */
+function handed(P) {
+  const l = HANDEDNESS.lefty(P.id);
+  if (typeof P.lefty === "boolean" && P.lefty !== l) console.error(`HANDEDNESS: roster says lefty=${P.lefty} for ${P.id}, the sourced table says ${l}; using the table.`);
+  return l;
+}
+const handSign = P => (handed(P) ? -1 : 1);              // +1 right-handed, −1 left-handed
 function choosePlayers(youId, surface = "hard") {
   const you = ROSTER.find(r => r.id === youId) || ROSTER[0], opp = ROSTER.find(r => r !== you);
-  const dress = P => ({ ...P, ui: P.shirt, ...(P.outfits && P.outfits[surface] || {}) });   // outfit for this court; ui keeps the signature colour for the HUD
+  const dress = P => ({ ...P, ui: P.shirt, ...(P.outfits && P.outfits[surface] || {}), lefty: handed(P) });   // outfit for this court; ui keeps the signature colour for the HUD
   PLAYERS.splice(0, 2, { ...dress(you), side: "near" }, { ...dress(opp), side: "far" });
   BODY = PLAYERS.map(P => applySkills(bodyStats(P), getSkills(P.id)));
 }
@@ -408,6 +417,12 @@ let b = bMain;                                           // the context every dr
 /* ACTOR LAYER: players, rackets, net and ball are drawn at AS× the court's pixel resolution, so characters get
    real detail while the world keeps its chunky pixel look. Same coordinates (scaled by a transform). */
 const AS = 3;
+/* PX: design-pixel scale in buffer units, picked from the visible-canvas backing store.
+   Backing is W·min(devicePixelRatio, 2); CSS size stays W×H. PX is 2 only when that backing is 2×
+   and the FPS tier is not 30; otherwise PX is 1 (main's buffers). Final blit is ~1:1
+   (1281→1280 at DPR 1, 2562→2560 at DPR 2 — the same 1–2 px crop as 4ba74ac).
+   The 30-FPS tier drops to the 1× buffer to cut fill rate. px is CSS pixels per buffer pixel (basePx / PX). */
+let PX = 1, px = 3, fpsTier = 120, dpr = 1, cssW = 0, cssH = 0;
 const abuf = document.createElement("canvas"), actx = abuf.getContext("2d");
 const q = v => Math.round(v * AS) / AS;                  // snap to the actor layer's finer pixel grid
 let BW = 320, BH = 200, F = 150, HZ = 60;
@@ -446,9 +461,13 @@ function updateCamera(dt) {
 
 function resize() {
   const W = innerWidth, H = innerHeight;
-  const px = W < 700 ? 2 : 3;               // size of one "pixel"
-  canvas.width = W; canvas.height = H;
-  BW = Math.ceil(W / px); BH = Math.ceil(H / px);
+  dpr = Math.min(devicePixelRatio || 1, 2); // cap at 2: that's the 2× quality backing
+  const basePx = W < 700 ? 2 : 3;           // original CSS pixels per design pixel (4ba74ac)
+  PX = (fpsTier === 30 || dpr < 2) ? 1 : 2; // 2× buffers only on a 2× backing; 1× at DPR 1 and at the 30 tier
+  px = basePx / PX;
+  cssW = W; cssH = H;
+  canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);   // backing in device px; CSS stays 100%×100%
+  BW = Math.ceil(W / basePx) * PX; BH = Math.ceil(H / basePx) * PX;           // main's buffers at PX=1; exact 2× at PX=2
   buf.width = BW; buf.height = BH;
   abuf.width = BW * AS; abuf.height = BH * AS;
   F = Math.min(BW * 0.63, BH * 0.95);
@@ -503,16 +522,16 @@ function crowdPattern(surface, big) {
   const key = surface + (big ? "B" : "S");
   if (crowdPatterns[key]) return crowdPatterns[key];
   const sc = SCENES[surface], c = document.createElement("canvas");
-  const cw = big ? 3 : 2, ch = big ? 5 : 3, cols = 16, rows = 4;          // one person = cw × ch pixels
+  const s = PX, cw = (big ? 3 : 2) * s, ch = (big ? 5 : 3) * s, cols = 16, rows = 4;   // one person = cw × ch buffer px (scaled so CSS size holds at 2×)
   c.width = cw * cols; c.height = ch * rows;
   const g = c.getContext("2d"); let seed = surface.length * 97 + (big ? 13 : 7);
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, pick = a => a[rnd() * a.length | 0];
   g.fillStyle = sc.stands; g.fillRect(0, 0, c.width, c.height);
   for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
-    const x = q * cw + (r % 2 ? 1 : 0), y = r * ch;                      // alternate rows sit offset, like real seats
-    g.fillStyle = pick(sc.crowd); g.fillRect(x, y + (big ? 2 : 1), cw, ch - (big ? 3 : 1));   // shoulders
+    const x = q * cw + (r % 2 ? s : 0), y = r * ch;                      // alternate rows sit offset, like real seats
+    g.fillStyle = pick(sc.crowd); g.fillRect(x, y + (big ? 2 : 1) * s, cw, ch - (big ? 3 : 1) * s);   // shoulders
     g.fillStyle = rnd() < 0.25 ? pick(["#2a1c14", "#5a4232", "#c9b48a", "#1b1b1f"]) : pick(sc.skin);
-    g.fillRect(x + (big ? 1 : 0), y + (big ? 0 : 0), big ? 1 : 1, big ? 2 : 1);              // head (hair or skin)
+    g.fillRect(x + (big ? 1 : 0) * s, y, 1 * s, (big ? 2 : 1) * s);                    // head (hair or skin)
   }
   return (crowdPatterns[key] = b.createPattern(c, "repeat"));
 }
@@ -536,12 +555,12 @@ function drawStadium() {
     b.beginPath(); pts.forEach((p, i) => (i ? b.lineTo(p.x, p.y) : b.moveTo(p.x, p.y))); b.closePath(); b.fill();
     if (q.k >= 0 && q.k < S.tiers) {                     // upper tiers sit in shade; a dark line marks each row's front edge
       b.fillStyle = `rgba(0,0,0,${(sc.shade * q.k / S.tiers).toFixed(3)})`; b.fill();
-      b.strokeStyle = "rgba(0,0,0,0.28)"; b.lineWidth = 1; b.beginPath(); b.moveTo(pts[0].x, pts[0].y); b.lineTo(pts[1].x, pts[1].y); b.stroke();
+      b.strokeStyle = "rgba(0,0,0,0.28)"; b.lineWidth = PX; b.beginPath(); b.moveTo(pts[0].x, pts[0].y); b.lineTo(pts[1].x, pts[1].y); b.stroke();
     }
-    if (q.k === -1) { b.strokeStyle = sc.trim; b.lineWidth = 1; b.beginPath(); b.moveTo(pts[3].x, pts[3].y); b.lineTo(pts[2].x, pts[2].y); b.stroke(); }
+    if (q.k === -1) { b.strokeStyle = sc.trim; b.lineWidth = PX; b.beginPath(); b.moveTo(pts[3].x, pts[3].y); b.lineTo(pts[2].x, pts[2].y); b.stroke(); }
     if (q.k === S.tiers && sc.lights && q.j % 6 === 0) { // floodlights along the roof (night session)
-      const m = pts[3]; b.fillStyle = "#fff6c8"; b.fillRect(Math.round(m.x) - 2, Math.round(m.y) - 1, 4, 2);
-      b.fillStyle = "rgba(255,246,200,0.10)"; b.fillRect(Math.round(m.x) - 6, Math.round(m.y) - 3, 12, 6);
+      const m = pts[3], s = PX; b.fillStyle = "#fff6c8"; b.fillRect(Math.round(m.x) - 2 * s, Math.round(m.y) - 1 * s, 4 * s, 2 * s);
+      b.fillStyle = "rgba(255,246,200,0.10)"; b.fillRect(Math.round(m.x) - 6 * s, Math.round(m.y) - 3 * s, 12 * s, 6 * s);
     }
   }
 }
@@ -555,7 +574,9 @@ function line(x1, y1, x2, y2, w = 0.05) {
   const a = proj(x1 - w, y1), c = proj(x2 + w, y2), a2 = proj(x1 + w, y1), c2 = proj(x2 - w, y2);
   // draw as thin quad so far lines stay ~1px
   const p1 = proj(x1, y1), p2 = proj(x2, y2);
-  b.strokeStyle = "#f4f6f8"; b.lineWidth = 1; b.beginPath(); b.moveTo(Math.round(p1.x) + .5, Math.round(p1.y) + .5); b.lineTo(Math.round(p2.x) + .5, Math.round(p2.y) + .5); b.stroke();
+  b.strokeStyle = "#f4f6f8"; b.lineWidth = PX; b.beginPath();
+  const snap = PX % 2 ? 0.5 : 0;                           // odd widths center on a pixel; even widths on the grid (avoids AA fringe at 2×)
+  b.moveTo(Math.round(p1.x) + snap, Math.round(p1.y) + snap); b.lineTo(Math.round(p2.x) + snap, Math.round(p2.y) + snap); b.stroke();
 }
 
 /* Court surfaces. Colours here; pace (ball speed after the bounce) and bounce height used by the point flow.
@@ -605,7 +626,7 @@ function drawShadows() {
         ["rightShoulder", "rightElbow"], ["rightElbow", "rightWrist"], ["neck", "nose"]];
       for (const d of L.shadows) {
         const at = n => W[n] && proj(W[n].x + d.x * W[n].z, W[n].y + d.y * W[n].z);
-        b.strokeStyle = `rgba(8,12,24,${d.a})`; b.lineCap = "round"; b.lineWidth = Math.max(1, proj(pos[i].x, pos[i].y).s * 0.16);
+        b.strokeStyle = `rgba(8,12,24,${d.a})`; b.lineCap = "round"; b.lineWidth = Math.max(PX, proj(pos[i].x, pos[i].y).s * 0.16);
         b.beginPath();
         for (const [m, n] of BONES) { const A = at(m), C = at(n); if (A && C) { b.moveTo(A.x, A.y); b.lineTo(C.x, C.y); } }
         b.stroke();
@@ -632,7 +653,7 @@ function drawShadows() {
 /* Sunshine: a warm grade over the whole picture and a soft glow from where the sun is (daytime courts only). */
 function drawSunlight() {
   const L = LIGHT(); if (!L.sun) return;
-  const W = canvas.width, H = canvas.height;
+  const W = cssW, H = cssH;                  // CSS pixels: ctx is already scaled by dpr, so the wash stays the same on-screen size
   ctx.save();
   ctx.globalCompositeOperation = "soft-light"; ctx.fillStyle = `rgba(255,196,110,${L.warm})`; ctx.fillRect(0, 0, W, H);
   ctx.globalCompositeOperation = "screen";
@@ -647,11 +668,11 @@ function drawNet() {
   const lb = proj(-post, 0, 0), rb = proj(post, 0, 0), lt = proj(-post, 0, hp), rt = proj(post, 0, hp), ct = proj(0, 0, hc), cb = proj(0, 0, 0);
   b.fillStyle = "rgba(20,26,36,0.62)";
   b.beginPath(); b.moveTo(lb.x, lb.y); b.lineTo(lt.x, lt.y); b.lineTo(ct.x, ct.y); b.lineTo(rt.x, rt.y); b.lineTo(rb.x, rb.y); b.closePath(); b.fill();
-  b.strokeStyle = "rgba(200,210,225,0.18)"; b.lineWidth = 1;
+  b.strokeStyle = "rgba(200,210,225,0.18)"; b.lineWidth = PX;
   for (let i = 1; i < 6; i++) { const t = i / 6; b.beginPath(); b.moveTo(lb.x, lb.y + (lt.y - lb.y) * t); b.lineTo(cb.x, cb.y + (ct.y - cb.y) * t); b.lineTo(rb.x, rb.y + (rt.y - rb.y) * t); b.stroke(); }
-  b.strokeStyle = "#f4f6f8"; b.lineWidth = 2;
+  b.strokeStyle = "#f4f6f8"; b.lineWidth = 2 * PX;
   b.beginPath(); b.moveTo(lt.x, lt.y); b.lineTo(ct.x, ct.y); b.lineTo(rt.x, rt.y); b.stroke();
-  b.fillStyle = "#c9ced8"; b.fillRect(lb.x - 1, lt.y, 2, lb.y - lt.y); b.fillRect(rb.x - 1, rt.y, 2, rb.y - rt.y);
+  b.fillStyle = "#c9ced8"; b.fillRect(lb.x - PX, lt.y, 2 * PX, lb.y - lt.y); b.fillRect(rb.x - PX, rt.y, 2 * PX, rb.y - rt.y);
 }
 
 /* Pixel player sprite, scaled from real height. facing: 1 = back to camera (near), -1 = facing camera (far) */
@@ -1195,8 +1216,9 @@ function poseTrack(keys, t) {                              // keys: [[time, pose
 }
 function racketPose(i, p, ago = 0) {
   const R = PLAYERS[i].side === "near" ? 1 : -1;        // near player's right is +x and forward is +y; far is the mirror
-  const W = (dx, dy, z) => ({ x: p.x + R * dx, y: p.y + R * dy, z });
-  const D = (dx, dy, dz) => V3.norm({ x: R * dx, y: R * dy, z: dz });
+  const RH = R * handSign(PLAYERS[i]);                   // his racket side: his right, or his left for a left-hander
+  const W = (dx, dy, z) => ({ x: p.x + RH * dx, y: p.y + R * dy, z });
+  const D = (dx, dy, dz) => V3.norm({ x: RH * dx, y: R * dy, z: dz });
   const clk = (c, fwd) => D(Math.sin(c * Math.PI / 6), fwd, Math.cos(c * Math.PI / 6));   // racket top pointing at c o'clock
   const hz = Math.max(0.45, Math.min(1.75, p.hitZ ?? 1.0));                              // contact height of the last ball
   const se = SLICE_END[PLAYERS[i].id] ?? 4.5;
@@ -1242,7 +1264,7 @@ function racketPose(i, p, ago = 0) {
   const sh = rally && rally.shot;
   if (sh && sh.recv === i && !rally.serve && ball) {                              // the ball is coming: swing on the beat of its arrival
     const ttc = sh.t1 + 0.85 * sh.t2 - sh.t + ago;                                // ≈ time left until contact
-    const side = (sh.end.x - p.x) * R >= 0;                                       // forehand if it comes to the racket side
+    const side = (sh.end.x - p.x) * RH >= 0;                                      // forehand if it comes to the racket side
     const slice = i === 0 ? (input.keys.has("e") || input.slice) : !!p.planSlice; // you hold E; the computer decided early
     const zc = Math.max(0.45, Math.min(1.75, sh.end.z));
     const set = (pz) => ({ ...pz, g: { ...pz.g, z: zc } });                       // aim the contact pose at the ball's height
@@ -1303,7 +1325,7 @@ function drawSignature(P, near, H) {
 
 function drawPlayer(i, pos, swing) {
   if (pos.motion && pos.motion.world) return drawCapturedFigure(i, pos, pos.motion.world);
-  const P = PLAYERS[i], near = P.side === "near", R = near ? 1 : -1;
+  const P = PLAYERS[i], near = P.side === "near", R = near ? 1 : -1, RH = R * handSign(P);   // RH: screen side of his racket arm
   const g = proj(pos.x, pos.y), s = g.s;
   const h = Math.max(6, P.heightM * s), w = h * 0.30, skin = "#e1b48b", skinD = shade(skin, -0.18), skinL = shade(skin, 0.12);
   const A = window.Anim ? Anim.frame(pos, BODY[i], near, P.id)
@@ -1314,8 +1336,8 @@ function drawPlayer(i, pos, swing) {
   /* YAW: how far the body is turned (−1…1, screen sense: + = toward screen right). Running sideways turns the whole
      body (turn); taking the racket back turns the shoulders (the unit turn), so a swing reads as a rotation too.
      Turned sideways = narrower, and the seams, logo and shading slide round the body (see cyl below). */
-  const dxR = (rp.g.x - pos.x) * R, dyR = (rp.g.y - pos.y) * R;
-  const twistS = Math.max(0, Math.min(1, -dyR * 2.6)) * Math.sign(dxR) * 0.8 * R;
+  const dxR = (rp.g.x - pos.x) * RH, dyR = (rp.g.y - pos.y) * R;
+  const twistS = Math.max(0, Math.min(1, -dyR * 2.6)) * Math.sign(dxR) * 0.8 * RH;
   const yaw = Math.max(-1, Math.min(1, turn + twistS * (1 - Math.abs(turn)))), tw = 1 - 0.36 * Math.abs(yaw);
   const hop = pos.air > 0 ? h * 0.07 : 0, drop = (A.crouch + (rp.crouch || 0) - A.bob) * h;
   const tiltR = (rp.tilt || 0) * h;                         // + = racket shoulder lower (a slice finishing low), − = higher
@@ -1386,9 +1408,9 @@ function drawPlayer(i, pos, swing) {
     Ln(hx2 + (ex - hx2) * 0.22, hy2 + (ey - hy2) * 0.22, hx2 + (ex - hx2) * 0.08, hy2 + (ey - hy2) * 0.08, P.ui || "#f2f2f2", w * 0.2);  // wristband
     Rr(hx2 - w * 0.08, hy2 - w * 0.08, w * 0.16, w * 0.16, skinL);                           // hand
   };
-  const rS = { x: tx + R * w * 0.5 * tw, y: shY + h * 0.05 + tiltR }, lS = { x: tx - R * w * 0.5 * tw, y: shY + h * 0.05 - tiltR };
+  const rS = { x: tx + RH * w * 0.5 * tw, y: shY + h * 0.05 + tiltR }, lS = { x: tx - RH * w * 0.5 * tw, y: shY + h * 0.05 - tiltR };   // racket / free shoulder
   const swingDir = A.dir === "right" ? 1 : A.dir === "left" ? -1 : 0, swingUp = A.dir === "away" ? 1 : A.dir === "toward" ? -1 : 0;
-  let freeHand = { x: lS.x - R * w * 0.25 * tw + swingDir * A.arms[0] * w * 0.55,           // the free arm pumps with the legs
+  let freeHand = { x: lS.x - RH * w * 0.25 * tw + swingDir * A.arms[0] * w * 0.55,           // the free arm pumps with the legs
                    y: shY + h * 0.33 + A.arms[0] * h * 0.05 - swingUp * A.arms[0] * h * 0.035 - Math.abs(swingDir * A.arms[0]) * h * 0.04 };
   let freeOnThroat = false;
   if (rp.twoHands) freeHand = { x: grip.x, y: grip.y + h * 0.02 };
@@ -1411,10 +1433,10 @@ function drawPlayer(i, pos, swing) {
   };
   const drawArms = (front) => {
     const freeHidden = near ? freeFront : !freeFront, racketHidden = near ? racketFront : !racketFront;
-    if (freeHidden !== front) arm(lS.x, lS.y, freeHand.x, freeHand.y, -R);
-    else if (front && near) stub(lS, freeHand.x, freeHand.y, -R, 0.6);
-    if (racketHidden !== front) arm(rS.x, rS.y, grip.x, grip.y, R, P.sleeve);
-    else if (front && near) stub(rS, grip.x, grip.y, R, 0.6);
+    if (freeHidden !== front) arm(lS.x, lS.y, freeHand.x, freeHand.y, -RH);
+    else if (front && near) stub(lS, freeHand.x, freeHand.y, -RH, 0.6);
+    if (racketHidden !== front) arm(rS.x, rS.y, grip.x, grip.y, RH, P.sleeve);
+    else if (front && near) stub(rS, grip.x, grip.y, RH, 0.6);
   };
   drawArms(false);                                                                           // arms hidden behind the torso first
   b.save(); b.translate(q(tx), 0); b.scale(tw, 1); b.translate(-q(tx), 0);               // turned sideways: the torso narrows
@@ -1527,7 +1549,7 @@ const BALL_R = 0.1;                                      // drawn radius in metr
 const BALL_R_PX_MIN = 1.6;                               // GAME-DESIGN: floor so a far ball doesn't vanish
 const BALL_R_PX_MAX = 36;                                // GAME-DESIGN: safety cap so net/pov cameras don't draw a giant ball
 // Any camera, including a future review slant camera, gets its scale through proj().s.
-function ballRadiusPx(p) { return Math.min(BALL_R_PX_MAX, Math.max(BALL_R_PX_MIN, BALL_R * p.s)); }
+function ballRadiusPx(p) { return Math.min(BALL_R_PX_MAX * PX, Math.max(BALL_R_PX_MIN * PX, BALL_R * p.s)); }  // floors in design pixels, so CSS size holds at 2×
 function drawBall(ball, inset = false) {
   const p = proj(ball.x, ball.y, ball.z), r = ballRadiusPx(p), cx = q(p.x), cy = q(p.y);
   const tr = ball._trail || (ball._trail = []);
@@ -1536,18 +1558,72 @@ function drawBall(ball, inset = false) {
     tr.slice(0, 3).forEach((o, k) => { const t = proj(o.x, o.y, o.z);
       b.fillStyle = `rgba(216,238,76,${0.22 - k * 0.06})`; b.beginPath(); b.arc(q(t.x), q(t.y), r * (0.9 - k * 0.15), 0, Math.PI * 2); b.fill(); });
   if (!inset) { tr.unshift({ x: ball.x, y: ball.y, z: ball.z }); tr.length = Math.min(tr.length, 4); }
-  const lx = litLeft() ? -1 : 1, night = !LIGHT().sun;
-  b.save(); b.beginPath(); b.arc(cx, cy, r, 0, Math.PI * 2); b.clip();
-  b.fillStyle = "#a9c02c"; b.fillRect(cx - r, cy - r, r * 2, r * 2);                         // shaded side
-  b.fillStyle = "#d6ec3e"; b.beginPath(); b.arc(cx + lx * r * 0.28, cy - r * 0.24, r * 0.95, 0, Math.PI * 2); b.fill();   // lit felt
-  b.fillStyle = "#f2fb9a"; b.beginPath(); b.arc(cx + lx * r * 0.42, cy - r * 0.42, r * (night ? 0.24 : 0.32), 0, Math.PI * 2); b.fill();   // highlight
+  const lx = litLeft() ? -1 : 1;
+  const R_TINY = 2.5 * PX, R_SEAM = 4.5 * PX;            // GAME-DESIGN: under 2.5 design-px, skip seam/halo (they turn to mush); seam only when the two-arc curve can read. *PX so the CSS thresholds hold on the 2× buffer.
   const th = (clock || gameT) * 11 + ball.x;                                               // the seam turns with the spin
-  b.strokeStyle = "rgba(250,250,238,0.95)"; b.lineWidth = Math.max(1 / AS, r * 0.16);
-  b.beginPath(); b.ellipse(cx - Math.cos(th) * r * 0.55, cy - Math.sin(th) * r * 0.55, r * 0.75, r * 0.5, th, -1.1, 1.1); b.stroke();
-  b.beginPath(); b.ellipse(cx + Math.cos(th) * r * 0.55, cy + Math.sin(th) * r * 0.55, r * 0.75, r * 0.5, th + Math.PI, -1.1, 1.1); b.stroke();
-  b.restore();
-  b.fillStyle = "rgba(226,244,120,0.55)";                                                  // felt fuzz around the edge
-  for (let k = 0; k < 10; k++) { const a = k * 0.628 + th * 0.2; b.fillRect(q(cx + Math.cos(a) * r) - 0.5 / AS, q(cy + Math.sin(a) * r) - 0.5 / AS, 1 / AS, 1 / AS); }
+  if (r < R_TINY) {                                      // floor-sized: solid optic-yellow disc and a one-pixel shade side
+    b.fillStyle = "#d8e244"; b.beginPath(); b.arc(cx, cy, r, 0, Math.PI * 2); b.fill();
+    b.fillStyle = "#94ac26"; b.fillRect(q(cx - lx * r * 0.45) - 0.5 / AS, q(cy) - 0.5 / AS, 1 / AS, 1 / AS);
+    return;
+  }
+  // Cached offscreen sprite (keyed by quantized radius + light side): smooth spherical
+  // felt + a dense fuzz halo. Built once, no per-frame gradient or speck loop.
+  if (!drawBall._spr) {
+    drawBall._spr = new Map();
+    // GAME-DESIGN colours: optic-yellow felt, no specular, no near-white spot.
+    // hi #e8ea58, lit #d8e244, mid #c6d438, shade #94ac26, rim #607a16, fuzz #b0c43a.
+    const HI = [232, 234, 88], LIT = [216, 226, 68], MID = [198, 212, 56], SHA = [148, 172, 38], RIM = [96, 122, 22], FUZZ = [176, 196, 58];
+    const mix = (A, B, t) => { t = t < 0 ? 0 : t > 1 ? 1 : t; return [A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t, A[2] + (B[2] - A[2]) * t]; };
+    const colAt = (nl, z) => {
+      let w = nl * 0.85 + 0.2 + 0.15 * z; if (w < 0) w = 0; else if (w > 1) w = 1;
+      if (w > 0.7) return mix(LIT, HI, (w - 0.7) / 0.3);
+      if (w > 0.4) return mix(MID, LIT, (w - 0.4) / 0.3);
+      if (w > 0.18) return mix(SHA, MID, (w - 0.18) / 0.22);
+      return mix(RIM, SHA, w / 0.18);
+    };
+    drawBall._bake = (rQ, lx) => {
+      const fuzz = Math.max(1.2 / AS, rQ * 0.12);        // GAME-DESIGN: soft halo width, as a fraction of r
+      const W = Math.ceil((rQ + fuzz) * 2 * AS) + 2, c = document.createElement("canvas");
+      c.width = c.height = W;
+      const g = c.getContext("2d"), img = g.createImageData(W, W), d = img.data, cx0 = W / 2, Rpix = rQ * AS;
+      const Lx = (lx < 0 ? -0.48 : 0.48), Ly = 0.72, Lz = 0.5, Ln = Math.hypot(Lx, Ly, Lz);
+      const lxn = Lx / Ln, lyn = Ly / Ln, lzn = Lz / Ln, fw = fuzz / rQ;
+      for (let j = 0; j < W; j++) for (let i = 0; i < W; i++) {
+        const x = (i + 0.5 - cx0) / Rpix, y = -(j + 0.5 - cx0) / Rpix, rr = Math.hypot(x, y), o = (j * W + i) * 4;
+        if (rr <= 1) {
+          const z = Math.sqrt(1 - rr * rr), col = colAt(x * lxn + y * lyn + z * lzn, z);
+          d[o] = col[0]; d[o + 1] = col[1]; d[o + 2] = col[2]; d[o + 3] = 255;
+        } else if (rr < 1 + fw) {                          // dense irregular halo (hashed alpha), not separate specks
+          const t = (rr - 1) / fw, h = ((i * 37 + j * 17) * 2654435761 >>> 0) / 4294967296, a = (1 - t) * (1 - t) * (0.5 + 0.45 * h);
+          if (a > 0.04) { d[o] = FUZZ[0]; d[o + 1] = FUZZ[1]; d[o + 2] = FUZZ[2]; d[o + 3] = a * 220; }
+        }
+      }
+      g.putImageData(img, 0, 0);
+      return { c, W };
+    };
+  }
+  const rQ = Math.round(r * AS) / AS, key = (lx < 0 ? "L" : "R") + rQ;
+  let spr = drawBall._spr.get(key);
+  if (!spr) {
+    if (drawBall._spr.size >= 48) drawBall._spr.delete(drawBall._spr.keys().next().value);
+    spr = drawBall._bake(rQ, lx); drawBall._spr.set(key, spr);
+  }
+  b.drawImage(spr.c, cx - spr.W / (2 * AS), cy - spr.W / (2 * AS), spr.W / AS, spr.W / AS);
+  if (r >= R_SEAM) {                                     // 3D two-arc seam (GAME-DESIGN k=1: photo pose at th=0); same spin variable; front-facing only
+    const kSeam = 1, nSeam = r >= 12 ? 72 : 48, cth = Math.cos(th), sth = Math.sin(th);
+    b.beginPath();
+    for (let i = 0, on = false; i <= nSeam; i++) {
+      const t = i / nSeam * Math.PI * 2;
+      let x = Math.cos(t), y = Math.sin(t), z = -kSeam * Math.cos(2 * t);
+      const inv = 1 / Math.hypot(x, y, z); x *= inv; y *= inv; z *= inv;
+      const y2 = y * cth - z * sth, z2 = y * sth + z * cth;
+      if (z2 > 0.04) { const px = cx + x * r, py = cy - y2 * r; if (on) b.lineTo(px, py); else { b.moveTo(px, py); on = true; } }
+      else on = false;
+    }
+    b.lineCap = "round"; b.lineJoin = "round";
+    b.strokeStyle = "rgba(120,132,58,0.85)"; b.lineWidth = Math.max(1.2 / AS, r * 0.11); b.stroke();  // GAME-DESIGN: shallow groove, thick enough to read at r≈5
+    b.strokeStyle = "rgba(236,236,214,0.95)"; b.lineWidth = Math.max(1 / AS, r * 0.08); b.stroke();   // GAME-DESIGN: pale cream stitch (a thin curve, not a specular spot)
+  }
 }
 
 /* =====================================================================
@@ -1742,28 +1818,23 @@ function motionFacing(m) {
   }
   return m.facing;
 }
-/* HANDEDNESS. The captured serves are flat recordings made from BEHIND the server. Played at the near end (seen from
-   behind) they read right. Played at the far end the same flat body is seen from the FRONT, where the side-on toss
-   arm lands on the screen's left and the racket on its right, so a right-hander looks left-handed (Ryan, Nov 11:
-   "Sinner is hitting with the racquet in his left hand and tossing with his right" in the serve-cam inset).
-   So for the opponent (seen from the front) the routine, toss and trophy are mirrored: racket on his right, bounce and
-   toss with his left. From the trophy to contact the body swings back to the true motion, so the racket comes up
-   through the middle and finishes across to his LEFT, as a right-hander's does (a plain mirror would finish it on his
-   right); the body narrows as it passes through, which reads as the turn to the ball. mo.flip: +1 = as captured,
-   −1 = mirrored at the start (far end). A left-hander (PLAYERS[i].lefty) gets the opposite. Never by deuce/ad side. */
+/* HANDEDNESS (root cause of "Sinner serves left-handed", fixed HQ-20261116-001). The captured serves are recorded
+   from BEHIND the server with x + = the player's own right. poseToWorld() turns that body round for the far end by
+   multiplying x by the court side (near +1, far −1), which is a rotation: the far player, seen from the front, keeps
+   his racket in his own right hand (on your screen's left). serveFlip() used to multiply by the court side AGAIN, so
+   the far end was mirrored twice and a right-hander held the racket in his LEFT hand until the trophy, and flipAt()
+   keyed its trophy→contact cross-fade on PLAYERS[i].lefty, which put a left-hander's racket in his right hand at
+   contact on the near end and for the whole serve on the far end. Now the court side is applied once (poseToWorld)
+   and the hand once (here): mo.flip = +1 when the clip's hand matches the player's SOURCED hand, −1 to mirror a
+   clip recorded with the other hand. It is constant for the whole serve, at both ends, in every camera (proj()
+   never mirrors). Never by deuce/ad side. */
 function serveFlip(i, m) {
-  const side = PLAYERS[i].side === "near" ? 1 : -1;
   const motionHand = (m && m.hand) || "R";
-  const playerHand = PLAYERS[i].lefty ? "L" : "R";
-  // A captured clip is already that player's hand. Mirror only when the clip and the player differ
-  // (a right-handed recording played by a left-hander). Shelton, Nadal and Tien are stored left-handed.
-  return side * (motionHand === playerHand ? 1 : -1);
+  const playerHand = handed(PLAYERS[i]) ? "L" : "R";
+  return motionHand === playerHand ? 1 : -1;
 }
 function flipAt(i, mo, t) {
-  const base = PLAYERS[i].lefty ? -1 : 1;
-  if (mo.flip * base > 0) return mo.flip;                // near end: as captured all the way
-  const E = mo.m.events, s = ease((t - E.trophy) / ((E.contact - E.trophy) || 0.1));
-  return base * (2 * s - 1);                             // −base (mirrored) until the trophy → +base (true) at contact
+  return mo.flip;                                        // constant: the court side is poseToWorld's job, not this one's
 }
 window.flipAt = flipAt;
 /* SIDE-ON START (from Ryan's serve compilation): every server begins turned at an angle to the court, front shoulder
@@ -1822,7 +1893,7 @@ function anatomize(i, W, t) {
      (BODIES shoulderJointW). In the flat clips the shoulder line flipped through zero as he turned to the net, so at
      contact the hitting shoulder sat LEFT of the tossing one: the racket arm grew out of the middle of the back,
      behind the head, and the other arm out of the chest. Now the frame keeps its real width, the hitting shoulder
-     stays on his right (on the mirrored far-end start, on the side the motion shows it), and the cartwheel tilt the
+     stays on the side the motion shows it (his right, unless a clip of the other hand is mirrored), and the cartwheel tilt the
      clip has (hitting shoulder up at contact) is kept. Each arm moves with its own shoulder, so its shape is kept. */
   const ls = W.leftShoulder, rs = W.rightShoulder;
   if (ls && rs) {
@@ -2095,7 +2166,7 @@ function hitBall(i, isServe, volley = false) {
   if (type === "slice") { err *= 1.25; if (i === 0) say(0, "SLICE"); }
   if (i === 0 && input.slice) { input.slice = false; sliceBtn.setAttribute("aria-pressed", "false"); sliceBtn.classList.remove("primary"); }
   swing[i] = 1;
-  const Rs = PLAYERS[i].side === "near" ? 1 : -1;
+  const Rs = (PLAYERS[i].side === "near" ? 1 : -1) * handSign(PLAYERS[i]);   // + = his forehand side
   Object.assign(p, { hitT: clock, hitServe: isServe, strokeType: type, hitZ: ball.z, strokeSide: Math.sign((ball.x - p.x) * Rs) || 1 });   // racket follow-through
   if (isServe) {
     const sv = planServe(i, rally.serveNo);
@@ -2233,20 +2304,68 @@ function retakeServe(no, call) {
 /* =====================================================================
    LOOP
    ===================================================================== */
-let last = performance.now();
+let last = performance.now(), lastDraw = 0, lastRaf = 0, fpsClimb = 0, fpsDrop = 0, fpsSticky = 0;
+const FPS_WIN = 90, fpsWork = [], fpsPaint = [], fpsRaf = [];
+const fpsTierLog = [];                                   // recent tier changes (for evidence)
+function fpsP90(a) { const s = a.slice().sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(0.9 * (s.length - 1)))]; }
+function fpsMean(a) { return a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0; }
+function adaptFps(workMs, paintMs) {
+  fpsWork.push(workMs); if (paintMs > 0) fpsPaint.push(paintMs);
+  if (fpsWork.length < FPS_WIN) return;
+  const qWork = fpsP90(fpsWork), qPaint = fpsPaint.length ? fpsP90(fpsPaint) : 0, qRaf = fpsRaf.length ? fpsP90(fpsRaf) : 0;
+  const avgPaintFps = fpsPaint.length ? 1000 / fpsMean(fpsPaint) : 0;
+  const avgRafFps = fpsRaf.length ? 1000 / fpsMean(fpsRaf) : 0;
+  fpsWork.length = 0; fpsPaint.length = 0; fpsRaf.length = 0;   // consume the window so hysteresis is in windows, not frames
+  if (fpsSticky > 0) fpsSticky--;
+  const budget = 1000 / fpsTier;
+  const workHeavy = qWork > budget * 1.15;
+  const deliveredLow = avgPaintFps < fpsTier * 0.9 || qPaint > budget * 1.15;   // measured paint-to-paint rate, not just work time
+  const next = fpsTier === 30 ? 60 : 120;
+  const workHeadroom = qWork < 1000 / next * 0.75;
+  // Paint is capped at the current tier, so climb must not use the capped interval.
+  // At 30 (~33 ms by design) judge climb on work only. At 60, use uncapped rAF to see if the display can do 120.
+  const deliveredHeadroom = fpsTier === 30 ? true : avgRafFps >= next * 0.9;
+  if (fpsTier > 30 && (workHeavy || deliveredLow)) {
+    fpsClimb = 0;
+    if (++fpsDrop >= 2) {
+      const from = fpsTier; fpsTier = fpsTier === 120 ? 60 : 30;
+      fpsDrop = 0;
+      const rec = { t: +gameT.toFixed(3), from, to: fpsTier, p90_work_ms: +qWork.toFixed(2), p90_paint_ms: +qPaint.toFixed(2), avg_paint_fps: +avgPaintFps.toFixed(2), avg_raf_fps: +avgRafFps.toFixed(2) };
+      fpsTierLog.push(rec); if (fpsTierLog.length > 40) fpsTierLog.shift();
+      console.info("[fps-tier]", from, "->", fpsTier, "p90_work_ms", rec.p90_work_ms, "p90_paint_ms", rec.p90_paint_ms, "avg_paint_fps", rec.avg_paint_fps, "avg_raf_fps", rec.avg_raf_fps);
+      if (fpsTier === 30) { fpsSticky = 8; resize(); }    // 1× buffer; sticky windows so 30↔60 cannot flap after a quality drop
+    }
+  } else if (fpsTier < 120 && workHeadroom && deliveredHeadroom && fpsSticky === 0) {
+    fpsDrop = 0;
+    if (++fpsClimb >= 2) {
+      const from = fpsTier; fpsTier = next;
+      fpsClimb = 0;
+      const rec = { t: +gameT.toFixed(3), from, to: fpsTier, p90_work_ms: +qWork.toFixed(2), p90_paint_ms: +qPaint.toFixed(2), avg_paint_fps: +avgPaintFps.toFixed(2), avg_raf_fps: +avgRafFps.toFixed(2) };
+      fpsTierLog.push(rec); if (fpsTierLog.length > 40) fpsTierLog.shift();
+      console.info("[fps-tier]", from, "->", fpsTier, "p90_work_ms", rec.p90_work_ms, "p90_paint_ms", rec.p90_paint_ms, "avg_paint_fps", rec.avg_paint_fps, "avg_raf_fps", rec.avg_raf_fps);
+      if (from === 30) resize();
+    }
+  } else { fpsClimb = 0; fpsDrop = 0; }
+}
 function frame(now) {
   requestAnimationFrame(frame);                          // schedule first, so one bad frame can't stop the game
+  const work0 = performance.now();
+  if (lastRaf) fpsRaf.push(now - lastRaf); lastRaf = now; // uncapped rAF intervals (display rate, including skipped paints)
   const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = Math.max(last, now);   // never step backwards in time
   if (!innerWidth || !innerHeight) return;              // hidden / zero-size window: nothing to draw
   const serveComing = (nextServe && nextServe.ready && !rally) || (rally && (rally.serve || (rally.shot && rally.shot.isServe)));
   pos.forEach((p, i) => { p.receiving = !!serveComing && i !== S.server && !S.over; });   // the receiver drops into the return stance
-  if (canvas.width !== innerWidth || canvas.height !== innerHeight) resize();
+  if (canvas.width !== Math.round(innerWidth * Math.min(devicePixelRatio || 1, 2)) ||
+      canvas.height !== Math.round(innerHeight * Math.min(devicePixelRatio || 1, 2))) resize();
   if (!paused) {                                          // a pause freezes the game clock, the rally and the serve timer
     gameT += dt; runTimers();
     if (rally) { clock += dt; stepRally(dt); }
     else { pos.forEach(p => { p.moving = false; }); readyStep(dt); }
     updateCamera(dt);
   }
+  if (now - lastDraw < 1000 / fpsTier * 0.9) return;     // adaptive cap: skip the paint only, physics already stepped
+  const paintMs = lastDraw ? now - lastDraw : 0;
+  lastDraw = now;
   drawCourt();
   const firstPerson = camMode === "pov";                  // in first person you don't see yourself
   const items = [
@@ -2262,13 +2381,20 @@ function frame(now) {
   drawShadows();                                         // cast shadows first: everything stands on top of them
   items.sort((a, c) => c.y - a.y).forEach(it => it.draw());
   b = bMain;
+  // Main's two-blit path onto the DPR backing store. With a backing-matched canvas, buf→canvas is ~3:1
+  // (desktop) or 2:1 (narrow) — never the 1.5× blit that shimmered in r1 — so the r2 dest-over composite
+  // of buf onto abuf is unnecessary fill (it was the extra ~3 ms at DPR 1).
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
   ctx.drawImage(abuf, 0, 0, canvas.width, canvas.height);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);                // sunlight + inset are authored in CSS pixels
+  ctx.imageSmoothingEnabled = false;
   drawSunlight();
   drawServeInset();
   renderHud();
   renderReady();
+  adaptFps(performance.now() - work0, paintMs);          // only draw frames count toward work/paint p90
 }
 
 /* SERVE CAM INSET. While your opponent serves you'd only see a small figure at the far baseline, so a zoomed view
@@ -2299,7 +2425,7 @@ function drawServeInset() {
   drawPlayer(i, p, swing[i]);
   if (ball) drawBall(ball, true);
   BW = keep.BW; BH = keep.BH; F = keep.F; HZ = keep.HZ; CAM_X = keep.CAM_X; b = keep.b;
-  const W = canvas.width, H = canvas.height, ih = Math.round(Math.min(H * 0.36, W * 0.42)), iw = Math.round(ih * IW / IH);
+  const W = cssW, H = cssH, ih = Math.round(Math.min(H * 0.36, W * 0.42)), iw = Math.round(ih * IW / IH);
   const x0 = W - iw - 16, y0 = 16;
   ctx.imageSmoothingEnabled = false;
   ctx.fillStyle = "rgba(8,12,24,0.85)"; ctx.fillRect(x0 - 3, y0 - 3, iw + 6, ih + 26);
@@ -2314,11 +2440,11 @@ function drawAim() {
   const aiming = S.server === 0 && ((nextServe && nextServe.ready) || (rally && (rally.serve || (rally.shot && rally.shot.isServe && !rally.shot.bounced))));
   if (!aiming) return;
   const bx = serviceBox(0);
-  b.strokeStyle = "rgba(216,238,76,0.35)"; b.lineWidth = 1;     // the box you must land in
+  b.strokeStyle = "rgba(216,238,76,0.35)"; b.lineWidth = PX;     // the box you must land in
   const c = [proj(bx.xlo, bx.ylo), proj(bx.xhi, bx.ylo), proj(bx.xhi, bx.yhi), proj(bx.xlo, bx.yhi)];
   b.beginPath(); c.forEach((p, i) => (i ? b.lineTo(p.x, p.y) : b.moveTo(p.x, p.y))); b.closePath(); b.stroke();
-  const p = proj(aim.x, aim.y), r = Math.max(2, p.s * 0.35);
-  b.strokeStyle = "#d8ee4c"; b.lineWidth = 2;
+  const p = proj(aim.x, aim.y), r = Math.max(2 * PX, p.s * 0.35);
+  b.strokeStyle = "#d8ee4c"; b.lineWidth = 2 * PX;
   b.beginPath(); b.moveTo(p.x - r, p.y - r * 0.4); b.lineTo(p.x + r, p.y + r * 0.4); b.moveTo(p.x + r, p.y - r * 0.4); b.lineTo(p.x - r, p.y + r * 0.4); b.stroke();
 }
 
@@ -2339,8 +2465,8 @@ function renderReady() {
 function drawReach() {
   const p = pos[0], r = BODY[0].reach, c = proj(p.x, p.y);
   const rx = proj(p.x + r, p.y).x - c.x, ry = Math.abs(proj(p.x, p.y - r).y - proj(p.x, p.y + r).y) / 2;
-  b.strokeStyle = "rgba(216,238,76,0.28)"; b.lineWidth = 1;
-  b.beginPath(); b.ellipse(Math.round(c.x), Math.round(c.y), rx, Math.max(1, ry), 0, 0, Math.PI * 2); b.stroke();
+  b.strokeStyle = "rgba(216,238,76,0.28)"; b.lineWidth = PX;
+  b.beginPath(); b.ellipse(Math.round(c.x), Math.round(c.y), rx, Math.max(PX, ry), 0, 0, Math.PI * 2); b.stroke();
 }
 
 const hudEls = [0, 1].map(i => ({ st: document.getElementById("st" + i), cap: document.getElementById("cap" + i) }));
