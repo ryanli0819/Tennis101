@@ -1,0 +1,563 @@
+{
+  "schema": "tennis101.anatomy.joints/v1",
+  "population": "Adult male tennis players. Clinical limits are general-population adult (male 20-44 where CDC data exist; otherwise AAOS-style reference values, sex-unspecific). Tennis-specific values live only in each joint's athleteNotes and never widen minDeg/maxDeg.",
+  "convention": {
+    "units": "degrees",
+    "zero": "Anatomical position = 0 deg for every motion (va_38cfr_471), except shoulder rotation (zero at 90 deg abduction, elbow 90 deg, forearm vertical) and forearm pronation/supination (zero = elbow 90 deg at side, thumb up).",
+    "sign": "Each axis is a signed range [minDeg, maxDeg]. Positive = the motion named in that axis's 'positive' field: flexion, abduction, external rotation, pronation, ulnar deviation, dorsiflexion, inversion; left lateral flexion/rotation for spine rows (mirror for the other side is symmetric). The opposite motion is negative, so extension/hyperextension, adduction, internal rotation, supination, radial deviation, plantarflexion and eversion appear as negative minDeg.",
+    "sides": "Values apply to both left and right sides; mirror for the left limb so that 'positive' keeps its anatomical meaning.",
+    "limitsAre": "Passive clinical end range (CDC values are population means of passive end range). Not dynamic peaks; dynamic serve peaks are in athleteNotes.",
+    "labels": "SOURCED = number appears at the cited URL at 'where'; ESTIMATED = reasoning in 'reason'; null = value unknown, reason in 'note'."
+  },
+  "sources": [
+    {
+      "id": "cdc_soucie",
+      "title": "CDC Normal Joint Range of Motion Study - Reference Values for Normal Joint Range of Motion (Soucie et al., Haemophilia 2011;17(3):500-507), passive goniometry, mean (95% CI)",
+      "url": "https://archive.cdc.gov/www_cdc_gov/ncbddd/jointrom/index.html",
+      "accessed": "2026-11-17",
+      "evidence": "evidence/cdc.txt",
+      "notes": "Male, age 20-44 column used. Values are population MEANS of passive end range, not maxima. Covers 11 motions only."
+    },
+    {
+      "id": "aaos_botman",
+      "title": "Botman et al., Plast Reconstr Surg Glob Open 2020;8(7):e2907 - Supplementary Digital Content 1, 'Normal ROM values according to AAOS'",
+      "url": "https://cdn-links.lww.com/permalink/prsgo/b/prsgo_8_6_2020_04_17_hendriks_gox-d-20-00155r2_sdc1.pdf",
+      "accessed": "2026-11-17",
+      "evidence": "evidence/botman_sdc1.txt",
+      "notes": "Open reproduction of AAOS normal ROM (single page table). Shoulder adduction is marked * = not from AAOS. No rotation, deviation, forearm or ankle inversion/eversion values."
+    },
+    {
+      "id": "physiopedia_rom",
+      "title": "Physiopedia - Range of Motion Normative Values (Table 1 upper limb, Table 2 spine, Table 3 lower limb)",
+      "url": "https://www.physio-pedia.com/Range_of_Motion_Normative_Values",
+      "accessed": "2026-11-17",
+      "evidence": "evidence/physiopedia_webfetch.txt",
+      "notes": "Secondary compilation citing AAOS via Botman et al. and Han et al. 2016 (hip rotation). Site returns HTTP 403 to curl from the box; opens in a normal browser and via WebFetch."
+    },
+    {
+      "id": "va_38cfr_471a",
+      "title": "eCFR 38 CFR 4.71a, General Rating Formula for Diseases and Injuries of the Spine, Note (2) (normal spine ROM)",
+      "url": "https://www.ecfr.gov/current/title-38/chapter-I/part-4/subpart-B/subject-group-ECFR3c3e3ed4b2c6b07/section-4.71a",
+      "accessed": "2026-11-17",
+      "evidence": "evidence/cfr471a.txt",
+      "notes": "Text fetched via https://www.ecfr.gov/api/renderer/v1/content/enhanced/current/title-38?part=4&section=4.71a . Reference limits for VA purposes; thoracolumbar spine treated as one segment."
+    },
+    {
+      "id": "va_38cfr_471",
+      "title": "eCFR 38 CFR 4.71, Measurement of ankylosis and joint motion (zero positions)",
+      "url": "https://www.ecfr.gov/current/title-38/chapter-I/part-4/subpart-B/subject-group-ECFR3c3e3ed4b2c6b07/section-4.71",
+      "accessed": "2026-11-17",
+      "evidence": "evidence/cfr471.txt",
+      "notes": "Used only for the zero-position convention (anatomical position = 0; shoulder rotation zero at 90 deg abduction / elbow 90 deg; forearm zero at midposition). Numbers are in Plates I-II (images), not used."
+    },
+    {
+      "id": "kovacs_2011",
+      "title": "Kovacs M, Ellenbecker T. An 8-Stage Model for Evaluating the Tennis Serve. Sports Health 2011;3(6):504-513 (PMC3445225)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3445225/",
+      "accessed": "2026-11-17",
+      "evidence": "evidence/kovacs.txt",
+      "notes": "Stage 4 Cocking: max ER 172 +/- 12 deg in professional servers (citing Fleisig 2003), composite of glenohumeral + scapulothoracic + trunk extension. Also IR / total-rotation loss up to 10-15 deg at 90 deg abduction."
+    },
+    {
+      "id": "garret_2024_meta",
+      "title": "Garret J, Cuinet T, et al. Shoulder range of motion in competitive tennis players: systematic review and meta-analysis. JSES International 2024 (PMC11064711)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11064711/",
+      "accessed": "2026-11-17",
+      "evidence": "evidence/meta.txt",
+      "notes": "25 studies, 18,534 players, ER/IR at 90 deg abduction. Pooled across ages and sexes; juniors included. Discussion paragraph mislabels one comparison (ER 110.3 vs 95.3 is children vs adults per Results)."
+    },
+    {
+      "id": "tubez_2019",
+      "title": "Tubez F, Forthomme B, Croisier JL, et al. Inter-Session Reliability of the Tennis Serve and Influence of the Laboratory Context. J Hum Kinet 2019 (PMC6458585)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6458585/",
+      "accessed": "2026-11-17",
+      "evidence": "evidence/serve_reliab.txt",
+      "notes": "13 men, 22 +/- 3 y, ITN 3, right-handed; 3D mocap. Table 1 lab-test 1 values used. Humeral rotation zeroed with arm along body, elbow 90 deg."
+    },
+    {
+      "id": "jacquier_bret_2024",
+      "title": "Jacquier-Bret J, Gorce P. Kinematics of the Tennis Serve Using an Optoelectronic Motion Capture System. Sensors 2024 (PMC11175047)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11175047/",
+      "accessed": "2026-11-17",
+      "evidence": "evidence/serve_mocap.txt",
+      "notes": "Introduction literature summary only (trophy-position separation and counter upper-torso rotation ranges); used in athlete notes, not in clinical limits."
+    }
+  ],
+  "joints": {
+    "shoulder": {
+      "type": "ball-and-socket",
+      "segment": "humerus relative to thorax (clinical goniometry includes scapulothoracic contribution)",
+      "axes": {
+        "flexionExtension": {
+          "minDeg": -60,
+          "maxDeg": 168.8,
+          "positive": "flexion",
+          "label": "SOURCED",
+          "sourceId": "cdc_soucie",
+          "where": "CDC table 'Reference Values for Normal Joint Range of Motion- ages 20 - 44', Males column, row 'Shoulder flexion'; extension from aaos_botman SDC 1 table, row 'Shoulder / Extension 60'",
+          "note": "max = CDC male 20-44 mean 168.8 (95% CI 167.3-170.3); min = AAOS extension 60 (CDC did not measure extension). AAOS flexion 180.",
+          "alternatives": [
+            {
+              "deg": 180,
+              "motion": "flexion",
+              "sourceId": "aaos_botman",
+              "where": "SDC 1 table, row 'Shoulder / Flexion 180'"
+            }
+          ],
+          "skillValue": "flex 0-180; ext 0-60"
+        },
+        "abductionAdduction": {
+          "minDeg": -30,
+          "maxDeg": 180,
+          "positive": "abduction",
+          "label": "SOURCED",
+          "sourceId": "aaos_botman",
+          "where": "SDC 1 table, row 'Shoulder / Abduction 180'; adduction from physiopedia_rom Table 1 'Upper Limb Range of Motion Reference Values', row 'Adduction 30'",
+          "note": "Adduction (past neutral, across the body) 30 from Physiopedia; Botman lists 40 but marks it '*not available from AAOS'.",
+          "alternatives": [
+            {
+              "deg": 40,
+              "motion": "adduction",
+              "sourceId": "aaos_botman",
+              "where": "SDC 1 'Adduction* 40' (asterisk: not AAOS)"
+            }
+          ],
+          "skillValue": "abd 0-180"
+        },
+        "internalExternalRotation": {
+          "minDeg": -70,
+          "maxDeg": 90,
+          "positive": "external rotation",
+          "label": "SOURCED",
+          "sourceId": "physiopedia_rom",
+          "where": "Table 1 'Upper Limb Range of Motion Reference Values', row 'Internal rotation 70' and Table 1 'Upper Limb Range of Motion Reference Values', row 'External rotation 90'",
+          "note": "Measured at 90 deg abduction, elbow 90 deg (zero position per va_38cfr_471). Clinical static passive range; see athleteNotes for tennis servers.",
+          "skillValue": "IR 0-70; ER 0-90"
+        },
+        "horizontalAbductionAdduction": {
+          "minDeg": null,
+          "maxDeg": null,
+          "positive": "horizontal adduction",
+          "label": null,
+          "sourceId": "physiopedia_rom",
+          "where": "Table 1 'Upper Limb Range of Motion Reference Values', row 'Horizontal abduction'",
+          "reason": "null: Physiopedia lists 'Varies by age and sex'; no open AAOS number found in this lean pass. Skill has no row either."
+        }
+      },
+      "athleteNotes": {
+        "serverRange": {
+          "staticPassiveER90abd": {
+            "deg": 105.4,
+            "ci": [
+              99.0,
+              111.7
+            ],
+            "side": "dominant",
+            "label": "SOURCED",
+            "sourceId": "garret_2024_meta",
+            "where": "Results, 'Dominant vs. nondominant': ER 105.4 deg (CI 99.0-111.7) vs 100.8 nondominant (Fig. 3)",
+            "note": "STATIC passive ER at 90 deg abduction, pooled competitive players (all ages/sexes). Adults only: 95.3 deg (vs children 110.3); males only: 104.9 deg. Not a widening of the clinical maxDeg."
+          },
+          "dynamicPeakERServe": {
+            "deg": 172,
+            "sd": 12,
+            "label": "SOURCED",
+            "sourceId": "kovacs_2011",
+            "where": "Phase 4 Cocking: 'externally rotated 172 deg +/- 12 deg' at instant of max ER, professional players (citing Fleisig 2003)",
+            "note": "DYNAMIC peak 'layback' during the serve, ~0.09 s before contact, shoulder abducted 101 +/- 13 deg. It is a COMPOSITE of glenohumeral + scapulothoracic rotation + trunk extension, so it must NOT be applied as a glenohumeral joint limit. Baseball pitchers 175-185."
+          },
+          "dynamicPeakERServeMocapITN3": {
+            "deg": 117.5,
+            "sd": 19.4,
+            "label": "SOURCED",
+            "sourceId": "tubez_2019",
+            "where": "Table 1, 'Peak shoulder external rotation angle', Lab-test 1",
+            "note": "Same event measured as humerus-vs-thorax with humeral zero = arm along body, elbow 90; advanced (ITN 3) adult men. Shows how much the number depends on the zero and segment definition."
+          }
+        },
+        "GIRD": {
+          "dominantIRDeg": 53.0,
+          "nondominantIRDeg": 62.6,
+          "deficitDeg": 9.6,
+          "label": "SOURCED",
+          "sourceId": "garret_2024_meta",
+          "where": "Results, 'Dominant vs. nondominant': IR 53.0 (CI 49.3-56.6) vs 62.6 (CI 58.7-66.5) (Fig. 2); deficit 9.6 = 62.6 - 53.0 computed",
+          "note": "Dominant-arm internal-rotation deficit at 90 deg abduction. Kovacs 2011: IR and total-rotation loss up to 10-15 deg in elite players. Adults IR 44.5 deg pooled. Use to lower the dominant-arm IR limit per player if desired; the clinical row is unchanged.",
+          "alt": [
+            {
+              "deg": [
+                10,
+                15
+              ],
+              "sourceId": "kovacs_2011",
+              "where": "Phase 4 Cocking: 'Loss of both internal rotation and total rotation up to 10° to 15°'"
+            }
+          ]
+        }
+      }
+    },
+    "elbow": {
+      "type": "hinge",
+      "segment": "forearm (ulna) relative to humerus",
+      "axes": {
+        "flexionExtension": {
+          "minDeg": -0.8,
+          "maxDeg": 144.6,
+          "positive": "flexion",
+          "label": "SOURCED",
+          "sourceId": "cdc_soucie",
+          "where": "CDC table 'Reference Values for Normal Joint Range of Motion- ages 20 - 44', Males column, row 'Elbow flexion' and row 'Elbow extension'",
+          "note": "CDC male 20-44: flexion 144.6 (95% CI 143.6-145.6); extension 0.8 past straight (hyperextension), so minDeg -0.8. AAOS: flexion 150, extension 0.",
+          "alternatives": [
+            {
+              "deg": 150,
+              "motion": "flexion",
+              "sourceId": "aaos_botman",
+              "where": "SDC 1 table, row 'Elbow / Flexion 150'"
+            },
+            {
+              "deg": 0,
+              "motion": "extension",
+              "sourceId": "aaos_botman",
+              "where": "SDC 1 table, row 'Elbow / Extension 0'"
+            }
+          ],
+          "skillValue": "flex 0-145/150; hyperext <=5-10"
+        }
+      },
+      "athleteNotes": {
+        "serve": {
+          "deg": 104,
+          "sd": 12,
+          "label": "SOURCED",
+          "sourceId": "kovacs_2011",
+          "where": "Phase 4 Cocking: 'the elbow is flexed 104° ± 12°' at max ER",
+          "note": "Dynamic posture at max ER, inside clinical range."
+        }
+      }
+    },
+    "forearm": {
+      "type": "pivot",
+      "segment": "radius about ulna (proximal + distal radioulnar joints)",
+      "axes": {
+        "pronationSupination": {
+          "minDeg": -85.0,
+          "maxDeg": 76.9,
+          "positive": "pronation",
+          "label": "SOURCED",
+          "sourceId": "cdc_soucie",
+          "where": "CDC table 'Reference Values for Normal Joint Range of Motion- ages 20 - 44', Males column, row 'Elbow pronation' and row 'Elbow supination'",
+          "note": "Zero = thumb up, elbow 90 deg at side (va_38cfr_471). CDC male 20-44 pronation 76.9 (75.6-78.2), supination 85.0 (83.8-86.2). Physiopedia 80-90 each.",
+          "alternatives": [
+            {
+              "deg": [
+                80,
+                90
+              ],
+              "motion": "pronation and supination",
+              "sourceId": "physiopedia_rom",
+              "where": "Table 1 'Upper Limb Range of Motion Reference Values', row 'Pronation 80-90 / Supination 80-90'"
+            }
+          ],
+          "skillValue": "pronation 0-80; supination 0-80"
+        }
+      }
+    },
+    "wrist": {
+      "type": "condyloid",
+      "segment": "hand relative to forearm (radiocarpal + midcarpal)",
+      "axes": {
+        "flexionExtension": {
+          "minDeg": -70,
+          "maxDeg": 80,
+          "positive": "flexion (palmar)",
+          "label": "SOURCED",
+          "sourceId": "aaos_botman",
+          "where": "SDC 1 table, row 'Wrist / Flexion 80' and 'Extension 70'",
+          "skillValue": "flex 0-80; ext 0-70"
+        },
+        "radialUlnarDeviation": {
+          "minDeg": -20,
+          "maxDeg": 30,
+          "positive": "ulnar deviation",
+          "label": "SOURCED",
+          "sourceId": "physiopedia_rom",
+          "where": "Table 1 'Upper Limb Range of Motion Reference Values', row 'Radial deviation 20' and 'Ulnar deviation 30'",
+          "skillValue": "radial ~20; ulnar ~30"
+        }
+      },
+      "athleteNotes": {
+        "serve": {
+          "deg": -66,
+          "sd": 19,
+          "label": "SOURCED",
+          "sourceId": "kovacs_2011",
+          "where": "Phase 4 Cocking: 'the wrist is extended 66° ± 19°' at max ER",
+          "note": "Dynamic extension at max ER (sign: extension negative), inside the clinical 70."
+        }
+      }
+    },
+    "hip": {
+      "type": "ball-and-socket",
+      "segment": "femur relative to pelvis",
+      "axes": {
+        "flexionExtension": {
+          "minDeg": -17.4,
+          "maxDeg": 130.4,
+          "positive": "flexion",
+          "label": "SOURCED",
+          "sourceId": "cdc_soucie",
+          "where": "CDC table 'Reference Values for Normal Joint Range of Motion- ages 20 - 44', Males column, row 'Hip flexion' and row 'Hip extension'",
+          "note": "CDC male 20-44 flexion 130.4 (129.0-131.8), extension 17.4 (16.3-18.5). AAOS 120 / 20.",
+          "alternatives": [
+            {
+              "deg": 120,
+              "motion": "flexion",
+              "sourceId": "aaos_botman",
+              "where": "SDC 1 table, row 'Hip / Flexion 120'"
+            },
+            {
+              "deg": 20,
+              "motion": "extension",
+              "sourceId": "aaos_botman",
+              "where": "SDC 1 table, row 'Hip / Extension 20'"
+            }
+          ],
+          "skillValue": "flex 0-120; ext 0-20/30"
+        },
+        "abductionAdduction": {
+          "minDeg": -20,
+          "maxDeg": 40,
+          "positive": "abduction",
+          "label": "SOURCED",
+          "sourceId": "aaos_botman",
+          "where": "SDC 1 table, row 'Hip / Abduction 40' and 'Adduction 20'",
+          "skillValue": "abd 0-45; add 0-30"
+        },
+        "internalExternalRotation": {
+          "minDeg": -45,
+          "maxDeg": 45,
+          "positive": "external rotation",
+          "label": "SOURCED",
+          "sourceId": "physiopedia_rom",
+          "where": "Table 3 'Lower Limb Range of Motion Reference Values', row 'Internal Rotation 45' and 'External Rotation 45'",
+          "note": "Physiopedia attributes Table 3 to Botman (AAOS) and Han et al. 2016, but the Botman SDC itself has no hip rotation row, so the ultimate origin is Han 2016 / other AAOS compilations (not opened).",
+          "skillValue": "IR 0-40/45; ER 0-45/50"
+        }
+      }
+    },
+    "knee": {
+      "type": "hinge (modified; small axial rotation when flexed not modelled)",
+      "segment": "tibia relative to femur",
+      "axes": {
+        "flexionExtension": {
+          "minDeg": -1.0,
+          "maxDeg": 137.7,
+          "positive": "flexion",
+          "label": "SOURCED",
+          "sourceId": "cdc_soucie",
+          "where": "CDC table 'Reference Values for Normal Joint Range of Motion- ages 20 - 44', Males column, row 'Knee flexion' and row 'Knee extension'",
+          "note": "CDC male 20-44 flexion 137.7 (136.5-138.9); extension 1.0 past straight (0.6-1.4) -> minDeg -1.0. AAOS 135 / 0.",
+          "alternatives": [
+            {
+              "deg": 135,
+              "motion": "flexion",
+              "sourceId": "aaos_botman",
+              "where": "SDC 1 table, row 'Knee / Flexion 135'"
+            }
+          ],
+          "skillValue": "flex 0-135/140; hyperext <=5-10"
+        }
+      }
+    },
+    "ankle": {
+      "type": "hinge (talocrural) + subtalar for inversion/eversion",
+      "segment": "foot relative to shank",
+      "axes": {
+        "dorsiPlantarflexion": {
+          "minDeg": -54.6,
+          "maxDeg": 12.7,
+          "positive": "dorsiflexion",
+          "label": "SOURCED",
+          "sourceId": "cdc_soucie",
+          "where": "CDC table 'Reference Values for Normal Joint Range of Motion- ages 20 - 44', Males column, row 'Ankle dorsiflexion' and row 'Ankle plantar flexion'",
+          "note": "CDC male 20-44 dorsiflexion 12.7 (11.6-13.8), plantarflexion 54.6 (53.2-56.0) (passive, knee position per CDC protocol). AAOS 20 / 50. Athletes in a lunge exceed 12.7 often; engineer may prefer the AAOS 20.",
+          "alternatives": [
+            {
+              "deg": 20,
+              "motion": "dorsiflexion",
+              "sourceId": "aaos_botman",
+              "where": "SDC 1 table, row 'Ankle / Dorsiflexion 20'"
+            },
+            {
+              "deg": 50,
+              "motion": "plantarflexion",
+              "sourceId": "aaos_botman",
+              "where": "SDC 1 table, row 'Ankle / Plantarflexion 50'"
+            }
+          ],
+          "skillValue": "dorsiflex 0-20; plantarflex 0-50"
+        },
+        "inversionEversion": {
+          "minDeg": -15,
+          "maxDeg": 35,
+          "positive": "inversion",
+          "label": "ESTIMATED",
+          "sourceId": null,
+          "where": "skill section 2 row 'Ankle' (inv ~35; ev ~15-20); no URL",
+          "reason": "Taken from the skill table (AAOS / Norkin & White, approximate, no URL); eversion set to the lower bound 15 of the skill's 15-20. No open source opened in this lean pass gives inversion/eversion; listed in rowsWithoutUrl.",
+          "skillValue": "inv ~35; ev ~15-20"
+        }
+      }
+    },
+    "pelvis": {
+      "type": "free segment (root); rotation vs ground/feet",
+      "segment": "pelvis relative to the planted feet / ground",
+      "axes": {
+        "axialRotation": {
+          "minDeg": -45,
+          "maxDeg": 45,
+          "positive": "toward the non-dominant side (counter-clockwise from above for a right-hander)",
+          "label": "ESTIMATED",
+          "sourceId": "physiopedia_rom",
+          "where": "derived from hip internalExternalRotation (Table 3, 45/45)",
+          "reason": "With both feet planted and not pivoting, pelvis rotation vs feet is bounded by hip IR/ER (~45 each way); when the feet pivot or leave the ground it is unbounded. No direct source for pelvis-vs-ground limits."
+        },
+        "tiltObliquity": {
+          "minDeg": null,
+          "maxDeg": null,
+          "positive": "anterior tilt / dominant side up",
+          "label": null,
+          "sourceId": null,
+          "where": "-",
+          "reason": "null: no clinical ROM exists for pelvis-vs-ground tilt/obliquity (it follows the hips and legs); not sourced in this pass."
+        }
+      }
+    },
+    "thorax": {
+      "type": "multi-segment (thoracolumbar spine treated as one segment); rotation vs pelvis",
+      "segment": "thorax relative to pelvis",
+      "axes": {
+        "flexionExtension": {
+          "minDeg": -30,
+          "maxDeg": 90,
+          "positive": "flexion (forward bend)",
+          "label": "SOURCED",
+          "sourceId": "va_38cfr_471a",
+          "where": "Note (2): 'Normal forward flexion of the thoracolumbar spine is zero to 90 degrees, extension is zero to 30 degrees'",
+          "note": "VA reference limit for whole thoracolumbar spine; lumbar is not split out. Kovacs 2011: spine goes into hyperextension, ipsilateral lateral flexion and rotation in loading/cocking.",
+          "skillValue": "flex ~60-80; ext ~25-30"
+        },
+        "lateralFlexion": {
+          "minDeg": -30,
+          "maxDeg": 30,
+          "positive": "toward the left",
+          "label": "SOURCED",
+          "sourceId": "va_38cfr_471a",
+          "where": "Note (2): 'left and right lateral flexion are zero to 30 degrees'",
+          "skillValue": "side bend ~25-35/side"
+        },
+        "axialRotation": {
+          "minDeg": -30,
+          "maxDeg": 30,
+          "positive": "toward the left",
+          "label": "SOURCED",
+          "sourceId": "va_38cfr_471a",
+          "where": "Note (2): 'left and right lateral rotation are zero to 30 degrees'",
+          "note": "Thorax relative to pelvis (pelvis kept separate above).",
+          "skillValue": "rotation ~30-45/side"
+        }
+      },
+      "athleteNotes": {
+        "serveTrunkPelvisSeparation": {
+          "deg": 20.6,
+          "sd": 11.3,
+          "plane": "transverse",
+          "label": "SOURCED",
+          "sourceId": "tubez_2019",
+          "where": "Table 1, 'Peak trunk-pelvis angle girdles (transversal) separation', Lab-test 1: 20.6 +/- 11.3",
+          "note": "Dynamic peak thorax-vs-pelvis rotation in the serve, ITN 3 adult men; inside the 30 deg clinical limit. Frontal-plane trunk-pelvis tilt 14.5 +/- 9.8 (same table)."
+        },
+        "serveLiteratureRanges": {
+          "label": "SOURCED",
+          "sourceId": "jacquier_bret_2024",
+          "where": "Introduction: 'lateral flexion shoulder-pelvis separation angle (17 ± 11° to 34 ± 7°)' and 'counter upper torso rotation (50.9 ± 16.1°)' at trophy position",
+          "note": "Frontal-plane separation 17-34 deg; 'counter upper torso rotation' 50.9 is not defined vs the pelvis in this summary, so it is not used as a thorax-vs-pelvis limit."
+        }
+      }
+    },
+    "neck": {
+      "type": "multi-segment (cervical spine)",
+      "segment": "head relative to thorax",
+      "axes": {
+        "flexionExtension": {
+          "minDeg": -45,
+          "maxDeg": 45,
+          "positive": "flexion",
+          "label": "SOURCED",
+          "sourceId": "va_38cfr_471a",
+          "where": "Note (2): 'normal forward flexion of the cervical spine is zero to 45 degrees, extension is zero to 45 degrees'",
+          "alternatives": [
+            {
+              "deg": 45,
+              "motion": "flexion and extension",
+              "sourceId": "aaos_botman",
+              "where": "SDC 1 'Neck Extension 45 / Flexion 45'"
+            }
+          ],
+          "skillValue": "flex ~45-60; ext ~45-75"
+        },
+        "lateralFlexion": {
+          "minDeg": -45,
+          "maxDeg": 45,
+          "positive": "toward the left",
+          "label": "SOURCED",
+          "sourceId": "va_38cfr_471a",
+          "where": "Note (2): 'left and right lateral flexion are zero to 45 degrees'",
+          "skillValue": "side bend ~45"
+        },
+        "axialRotation": {
+          "minDeg": -80,
+          "maxDeg": 80,
+          "positive": "toward the left",
+          "label": "SOURCED",
+          "sourceId": "va_38cfr_471a",
+          "where": "Note (2): 'left and right lateral rotation are zero to 80 degrees'",
+          "note": "AAOS (Botman SDC 1) gives 60; VA 80 kept as primary for consistency with the spine rows and the skill's 70-80.",
+          "alternatives": [
+            {
+              "deg": 60,
+              "motion": "rotation",
+              "sourceId": "aaos_botman",
+              "where": "SDC 1 'Neck Rotation 60'"
+            }
+          ],
+          "skillValue": "rot ~70-80/side"
+        }
+      }
+    }
+  },
+  "rowsWithoutUrl": [
+    {
+      "row": "ankle.inversionEversion",
+      "reason": "ESTIMATED from skill section 2 (no URL); no open source opened this pass."
+    },
+    {
+      "row": "pelvis.axialRotation",
+      "reason": "ESTIMATED: derived from hip rotation; no direct pelvis-vs-ground source."
+    },
+    {
+      "row": "pelvis.tiltObliquity",
+      "reason": "null: no clinical ROM for this."
+    },
+    {
+      "row": "shoulder.horizontalAbductionAdduction",
+      "reason": "null: source says 'varies by age and sex'; no open number."
+    }
+  ],
+  "skillMapping": {
+    "skill": "/workspace/tennis101-hq/skills/human-body-folding-and-foreshortening.md section 2",
+    "note": "Each motion carries 'skillValue' = the skill's text for that row; differences are listed in work folder skill_corrections_proposal.md. Skill 'Trunk' row maps to joints.thorax (vs pelvis); skill 'Waist 40-60 deg at a serve trophy' bullet maps to thorax.athleteNotes."
+  },
+  "jsKeyMapping": "No src/body/joints.js exists on origin/main 4ba74ac or on agent/body-motion-engineer-20261117-002 (local, 4ba74ac) at time of writing; keys chosen fresh: joints.<name>.axes.<motionPair>.{minDeg,maxDeg}."
+}

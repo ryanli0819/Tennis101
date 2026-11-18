@@ -231,6 +231,11 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/animation/run-cycle.js?v=0.11.0"></script>
 <script src="src/serve/motion/sinner-serve.js?v=0.11.0"></script>
 <script src="src/players/handedness.js?v=0.14.0"></script>
+<!-- Fixed-length 3D skeleton (body-motion-engineer, HQ-20261117-002): limits from datasets/anatomy/joints.json. Off for players without a skeleton. -->
+<script src="src/body/joints.js?v=0.14.0"></script>
+<script src="src/body/skeleton.js?v=0.14.0"></script>
+<!-- Per-segment paint order + near-tie hysteresis (player-artist, HQ-20261117-002.PM.1). HOOK, pinned: SegmentPaint.API === 1 (window.SegmentPaint, v0.14.0-paint.1); drawCapturedFigure uses it only for players with a skeleton and falls back to the old figure without it. -->
+<script src="src/players/segment-paint.js?v=0.14.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -791,6 +796,210 @@ function drawCapturedFigure(i, p, W) {
     return rings;
   };
   const backOf = ring => ring.pts.reduce((m, p) => (p.fore < m.fore ? p : m), ring.pts[0]);
+  /* HQ-20261117-002.PM.1 PAINT (player-artist): the SKELETON FIGURE (players the Body Motion Engineer's skeleton drives,
+     i.e. Alcaraz and Sinner: W._skeleton is set by BodySkeleton.fitWorld). Every other player falls through to the
+     unchanged figure below. Skill `human-body-folding-and-foreshortening`:
+     - each segment (thighs, shanks, feet, upper arms, forearms, hands, neck, torso) is painted in the order
+       BodySkeleton.segmentsInDrawOrder() gives for THIS camera (far → near), through SegmentPaint.order() which adds
+       near-tie hysteresis (src/players/segment-paint.js, HYST_M GAME-DESIGN) and slots in the skull and the racket.
+       A hidden segment is still painted, first, so the nearer one covers it; nothing is deleted.
+     - limbs are capsules between the skeleton's own 3D joints, projected: a limb pointing at the camera is short on
+       screen (L·cosθ), never stretched. Same radii and colours as the figure below (looks unchanged).
+     - the popliteal / elbow crease goes on the concave side of the fold; joints are round (capsule end caps).
+     - the head is one 3D skull for BOTH ends, facing the thorax (shoulder line, nose side) turned by W._look, so the
+       far player shows a face when he faces you, a profile side-on and the back of the head / cap when he turns away. */
+  const SKP = W._skeleton && window.SegmentPaint && SegmentPaint.API === 1 && window.BodySkeleton ? BodySkeleton.skeletonFor(P.id) : null;
+  if (SKP) {
+    const A3 = v => [v.x, v.y, v.z];
+    /* THORAX FACING from the skeleton's own left/right: fitWorld solves in the player's anatomical frame and re-applies the
+       game's mirror sign (flipAt), so his forward in court metres is sign(flip) × (up × (rightShoulder − leftShoulder)).
+       The nose offset (used by the figure below) is only a few cm when he looks up and flips sign frame to frame. */
+    const flipS = p.motion && p.motion.m && typeof window.flipAt === "function" ? (Math.sign(flipAt(i, p.motion, p.motion.t)) || 1) : 1;
+    if (LS && RS) { const dx = RS.x - LS.x, dy = RS.y - LS.y, l = Math.hypot(dx, dy); if (l > 0.02 * Hm) { fx = -dy / l * flipS; fy = dx / l * flipS; } }
+    const camera = { project: a => { const r = proj(a[0], a[1], a[2]); return { x: r.x, y: r.y, depth: r.d != null ? r.d : F / r.s, s: r.s }; } };
+    const J = {}; for (const n in W) { const v = W[n]; if (v && typeof v.x === "number" && typeof v.z === "number") J[n] = A3(v); }
+    const hitSide = (p.motion && p.motion.m && p.motion.m.hand === "L") ? "left" : "right";
+    const shortsC = P.shorts || "#1f2024", shoeC = P.shoes || "#f2f2f2";
+    const paint = {}, done = new Set();
+    /* crease on the concave side of a hinge (A–B–C, B = knee or elbow), only once it is clearly bent (GAME-DESIGN 35°) */
+    const crease = (Aw, Bw, Cw, r, col) => {
+      if (!Aw || !Bw || !Cw) return;
+      const u1 = V3.norm(sub3(Aw, Bw)), u2 = V3.norm(sub3(Cw, Bw)), flex = 180 - Math.acos(Math.max(-1, Math.min(1, dot3(u1, u2)))) * 180 / Math.PI;
+      if (flex < 35) return;
+      const bis = V3.norm(add3(u1, u2)), cw = add3(Bw, mul3(bis, r * 0.55));
+      if (!nearer(cw, Bw, r * 0.35)) return;                                  // the fold faces away: the limb hides it
+      const c = proj(cw.x, cw.y, cw.z), B0 = proj(Bw.x, Bw.y, Bw.z);
+      let dx = c.x - B0.x, dy = c.y - B0.y; const dl = Math.hypot(dx, dy);
+      const half = pxRadius(Bw, r) * 0.6; if (dl < 1e-3) return; dx /= dl; dy /= dl;
+      b.strokeStyle = shade(col, -0.34); b.lineWidth = Math.max(1 / AS, half * 0.3); b.lineCap = "round";
+      b.beginPath(); b.moveTo(c.x - dy * half, c.y + dx * half); b.lineTo(c.x + dy * half, c.y - dx * half); b.stroke();
+    };
+    for (const s of ["left", "right"]) {
+      const Hp = W[s + "Hip"], Kn = W[s + "Knee"], An = W[s + "Ankle"], Toe = W[s + "Toe"];
+      const knee = () => crease(Hp, Kn, An, 0.050 * Hm, skin);
+      paint[s + "Thigh"] = () => { if (!Hp || !Kn) return;
+        capsule(Hp, Kn, skin, 0.072 * Hm, 0.050 * Hm);
+        capsule(Hp, V3.lerp(Hp, Kn, 0.12), shortsC, 0.075 * Hm, 0.072 * Hm);   // the shorts' leg over the top of the thigh (GAME-DESIGN 12%)
+        if (done.has(s + "Shank")) knee(); };
+      paint[s + "Shank"] = () => { if (!Kn || !An) return;
+        capsule(Kn, An, skin, 0.048 * Hm, 0.036 * Hm);
+        capsule(V3.lerp(An, Kn, 0.22), An, P.socks || "#f1f1ee", 0.040 * Hm, 0.034 * Hm);
+        if (done.has(s + "Thigh")) knee(); };
+      paint[s + "Foot"] = () => { if (!An) return;
+        // the skeleton's own foot bone (ankle → toe, fixed length) sets the shoe, so it foreshortens with the foot
+        const d = Toe ? V3.norm(sub3(Toe, An)) : { x: fx, y: fy, z: 0 }, Lf = Toe ? Math.hypot(Toe.x - An.x, Toe.y - An.y, Toe.z - An.z) : 0.13;
+        const toe = { x: An.x + d.x * Lf, y: An.y + d.y * Lf, z: Math.max(0.012, An.z + d.z * Lf - 0.01) };
+        const heel = { x: An.x - d.x * 0.045, y: An.y - d.y * 0.045, z: Math.max(0.012, An.z - d.z * 0.045 - 0.008) };
+        capsule(heel, toe, shade(shoeC, -0.42), 0.030 * Hm, 0.022 * Hm);
+        capsule({ x: heel.x, y: heel.y, z: heel.z + 0.018 }, { x: toe.x, y: toe.y, z: toe.z + 0.012 }, shoeC, 0.034 * Hm, 0.026 * Hm); };
+      const Sh = W[s + "Shoulder"], El = W[s + "Elbow"], Wr = W[s + "Wrist"], Hd = W[s + "Index"] || W[s + "Hand"];
+      const foreC = s === "right" && P.sleeve ? P.sleeve : skin;
+      const elbow = () => crease(Sh, El, Wr, 0.038 * Hm, skin);
+      paint[s + "UpperArm"] = () => { if (!Sh || !El) return;
+        capsule(Sh, El, skin, 0.046 * Hm, 0.038 * Hm);
+        capsule(Sh, V3.lerp(Sh, El, 0.46), P.shirt, 0.052 * Hm, 0.044 * Hm);
+        if (done.has(s + "Forearm")) elbow(); };
+      paint[s + "Forearm"] = () => { if (!El || !Wr) return;
+        capsule(El, Wr, foreC, 0.036 * Hm, 0.028 * Hm);
+        capsule(V3.lerp(Wr, El, 0.14), V3.lerp(Wr, El, 0.04), "#f3f3f0", 0.022 * Hm, 0.020 * Hm);
+        if (done.has(s + "UpperArm")) elbow(); };
+      paint[s + "Hand"] = () => { if (Wr && Hd) capsule(Wr, Hd, skin, 0.026 * Hm, 0.020 * Hm); };
+    }
+    paint.torso = () => {
+      if (!sMid || !hMid) return;
+      drawTube([0, 0.2, 0.42], shortsC);
+      const shirtRings = drawTube([0.34, 0.55, 0.78, 1], P.shirt);
+      const chest = ringAt(0.72), hip = ringAt(0.08);
+      const front = chest.pts.reduce((m, p) => (p.fore > m.fore ? p : m), chest.pts[0]);
+      if (shirtRings && nearer(backOf(chest), front, 0.05 * Hm)) {
+        const seam = [hip, ringAt(0.38), chest, ringAt(1)].map(backOf);
+        b.strokeStyle = shade(P.shirt, -0.38); b.lineWidth = Math.max(1.4 / AS, pxRadius(chest.ctr, 0.012 * Hm) * 2); b.lineCap = "round";
+        b.beginPath(); seam.forEach((p, k) => { const s = proj(p.x, p.y, p.z); k ? b.lineTo(s.x, s.y) : b.moveTo(s.x, s.y); }); b.stroke();
+      }
+      for (const S0 of [LS, RS]) if (S0) { const c = proj(S0.x, S0.y, S0.z), rad = pxRadius(S0, 0.055 * Hm); b.fillStyle = shade(P.shirt, -0.06); b.beginPath(); b.arc(c.x, c.y, rad, 0, Math.PI * 2); b.fill(); }
+    };
+    // HEAD: thorax facing (fx, fy from the shoulder line, sign from the nose) turned toward W._look (GAME-DESIGN 0.35 ≈ 19°)
+    const neckW = W.neck || (sMid && { x: sMid.x, y: sMid.y, z: sMid.z + 0.04 * Hm });
+    const RH0 = 0.105 * Hm;
+    const look = W._look || { x: 0, up: 0 };
+    let hfx = fx + 0.35 * Math.max(-1, Math.min(1, look.x || 0)), hfy = fy; { const l = Math.hypot(hfx, hfy) || 1; hfx /= l; hfy /= l; }
+    let hax = -hfy, hay = hfx; if (hax * ax + hay * ay < 0) { hax = -hax; hay = -hay; }
+    const tilt = 0.5 * Math.max(0, Math.min(1, look.up || 0));               // looking up at the toss (GAME-DESIGN)
+    const center = neckW && { x: neckW.x + fx * 0.02 * Hm, y: neckW.y + fy * 0.02 * Hm, z: neckW.z + 0.100 * Hm };
+    const onSkull = (faceAmt, sideAmt, upAmt, Rk = 1) => {
+      const x = hfx * faceAmt + hax * sideAmt, y = hfy * faceAmt + hay * sideAmt, z = upAmt + tilt * Math.max(0, faceAmt);
+      const l = Math.hypot(x, y, z) || 1;
+      return { x: center.x + x / l * RH0 * Rk, y: center.y + y / l * RH0 * Rk, z: center.z + z / l * RH0 * Rk };
+    };
+    paint.neck = () => { if (neckW && center) capsule(sMid || neckW, { x: center.x - fx * 0.01 * Hm, y: center.y - fy * 0.01 * Hm, z: center.z - RH0 * 0.72 }, skin, 0.050 * Hm, 0.040 * Hm); };
+    const hull = pts => {                                                     // 2D convex hull (monotone chain)
+      const P2 = pts.slice().sort((a, c) => a.x - c.x || a.y - c.y), cr = (o, a, c) => (a.x - o.x) * (c.y - o.y) - (a.y - o.y) * (c.x - o.x);
+      const lo = [], up = [];
+      for (const v of P2) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], v) <= 0) lo.pop(); lo.push(v); }
+      for (const v of P2.reverse()) { while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], v) <= 0) up.pop(); up.push(v); }
+      return lo.slice(0, -1).concat(up.slice(0, -1));
+    };
+    paint.head = () => {
+      if (!center || !W.nose) return;
+      const [hr, hrD, hrL] = HAIR[P.id] || [P.hair, P.hair, P.hair];
+      const R = RH0, c = proj(center.x, center.y, center.z), rad = pxRadius(center, R);
+      const longBand = P.look && P.look.style === "long-band", capCurls = P.look && P.look.style === "cap-curls";
+      const curls = [];
+      if (capCurls) for (let k = 0; k < 12; k++) {                            // ginger curls flaring out under the cap: sides and back, not the face
+        const ang = Math.PI * (0.36 + 1.28 * k / 11), up = -0.15 + 0.16 * (k % 2);
+        curls.push({ w: onSkull(Math.cos(ang), Math.sin(ang), up, 1.06), col: k % 3 ? hr : hrL });
+      }
+      const curl = cu => { const d = proj(cu.w.x, cu.w.y, cu.w.z); b.fillStyle = cu.col; b.beginPath(); b.arc(d.x, d.y, Math.max(1 / AS, rad * 0.24), 0, Math.PI * 2); b.fill(); };
+      curls.filter(cu => !nearer(cu.w, center)).forEach(curl);               // the far curls peek out round the skull
+      if (longBand) { const nape = onSkull(-0.9, 0, -0.2), tail = { x: nape.x - hfx * R * 0.35, y: nape.y - hfy * R * 0.35, z: neckW.z }; capsule(nape, tail, hr, R * 0.28, R * 0.16); }
+      // cap (Sinner): crown over the skull, rim higher at the front; brim toward his face
+      const capC = P.cap || "#f2f2ef";
+      const brim = [];
+      if (capCurls) { for (let k = -5; k <= 5; k++) { const ph = k / 5 * 1.25, cs = Math.cos(ph), sn = Math.sin(ph);
+          brim.push({ x: center.x + (hfx * cs + hax * sn) * R * 1.0, y: center.y + (hfy * cs + hay * sn) * R * 1.0, z: center.z + R * 0.3 }); }
+        for (let k = 5; k >= -5; k--) { const ph = k / 5 * 1.25, cs = Math.cos(ph), sn = Math.sin(ph);
+          brim.push({ x: center.x + (hfx * cs * 1.62 + hax * sn * 1.05) * R, y: center.y + (hfy * cs * 1.62 + hay * sn * 1.05) * R, z: center.z + R * 0.22 }); } }
+      const brimMid = brim.length ? brim.reduce((m, v) => add3(m, mul3(v, 1 / brim.length)), { x: 0, y: 0, z: 0 }) : null;
+      const brimFront = brimMid && nearer(brimMid, center);
+      const drawBrim = () => { const pp = brim.map(v => proj(v.x, v.y, v.z)); fillPoly(pp, shade(capC, -0.18));
+        b.strokeStyle = shade(capC, -0.36); b.lineWidth = 1 / AS; b.beginPath(); pp.slice(11).forEach((v, k) => (k ? b.lineTo(v.x, v.y) : b.moveTo(v.x, v.y))); b.stroke(); };
+      if (brim.length && !brimFront) drawBrim();
+      b.fillStyle = hrD; b.beginPath(); b.arc(c.x, c.y, rad, 0, Math.PI * 2); b.fill();
+      b.fillStyle = hr; b.beginPath(); b.arc(c.x, c.y - rad * 0.08, rad * 0.92, Math.PI, Math.PI * 2); b.fill();
+      const facePt = onSkull(0.9, 0.22, 0.02), fc = proj(facePt.x, facePt.y, facePt.z);
+      const faceOff = Math.hypot(fc.x - c.x, fc.y - c.y);
+      // the face shows only on the camera's side of the skull (a sliver past side-on reads as a profile); from behind: hair / cap
+      const seeFace = nearer(facePt, center, R * 0.3); void faceOff;
+      SegmentPaint.lastHead = SegmentPaint.lastHead || {};   // evidence read-out only (no game state): which way the painted face points
+      SegmentPaint.lastHead[i + "|" + (SegmentPaint.viewOverride || (b === ictx ? "inset" : "main"))] = { fx: +hfx.toFixed(3), fy: +hfy.toFixed(3), seeFace, flipS };
+      if (seeFace) {
+        b.save(); b.beginPath(); b.arc(c.x, c.y, rad * 0.98, 0, Math.PI * 2); b.clip();
+        b.fillStyle = skin; b.beginPath(); b.arc(fc.x, fc.y, rad * 0.74, 0, Math.PI * 2); b.fill();
+        if (P.look && P.look.beard) {
+          b.fillStyle = hrD;
+          for (const jaw of [onSkull(0.62, 0.38, -0.5), onSkull(0.78, 0.12, -0.58), onSkull(0.5, 0, -0.82)]) {
+            if (!nearer(jaw, center, R * 0.15)) continue;
+            const j = proj(jaw.x, jaw.y, jaw.z); b.beginPath(); b.arc(j.x, j.y, rad * 0.32, 0, Math.PI * 2); b.fill();
+          }
+        }
+        const dot = (wpt, col, sz) => {
+          const d = proj(wpt.x, wpt.y, wpt.z);
+          if (!nearer(wpt, center, R * 0.12)) return;
+          b.fillStyle = col; b.fillRect(q(d.x - sz / 2), q(d.y - sz / 2), Math.max(1.4 / AS, sz), Math.max(1.4 / AS, sz));
+        };
+        dot(onSkull(0.78, 0.36, 0.16), "#1b1b1f", Math.max(2 / AS, rad * 0.2));
+        dot(onSkull(0.78, -0.16, 0.16), "#1b1b1f", Math.max(2 / AS, rad * 0.2));
+        dot(onSkull(0.8, 0.06, -0.4), "#a4574a", Math.max(1.6 / AS, rad * 0.18));
+        b.restore();
+        const nose = onSkull(1.15, 0.12, -0.02), np = proj(nose.x, nose.y, nose.z);
+        if (nearer(nose, center, R * 0.3)) { b.fillStyle = shade(skin, -0.14); b.beginPath(); b.arc(np.x, np.y, Math.max(1.2 / AS, rad * 0.2), 0, Math.PI * 2); b.fill(); }
+      }
+      for (const sd of [1, -1]) {
+        const ear = onSkull(0.02, sd, -0.08);
+        if (!nearer(ear, center, -R * 0.01)) continue;
+        const e = proj(ear.x, ear.y, ear.z);
+        b.fillStyle = shade(skin, -0.08); b.beginPath(); b.ellipse(e.x, e.y, rad * 0.14, rad * 0.24, 0, 0, Math.PI * 2); b.fill();
+      }
+      curls.filter(cu => nearer(cu.w, center)).forEach(curl);
+      if (capCurls) {
+        const dome = [];
+        for (let k = 0; k < 16; k++) { const ang = k / 16 * Math.PI * 2, cs = Math.cos(ang), back = (1 - cs) / 2;
+          for (const lift of [0, 0.35, 0.7]) dome.push(onSkull(cs, Math.sin(ang), (0.3 - 0.42 * back) * (1 - lift) + 1.6 * lift, 1.06)); }
+        dome.push(onSkull(0, 0, 1, 1.06));
+        fillPoly(hull(dome.map(v => proj(v.x, v.y, v.z))), capC);
+        const top = onSkull(0.2, 0, 1, 1.06), tp = proj(top.x, top.y, top.z);
+        b.fillStyle = shade(capC, 0.12); b.beginPath(); b.arc(tp.x, tp.y, Math.max(1 / AS, rad * 0.18), 0, Math.PI * 2); b.fill();   // button
+        if (brim.length && brimFront) drawBrim();
+      } else if (longBand) {
+        b.save(); b.beginPath(); b.arc(c.x, c.y, rad * 1.02, 0, Math.PI * 2); b.clip();
+        b.strokeStyle = P.look.band || "#f6f6f2"; b.lineWidth = Math.max(1.4 / AS, rad * 0.18); b.lineCap = "round";
+        b.beginPath(); let pen = false;
+        for (let k = 0; k <= 20; k++) {
+          const ang = (k / 20) * Math.PI * 2;
+          const wpt = { x: center.x + (hax * Math.cos(ang) + hfx * Math.sin(ang) * 0.92) * R * 0.9, y: center.y + (hay * Math.cos(ang) + hfy * Math.sin(ang) * 0.92) * R * 0.9, z: center.z + R * 0.22 };
+          if (!nearer(wpt, center, -R * 0.015)) { pen = false; continue; }
+          const d = proj(wpt.x, wpt.y, wpt.z);
+          if (!pen) { b.moveTo(d.x, d.y); pen = true; } else b.lineTo(d.x, d.y);
+        }
+        b.stroke(); b.restore();
+      } else sigHead(P, true, c.x, c.y, rad, hr, hrD, hrL);
+    };
+    // RACKET: a real 3D racket continuing the hitting forearm (same as below), slotted by depth
+    let rk = null;
+    if (W[hitSide + "Elbow"] && W[hitSide + "Wrist"]) {
+      const e = W[hitSide + "Elbow"], r = W[hitSide + "Wrist"], u = V3.norm(sub3(r, e));
+      rk = { r, u, n: V3.norm({ x: 0, y: u.z, z: -u.y }) };
+      paint.racket = () => drawRacket(rk.r, rk.u, rk.n, RACKET_LOOK[P.id] || RACKET_LOOK.sinner);
+    }
+    const extras = [];
+    if (center && W.nose) extras.push({ name: "head", anchor: "neck", samples: [{ p: A3(center), r: RH0 }] });
+    if (rk) extras.push({ name: "racket", anchor: hitSide + "Hand", skip: [hitSide + "Forearm"],
+      samples: [0.12, 0.22, 0.32, 0.42, 0.52, 0.62].map(t => ({ p: A3(add3(rk.r, mul3(rk.u, t))), r: t < 0.36 ? 0.025 : RACKET.headW / 2 })) });
+    const view = SegmentPaint.viewOverride || (b === ictx ? "inset" : "main");
+    const o = SegmentPaint.order(J, camera, SKP.radiiM, { player: i, view, camKey: view === "main" ? camMode : view, motion: p.motion, extras });
+    for (const n of o.names) { const f = paint[n]; if (f) f(); done.add(n); }
+    return;
+  }
   // legs: thigh and shin as volumes, sock, then a shoe that points into the court
   for (const s of ["left", "right"]) {
     const Hp = W[s + "Hip"], Kn = W[s + "Knee"], An = W[s + "Ankle"];
@@ -1732,6 +1941,9 @@ function stepMotion(i, dt) {
     }
     for (const n of ["leftKnee", "rightKnee"]) if (W[n]) W[n].z -= 0.012 * H * wgt * (1 + bump(0.06, 0.08));   // a little knee give
   }
+  // BODY SKELETON (HQ-20261117-002): refit the displayed joints onto the player's fixed-length skeleton (bones keep their
+  // length, joints stay in SOURCED limits). Guarded: only players with a skeleton (Alcaraz, Sinner), only once limits load.
+  if (window.BodySkeleton) BodySkeleton.fitWorld(i, PLAYERS[i], pos[i], W, mo);
   if (sv) {
     if (mo.t < bouncesEnd) {                             // ROUTINE: he bounces the ball ROUTINE.bounces times
       const P = (bouncesEnd - mo.t0) / ROUTINE.bounces, f = ((mo.t - mo.t0) / P) % 1, h = W[toss + "Hand"] || W[toss + "Wrist"];
@@ -1742,6 +1954,7 @@ function stepMotion(i, dt) {
       if (!sv.release) {                                 // solve the toss once: release point → contact point
         const C = poseToWorld(i, pos[i], motionPose(m, E.contact), E.contact);
         anatomize(i, C, E.contact);                      // aim the toss at the corrected racket hand
+        if (window.BodySkeleton) BodySkeleton.fitWorld(i, PLAYERS[i], pos[i], C, mo, { t: E.contact, stateless: true });   // same skeleton as drawn
         const T = Math.max(0.2, E.contact - E.tossRelease);
         sv.release = { ...W[toss + "Wrist"] };
         sv.hit = { x: C[hit + "Wrist"].x, z: C[hit + "Wrist"].z + RACKET_M * 0.9 };
