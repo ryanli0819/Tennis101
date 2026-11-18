@@ -2195,7 +2195,8 @@ function drawServeInset() {
   if (!on || camMode === "pov") return;
   const IW = 60, IH = 78, p = pos[i];
   if (inset.width !== IW * AS) { inset.width = IW * AS; inset.height = IH * AS; }
-  const keep = { BW, BH, F, HZ, CAM_X, b };
+  const keep = { BW, BH, F, HZ, CAM_X, b, PX };
+  PX = 1;                                    // inset is a fixed 60×78 design-px scene; don't inherit the main buffer's PX
   const d = p.y + CAM_BACK;
   F = 0.86 * IH * d / 3.5;                               // frame 0 → 3.5 m: the toss and contact fit
   BW = IW; BH = IH; CAM_X = p.x; HZ = IH * 0.93 - CAM_H * F / d;
@@ -2211,7 +2212,7 @@ function drawServeInset() {
   drawShadows();
   drawPlayer(i, p, swing[i]);
   if (ball) drawBall(ball, true);
-  BW = keep.BW; BH = keep.BH; F = keep.F; HZ = keep.HZ; CAM_X = keep.CAM_X; b = keep.b;
+  BW = keep.BW; BH = keep.BH; F = keep.F; HZ = keep.HZ; CAM_X = keep.CAM_X; b = keep.b; PX = keep.PX;
   const W = cssW, H = cssH, ih = Math.round(Math.min(H * 0.36, W * 0.42)), iw = Math.round(ih * IW / IH);
   const x0 = W - iw - 16, y0 = 16;
   ctx.imageSmoothingEnabled = false;
