@@ -236,6 +236,8 @@ body { background: var(--night); color: var(--ink); font-family: var(--f-name); 
 <script src="src/body/skeleton.js?v=0.14.0"></script>
 <!-- Per-segment paint order + near-tie hysteresis (player-artist, HQ-20261117-002.PM.1). HOOK, pinned: SegmentPaint.API === 1 (window.SegmentPaint, v0.14.0-paint.1); drawCapturedFigure uses it only for players with a skeleton and falls back to the old figure without it. -->
 <script src="src/players/segment-paint.js?v=0.14.0"></script>
+<!-- Touch gestures: double-tap = split step, flick down = slide, flick sideways = slice (Controls Designer, HQ-20261118-002.GP.1) -->
+<script src="src/controls/gestures.js?v=0.14.0"></script>
 <script>
 /* =====================================================================
    PLAYERS — real measurements drive sprite height (and later, physics)
@@ -2168,7 +2170,7 @@ function hitBall(i, isServe, volley = false) {
   const type = isServe ? "drive" : (i === 0 ? (input.keys.has("e") || input.slice) : p.planSlice || (q < 0.6 && Math.random() < 0.12)) ? "slice" : "drive";
   p.planSlice = false;
   if (type === "slice") { err *= 1.25; if (i === 0) say(0, "SLICE"); }
-  if (i === 0 && input.slice) { input.slice = false; sliceBtn.setAttribute("aria-pressed", "false"); sliceBtn.classList.remove("primary"); }
+  if (i === 0 && input.slice) setSliceArmed(false);   // an armed slice lasts one shot
   swing[i] = 1;
   const Rs = (PLAYERS[i].side === "near" ? 1 : -1) * handSign(PLAYERS[i]);   // + = his forehand side
   Object.assign(p, { hitT: clock, hitServe: isServe, strokeType: type, hitZ: ball.z, strokeSide: Math.sign((ball.x - p.x) * Rs) || 1 });   // racket follow-through
@@ -2470,7 +2472,8 @@ function renderReady() {
 function drawReach() {
   const p = pos[0], r = BODY[0].reach, c = proj(p.x, p.y);
   const rx = proj(p.x + r, p.y).x - c.x, ry = Math.abs(proj(p.x, p.y - r).y - proj(p.x, p.y + r).y) / 2;
-  b.strokeStyle = "rgba(216,238,76,0.28)"; b.lineWidth = PX;
+  const armed = input.slice;                           // slice armed (touch): a steady, brighter white ring, no text, no animation
+  b.strokeStyle = armed ? "rgba(238,243,251,0.75)" : "rgba(216,238,76,0.28)"; b.lineWidth = armed ? 2 * PX : PX;
   b.beginPath(); b.ellipse(Math.round(c.x), Math.round(c.y), rx, Math.max(PX, ry), 0, 0, Math.PI * 2); b.stroke();
 }
 
@@ -2562,9 +2565,16 @@ document.getElementById("pauseBtn").onclick = () => setPaused(!paused);
 document.getElementById("resumeBtn").onclick = () => setPaused(false);
 document.getElementById("pauseNew").onclick = () => openSetup(1);
 document.getElementById("slideBtn").onclick = () => slide(0);
-/* Touch: tap Slice to arm your next shot as a slice (it disarms after one shot). */
+/* SLICE ARMED: the one switch for "your next shot is a slice" (Slice button, sideways flick). It disarms after one shot
+   (hitBall). E held as you hit is separate and unchanged. The button may be gone (HUD cleanup); then only the state changes. */
+function setSliceArmed(on) {
+  input.slice = !!on;
+  const btn = document.getElementById("sliceBtn");
+  if (btn) { btn.setAttribute("aria-pressed", String(input.slice)); btn.classList.toggle("primary", input.slice); }
+}
+const toggleSlice = () => setSliceArmed(!input.slice);
 const sliceBtn = document.getElementById("sliceBtn");
-sliceBtn.onclick = () => { input.slice = !input.slice; sliceBtn.setAttribute("aria-pressed", String(input.slice)); sliceBtn.classList.toggle("primary", input.slice); };
+if (sliceBtn) sliceBtn.onclick = toggleSlice;
 document.getElementById("ptA").onclick = () => manualPoint(0);
 document.getElementById("ptB").onclick = () => manualPoint(1);
 document.getElementById("undoBtn").onclick = undo;
@@ -2611,7 +2621,17 @@ function aimAt(cx, cy) {
   aim.x = clamp(c.x, bx.xlo + 0.05, bx.xhi - 0.05);
   aim.y = clamp(c.y, bx.sy * 1.5, bx.sy * (COURT.SVC - 0.05));
 }
+/* Touch gestures (src/controls/gestures.js): any finger the stick or aiming isn't using, or a quick tap/flick of the
+   stick finger itself. They call the same moves as the keys: splitStep(0) (Shift), slide(0) (Space), toggleSlice (Slice). */
+const gestures = window.TouchGestures ? TouchGestures.create() : null;
+const gestureMoves = { split: () => splitStep(0), slide: () => slide(0), slice: toggleSlice };
+const gestureOn = e => gestures && e.pointerType === "touch" && e.pointerId !== aimDrag;
 canvas.addEventListener("pointerdown", e => {
+  if (gestureOn(e) && !aimingNow()) gestures.down(e.pointerId, e.clientX, e.clientY, e.timeStamp);
+  if (stickOrigin && e.pointerId !== stickOrigin.id) {           // a second finger never steals the stick
+    if (gestureOn(e)) canvas.setPointerCapture(e.pointerId);     // so its lift is seen even off the court
+    return;
+  }
   if (aimingNow()) {                                      // serving: click / tap (and drag) to aim; you can't run during the windup anyway
     const c = screenToCourt(e.clientX, e.clientY);
     if (c && Math.sign(c.y) === serviceBox(0).sy) { aimDrag = e.pointerId; canvas.setPointerCapture(e.pointerId); aimAt(e.clientX, e.clientY); return; }
@@ -2622,6 +2642,7 @@ canvas.addEventListener("pointerdown", e => {
   knob.style.transform = "";
 });
 canvas.addEventListener("pointermove", e => {
+  if (gestureOn(e)) gestures.move(e.pointerId, e.clientX, e.clientY);
   if (aimDrag === e.pointerId) { aimAt(e.clientX, e.clientY); return; }
   if (!stickOrigin || e.pointerId !== stickOrigin.id) return;
   let dx = (e.clientX - stickOrigin.x) / 40, dy = (e.clientY - stickOrigin.y) / 40;
@@ -2630,8 +2651,13 @@ canvas.addEventListener("pointermove", e => {
   knob.style.transform = `translate(${dx * 30}px, ${dy * 30}px)`;
 });
 const endStick = () => { stickOrigin = null; aimDrag = null; input.stick = { x: 0, y: 0 }; stick.hidden = true; };
-canvas.addEventListener("pointerup", endStick);
-canvas.addEventListener("pointercancel", endStick);
+const ownsStick = e => (stickOrigin && e.pointerId === stickOrigin.id) || e.pointerId === aimDrag || (!stickOrigin && aimDrag == null);
+canvas.addEventListener("pointerup", e => {
+  const move = gestureOn(e) ? gestures.up(e.pointerId, e.clientX, e.clientY, e.timeStamp) : null;
+  if (ownsStick(e)) endStick();                          // lifting another finger leaves the stick alone
+  if (move && !paused && !StartFlow.isOpen()) gestureMoves[move]();   // after the stick lets go: slide goes the way you were moving
+});
+canvas.addEventListener("pointercancel", e => { if (gestures) gestures.cancel(e.pointerId); if (ownsStick(e)) endStick(); });
 
 resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
 </script>
