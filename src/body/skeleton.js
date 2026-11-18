@@ -281,11 +281,17 @@
      cost = total clamping (deg) + YAW_COST_PER_M × mean joint displacement from the capture (m) + |δ| × YAW_COST_PER_DEG.
      The weights are GAME-DESIGN (1 cm of displacement ≈ 1° of clamping; 0.05 per degree of turn so ties keep the capture). */
   const PELVIS_YAW_TRIES = [0, -10, 10, -20, 20, -30, 30, -45, 45, -60, 60], YAW_COST_PER_M = 100, YAW_COST_PER_DEG = 0.05;
+  /* YAW CONTINUITY (r4, HQ-20261117-002.PM.1): same rule as the pitch below (skill §2, no snapping). With a previous frame,
+     |δ − δ_prev| ≤ YAW_RATE_DEG_S × dt (dt from the frame times; 5° per frame if unknown). YAW_RATE_DEG_S = 300°/s is
+     GAME-DESIGN (= PITCH_RATE_DEG_S), not a SOURCED limit. Candidates = the grid values inside the window plus
+     δ_prev + {−1, −½, 0, ½, 1} × step (clamped to ±60°, the grid's range). */
+  const YAW_RATE_DEG_S = 300;
   /* PELVIS PITCH IS SOLVED TOO (r2, RETURN fix 1). Two hip points give no pelvic tilt, so it is a free part of the root
      rotation, like the yaw. Rule (GAME-DESIGN, stated in JOINT_LIMITS.md):
      - split prior: the capture's sagittal trunk lean λ (shoulder midpoint vs hip midpoint, against an upright pelvis) is
        split PITCH_SPLIT = 0.5 to the pelvis (θ0 = 0.5 λ) and the rest to thorax.flexionExtension (trunk vs pitched pelvis);
-     - search: after the yaw search, θ = θ0 + PITCH_OFFSETS and θ_prev + steps are tried at the winning yaw and at yaw 0, same cost as
+     - search: after the yaw search, θ = θ0 + PITCH_OFFSETS and θ_prev + steps are tried at the winning yaw and at yaw 0 (r4: yaw 0
+       only if it is inside the yaw-continuity window), same cost as
        the yaw plus |θ − θ0| × PITCH_COST_PER_DEG, so the pelvis tips only where that cuts clamping clearly (e.g. a back leg
        past hip extension) and drifts back to the split prior otherwise;
      - no snapping (skill §2): with a previous frame, |θ − θ_prev| ≤ PITCH_RATE_DEG_S × dt (dt from the frame times; 5° per
@@ -318,14 +324,20 @@
       r.cost = r.clamps.reduce((a, c) => a + Math.abs(c.captured - c.solved), 0) + YAW_COST_PER_M * mv / Math.max(1, n) + Math.abs(dDeg) * YAW_COST_PER_DEG + Math.abs(pitch - theta0) * PITCH_COST_PER_DEG;
       if (!best || r.cost < best.cost - 1e-9) best = r;
     };
-    for (const dDeg of PELVIS_YAW_TRIES) tryOne(dDeg, th1);
+    // YAW CONTINUITY (r4, see YAW_RATE_DEG_S): δ stays within YAW_RATE_DEG_S × dt of the previous frame's δ (GAME-DESIGN 300°/s).
+    const prevYaw = opts.prev && opts.prev.pelvisYawSolvedDeg != null ? opts.prev.pelvisYawSolvedDeg : null;
+    const yawStep = prevYaw == null ? Infinity : (dt != null && dt > 0 ? Math.max(0.5, YAW_RATE_DEG_S * dt) : 5);
+    const yawTries = prevYaw == null ? PELVIS_YAW_TRIES
+      : [...new Set([...PELVIS_YAW_TRIES.filter(d => Math.abs(d - prevYaw) <= yawStep), ...[-1, -0.5, 0, 0.5, 1].map(f => clamp(prevYaw + f * yawStep, -60, 60))])];
+    for (const dDeg of yawTries) tryOne(dDeg, th1);
     // the pitch only changes angles measured in the pelvis frame (hips, trunk): with none of those clamped and θ already at
     // the prior, no other θ can lower the cost, so the search is skipped (speed; same result)
     const pitchMatters = best.clamps.some(c => /Hip$|^trunk$/.test(c.joint)) || Math.abs(th1 - theta0) > 1e-9;
     if (!opts.noPitchSearch && pitchMatters) { const y = best.pelvisYawSolvedDeg;
       const ths = new Set(PITCH_OFFSETS.map(o => theta0 + o));
       if (prevPitch != null) for (const f of [-1, -0.5, 0, 0.5, 1]) ths.add(prevPitch + f * Math.min(maxStep, 40));
-      for (const yy of y ? [y, 0] : [0]) for (const th0 of ths) { const th = clamp(lim(th0), PELVIS_PITCH_MIN, PELVIS_PITCH_MAX); if (Math.abs(th - th1) > 1e-9) tryOne(yy, th); } }
+      // the pitch search also retries yaw 0, but only when 0 is inside the yaw window (r4: otherwise it bypassed the rate limit)
+      for (const yy of y ? [y, ...(Math.abs(0 - (prevYaw ?? 0)) <= yawStep ? [0] : [])] : [0]) for (const th0 of ths) { const th = clamp(lim(th0), PELVIS_PITCH_MIN, PELVIS_PITCH_MAX); if (Math.abs(th - th1) > 1e-9) tryOne(yy, th); } }
     fin(best);
     // moved is always measured against the ORIGINAL capture
     for (const k in best.joints) { const C = cap[k]; if (!C) continue; best.moved[k] = { xy: Math.hypot(best.joints[k][0] - C[0], best.joints[k][1] - C[1]), xyz: C[2] == null ? null : Math.hypot(best.joints[k][0] - C[0], best.joints[k][1] - C[1], best.joints[k][2] - C[2]) }; }
@@ -679,7 +691,7 @@
     return delta;
   }
 
-  const API = { PELVIS_YAW_TRIES, YAW_COST_PER_M, YAW_COST_PER_DEG, PITCH_SPLIT, PITCH_OFFSETS, PITCH_COST_PER_DEG, PITCH_RATE_DEG_S, PELVIS_PITCH_MIN, PELVIS_PITCH_MAX, AIR_LO_M, AIR_HI_M, pelvisFrame, trunkLeanDeg, SKELETONS, NOSE_TO_ANKLE_H, scaleK, BONE_DEFS, SEGMENTS, skeletonFor, solveFrame, solveMotion, measureAngles, ranges, violations, boneLengths, boneKey,
+  const API = { PELVIS_YAW_TRIES, YAW_COST_PER_M, YAW_COST_PER_DEG, YAW_RATE_DEG_S, PITCH_SPLIT, PITCH_OFFSETS, PITCH_COST_PER_DEG, PITCH_RATE_DEG_S, PELVIS_PITCH_MIN, PELVIS_PITCH_MAX, AIR_LO_M, AIR_HI_M, pelvisFrame, trunkLeanDeg, SKELETONS, NOSE_TO_ANKLE_H, scaleK, BONE_DEFS, SEGMENTS, skeletonFor, solveFrame, solveMotion, measureAngles, ranges, violations, boneLengths, boneKey,
     frameToLocal, measureBoneRatios, measureNeckNeutral, measureAnkleNeutral, segmentsInDrawOrder, orthoCamera, lookAtCamera, gameCamera, fitWorld, UNOBSERVED, limitsTable: LIMT };
   if (typeof module === "object" && module.exports) module.exports = API;
   root.BodySkeleton = API;
