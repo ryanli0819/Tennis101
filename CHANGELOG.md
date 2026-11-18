@@ -3,6 +3,7 @@
 Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it was published (Eastern time, to the hour).
 
 ## Unreleased
+- Phone moves without buttons: on a phone you can now split step with a double-tap, slide with a short flick down, and arm a slice for your next shot with a short flick sideways (the ring around your player turns white while it is armed; flick sideways again to cancel). Dragging still moves your player, and the keyboard keys are unchanged. (Nov 18, 5 PM · Controls Designer, HQ-20261118-002, pending review)
 - Every pro serves with his own captured motion: all 22 players in the locker room use a serve taken from checked footage. Speed, spin and serve type are unchanged, because the footage did not measure them. A player with only one filmed serve (Fils) uses it for both. (Nov 11, 6 PM · captured serves)
 
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
