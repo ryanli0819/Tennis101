@@ -3,6 +3,7 @@
 Newest first. Each version is a git tag (`vX.Y.Z`) with the approximate time it was published (Eastern time, to the hour).
 
 ## Unreleased
+- The ball is its real size at every distance: the ball and its shadow are drawn at a real ball's 6.7 cm instead of about three times bigger, so it shrinks properly toward the far end and a ball on a far line sits on the line instead of spilling past it. (Nov 18, 5 PM · Ball Physicist, HQ-20261118-003, pending review)
 - Every pro serves with his own captured motion: all 22 players in the locker room use a serve taken from checked footage. Speed, spin and serve type are unchanged, because the footage did not measure them. A player with only one filmed serve (Fils) uses it for both. (Nov 11, 6 PM · captured serves)
 
 A new version is published only once **5 or more changes** have built up. Until then, each change waits in [`contemporary/`](contemporary/). The Version Keeper manages this (rules: `agents/version-keeper/PROMPT.md`).
