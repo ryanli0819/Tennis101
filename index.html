@@ -646,7 +646,7 @@ function drawShadows() {
     }
   }
   if (ball) for (const d of L.shadows) {                  // the ball's shadow slides away from the light as it rises
-    const sx = ball.x + d.x * ball.z, sy = ball.y + d.y * ball.z, g = proj(sx, sy), r = ballRadiusPx(g);
+    const sx = ball.x + d.x * ball.z, sy = ball.y + d.y * ball.z, g = proj(sx, sy), r = ballRadiusPx(g, ball.y);
     b.fillStyle = `rgba(8,12,24,${Math.max(0.06, d.a * 1.2 - ball.z * 0.04).toFixed(3)})`;
     b.beginPath(); b.ellipse(q(g.x), q(g.y), r, r * 0.42, 0, 0, Math.PI * 2); b.fill();
   }
@@ -1555,9 +1555,14 @@ const BALL_R_PX_MIN = 0.5;                               // GAME-DESIGN: floor o
                                                          // (lines are drawn 1 design px) and never vanishes; a line ball still sits on the line
 const BALL_R_PX_MAX = 36;                                // GAME-DESIGN: safety cap so net/pov cameras don't draw a giant ball (only ever shrinks)
 // Any camera, including a future review slant camera, gets its scale through proj().s.
-function ballRadiusPx(p) { return Math.min(BALL_R_PX_MAX * PX, Math.max(BALL_R_PX_MIN * PX, BALL_R * p.s)); }  // floors in design pixels, so CSS size holds at 2×
+// NEAR BALL BIGGER (Ryan, Nov 18: "make the tennis ball 2x bigger … the closer it is, the bigger it is, … a little bigger
+// than now when the ball is hit to the other side, and 2x bigger when its up front close to me"): on top of the
+// perspective shrink, the ball is drawn 2× its true size on your (near) side and eases down to 1.25× at the far baseline.
+const BALL_BOOST_NEAR = 2.0, BALL_BOOST_FAR = 1.25;     // GAME-DESIGN: Ryan's call (readability over true size up close)
+function ballBoost(y) { const u = Math.min(1, Math.max(0, (y + COURT.L) / (2 * COURT.L))); return BALL_BOOST_NEAR + (BALL_BOOST_FAR - BALL_BOOST_NEAR) * u; }
+function ballRadiusPx(p, y) { return Math.min(BALL_R_PX_MAX * PX, Math.max(BALL_R_PX_MIN * PX, BALL_R * p.s) * (y == null ? 1 : ballBoost(y))); }  // floors in design pixels, so CSS size holds at 2×
 function drawBall(ball, inset = false) {
-  const p = proj(ball.x, ball.y, ball.z), r = ballRadiusPx(p), cx = q(p.x), cy = q(p.y);
+  const p = proj(ball.x, ball.y, ball.z), r = ballRadiusPx(p, ball.y), cx = q(p.x), cy = q(p.y);
   const tr = ball._trail || (ball._trail = []);
   const sp = tr.length ? Math.hypot(ball.x - tr[0].x, ball.y - tr[0].y, ball.z - tr[0].z) : 0;
   if (sp > 0.12 && !matchMedia("(prefers-reduced-motion: reduce)").matches)      // moving fast: a short fading trail
