@@ -760,17 +760,34 @@ function drawCapturedFigure(i, p, W) {
     if (Math.hypot(nose.x - sMid.x, nose.y - sMid.y) < 0.02 * Hm) { fx = 0; fy = -sideSign(i); }
   }
   const light = V3.norm({ x: lit < 0 ? -0.7 : 0.7, y: -0.2, z: 0.62 });
-  const ringAt = (u, n = 8) => {
+  /* WHOLE TORSO (Ryan, Nov 19: "take the entire body into consideration, including shoulder, hip, chest, ass rotations,
+     contractions"): the pelvis faces along its own hip line and the chest along the shoulder line, and the waist twists
+     between them (hip–shoulder separation). The back of the pelvis carries the glutes; the chest opens at the racket drop.
+     Muscles swell a little when they work (W._act, ESTIMATED from the motion; GAME-DESIGN sizes). */
+  const act = W._act || {}, A = n => Math.max(0, Math.min(1, act[n] || 0));
+  let hx = ax, hy = ay, hfx = fx, hfy = fy;
+  if (LH && RH) { const dx = RH.x - LH.x, dy = RH.y - LH.y, l = Math.hypot(dx, dy);
+    if (l > 0.02 * Hm) { hx = dx / l; hy = dy / l; hfx = -hy; hfy = hx; if (hfx * fx + hfy * fy < 0) { hfx = -hfx; hfy = -hfy; } } }
+  const smooth01 = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+  const ringAt = (u, n = 10) => {
     const keys = [[0, 0.24, 0.15], [0.40, 0.145, 0.090], [0.72, 0.21, 0.17], [1, 0.28, 0.12]];
     let a = keys[0], c = keys[keys.length - 1];
     for (let k = 0; k < keys.length - 1; k++) if (u >= keys[k][0] && u <= keys[k + 1][0]) { a = keys[k]; c = keys[k + 1]; break; }
     const t = (u - a[0]) / ((c[0] - a[0]) || 1);
-    const fw = (a[1] + (c[1] - a[1]) * t) * Hm, fd = (a[2] + (c[2] - a[2]) * t) * Hm;
+    const chestK = Math.exp(-(((u - 0.72) / 0.12) ** 2));
+    const fw = (a[1] + (c[1] - a[1]) * t) * Hm * (1 + 0.06 * chestK * A("chest_open")), fd = (a[2] + (c[2] - a[2]) * t) * Hm;
     const ctr = V3.lerp(hMid, sMid, u);
+    const k2 = smooth01(0.12, 0.66, u);                    // pelvis below, chest above, the waist twists in between
+    let rx = hx + (ax - hx) * k2, ry = hy + (ay - hy) * k2, qx = hfx + (fx - hfx) * k2, qy = hfy + (fy - hfy) * k2;
+    { const l = Math.hypot(rx, ry) || 1; rx /= l; ry /= l; const m = Math.hypot(qx, qy) || 1; qx /= m; qy /= m; }
+    const gluteK = Math.exp(-(((u - 0.1) / 0.11) ** 2));   // glutes: the back of the pelvis, just below the waistband
     const pts = [];
     for (let k = 0; k < n; k++) {
-      const ang = (k / n) * Math.PI * 2, side = Math.cos(ang) * fw / 2, fore = Math.sin(ang) * fd / 2;
-      pts.push({ x: ctr.x + ax * side + fx * fore, y: ctr.y + ay * side + fy * fore, z: ctr.z, fore });
+      const ang = (k / n) * Math.PI * 2, cs = Math.cos(ang), sn = Math.sin(ang), side = cs * fw / 2;
+      let fore = sn * fd / 2;
+      if (sn < 0) fore *= 1 + gluteK * (0.42 + 0.22 * A(cs > 0 ? "glute_right" : "glute_left")) * Math.min(1, 1.6 * -sn);
+      else fore *= 1 + chestK * (0.10 * A("chest_open") + 0.06 * A("chest"));
+      pts.push({ x: ctr.x + rx * side + qx * fore, y: ctr.y + ry * side + qy * fore, z: ctr.z, fore });
     }
     return { pts, ctr };
   };
@@ -840,11 +857,14 @@ function drawCapturedFigure(i, p, W) {
       const Hp = W[s + "Hip"], Kn = W[s + "Knee"], An = W[s + "Ankle"], Toe = W[s + "Toe"];
       const knee = () => crease(Hp, Kn, An, 0.050 * Hm, skin);
       paint[s + "Thigh"] = () => { if (!Hp || !Kn) return;
-        capsule(Hp, Kn, skin, 0.072 * Hm, 0.050 * Hm);
+        const q = 1 + 0.10 * A("quad_" + s);                                // quads / hamstrings working
+        capsule(Hp, Kn, skin, 0.072 * Hm * q, 0.050 * Hm * (1 + 0.06 * A("quad_" + s)));
         capsule(Hp, V3.lerp(Hp, Kn, 0.12), shortsC, 0.075 * Hm, 0.072 * Hm);   // the shorts' leg over the top of the thigh (GAME-DESIGN 12%)
         if (done.has(s + "Shank")) knee(); };
       paint[s + "Shank"] = () => { if (!Kn || !An) return;
         capsule(Kn, An, skin, 0.048 * Hm, 0.036 * Hm);
+        const cf = A("calf_" + s);                                              // the calf bunches up when he rises on the toes
+        if (cf > 0.05) capsule(V3.lerp(Kn, An, 0.18), V3.lerp(Kn, An, 0.5), skin, 0.050 * Hm * (1 + 0.16 * cf), 0.044 * Hm * (1 + 0.10 * cf));
         capsule(V3.lerp(An, Kn, 0.22), An, P.socks || "#f1f1ee", 0.040 * Hm, 0.034 * Hm);
         if (done.has(s + "Thigh")) knee(); };
       paint[s + "Foot"] = () => { if (!An) return;
@@ -858,19 +878,20 @@ function drawCapturedFigure(i, p, W) {
       const foreC = s === "right" && P.sleeve ? P.sleeve : skin;
       const elbow = () => crease(Sh, El, Wr, 0.038 * Hm, skin);
       paint[s + "UpperArm"] = () => { if (!Sh || !El) return;
-        capsule(Sh, El, skin, 0.046 * Hm, 0.038 * Hm);
+        const am = s === hitSide ? 1 + 0.08 * A("arm") : 1;                  // the racket arm tenses as it swings
+        capsule(Sh, El, skin, 0.046 * Hm * am, 0.038 * Hm * am);
         capsule(Sh, V3.lerp(Sh, El, 0.46), P.shirt, 0.052 * Hm, 0.044 * Hm);
         if (done.has(s + "Forearm")) elbow(); };
       paint[s + "Forearm"] = () => { if (!El || !Wr) return;
-        capsule(El, Wr, foreC, 0.036 * Hm, 0.028 * Hm);
+        capsule(El, Wr, foreC, 0.036 * Hm * (s === hitSide ? 1 + 0.10 * A("arm") : 1), 0.028 * Hm);
         capsule(V3.lerp(Wr, El, 0.14), V3.lerp(Wr, El, 0.04), "#f3f3f0", 0.022 * Hm, 0.020 * Hm);
         if (done.has(s + "UpperArm")) elbow(); };
       paint[s + "Hand"] = () => { if (Wr && Hd) capsule(Wr, Hd, skin, 0.026 * Hm, 0.020 * Hm); };
     }
     paint.torso = () => {
       if (!sMid || !hMid) return;
-      drawTube([0, 0.2, 0.42], shortsC);
-      const shirtRings = drawTube([0.34, 0.55, 0.78, 1], P.shirt);
+      drawTube([0, 0.1, 0.22, 0.42], shortsC);
+      const shirtRings = drawTube([0.34, 0.5, 0.64, 0.78, 1], P.shirt);
       const chest = ringAt(0.72), hip = ringAt(0.08);
       const front = chest.pts.reduce((m, p) => (p.fore > m.fore ? p : m), chest.pts[0]);
       if (shirtRings && nearer(backOf(chest), front, 0.05 * Hm)) {
@@ -1020,8 +1041,8 @@ function drawCapturedFigure(i, p, W) {
   }
   // hips and waist: shorts are wider at the pelvis and pinch at the waist
   if (sMid && hMid) {
-    drawTube([0, 0.2, 0.42], P.shorts || "#1f2024");
-    const shirtRings = drawTube([0.34, 0.55, 0.78, 1], P.shirt);
+    drawTube([0, 0.1, 0.22, 0.42], P.shorts || "#1f2024");
+    const shirtRings = drawTube([0.34, 0.5, 0.64, 0.78, 1], P.shirt);
     const chest = ringAt(0.72), hip = ringAt(0.08);
     const front = chest.pts.reduce((m, p) => (p.fore > m.fore ? p : m), chest.pts[0]);
     if (shirtRings && nearer(backOf(chest), front, 0.05 * Hm)) {
@@ -1799,6 +1820,15 @@ function motionPose(m, t) {
   return out;
 }
 window.motionPose = motionPose;
+/* MUSCLES: a motion's frames may carry "act" (0..1 per group: quad_/glute_/calf_left|right, core, chest, chest_open, arm),
+   ESTIMATED from the motion (alcaraz_legs_arms.py). Linear between frames; {} when the motion has none. */
+function motionAct(m, t) {
+  const fr = m.frames; if (!fr.length || !fr[0].act) return {};
+  let k = 1; while (k < fr.length - 1 && fr[k].t < t) k++;
+  const a = fr[k - 1].act || {}, c = fr[k].act || a, u = Math.max(0, Math.min(1, (t - fr[k - 1].t) / ((fr[k].t - fr[k - 1].t) || 1))), out = {};
+  for (const n in c) out[n] = (a[n] ?? c[n]) + (c[n] - (a[n] ?? c[n])) * u;
+  return out;
+}
 /* Body heights → court metres for a player standing at p (scaled by their real height). */
 function poseToWorld(i, p, pose, t) {
   const h = PLAYERS[i].heightM, right = (PLAYERS[i].side === "near" ? 1 : -1) * (p.motion ? flipAt(i, p.motion, t ?? p.motion.t) : 1), w = {};
@@ -1934,6 +1964,7 @@ function stepMotion(i, dt) {
   const toss = m.hand === "L" ? "right" : "left", hit = m.hand === "L" ? "left" : "right";   // lefties toss right, hit left
   mo.t += dt;
   const W = mo.world = poseToWorld(i, pos[i], motionPose(m, mo.t));
+  W._act = motionAct(m, mo.t);                            // how hard each muscle group works now (frames' "act", if any)
   const sv = rally && rally.serve;
   sideOn(i, W, m, mo.t);
   anatomize(i, W);

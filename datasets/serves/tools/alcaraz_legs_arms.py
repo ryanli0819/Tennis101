@@ -42,6 +42,7 @@ CLIP = "datasets/video/alcaraz/serve/alcaraz_serve01_legs_0.25x.mp4"
 # contact src 5.08 → 1.5921 (capture_alcaraz_poetry.py TROPHY_SRC / CONTACT_SRC).
 K = (1.5921 - 1.3476) / (5.08 - 4.30)
 T0 = 5.08 - 1.5921 / K
+CONTACT_SRC_CLIP = 5.42
 
 ARM = {"left": ("leftShoulder", "leftElbow", "leftWrist", "leftIndex"),
        "right": ("rightShoulder", "rightElbow", "rightWrist", "rightIndex")}
@@ -331,7 +332,12 @@ def fix_arms(frames, D, cam):
             if "hips" in sm[i]:
                 hm3 = (J["leftHip"] + J["rightHip"]) / 2
                 p_sh_v = sm[i]["hips"] + cam["s"] * (cam["R2"] @ (sh - hm3))
-                if c0 < 0.6 or np.linalg.norm(p_sh - p_sh_v) > 70: p_sh = p_sh_v
+                if c0 < 0.4 or np.linalg.norm(p_sh - p_sh_v) > 130: p_sh = p_sh_v
+            # the blur at the strike hides the elbow while the hand is still seen: the arm is straight there in the
+            # clip (frames 214-222), so the elbow goes on the shoulder–hand line
+            if c1 < 0.4 and c2 >= 0.4:
+                Lu_, Lf_ = np.linalg.norm(el - sh), np.linalg.norm(wr - el)
+                p_el = p_sh + (p_wr - p_sh) * (Lu_ / (Lu_ + Lf_)); c1 = c2
             conf = min(c1, c2)
             w = edge * min(1.0, max(0.0, (conf - 0.15) / 0.3))
             if w <= 0: continue
@@ -392,6 +398,142 @@ def fix_arms(frames, D, cam):
     return changed
 
 
+# ---------------------------------------------------------------- torso (hips, shoulders, spine)
+UPPER = ("leftShoulder", "rightShoulder", "leftElbow", "rightElbow", "leftWrist", "rightWrist", "leftIndex",
+         "rightIndex", "nose", "leftEar", "rightEar", "neck", "chest", "head")
+
+
+def seg_from_picture(v2, L, cur, cam, calib=1.0):
+    """3D vector of length L whose picture is v2 (px); the part the picture hides (toward / away from the lens) comes
+    from the length, on the side the current 3D has it."""
+    q = (cam["R2"][0] * v2[0] + cam["R2"][1] * v2[1]) / (cam["s"] * calib)
+    l = np.linalg.norm(q)
+    if l >= L: return unit(q) * L
+    sgn = 1.0 if cur @ cam["r3"] >= 0 else -1.0
+    return q + cam["r3"] * math.sqrt(L * L - l * l) * sgn
+
+
+def fix_torso(frames, D, cam):
+    """Hip line, shoulder line and spine follow the clip (rotation of the pelvis, of the chest against it, and the
+    trunk's lean and arch). Each keeps its 3D length. The upper body turns with the chest; the legs are re-solved
+    afterwards by fix_legs (feet stay planted)."""
+    names = {"hip": ("leftHip", "rightHip"), "sh": ("leftShoulder", "rightShoulder")}
+    G = lambda v: cam["s"] * (cam["R2"] @ v)
+    # calibration: the tracker's hip and shoulder points are not the capture's joint centres. A segment's picture can
+    # be no longer than its true length; the spine is matched on the walk-up, where the capture stands as the clip does.
+    samples = {"hip": [], "sh": [], "sp_c": [], "sp_g": []}
+    rows = []
+    for f in frames:
+        st = f["t"] / K + T0; p = pose_at(D, st) if 1.55 <= st <= 6.0 else None
+        rows.append(p)
+        if not p or any(n not in p for n in ("leftHip", "rightHip", "leftShoulder", "rightShoulder")): continue
+        J = {k: V(v) for k, v in f["joints"].items()}
+        for key, (a, b) in names.items():
+            if min(p[a][2], p[b][2]) > 0.55:
+                samples[key].append((np.linalg.norm(np.array(p[b][:2]) - np.array(p[a][:2])), np.linalg.norm(J[b] - J[a]) * cam["s"]))
+        if 1.6 <= st <= 3.1 and min(p[n][2] for n in ("leftHip", "rightHip", "leftShoulder", "rightShoulder")) > 0.55:
+            c = (np.array(p["leftShoulder"][:2]) + np.array(p["rightShoulder"][:2]) - np.array(p["leftHip"][:2]) - np.array(p["rightHip"][:2])) / 2
+            samples["sp_c"].append(np.linalg.norm(c))
+            samples["sp_g"].append(np.linalg.norm(G((J["leftShoulder"] + J["rightShoulder"] - J["leftHip"] - J["rightHip"]) / 2)))
+    calib = {}
+    for key in ("hip", "sh"):
+        pic = np.percentile([a for a, _ in samples[key]], 95); true = np.median([b for _, b in samples[key]])
+        calib[key] = max(1.0, pic / true)
+    calib["sp"] = float(np.median(samples["sp_c"]) / np.median(samples["sp_g"]))
+    # per-frame targets with confidence, then smoothed over time
+    ts = np.array([f["t"] for f in frames]); tgt = {k: [None] * len(frames) for k in ("hip", "sh", "sp")}
+    for i, (f, p) in enumerate(zip(frames, rows)):
+        if not p or any(n not in p for n in ("leftHip", "rightHip", "leftShoulder", "rightShoulder")): continue
+        P2 = lambda n: np.array(p[n][:2])
+        ch = min(p["leftHip"][2], p["rightHip"][2]); cs = min(p["leftShoulder"][2], p["rightShoulder"][2])
+        tgt["hip"][i] = (P2("rightHip") - P2("leftHip"), ch)
+        tgt["sh"][i] = (P2("rightShoulder") - P2("leftShoulder"), cs)
+        tgt["sp"][i] = ((P2("leftShoulder") + P2("rightShoulder") - P2("leftHip") - P2("rightHip")) / 2, min(ch, cs))
+    def smoothed(key, i):
+        num = np.zeros(2); den = 0.0
+        for j in range(max(0, i - 8), min(len(frames), i + 9)):
+            if tgt[key][j] is None: continue
+            v, c = tgt[key][j]; w = math.exp(-0.5 * ((ts[j] - ts[i]) / 0.015) ** 2) * max(0.0, c - 0.4)
+            num += w * v; den += w
+        return (num / den, den) if den > 1e-6 else (None, 0.0)
+    changed = 0; report = []
+    for i, f in enumerate(frames):
+        st = f["t"] / K + T0
+        edge = min(1.0, max(0.0, min(st - 1.55, 6.0 - st) / 0.12))
+        if edge <= 0: continue
+        J = {k: V(v) for k, v in f["joints"].items()}
+        hm = (J["leftHip"] + J["rightHip"]) / 2; sm = (J["leftShoulder"] + J["rightShoulder"]) / 2
+        Hv, Sv, Sp = J["rightHip"] - J["leftHip"], J["rightShoulder"] - J["leftShoulder"], sm - hm
+        new = {}
+        for key, cur, L, cal in (("hip", Hv, np.linalg.norm(Hv), calib["hip"]), ("sh", Sv, np.linalg.norm(Sv), calib["sh"]),
+                                 ("sp", Sp, np.linalg.norm(Sp), calib["sp"])):
+            v, den = smoothed(key, i)
+            if v is None: new[key] = cur; continue
+            w = edge * min(1.0, den / 0.6)
+            n = seg_from_picture(v, L, cur, cam, cal)
+            new[key] = unit((1 - w) * cur + w * n) * L
+        # pelvis: hip joints about the hip centre
+        J["leftHip"], J["rightHip"] = hm - new["hip"] / 2, hm + new["hip"] / 2
+        # chest: the whole upper body turns rigidly from (spine, shoulder line) to the new pair, about the hip centre
+        def basis(u, s):
+            u = unit(u); s = unit(s - u * (s @ u)); return np.column_stack([u, s, np.cross(u, s)])
+        R = basis(new["sp"], new["sh"]) @ basis(Sp, Sv).T
+        for n in UPPER:
+            if n in J: J[n] = hm + R @ (J[n] - hm)
+        # then the shoulder line itself (its cartwheel tilt too): each shoulder to its place, its arm going with it
+        smid = (J["leftShoulder"] + J["rightShoulder"]) / 2
+        for side, sg in (("left", -1), ("right", 1)):
+            d = smid + sg * new["sh"] / 2 - J[side + "Shoulder"]
+            for n in (side + "Shoulder", side + "Elbow", side + "Wrist", side + "Index"):
+                if n in J: J[n] = J[n] + d
+        for k in J: f["joints"][k] = P(J[k])
+        changed += 1
+        report.append((st, new))
+    return changed, calib
+
+
+# ---------------------------------------------------------------- muscles (how hard each group works)
+def activations(frames, kt=None):
+    """0..1 per frame, from the motion itself (ESTIMATED: kinematics, not measured muscle activity):
+    quads   — knee bent under load (holding the squat) + knee straightening fast (the drive);
+    glutes  — hip straightening fast (the drive up) + the load;
+    calves  — up on the toes while the foot is down + ankle push-off;
+    core    — trunk folding forward / uncoiling fast (contact and after);
+    chest   — the arch at the trophy stretches it open, the strike pulls it in;
+    arm     — the racket arm's grip and forearm as the hand speeds up."""
+    n = len(frames); ts = np.array([f["t"] for f in frames]); dt = np.gradient(ts)
+    J = [{k: V(v) for k, v in f["joints"].items()} for f in frames]
+    floor = min(min(j["leftToe"][1], j["rightToe"][1]) for j in J)
+    def ser(fn): return np.array([fn(j) for j in J])
+    out = {}
+    for s in ("left", "right"):
+        knee = ser(lambda j: 180 - inside_angle(j[s + "Hip"], j[s + "Knee"], j[s + "Ankle"]))           # flexion
+        hipf = ser(lambda j: 180 - inside_angle((j["leftShoulder"] + j["rightShoulder"]) / 2, j[s + "Hip"], j[s + "Knee"]))
+        down = ser(lambda j: 1.0 if min(j[s + "Toe"][1], j[s + "Heel"][1]) < floor + 0.04 else 0.0)
+        toes = ser(lambda j: np.clip((j[s + "Heel"][1] - j[s + "Toe"][1] + 0.01) / 0.05, 0, 1))
+        dk = -np.gradient(knee) / dt; dh = -np.gradient(hipf) / dt                                      # + = straightening
+        out["quad_" + s] = np.clip(0.15 + down * np.clip(knee / 90, 0, 1) * 0.55 + np.clip(dk / 700, 0, 1) * 0.6, 0, 1)
+        out["glute_" + s] = np.clip(0.1 + down * np.clip(hipf / 80, 0, 1) * 0.35 + np.clip(dh / 600, 0, 1) * 0.7, 0, 1)
+        out["calf_" + s] = np.clip(0.1 + down * toes * 0.6 + np.clip(-np.gradient(toes) / dt / 8, 0, 1) * 0.5, 0, 1)
+    lean = ser(lambda j: math.degrees(math.atan2(((j["leftShoulder"] + j["rightShoulder"]) / 2 - (j["leftHip"] + j["rightHip"]) / 2)[2],
+                                                 ((j["leftShoulder"] + j["rightShoulder"]) / 2 - (j["leftHip"] + j["rightHip"]) / 2)[1])))
+    twist = ser(lambda j: math.degrees(math.atan2(*(lambda a, b: (a[0] * b[2] - a[2] * b[0], a[0] * b[0] + a[2] * b[2]))(
+        j["rightShoulder"] - j["leftShoulder"], j["rightHip"] - j["leftHip"]))))
+    out["core"] = np.clip(0.15 + np.clip(np.gradient(lean) / dt / 250, 0, 1) * 0.6 + np.clip(np.abs(np.gradient(twist) / dt) / 500, 0, 1) * 0.4, 0, 1)
+    wr = ser(lambda j: j["rightWrist"]); speed = np.linalg.norm(np.gradient(wr, axis=0), axis=1) / dt
+    # racket drop: the hand falls behind the back and the elbow points up, which stretches the chest open
+    out["chest_open"] = ser(lambda j: float(np.clip(((j["leftShoulder"][2] + j["rightShoulder"][2]) / 2 - j["rightWrist"][2]) / 0.12, 0, 1)
+                                            * np.clip((j["rightElbow"][1] - j["rightShoulder"][1] + 0.02) / 0.08, 0, 1)))
+    out["chest"] = np.clip(0.1 + speed / max(speed.max(), 1e-6) * 0.9, 0, 1)
+    out["arm"] = np.clip(0.2 + speed / max(speed.max(), 1e-6) * 0.8, 0, 1)
+    # smooth (muscles do not switch in one frame)
+    for k, v in out.items():
+        sm = np.array([np.average(v[max(0, i - 4):i + 5], weights=np.exp(-0.5 * ((ts[max(0, i - 4):i + 5] - ts[i]) / 0.012) ** 2)) for i in range(n)])
+        out[k] = sm
+    for i, f in enumerate(frames): f["act"] = {k: round(float(v[i]), 2) for k, v in out.items()}
+    return {k: (round(float(v.min()), 2), round(float(v.max()), 2)) for k, v in out.items()}
+
+
 # ---------------------------------------------------------------- build
 def recompute_derived(f):
     """Same derived joints as capture_alcaraz_poetry.py derive()."""
@@ -402,7 +544,11 @@ def recompute_derived(f):
 def build():
     D = json.load(open(TRACKS)); m = load_poetry(); frames = m["frames"]
     kt = knee_targets(D)
-    cam0 = fit_camera(frames, D)                        # camera from the capture as it is, to aim the knees
+    cam0 = fit_camera(frames, D)                        # camera from the capture as it is
+    nt, calib = fix_torso(frames, D, cam0)              # pelvis, chest and spine first; the legs then fit under them
+    print(f"torso (hips, shoulders, spine) fitted on {nt} frames; calibration {dict((k, round(v, 2)) for k, v in calib.items())}")
+    for f in frames: recompute_derived(f)
+    cam0 = fit_camera(frames, D)
     rep = fix_legs(frames, kt, D, cam0)
     print("legs  src   L want/now   R want/now")
     for r in rep[::14]: print(f"  {r[0]:.2f}   {r[1]:5.0f}/{r[2]:4.0f}   {r[3]:5.0f}/{r[4]:4.0f}")
@@ -411,7 +557,19 @@ def build():
           f"depth axis {np.round(cam['r3'], 2)}")
     print(f"arms rebuilt on {fix_arms(frames, D, cam)} frames")
     for f in frames: recompute_derived(f)
+    print("muscle activation ranges", activations(frames))
     first = dict(m)
+    # CONTACT read off Ryan's clip: the racket hangs behind the back until ~5.2 s (source clock), swings up, and the
+    # arm is straight up with the racket over it at frames 218-220 (5.40-5.46 s). The poetry capture's 5.08 s was the
+    # end of the racket drop.
+    first["events"] = dict(m["events"]); first["events"]["contact"] = round((CONTACT_SRC_CLIP - T0) * K, 4)
+    first["timingNote"] = (m["timingNote"] + f" Contact moved to source {CONTACT_SRC_CLIP} s (read off Ryan's leg-overlay "
+                           "clip: arm straight up, racket over it), so toss release to contact is now about "
+                           f"{(CONTACT_SRC_CLIP - T0) * K - m['events']['tossRelease']:.2f} s.")
+    cf = min(frames, key=lambda f: abs(f["t"] - first["events"]["contact"]))
+    first["hittingWristHeightM"] = round(cf["joints"]["rightWrist"]["y"] * 1.83, 3)
+    first["estimatedContactHeightM"] = round(first["hittingWristHeightM"] + 0.55, 3)
+    print(f"contact at game t {first['events']['contact']}: racket wrist {first['hittingWristHeightM']} m, contact ~{first['estimatedContactHeightM']} m")
     first["id"] = "alcaraz_poetry_legs_tracked_first"
     first["source"] = m["source"] + "; legs and arms re-fitted to Ryan's leg-overlay clip (" + CLIP + ")"
     first["note"] = (m["note"] + " Legs and arms re-fitted (alcaraz_legs_arms.py): each knee follows the overlay's "
