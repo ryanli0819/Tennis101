@@ -1766,7 +1766,8 @@ function say(i, text) {
 /* =====================================================================
    SERVE MOTIONS — every pro with a motion file serves his own way.
    src/serve/motion/roster-serves.js sets SERVE_MOTIONS[id] = { first, second } for the roster.
-   Alcaraz's first serve is only src/serve/motion/alcaraz-poetry.js. The roster does not fill that slot.
+   Alcaraz's first and second serves are only src/serve/motion/alcaraz-tracked.js (alcaraz-poetry.js re-fitted to Ryan's
+   leg-overlay clip: knee angles, arm paths). The roster does not fill those slots.
    Joints are body heights ({x, y, z} or the older [x, up]).
    Speed, spin and serve type stay the game's own numbers: the footage did not measure them.
    ===================================================================== */
@@ -2670,7 +2671,9 @@ resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
 <script src="src/lockerroom/lockerroom.js?v=0.11.0"></script>
 <script src="src/start/flow.js?v=0.11.0"></script>
 <!-- Captured serves. Roster loads first and does not set Alcaraz's first serve.
-     alcaraz-poetry.js is the only writer of SERVE_MOTIONS.alcaraz.first. -->
+     alcaraz-poetry.js is the input; alcaraz-tracked.js (generated from it and Ryan's leg-overlay clip) loads last and
+     writes SERVE_MOTIONS.alcaraz.first and .second. -->
 <script src="src/serve/motion/roster-serves.js?v=0.12.0"></script>
 <script src="src/serve/motion/alcaraz-poetry.js?v=0.13.0"></script>
+<script src="src/serve/motion/alcaraz-tracked.js?v=0.13.1"></script>
 <script>StartFlow.open();</script>
