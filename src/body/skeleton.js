@@ -661,6 +661,7 @@
      player's own left/right before solving and re-applied after, so handedness is exactly the game's.
      Joints without a bone (ears, heels, head, neck, chest, pelvis, root, hands) move with their parent. */
   const _state = {};
+  const CORR_RATE_M_S = 1.5;   // GAME-DESIGN: fastest change of a skeleton correction (see STEADY CORRECTIONS in fitWorld)
   function fitWorld(i, player, p, W, mo, o = {}) {   // o: { t: time for flipAt (default mo.t), stateless: true = no continuity state }
     const sk = player && skeletonFor(player.id);
     if (!sk || !sk.limits || !W || !W.leftHip || !W.rightHip || !W.leftShoulder || !W.rightShoulder) return null;
@@ -674,7 +675,29 @@
     const mode = mo && mo.m && mo.m.measuredDepth ? "direction" : "image";
     const r = solveFrame(cap, sk, { mode, groundY: 0, prev: st.prev, t, hand: (mo && mo.m && mo.m.hand) || (player.lefty ? "L" : "R") }); r.t = t; st.prev = r;
     const delta = {}, toW = q => ({ x: p.x + q[0] * sR, y: p.y + q[2] * fwd, z: q[1] });
-    for (const n in r.joints) { const w = toW(r.joints[n]), o = W[n]; if (!o) continue; delta[n] = { x: w.x - o.x, y: w.y - o.y, z: w.z - o.z }; o.x = w.x; o.y = w.y; o.z = w.z; }
+    /* STEADY CORRECTIONS (Ryan, Nov 19: "the serve is still shaking"). The solve can switch between two answers from one
+       frame to the next (a forearm's depth sign, a twist clamp switching on at 20° of elbow flexion) and the joint jumped
+       up to 0.45 m in 1/60 s. The motion files are now smooth, so how far the skeleton moves each joint away from them
+       (the correction) may change by at most CORR_RATE_M_S; a new answer slides in over a few frames instead of popping.
+       Bones can be a few cm off their fixed length while it slides. Stateless solves (the toss aim) are not limited. */
+    const lim = !o.stateless && st.off && st.offT != null && t > st.offT && t - st.offT < 0.1 ? CORR_RATE_M_S * (t - st.offT) : null;
+    const off = {};
+    for (const n in r.joints) { const w = toW(r.joints[n]), o = W[n]; if (!o) continue;
+      let d = { x: w.x - o.x, y: w.y - o.y, z: w.z - o.z }; const q = lim != null && st.off[n];
+      if (q) { const ex = d.x - q.x, ey = d.y - q.y, ez = d.z - q.z, el = Math.hypot(ex, ey, ez);
+        if (el > lim) { const k = lim / el; d = { x: q.x + ex * k, y: q.y + ey * k, z: q.z + ez * k }; } }
+      off[n] = d; delta[n] = d; o.x += d.x; o.y += d.y; o.z += d.z; }
+    if (!o.stateless) { st.off = off; st.offT = t; }
+    if (lim != null) {   // the slide keeps directions, so put every limb bone back to its fixed length (parent first)
+      const J = r.joints, L3 = (a, b) => Math.hypot(J[b][0] - J[a][0], J[b][1] - J[a][1], J[b][2] - J[a][2]);
+      for (const [a, b] of [["leftShoulder", "leftElbow"], ["leftElbow", "leftWrist"], ["leftWrist", "leftIndex"], ["rightShoulder", "rightElbow"], ["rightElbow", "rightWrist"], ["rightWrist", "rightIndex"],
+                            ["leftHip", "leftKnee"], ["leftKnee", "leftAnkle"], ["rightHip", "rightKnee"], ["rightKnee", "rightAnkle"]]) {
+        const A = W[a], B = W[b]; if (!A || !B || !J[a] || !J[b]) continue;
+        const dx = B.x - A.x, dy = B.y - A.y, dz = B.z - A.z, l = Math.hypot(dx, dy, dz); if (l < 1e-6) continue;
+        const k = L3(a, b) / l, nx = A.x + dx * k, ny = A.y + dy * k, nz = A.z + dz * k, m = { x: nx - B.x, y: ny - B.y, z: nz - B.z };
+        B.x = nx; B.y = ny; B.z = nz; if (delta[b]) { delta[b].x += m.x; delta[b].y += m.y; delta[b].z += m.z; }
+      }
+    }
     const follow = { leftEar: "nose", rightEar: "nose", head: "nose", leftEye: "nose", rightEye: "nose", leftHeel: "leftAnkle", rightHeel: "rightAnkle",
       leftHand: "leftWrist", rightHand: "rightWrist", neck: "shoulderMid", chest: "shoulderMid" };
     const smOld = W._smOld;

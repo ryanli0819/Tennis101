@@ -523,7 +523,7 @@ def activations(frames, kt=None):
     wr = ser(lambda j: j["rightWrist"]); speed = np.linalg.norm(np.gradient(wr, axis=0), axis=1) / dt
     # racket drop: the hand falls behind the back and the elbow points up, which stretches the chest open
     out["chest_open"] = ser(lambda j: float(np.clip(((j["leftShoulder"][2] + j["rightShoulder"][2]) / 2 - j["rightWrist"][2]) / 0.12, 0, 1)
-                                            * np.clip((j["rightElbow"][1] - j["rightShoulder"][1] + 0.02) / 0.08, 0, 1)))
+                                            * np.clip((j["rightElbow"][1] - j["rightShoulder"][1] + 0.05) / 0.08, 0, 1)))
     out["chest"] = np.clip(0.1 + speed / max(speed.max(), 1e-6) * 0.9, 0, 1)
     out["arm"] = np.clip(0.2 + speed / max(speed.max(), 1e-6) * 0.8, 0, 1)
     # smooth (muscles do not switch in one frame)
@@ -541,6 +541,27 @@ def recompute_derived(f):
     J["neck"] = P(neck); J["pelvis"] = P(pel); J["root"] = P(pel); J["chest"] = P(0.58 * neck + 0.42 * pel); J["head"] = dict(J["nose"])
 
 
+def steady(frames, contact):
+    """Ryan, Nov 19 ("every player's serve shakes"): the per-frame torso and arm fits left 5-30 cm frame-to-frame jumps
+    in the head and shoulders. Local-linear Gaussian smoothing in time: 30 ms for the body, 12 ms for the racket arm
+    within 0.12 s of contact (the swing keeps its speed). Bone lengths are restored by the game's skeleton fit."""
+    t = np.array([f["t"] for f in frames]); names = list(frames[0]["joints"].keys())
+    X = np.array([[V(f["joints"][n]) for n in names] for f in frames])
+    out = X.copy()
+    for k, n in enumerate(names):
+        swing = n in ("rightElbow", "rightWrist", "rightIndex", "rightHand")
+        for q, tt in enumerate(t):
+            sg = 0.012 + (0.030 - 0.012) * min(1, abs(tt - contact) / 0.12) if swing else 0.030
+            w = np.exp(-0.5 * ((t - tt) / sg) ** 2); d = t - tt
+            S0, S1, S2 = w.sum(), (w * d).sum(), (w * d * d).sum(); det = S0 * S2 - S1 * S1
+            a = (w[:, None] * X[:, k]).sum(0); b = ((w * d)[:, None] * X[:, k]).sum(0)
+            out[q, k] = (S2 * a - S1 * b) / det if det > 1e-12 else a / S0
+    for q, f in enumerate(frames):
+        for k, n in enumerate(names): f["joints"][n] = P(out[q, k])
+    acc = lambda Y: float(np.linalg.norm(Y[2:] - 2 * Y[1:-1] + Y[:-2], axis=2).max(1).mean())
+    return round(acc(X) * 183, 2), round(acc(out) * 183, 2)
+
+
 def build():
     D = json.load(open(TRACKS)); m = load_poetry(); frames = m["frames"]
     kt = knee_targets(D)
@@ -556,6 +577,8 @@ def build():
     print(f"camera: scale {cam['s']:.0f} px per body height, fit rms {cam['rms_px']:.1f} px on {cam['n']} points, "
           f"depth axis {np.round(cam['r3'], 2)}")
     print(f"arms rebuilt on {fix_arms(frames, D, cam)} frames")
+    for f in frames: recompute_derived(f)
+    print("steady: worst joint jump per frame (cm) before/after", steady(frames, (CONTACT_SRC_CLIP - T0) * K))
     for f in frames: recompute_derived(f)
     print("muscle activation ranges", activations(frames))
     first = dict(m)
