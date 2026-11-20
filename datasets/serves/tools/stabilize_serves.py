@@ -336,6 +336,49 @@ def foot_slide(tq, J):
 
 
 # ---------------------------------------------------------------- build
+def facing_fix(sv, hand):
+    """Ryan, Nov 19: from the user's end most pros served "with the wrong hand". Most broadcast clips store the body
+    turned half round (facing away from the net): for a right-hander standing side-on, seen from behind, the toss arm
+    should reach out to his right (+x, he faces his right side) and the toss-side shoulder and foot lead toward the
+    net (+z). The toss arm's side before the trophy decides x; the toss shoulder and toss foot leading decide z. Both wrong =
+    turned 180° about the vertical (x → −x, z → −z), the usual case; only one = that axis alone is flipped.
+    The racket stays in the hand the roster gives him. Returns (rows, kind, votes)."""
+    t, J = rows_to_arrays(sv["rows"]); E = sv["events"]
+    hit = "left" if hand == "L" else "right"; toss = "right" if hit == "left" else "left"; want = 1 if hand == "R" else -1
+    pel = (J[:, IX["leftHip"]] + J[:, IX["rightHip"]]) / 2
+    m = (t >= E["start"]) & (t <= E["trophy"])
+    if m.sum() < 2:
+        m = t <= E["trophy"]
+    # x as the game shows it: anatomize() squares the shoulders (toss shoulder on his left) and moves each arm with its
+    # shoulder, so the toss hand lands at (wrist − its shoulder) + the shoulder's new place. Window: start → toss.
+    mx = (t >= E["start"]) & (t <= E["tossRelease"])
+    if mx.sum() < 2:
+        mx = m
+    mid = (J[:, IX["leftShoulder"]] + J[:, IX["rightShoulder"]]) / 2
+    seen = J[mx, IX[toss + "Wrist"], 0] - pel[mx, 0] - (J[mx, IX[toss + "Shoulder"], 0] - mid[mx, 0])
+    vals = [want * seen.mean(),
+            (J[m, IX[toss + "Shoulder"], 2] - J[m, IX[hit + "Shoulder"], 2]).mean(),
+            (J[m, IX[toss + "Ankle"], 2] - J[m, IX[hit + "Ankle"], 2]).mean()]
+    flipx = vals[0] < 0                           # what the user sees: the toss arm on the wrong side
+    flipz = (vals[1] + vals[2]) / 2 < -0.03       # depth: the racket side leading toward the net
+    rows = sv["rows"].copy()
+    for k in range(len(N)):
+        if flipz: rows[:, 3 + 3 * k] *= -1
+    return rows, flipz, [round(float(v), 2) for v in vals]
+
+
+def seen_toss_side(tq, S, E, hand):
+    """Where the user sees the toss hand (+ = correct side), measured on the finished serve the way the game draws it
+    (anatomize squares the shoulders and moves each arm with its shoulder). Window: start → toss release."""
+    hit = "left" if hand == "L" else "right"; toss = "right" if hit == "left" else "left"; want = 1 if hand == "R" else -1
+    m = (tq >= E["start"]) & (tq <= E["tossRelease"])
+    if m.sum() < 2:
+        m = tq <= E["trophy"]
+    pel = (S[m, IX["leftHip"]] + S[m, IX["rightHip"]]) / 2
+    mid = (S[m, IX["leftShoulder"]] + S[m, IX["rightShoulder"]]) / 2
+    return float(want * (S[m, IX[toss + "Wrist"], 0] - pel[:, 0] - (S[m, IX[toss + "Shoulder"], 0] - mid[:, 0])).mean())
+
+
 def stabilize(t, J, events, hand):
     tq, S = smooth_all(t, J, events["contact"], hand)
     S, L = fix_bones(S, tq)
@@ -356,23 +399,30 @@ def main():
             continue
         jobs = [("first", first)] + ([("second", second)] if second else [])
         for role, sv in jobs:
-            t0, J0 = rows_to_arrays(sv["rows"])
-            ev, src, hand = dict(sv["events"]), sv["id"], p["hand"]
+            hand = p["hand"]
+            rows, turned, votes = facing_fix(sv, hand)
+            sv = dict(sv, rows=rows)
+            t0, J0 = rows_to_arrays(rows)
+            ev, src = dict(sv["events"]), sv["id"]
             if p["id"] == "sinner":
                 clip = clips["first" if role == "first" else "second"]
                 t0, J0 = sinner_from_clip(clip, sv)
                 ev, src = dict(clip["events"]), clip["source"] + " + depth from " + sv["id"]
             before = (bone_spread(J0), jitter(t0, J0), foot_slide(t0, J0))
             tq, S, L, locks = stabilize(t0, J0, ev, hand)
+            flipx = seen_toss_side(tq, S, ev, hand) < 0
+            if flipx:  # the user would see the toss arm on the wrong side: turn x round (bones and pinned feet are unchanged)
+                S = S.copy(); S[:, :, 0] *= -1
+            turned = "turned" if flipx and turned else "sideways" if flipx else "depth" if turned else None
             after = (bone_spread(S), jitter(tq, S, t0), foot_slide(tq, S))
             out.setdefault(p["id"], {})[role] = {
                 "id": sv["id"], "source": src, "events": ev, "hz": HZ, "t0": round(float(tq[0]), 4),
-                "bonesM": {g: round(v * 1, 4) for g, v in L.items()}, "planted": locks,
+                "bonesM": {g: round(v * 1, 4) for g, v in L.items()}, "planted": locks, "turned": turned, "facingVotes": votes,
                 "before": dict(zip(("boneSpreadPct", "jitterPct", "footSlidePct"), before)),
                 "after": dict(zip(("boneSpreadPct", "jitterPct", "footSlidePct"), after)),
                 "rows": [[round(float(x), 4) for x in fr.reshape(-1)] for fr in S],
             }
-            report.append(f"{p['id']:18s} {role:6s} bones ±{before[0]}% → ±{after[0]}%   jitter {before[1]} → {after[1]}   foot slide {before[2]} → {after[2]}   ({len(t0)} → {len(tq)} frames)")
+            report.append(f"{p['id']:18s} {role:6s} {turned or 'kept'} {votes} bones ±{before[0]}% → ±{after[0]}%   jitter {before[1]} → {after[1]}   foot slide {before[2]} → {after[2]}   ({len(t0)} → {len(tq)} frames)")
             if not second:  # only one captured serve: the roster reuses it as the second serve, so reuse the steady one
                 out[p["id"]]["second"] = dict(out[p["id"]]["first"], reused=True)
     hdr = ("/* Generated by datasets/serves/tools/stabilize_serves.py — do not edit by hand.\n"
@@ -391,7 +441,7 @@ def main():
       Object.assign(joints, { neck, pelvis, root: pelvis, chest: MID(neck, pelvis, 0.42), head: joints.nose });
       return { t: +(s.t0 + k / s.hz).toFixed(4), joints };
     });
-    slot[role] = Object.assign({}, base, { role, reused: !!s.reused, events: s.events, frames, stabilized: { source: s.source, bonesBodyHeights: s.bonesM, planted: s.planted, before: s.before, after: s.after } });
+    slot[role] = Object.assign({}, base, { role, reused: !!s.reused, events: s.events, frames, stabilized: { source: s.source, turned: s.turned, facingVotes: s.facingVotes, bonesBodyHeights: s.bonesM, planted: s.planted, before: s.before, after: s.after } });
     if (s.source !== base.source) slot[role].source = s.source;
     if (!slot[role].hand) slot[role].hand = "R";
   }
