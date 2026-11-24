@@ -1967,11 +1967,60 @@ function anatomize(i, W, t) {
     for (const n of ["nose", "head", "leftEar", "rightEar", "leftEye", "rightEye"]) if (W[n]) W[n].z += lift;
   }
 }
+/* JUMP TO THE HITTING POINT (Ryan, Nov 24: "for all tall players, make sure the hitting point is high, while the short
+   players has to jump up to hit that point, taller players doesn't need as much vertical"). Every server aims at the ball
+   at about SERVE_REACH_M (GAME-DESIGN). His captured reach at contact (racket hand + racket) is measured once per motion;
+   the gap between his own reach (arm straight up: ARM_UP_REACH × height + racket) and that point is closed with a real jump, a ballistic arc that peaks at contact (z = lift − g·dt²/2), so a tall pro barely
+   leaves the ground and a short one springs up. The motion runs until he has landed. m.travel.fwd (metres, Sinner)
+   carries him forward into the court from the trophy to the landing; he stays where he lands. */
+const SERVE_REACH_M = 3.15, SERVE_JUMP_MIN = 0.04, SERVE_JUMP_MAX = 0.42, ARM_UP_REACH = 1.25;   // GAME-DESIGN: hitting point; racket wrist with the arm straight up ≈ 1.25 × height
+/* STRAIGHT ARM AT CONTACT: a server meets the ball with the hitting arm straight up (slightly forward and out to his
+   side). Most broadcast clips caught the arm still bent at the marked contact, so a 1.98 m pro "reached" 2.3 m. Within
+   0.14 s of contact the upper arm and forearm turn toward that line (bones keep their length), so the reach comes from
+   his real size: shoulder height + arm + racket. GAME-DESIGN directions. */
+function straightArm(i, W, m, t) {
+  const dt = Math.abs(t - m.events.contact); if (dt >= 0.14) return;
+  const u0 = dt / 0.14, w = 1 - u0 * u0 * (3 - 2 * u0), hit = m.hand === "L" ? "left" : "right";
+  const Sh = W[hit + "Shoulder"], El = W[hit + "Elbow"], Wr = W[hit + "Wrist"]; if (!Sh || !El || !Wr) return;
+  const near = PLAYERS[i].side === "near" ? 1 : -1, out = near * (m.hand === "L" ? -1 : 1);
+  const up = V3.norm({ x: 0.12 * out, y: 0.14 * near, z: 1 });
+  const turn = (a, b) => { const L = Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z) || 1, d = { x: (b.x - a.x) / L, y: (b.y - a.y) / L, z: (b.z - a.z) / L };
+    const n = V3.norm({ x: d.x + (up.x - d.x) * w, y: d.y + (up.y - d.y) * w, z: d.z + (up.z - d.z) * w }); return { L, n }; };
+  const A = turn(Sh, El), B = turn(El, Wr);
+  const nEl = { x: Sh.x + A.n.x * A.L, y: Sh.y + A.n.y * A.L, z: Sh.z + A.n.z * A.L };
+  const nWr = { x: nEl.x + B.n.x * B.L, y: nEl.y + B.n.y * B.L, z: nEl.z + B.n.z * B.L };
+  const dW = { x: nWr.x - Wr.x, y: nWr.y - Wr.y, z: nWr.z - Wr.z };
+  Object.assign(El, nEl); Object.assign(Wr, nWr);
+  for (const n of ["Index", "Hand"]) { const v = W[hit + n]; if (v) { v.x += dW.x; v.y += dW.y; v.z += dW.z; } }
+}
+function serveJump(i, m) {
+  if (m._jump && m._jump.i === PLAYERS[i].id) return m._jump;
+  const E = m.events, hit = m.hand === "L" ? "left" : "right";
+  const C = poseToWorld(i, { x: 0, y: 0, motion: { m, t: E.contact, flip: 1 } }, motionPose(m, E.contact), E.contact);
+  straightArm(i, C, m, E.contact);
+  const reach = (C[hit + "Wrist"] ? C[hit + "Wrist"].z : PLAYERS[i].heightM) + RACKET_M * 0.9;   // this clip's reach (reported)
+  const bodyReach = ARM_UP_REACH * PLAYERS[i].heightM + RACKET_M * 0.9;   // his size decides the jump, not the clip's crouch
+  const lift = clamp(SERVE_REACH_M - bodyReach, SERVE_JUMP_MIN, SERVE_JUMP_MAX), air = Math.sqrt(2 * lift / 9.81);
+  return (m._jump = { i: PLAYERS[i].id, reach, lift, air, end: Math.max(E.finish, E.contact + air + 0.06), fwd: (m.travel && m.travel.fwd) || 0 });
+}
+function serveTravel(i, m, t) {
+  const J = serveJump(i, m), E = m.events, dt = t - E.contact;
+  const up = Math.abs(dt) < J.air ? Math.max(0, J.lift - 0.5 * 9.81 * dt * dt) : 0;
+  const u = clamp((t - E.trophy) / ((J.end - E.trophy) || 1), 0, 1);
+  return { up, fwd: J.fwd * u * u * (3 - 2 * u) };
+}
+function applyTravel(i, W, m, t) {
+  straightArm(i, W, m, t);
+  const tr = serveTravel(i, m, t), dir = PLAYERS[i].side === "near" ? 1 : -1;
+  for (const n in W) { const v = W[n]; if (v && typeof v.z === "number") { v.z += tr.up; v.y += tr.fwd * dir; } }
+  return tr;
+}
 function stepMotion(i, dt) {
   const mo = pos[i].motion, m = mo.m, E = m.events, bouncesEnd = E.set ?? E.start;
   const toss = m.hand === "L" ? "right" : "left", hit = m.hand === "L" ? "left" : "right";   // lefties toss right, hit left
   mo.t += dt;
   const W = mo.world = poseToWorld(i, pos[i], motionPose(m, mo.t));
+  applyTravel(i, W, m, mo.t);                             // the jump to the hitting point (and Sinner's step into the court)
   W._act = motionAct(m, mo.t);                            // how hard each muscle group works now (frames' "act", if any)
   const sv = rally && rally.serve;
   sideOn(i, W, m, mo.t);
@@ -2004,6 +2053,7 @@ function stepMotion(i, dt) {
     } else {
       if (!sv.release) {                                 // solve the toss once: release point → contact point
         const C = poseToWorld(i, pos[i], motionPose(m, E.contact), E.contact);
+        applyTravel(i, C, m, E.contact);
         anatomize(i, C, E.contact);                      // aim the toss at the corrected racket hand
         if (window.BodySkeleton) BodySkeleton.fitWorld(i, PLAYERS[i], pos[i], C, mo, { t: E.contact, stateless: true });   // same skeleton as drawn
         const T = Math.max(0.2, E.contact - E.tossRelease);
@@ -2018,7 +2068,10 @@ function stepMotion(i, dt) {
       if (mo.t >= E.contact) { rally.serve = null; hitBall(i, true); }   // contact: the serve leaves the racket
     }
   }
-  if (mo.t >= E.finish) pos[i].motion = null;           // landing done: back to the normal sprite
+  if (mo.t >= serveJump(i, m).end) {                     // landed: back to the normal sprite, where he landed
+    const f = serveJump(i, m).fwd; if (f) pos[i].y += f * (PLAYERS[i].side === "near" ? 1 : -1);
+    pos[i].motion = null;
+  }
 }
 
 /* =====================================================================
@@ -2069,6 +2122,7 @@ function aiAim(bx, second) {
    placement (within 45 cm of the T, the sideline or the service line); it's far likelier when the
    receiver is on the wrong side. Serve skill adds a constant step per point; second serves rarely ace. */
 let ACE_CHANCE = { chance: 0, perfect: false, wrongSide: false };
+const SERVE_SIDESPIN = { nadal: 2.2 };   // GAME-DESIGN: how much harder than a normal serve the ball bends sideways
 function planServe(server, no) {
   const B = BODY[server], bx = serviceBox(server), second = no === 2, r = pos[1 - server];
   const target = server === 0 ? { ...aim } : aiAim(bx, second);
@@ -2193,9 +2247,19 @@ function planShot(hitter, isServe, q, out, sv = null, type = "drive") {
   const toWide = Math.sign(bx - from.x) || 1;
   const arc = isServe ? (sv.no === 2 ? 2.7 : 1.25) : slice ? 2.4 : 6;   // slice: low over the net (backspin)
   const curve = isServe ? (sv.no === 2 ? -toWide * rand(0.2, 0.35) : toWide * rand(0.35, 0.6)) : slice ? toWide * rand(0.2, 0.45) : rand(-0.35, 0.35);
-  const kick = isServe ? (sv.no === 2 ? { up: 1.45, side: -toWide * 0.45 } : { up: 0.8, side: toWide * 0.25 })
+  let kick = isServe ? (sv.no === 2 ? { up: 1.45, side: -toWide * 0.45 } : { up: 0.8, side: toWide * 0.25 })
              : slice ? { up: 0.4, side: 0 } : { up: 1, side: 0 };   // backspin: the slice stays low and stops
-  return { hitter, recv, from, bounce: { x: bx, y: by }, end: { x: cx, y: cy, z: slice ? 0.45 : 1.0 }, isServe, serve: sv, arc, curve, kick, type,
+  /* SIDESPIN SERVERS (Ryan, Nov 24: Nadal "more spin, so make sure to add lots of side spin to his serves"). A slice
+     bends the way the server's hand sweeps: a left-hander's swings toward his own right (away from a right-handed
+     receiver on the ad side). SERVE_SIDESPIN[id] multiplies the bend in flight and the skid after the bounce (GAME-DESIGN). */
+  const spinK = isServe ? (SERVE_SIDESPIN[PLAYERS[hitter].id] || 0) : 0;
+  let curveS = curve;
+  if (spinK) {
+    const handDir = (handed(PLAYERS[hitter]) ? 1 : -1) * (PLAYERS[hitter].side === "near" ? 1 : -1);   // + = his right
+    curveS = handDir * Math.abs(curve) * spinK;
+    kick = { up: kick.up * (sv.no === 2 ? 1 : 0.85), side: handDir * Math.max(0.35, Math.abs(kick.side)) * spinK };
+  }
+  return { hitter, recv, from, bounce: { x: bx, y: by }, end: { x: cx, y: cy, z: slice ? 0.45 : 1.0 }, isServe, serve: sv, arc, curve: curveS, kick, type,
            t1: dist / speed, t2: (0.42 - 0.08 * q) / SURF().pace * (slice ? 1.5 : 1), t: 0, out, bounced: false, prevD: Infinity, prevV: Infinity };
 }
 
@@ -2714,7 +2778,7 @@ resize(); resetPositions(); renderScore(); requestAnimationFrame(frame);
      writes SERVE_MOTIONS.alcaraz.first and .second. -->
 <script src="src/serve/motion/roster-serves.js?v=0.12.0"></script>
 <!-- Steady serves (Ryan, Nov 19): every roster pro but Alcaraz, fixed bone lengths, smoothed, planted feet pinned; Sinner from his own clips. Generated by datasets/serves/tools/stabilize_serves.py. -->
-<script src="src/serve/motion/serves-stable.js?v=0.14.7"></script>
+<script src="src/serve/motion/serves-stable.js?v=0.15.0"></script>
 <script src="src/serve/motion/alcaraz-poetry.js?v=0.13.0"></script>
 <script src="src/serve/motion/alcaraz-tracked.js?v=0.14.1"></script>
 <script>StartFlow.open();</script>

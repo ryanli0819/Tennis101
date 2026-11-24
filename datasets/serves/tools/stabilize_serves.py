@@ -379,6 +379,77 @@ def seen_toss_side(tq, S, E, hand):
     return float(want * (S[m, IX[toss + "Wrist"], 0] - pel[:, 0] - (S[m, IX[toss + "Shoulder"], 0] - mid[:, 0])).mean())
 
 
+def contact_at_peak(tq, S, ev, hand):
+    """Ryan, Nov 24: hitting points were far too low (some clips marked contact 1.5-1.7 m up). Contact is where the
+    racket hand is highest, searched within 0.2 s of the clip's mark and after the toss; finish is kept after it."""
+    hit = "left" if hand == "L" else "right"
+    c0 = ev["contact"]
+    m = (tq >= max(ev["tossRelease"] + 0.1, c0 - 0.2)) & (tq <= c0 + 0.2)
+    if m.sum() < 2:
+        return ev, 0.0
+    c = float(tq[m][np.argmax(S[m, IX[hit + "Wrist"], 1])])
+    ev = dict(ev, contact=round(c, 4))
+    ev["finish"] = round(max(ev["finish"], c + 0.05), 4)
+    ev["trophy"] = round(min(ev["trophy"], c - 0.08), 4)
+    return ev, round(c - c0, 3)
+
+
+def rotate_to(u, v, w):
+    """Unit vector a fraction w of the way from u to v (slerp)."""
+    d = float(np.clip(np.dot(u, v), -1, 1)); a = math.acos(d)
+    if a < 1e-6:
+        return u
+    return (math.sin((1 - w) * a) * u + math.sin(w * a) * v) / math.sin(a)
+
+
+def sinner_style(tq, S, ev, hand):
+    """GAME-DESIGN from Ryan's notes on Sinner (Nov 24), on top of his own clip:
+    1. Hands from the bottom: after the bounces both arms drop and hang (toss hand by the front thigh, racket hand by
+       the back thigh), then the toss arm sweeps up from there. 0.4 s is added before the clip's start for the drop;
+       the routine ends there (events.set). Bones keep their length (directions blend).
+    2. Feet: the front foot points toward the net post (45° between his front and the net), the back foot along the
+       baseline, so from behind both shoes show their length; after contact the front foot turns to the net for the
+       landing. Foot and heel lengths are his own.
+    Returns the new times, frames and events; the forward jump is the game's (travel.fwd)."""
+    face = 1.0 if hand == "R" else -1.0
+    toss, hit = ("left", "right") if hand == "R" else ("right", "left")
+    pre = int(round(0.4 * HZ))
+    tq = np.concatenate([tq[0] - (np.arange(pre, 0, -1) / HZ), tq])
+    S = np.concatenate([np.repeat(S[:1], pre, 0), S])
+    start = ev["start"]
+    ev = dict(ev, set=round(start - 0.4, 4))
+    w_down = lambda t: float(np.clip((t - (start - 0.4)) / 0.3, 0, 1))
+    def w_low(t, back):
+        if t < start - 0.1: return w_down(t) ** 2 * (3 - 2 * w_down(t))
+        u = float(np.clip((t - (start - 0.1)) / back, 0, 1)); return 1 - u * u * (3 - 2 * u)
+    low_up = {toss: unit(np.array([0.22 * face, -1.0, 0.12])), hit: unit(np.array([0.05 * face, -1.0, -0.10]))}
+    low_fo = {toss: unit(np.array([0.40 * face, -1.0, 0.25])), hit: unit(np.array([0.10 * face, -1.0, -0.05]))}
+    back = {toss: 0.22, hit: 0.35}
+    for f, t in enumerate(tq):
+        for sd in (toss, hit):
+            w = w_low(t, back[sd])
+            if w <= 0:
+                continue
+            sh, el, wr = IX[sd + "Shoulder"], IX[sd + "Elbow"], IX[sd + "Wrist"]
+            ix = IX[sd + "Index"]
+            Lu = np.linalg.norm(S[f, el] - S[f, sh]); Lf = np.linalg.norm(S[f, wr] - S[f, el]); Lh = np.linalg.norm(S[f, ix] - S[f, wr])
+            du = rotate_to(unit(S[f, el] - S[f, sh]), low_up[sd], w)
+            df = rotate_to(unit(S[f, wr] - S[f, el]), low_fo[sd], w)
+            dh = rotate_to(unit(S[f, ix] - S[f, wr]), low_fo[sd], w)
+            S[f, el] = S[f, sh] + du * Lu; S[f, wr] = S[f, el] + df * Lf; S[f, ix] = S[f, wr] + dh * Lh
+    front, rear = toss, hit
+    land = lambda t: float(np.clip((t - ev["contact"]) / 0.15, 0, 1))
+    for f, t in enumerate(tq):
+        for sd, d0, d1 in ((front, np.array([0.7 * face, 0, 0.7]), np.array([0.25 * face, 0, 1.0])),
+                           (rear, np.array([1.0 * face, 0, 0.0]), np.array([0.6 * face, -0.3, 0.75]))):
+            a, to, he = IX[sd + "Ankle"], IX[sd + "Toe"], IX[sd + "Heel"]
+            Lt = np.linalg.norm(S[f, to] - S[f, a]); Lh = np.linalg.norm(S[f, he] - S[f, a])
+            d = unit(d0 + (d1 - d0) * land(t))
+            S[f, to] = S[f, a] + unit(d + np.array([0, -0.35, 0])) * Lt
+            S[f, he] = S[f, a] + unit(-d + np.array([0, -0.9, 0])) * Lh
+    return tq, S, ev
+
+
 def stabilize(t, J, events, hand):
     tq, S = smooth_all(t, J, events["contact"], hand)
     S, L = fix_bones(S, tq)
@@ -414,15 +485,20 @@ def main():
             if flipx:  # the user would see the toss arm on the wrong side: turn x round (bones and pinned feet are unchanged)
                 S = S.copy(); S[:, :, 0] *= -1
             turned = "turned" if flipx and turned else "sideways" if flipx else "depth" if turned else None
+            ev, moved = contact_at_peak(tq, S, ev, hand)
+            travel = None
+            if p["id"] == "sinner":
+                tq, S, ev = sinner_style(tq, S, ev, hand)
+                travel = {"fwd": 0.7}   # GAME-DESIGN (Ryan: "make him jump forward"): lands about 0.7 m inside the baseline
             after = (bone_spread(S), jitter(tq, S, t0), foot_slide(tq, S))
             out.setdefault(p["id"], {})[role] = {
                 "id": sv["id"], "source": src, "events": ev, "hz": HZ, "t0": round(float(tq[0]), 4),
-                "bonesM": {g: round(v * 1, 4) for g, v in L.items()}, "planted": locks, "turned": turned, "facingVotes": votes,
+                "bonesM": {g: round(v * 1, 4) for g, v in L.items()}, "planted": locks, "turned": turned, "facingVotes": votes, "contactMovedS": moved, "travel": travel,
                 "before": dict(zip(("boneSpreadPct", "jitterPct", "footSlidePct"), before)),
                 "after": dict(zip(("boneSpreadPct", "jitterPct", "footSlidePct"), after)),
                 "rows": [[round(float(x), 4) for x in fr.reshape(-1)] for fr in S],
             }
-            report.append(f"{p['id']:18s} {role:6s} {turned or 'kept'} {votes} bones ±{before[0]}% → ±{after[0]}%   jitter {before[1]} → {after[1]}   foot slide {before[2]} → {after[2]}   ({len(t0)} → {len(tq)} frames)")
+            report.append(f"{p['id']:18s} {role:6s} {turned or 'kept'} contact {moved:+.2f}s bones ±{before[0]}% → ±{after[0]}%   jitter {before[1]} → {after[1]}   foot slide {before[2]} → {after[2]}   ({len(t0)} → {len(tq)} frames)")
             if not second:  # only one captured serve: the roster reuses it as the second serve, so reuse the steady one
                 out[p["id"]]["second"] = dict(out[p["id"]]["first"], reused=True)
     hdr = ("/* Generated by datasets/serves/tools/stabilize_serves.py — do not edit by hand.\n"
@@ -441,7 +517,7 @@ def main():
       Object.assign(joints, { neck, pelvis, root: pelvis, chest: MID(neck, pelvis, 0.42), head: joints.nose });
       return { t: +(s.t0 + k / s.hz).toFixed(4), joints };
     });
-    slot[role] = Object.assign({}, base, { role, reused: !!s.reused, events: s.events, frames, stabilized: { source: s.source, turned: s.turned, facingVotes: s.facingVotes, bonesBodyHeights: s.bonesM, planted: s.planted, before: s.before, after: s.after } });
+    slot[role] = Object.assign({}, base, { role, reused: !!s.reused, events: s.events, frames, travel: s.travel || undefined, stabilized: { source: s.source, turned: s.turned, facingVotes: s.facingVotes, bonesBodyHeights: s.bonesM, planted: s.planted, before: s.before, after: s.after } });
     if (s.source !== base.source) slot[role].source = s.source;
     if (!slot[role].hand) slot[role].hand = "R";
   }
