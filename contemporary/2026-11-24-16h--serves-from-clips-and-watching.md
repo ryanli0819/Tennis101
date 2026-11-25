@@ -1,0 +1,14 @@
+# Zverev, Shelton and Federer serve like Ryan's clips; eight more pros serve the way they were seen
+- Landed: main, Nov 24 2026, 16h
+- Source: Ryan ("do the watching yourself", plus his uploaded clips)
+- Change:
+  - Zverev, Shelton and Federer now follow Ryan's back-view clips. Their sideways motion and height come from the clip, the same way Sinner's do.
+  - Eight pros were watched frame by frame on YouTube in the built-in browser (nothing downloaded), and each got his own serve shape:
+    - Djokovic holds the ball on the strings in front of him, pauses, then arches back.
+    - Nadal does the same, left-handed, with a bigger head tilt.
+    - Kyrgios has a quick windup, an explosive jump and a back-leg kick.
+    - Medvedev swings his racket arm out wide and straight.
+    - Cobolli bends his knees very deeply and arches his back.
+    - Fils crouches deep and jumps hard.
+    - De Minaur has a quick, compact motion and moves well into the court.
+    - Jodar holds the ball and racket together at his chest, then splits his arms and bends deeply in a wide stance.

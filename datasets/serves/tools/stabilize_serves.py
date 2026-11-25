@@ -72,10 +72,25 @@ def rows_to_arrays(rows):
     return t, J
 
 
+# Pros whose serve follows their own clip (x and height from the clip, depth from the roster serve at the same phase).
+# Files are written by export_motion.py; the roster serve still supplies depth, heels, toes, ears and index fingers.
+CLIP_PLAYERS = ["sinner", "zverev", "shelton", "federer"]
+
+
+def read_clips():
+    out = {}
+    for pid in CLIP_PLAYERS:
+        f = ROOT / f"src/serve/motion/{pid}-serve.js"
+        if not f.exists():
+            continue
+        s = f.read_text()
+        key = f"SERVE_MOTIONS.{pid}" if f"SERVE_MOTIONS.{pid} =" in s else f'SERVE_MOTIONS["{pid}"]'
+        out[pid] = json.loads(s[s.find("=", s.find(key)) + 1:].strip().rstrip(";").splitlines()[0].rstrip(";"))
+    return out
+
+
 def read_sinner_clips():
-    s = SINNER.read_text()
-    d = json.loads(s[s.find("=", s.find("SERVE_MOTIONS.sinner")) + 1:].strip().rstrip(";"))
-    return d
+    return read_clips()["sinner"]
 
 
 # ---------------------------------------------------------------- 1. smoothing
@@ -450,6 +465,126 @@ def sinner_style(tq, S, ev, hand):
     return tq, S, ev
 
 
+# ---------------------------------------------------------------- per-pro serve style (watched, Nov 24)
+# GAME-DESIGN values from watching each pro's serve frame by frame (watch-tennis-video skill; nothing downloaded) and
+# Ryan's notes. Each entry names what was seen and where. Applied after the steadying, on the finished serve.
+STYLES = {
+    "djokovic": {"seen": "youtube 32nyPw9YUEA 95-103 s (court level, super slow motion): ball held on the strings in front of the waist, a still pause, toss arm straight up while the racket hangs, deep bend with hips forward and the back arched",
+                 "hold": ("ballOnRacket", 0.45), "hipDrop": 0.05, "leanBack": 14},
+    "nadal":    {"seen": "Ryan: like Djokovic but left-handed, more head and neck tilt, side spin (game: SERVE_SIDESPIN)",
+                 "hold": ("ballOnRacket", 0.4), "hipDrop": 0.04, "leanBack": 12, "headTilt": 18},
+    "kyrgios":  {"seen": "youtube oZ7hwsx1MmU 4-16 s (Indian Wells 2015 slow motion): quick short windup, little knee bend, explosive jump (both feet high), lands on the front foot with the back leg kicked out level",
+                 "quick": 0.72, "kickBack": 0.25, "jump": 0.12, "fwd": 0.5},
+    "medvedev": {"seen": "youtube ZJ39LcNagSM 31-39 s (US Open, from behind): tall and upright, slight knee bend, racket arm swung out almost straight at shoulder height, toss arm straight up, tall jump",
+                 "racketWide": 1.0, "jump": 0.05},
+    "cobolli":  {"seen": "youtube XewX3v0Ku6o 16-24 s (side view slow motion): long trophy with the racket up behind the head, very deep forward knee bend, arched back, explosive tucked jump, lands on the front foot",
+                 "hipDrop": 0.09, "leanBack": 10, "jump": 0.12, "kickBack": 0.18, "fwd": 0.5},
+    "fils":     {"seen": "youtube LvA9IJcS2ok 380-391 s (front view compilation): deep crouch at the trophy, racket raised early behind the head, explosive jump",
+                 "hipDrop": 0.08, "jump": 0.12, "fwd": 0.4},
+    "de-minaur": {"seen": "youtube LvA9IJcS2ok 252-276 s (front view compilation): quick compact motion, short trophy, moderate bend, moves well into the court and kicks the back leg",
+                  "quick": 0.85, "hipDrop": 0.04, "kickBack": 0.15, "fwd": 0.8},
+    "jodar":    {"seen": "youtube jNnhYeRfyYo 26-38 s (US Open practice): racket and ball held together at the chest for a long moment, both arms drop and split (racket wide and straight back), wide platform stance with a deep bend, explosive jump",
+                 "hold": ("chestTogether", 0.5), "hipDrop": 0.08, "racketWide": 0.6, "jump": 0.1, "fwd": 0.4},
+    "federer":  {"seen": "Ryan's back-view clip (deep bend, chest opening); the clip already carries it, a little extra bend",
+                 "hipDrop": 0.03},
+}
+
+
+def _bump(t, a, peak, b):
+    if t <= a or t >= b: return 0.0
+    u = (t - a) / (peak - a) if t < peak else (b - t) / (b - peak)
+    u = max(0.0, min(1.0, u)); return u * u * (3 - 2 * u)
+
+
+def _rot_xy(v, pivot, ang):
+    c, s_ = math.cos(ang), math.sin(ang); d = v - pivot
+    return pivot + np.array([c * d[0] - s_ * d[1], s_ * d[0] + c * d[1], d[2]])
+
+
+def _resample(tq, S, warp):
+    """New uniform 50 Hz frames for a time warp (old time → new time, monotonic)."""
+    nt = np.array([warp(t) for t in tq]); grid = np.arange(nt[0], nt[-1] + 1e-9, 1 / HZ)
+    out = np.empty((len(grid),) + S.shape[1:])
+    for k in range(S.shape[1]):
+        for c in range(3): out[:, k, c] = np.interp(grid, nt, S[:, k, c])
+    return grid, out
+
+
+def apply_style(pid, tq, S, ev, hand, L):
+    st = STYLES.get(pid)
+    if not st:
+        return tq, S, ev, {}
+    S = S.copy(); ev = dict(ev)
+    face = 1.0 if hand == "R" else -1.0
+    toss, hit = ("left", "right") if hand == "R" else ("right", "left")
+    f = np.array([face, 0.0, 0.0])
+    # QUICK: the windup (start → trophy) runs faster
+    if st.get("quick"):
+        k, a, b = st["quick"], ev["start"], ev["trophy"]
+        warp = lambda t: t if t <= a else a + (t - a) * k if t <= b else a + (b - a) * k + (t - b)
+        tq, S = _resample(tq, S, warp)
+        ev = {n: round(warp(v), 4) for n, v in ev.items()}
+    # HOLD: a still pause before the toss in a set pose (body frozen on the first frame)
+    if st.get("hold"):
+        kind, dur = st["hold"]
+        pre = int(round(dur * HZ)); start = ev["start"]
+        tq = np.concatenate([tq[0] - (np.arange(pre, 0, -1) / HZ), tq]); S = np.concatenate([np.repeat(S[:1], pre, 0), S])
+        ev["set"] = round(min(ev.get("set", 1e9), start - dur), 4)
+        poses = {"ballOnRacket": {hit: ((0.25, -1, 0.15), (1.0, -0.15, 0.2)), toss: ((0.35, -1, 0.2), (1.0, -0.05, 0.25))},
+                 "chestTogether": {hit: ((0.3, -1, 0.2), (0.55, 0.9, 0.2)), toss: ((0.3, -1, 0.2), (0.6, 0.9, 0.25))}}[kind]
+        for fi, t in enumerate(tq):
+            w = _bump(t, start - dur - 0.01, start - dur + 0.18, start + 0.14) if t < start - 0.05 or t > start - dur + 0.18 else 1.0
+            if t >= start - dur + 0.18 and t <= start - 0.05: w = 1.0
+            if w <= 0: continue
+            for sd, (du, dfo) in poses.items():
+                sh, el, wr, ix = (IX[sd + n] for n in ("Shoulder", "Elbow", "Wrist", "Index"))
+                Lu, Lf, Lh = (np.linalg.norm(S[fi, b_] - S[fi, a_]) for a_, b_ in ((sh, el), (el, wr), (wr, ix)))
+                tu = unit(np.array([du[0] * face, du[1], du[2]])); tf = unit(np.array([dfo[0] * face, dfo[1], dfo[2]]))
+                u_ = rotate_to(unit(S[fi, el] - S[fi, sh]), tu, w); f_ = rotate_to(unit(S[fi, wr] - S[fi, el]), tf, w)
+                h_ = rotate_to(unit(S[fi, ix] - S[fi, wr]), tf, w)
+                S[fi, el] = S[fi, sh] + u_ * Lu; S[fi, wr] = S[fi, el] + f_ * Lf; S[fi, ix] = S[fi, wr] + h_ * Lh
+    E = ev
+    upper = [IX[n] for n in N if not any(x in n for x in ("Hip", "Knee", "Ankle", "Heel", "Toe"))]
+    for fi, t in enumerate(tq):
+        load = _bump(t, E["tossRelease"] - 0.15, E["trophy"], E["contact"] - 0.04)
+        pel = (S[fi, IX["leftHip"]] + S[fi, IX["rightHip"]]) / 2
+        # HIP DROP: the body above the knees sinks at the trophy (knees re-solved below)
+        if st.get("hipDrop"):
+            d = np.array([0, -st["hipDrop"] * load, 0])
+            for k in upper + [IX["leftHip"], IX["rightHip"]]: S[fi, k] += d
+            pel = pel + d
+        # LEAN BACK: the upper body arches away from where he faces (rotation in the picture plane about the pelvis)
+        if st.get("leanBack"):
+            ang = math.radians(st["leanBack"]) * load * face
+            for k in upper: S[fi, k] = _rot_xy(S[fi, k], pel, ang)
+        # HEAD TILT: the head tips back and over from the neck while he watches the toss
+        if st.get("headTilt"):
+            neck = (S[fi, IX["leftShoulder"]] + S[fi, IX["rightShoulder"]]) / 2
+            ang = math.radians(st["headTilt"]) * _bump(t, E["tossRelease"] - 0.1, E["trophy"], E["contact"] + 0.05) * face
+            for n in ("nose", "leftEar", "rightEar"): S[fi, IX[n]] = _rot_xy(S[fi, IX[n]], neck, ang)
+        # RACKET WIDE: the racket arm swings out almost straight, back from where he faces, at shoulder height
+        if st.get("racketWide"):
+            w = st["racketWide"] * _bump(t, E["tossRelease"] - 0.25, (E["tossRelease"] + E["trophy"]) / 2, E["trophy"] + 0.08)
+            if w > 0:
+                sh, el, wr, ix = (IX[hit + n] for n in ("Shoulder", "Elbow", "Wrist", "Index"))
+                tgt = unit(np.array([-0.85 * face, 0.2, -0.3]))
+                for a_, b_ in ((sh, el), (el, wr), (wr, ix)):
+                    Lb = np.linalg.norm(S[fi, b_] - S[fi, a_]); S[fi, b_] = S[fi, a_] + rotate_to(unit(S[fi, b_] - S[fi, a_]), tgt, w) * Lb
+        # KICK BACK: after contact the back foot flies up behind him
+        if st.get("kickBack"):
+            w = _bump(t, E["contact"] - 0.02, E["contact"] + 0.14, E["finish"] + 0.2)
+            if w > 0:
+                for n in ("Ankle", "Heel", "Toe"): S[fi, IX[hit + n]] += np.array([-0.08 * face, st["kickBack"], -0.1]) * w
+        # knees: fixed thigh and shin between the moved hip and the ankle
+        for sd in ("left", "right"):
+            K, A, _ = two_bone(S[fi, IX[sd + "Hip"]], S[fi, IX[sd + "Ankle"]], S[fi, IX[sd + "Knee"]], L["thigh"], L["shank"])
+            sh_ = A - S[fi, IX[sd + "Ankle"]]; S[fi, IX[sd + "Knee"]] = K
+            for n in ("Ankle", "Heel", "Toe"): S[fi, IX[sd + n]] += sh_
+    travel = {k: st[k] for k in ("fwd",) if st.get(k)}
+    if st.get("jump"): travel["up"] = st["jump"]
+    return tq, S, ev, {"travel": travel, "seen": st["seen"]}
+
+
 def stabilize(t, J, events, hand):
     tq, S = smooth_all(t, J, events["contact"], hand)
     S, L = fix_bones(S, tq)
@@ -459,7 +594,7 @@ def stabilize(t, J, events, hand):
 
 def main():
     players = read_roster()
-    clips = read_sinner_clips()
+    clips = read_clips()
     out, report = {}, []
     for p in players:
         if p["id"] == "alcaraz":
@@ -475,8 +610,9 @@ def main():
             sv = dict(sv, rows=rows)
             t0, J0 = rows_to_arrays(rows)
             ev, src = dict(sv["events"]), sv["id"]
-            if p["id"] == "sinner":
-                clip = clips["first" if role == "first" else "second"]
+            if p["id"] in clips:
+                cl = clips[p["id"]]
+                clip = cl["first"] if role == "first" else cl.get("second", cl["first"])
                 t0, J0 = sinner_from_clip(clip, sv)
                 ev, src = dict(clip["events"]), clip["source"] + " + depth from " + sv["id"]
             before = (bone_spread(J0), jitter(t0, J0), foot_slide(t0, J0))
@@ -486,14 +622,16 @@ def main():
                 S = S.copy(); S[:, :, 0] *= -1
             turned = "turned" if flipx and turned else "sideways" if flipx else "depth" if turned else None
             ev, moved = contact_at_peak(tq, S, ev, hand)
-            travel = None
+            travel, styled = None, {}
             if p["id"] == "sinner":
                 tq, S, ev = sinner_style(tq, S, ev, hand)
                 travel = {"fwd": 0.7}   # GAME-DESIGN (Ryan: "make him jump forward"): lands about 0.7 m inside the baseline
+            tq, S, ev, styled = apply_style(p["id"], tq, S, ev, hand, L)
+            if styled.get("travel"): travel = dict(travel or {}, **styled["travel"])
             after = (bone_spread(S), jitter(tq, S, t0), foot_slide(tq, S))
             out.setdefault(p["id"], {})[role] = {
                 "id": sv["id"], "source": src, "events": ev, "hz": HZ, "t0": round(float(tq[0]), 4),
-                "bonesM": {g: round(v * 1, 4) for g, v in L.items()}, "planted": locks, "turned": turned, "facingVotes": votes, "contactMovedS": moved, "travel": travel,
+                "bonesM": {g: round(v * 1, 4) for g, v in L.items()}, "planted": locks, "turned": turned, "facingVotes": votes, "contactMovedS": moved, "travel": travel, "style": styled.get("seen"),
                 "before": dict(zip(("boneSpreadPct", "jitterPct", "footSlidePct"), before)),
                 "after": dict(zip(("boneSpreadPct", "jitterPct", "footSlidePct"), after)),
                 "rows": [[round(float(x), 4) for x in fr.reshape(-1)] for fr in S],

@@ -54,6 +54,26 @@ PLAYERS["alcaraz"] = {
     "second": {"keyframes": True},
 }
 
+# Nov 24, 2026 (Ryan's uploads): event frames read off stills by eye (triangulate-serve skill, step 2).
+PLAYERS["zverev"] = {   # real-speed back-view compilation (Indian Wells practice), cuts between serves
+    "first":  {"src": "datasets/serves/zverev/zverev-serve-backview.keypoints.json", "mirror": False, "calm": (236, 252), "clean": "light",
+               "realSpeed": True, "events": {"start": 259, "tossRelease": 282, "trophy": 308, "contact": 329, "finish": 348},
+               "note": "1st serve, back view, real speed (zverev serve backview.mov 4.7-6.4 s)"},
+    "second": {"src": "datasets/serves/zverev/zverev-serve-backview.keypoints.json", "mirror": False, "calm": (720, 738), "clean": "light",
+               "realSpeed": True, "events": {"start": 740, "tossRelease": 770, "trophy": 795, "contact": 819, "finish": 844},
+               "note": "another serve, back view, real speed (zverev serve backview.mov 13.5-15.4 s)"},
+}
+PLAYERS["shelton"] = {  # left-handed; slow motion from behind, very deep crouch, back leg kicked high after contact
+    "first":  {"src": "datasets/serves/shelton/shelton-serve-backview.keypoints.json", "mirror": False, "calm": (0, 150), "clean": "light",
+               "events": {"start": 395, "tossRelease": 449, "trophy": 499, "contact": 578, "finish": 658},
+               "note": "1st serve, back view, slow motion (shelton serve backview.mov 7.2-12.0 s)"},
+}
+PLAYERS["federer"] = {  # slow motion from behind, deep knee bend and chest opening, full pronation
+    "first":  {"src": "datasets/serves/federer/federer-back.keypoints.json", "mirror": False, "calm": (36, 46), "clean": "light",
+               "events": {"start": 47, "tossRelease": 83, "trophy": 135, "contact": 177, "finish": 230},
+               "note": "1st serve, back-side view, slow motion (Roger Federer Back view.mov 1.6-7.6 s)"},
+}
+
 def light_clean(d):
     """Raw joints with confidence >= 0.3; a joint that jumps away from both neighbours (and they agree) is a spike: dropped."""
     F = d["frames"]
@@ -89,7 +109,7 @@ def export(spec, player):
     sx = -1 if spec["mirror"] else 1
 
     t_of = {f["i"]: f["t"] for f in F}
-    k = REAL_RELEASE_TO_CONTACT / (t_of[E["contact"]] - t_of[E["tossRelease"]])   # 1.0 for a real-speed clip
+    k = 1.0 if spec.get("realSpeed") else REAL_RELEASE_TO_CONTACT / (t_of[E["contact"]] - t_of[E["tossRelease"]])
     t0 = t_of[spec["leadFrom"]] if "leadFrom" in spec else t_of[E["start"]] - 0.3   # keep a lead-in before the toss starts
     frames, last_rel = [], {}
     for f in F:
