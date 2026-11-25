@@ -1,6 +1,6 @@
 # Intake: get clips and photos into the project without sorting them by hand
 
-**Easiest: the Tennis101 Inbox app on the Desktop.** Drag any video (.mp4 / .mov / .m4v) or photo onto its icon, pick what it shows (Serves, Forehands or Backhands), then tick exactly the players in each clip: one, or several for a compilation (players named in the file are ticked already). Files land in `datasets/inbox/<category>/` and are filed by player and stroke; compilations go to `datasets/video/_compilations/<category>/`.
+**Easiest: the Tennis101 Inbox app on the Desktop.** Drag any labelled video (.mp4 / .mov / .m4v) or photo onto its icon. It asks nothing (Ryan, Nov 25): the file is copied into `datasets/inbox/` and filed by the player and stroke in its name, e.g. `djokovic 2nd serve back.mov`; several player names = a compilation (`datasets/video/_compilations/`), no player name = `inbox/unsorted/`, already in the project = `inbox/rejected/`. A notification says how many were added.
 It copies the file into `datasets/inbox` (the original stays put), asks which player it shows if the name doesn't say,
 and starts the intake (filing + pose detection) in the background. Rebuild it with:
 
