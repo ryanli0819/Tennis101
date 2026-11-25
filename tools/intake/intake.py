@@ -15,8 +15,8 @@ What it does with each file in datasets/inbox/ (sub-folders too):
    pick_server.py (keeps the server). Saves 8 stills for the Appearance Scout in datasets/players/<id>/images/stills/.
 5. Logs everything in datasets/inbox/intake-log.json (what moved where, what was analysed, what failed).
 0. Rejects what is already in the system (Ryan, Nov 25): a file whose content (SHA-256) matches a video or photo already
-   anywhere under datasets/ — or one filed earlier in the same run — is moved to inbox/rejected/ (never deleted) and
-   logged with the copy it matches. A different file with an existing file's name is filed under a new name, never
+   anywhere under datasets/ — or one filed earlier in the same run — is moved to the macOS Trash (recoverable; no
+   second copy is kept on the Mac) and logged with the copy it matches. A different file with an existing file's name is filed under a new name, never
    over it. Fingerprints are cached in datasets/inbox/media-index.json (path, size, modified time → hash).
 
 Video, photos and stills stay on this Mac (git-ignored); keypoints and logs are numbers and names only.
@@ -112,9 +112,9 @@ for dirpath, dirs, files in os.walk(INBOX):
         entry = {"file": f, "at": time.strftime("%Y-%m-%d %H:%M"), "player": pid, "players": found, "kind": kind}
         digest = sha256(src)
         if digest in known:                                  # already in the system: reject, keep the file aside
-            rej = free_name(os.path.join(INBOX, "rejected", f))
-            entry.update(rejected=True, duplicateOf=known[digest], to=os.path.relpath(rej, ROOT))
-            print(("[dry] " if DRY else "") + f"{context} ✗ rejected: already in the system as {known[digest]}")
+            rej = free_name(os.path.join(os.path.expanduser("~/.Trash"), f))
+            entry.update(rejected=True, duplicateOf=known[digest], to="Trash")
+            print(("[dry] " if DRY else "") + f"{context} ✗ already in the system as {known[digest]}: moved to the Trash")
             if not DRY:
                 os.makedirs(os.path.dirname(rej), exist_ok=True); shutil.move(src, rej)
             log.append(entry); done += 1; continue

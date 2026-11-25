@@ -1,6 +1,6 @@
 # Intake: get clips and photos into the project without sorting them by hand
 
-**Easiest: the Tennis101 Inbox app on the Desktop.** Drag any labelled video (.mp4 / .mov / .m4v) or photo onto its icon. It asks nothing (Ryan, Nov 25): the file is copied into `datasets/inbox/` and filed by the player and stroke in its name, e.g. `djokovic 2nd serve back.mov`; several player names = a compilation (`datasets/video/_compilations/`), no player name = `inbox/unsorted/`, already in the project = `inbox/rejected/`. A notification says how many were added.
+**Easiest: the Tennis101 Inbox app on the Desktop.** Drag any labelled video (.mp4 / .mov / .m4v) or photo onto its icon. It asks nothing (Ryan, Nov 25): the file is moved into `datasets/inbox/` (no second copy is left where it came from) and filed by the player and stroke in its name, e.g. `djokovic 2nd serve back.mov`; several player names = a compilation (`datasets/video/_compilations/`), no player name = `inbox/unsorted/`, already in the project = the Trash. A notification says how many were added.
 It copies the file into `datasets/inbox` (the original stays put), asks which player it shows if the name doesn't say,
 and starts the intake (filing + pose detection) in the background. Rebuild it with:
 
@@ -26,7 +26,7 @@ copy automatically with `tools/intake/convert.py` (PyAV in `tools/.venv`, git-ig
        python3 -I tools/intake/intake.py --dry-run   # see where everything would go
        python3 -I tools/intake/intake.py             # file it and run pose detection
 
-**Already in the system → rejected.** A file whose content matches a video or photo already under `datasets/` (or one filed earlier in the same run) is moved to `inbox/rejected/`, never deleted, and the log names the copy it matches. Renamed or re-labelled copies are caught too; a re-recorded or re-encoded version of the same clip is a different file and is filed. A different file with an existing file's name is filed as `name (2).mov`, never over it.
+**Already in the system → rejected.** A file whose content matches a video or photo already under `datasets/` (or one filed earlier in the same run) goes to the macOS Trash (recoverable until it's emptied), and the log names the copy it matches. Renamed or re-labelled copies are caught too; a re-recorded or re-encoded version of the same clip is a different file and is filed. A different file with an existing file's name is filed as `name (2).mov`, never over it.
 
 Files without a player name wait in `inbox/unsorted/`. A file naming several players (a compilation) goes to `datasets/video/_compilations/` with pose data, to be split per player. Everything is logged in `inbox/intake-log.json`.
 Videos and photos never leave the Mac (git-ignored); only keypoints (numbers) are committed.
