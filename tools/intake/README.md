@@ -26,6 +26,8 @@ copy automatically with `tools/intake/convert.py` (PyAV in `tools/.venv`, git-ig
        python3 -I tools/intake/intake.py --dry-run   # see where everything would go
        python3 -I tools/intake/intake.py             # file it and run pose detection
 
+**Already in the system → rejected.** A file whose content matches a video or photo already under `datasets/` (or one filed earlier in the same run) is moved to `inbox/rejected/`, never deleted, and the log names the copy it matches. Renamed or re-labelled copies are caught too; a re-recorded or re-encoded version of the same clip is a different file and is filed. A different file with an existing file's name is filed as `name (2).mov`, never over it.
+
 Files without a player name wait in `inbox/unsorted/`. A file naming several players (a compilation) goes to `datasets/video/_compilations/` with pose data, to be split per player. Everything is logged in `inbox/intake-log.json`.
 Videos and photos never leave the Mac (git-ignored); only keypoints (numbers) are committed.
 

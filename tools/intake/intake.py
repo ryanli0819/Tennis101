@@ -14,10 +14,14 @@ What it does with each file in datasets/inbox/ (sub-folders too):
    (tools/intake/convert.py, PyAV in tools/.venv). Then runs pose.swift (every person, every frame) → <name>.keypoints.json next to the clip; for serve clips also
    pick_server.py (keeps the server). Saves 8 stills for the Appearance Scout in datasets/players/<id>/images/stills/.
 5. Logs everything in datasets/inbox/intake-log.json (what moved where, what was analysed, what failed).
+0. Rejects what is already in the system (Ryan, Nov 25): a file whose content (SHA-256) matches a video or photo already
+   anywhere under datasets/ — or one filed earlier in the same run — is moved to inbox/rejected/ (never deleted) and
+   logged with the copy it matches. A different file with an existing file's name is filed under a new name, never
+   over it. Fingerprints are cached in datasets/inbox/media-index.json (path, size, modified time → hash).
 
 Video, photos and stills stay on this Mac (git-ignored); keypoints and logs are numbers and names only.
 """
-import json, os, re, shutil, subprocess, sys, time
+import hashlib, json, os, re, shutil, subprocess, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 INBOX = os.path.join(ROOT, "datasets/inbox")
@@ -63,11 +67,41 @@ if "--detect" in sys.argv:                                  # used by the Tennis
 if "--players" in sys.argv:                                 # the list the app offers when a name mentions nobody
     print("\n".join(f"{p['id']} — {p['name']}" for p in top["players"])); sys.exit(0)   # the roster only
 
+# ---- already in the system? content fingerprints of every video and photo under datasets/ (the inbox excluded)
+INDEX_PATH = os.path.join(INBOX, "media-index.json")
+index = json.load(open(INDEX_PATH)) if os.path.exists(INDEX_PATH) else {}
+
+def sha256(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""): h.update(chunk)
+    return h.hexdigest()
+
+def fingerprint(path):
+    st = os.stat(path); rel = os.path.relpath(path, ROOT); c = index.get(rel)
+    if c and c["size"] == st.st_size and c["mtime"] == int(st.st_mtime): return c["sha256"]
+    d = sha256(path); index[rel] = {"size": st.st_size, "mtime": int(st.st_mtime), "sha256": d}; return d
+
+known = {}                                                  # sha256 → a path already in the system
+for dirpath, dirs, files in os.walk(os.path.join(ROOT, "datasets")):
+    if os.path.commonpath([dirpath, INBOX]) == INBOX: continue
+    for f in files:
+        if os.path.splitext(f)[1].lower() in VIDEO | IMAGE:
+            fp = os.path.join(dirpath, f); known.setdefault(fingerprint(fp), os.path.relpath(fp, ROOT))
+index = {k: v for k, v in index.items() if os.path.exists(os.path.join(ROOT, k))}
+
+def free_name(dest):
+    """A different file already has this name: file it next to it as 'name (2).ext', never over it."""
+    if not os.path.exists(dest): return dest
+    b, e = os.path.splitext(dest); n = 2
+    while os.path.exists(f"{b} ({n}){e}"): n += 1
+    return f"{b} ({n}){e}"
+
 log_path = os.path.join(INBOX, "intake-log.json")
 log = json.load(open(log_path)) if os.path.exists(log_path) else []
 done = 0
 for dirpath, dirs, files in os.walk(INBOX):
-    if os.path.relpath(dirpath, INBOX).split(os.sep)[0] == "unsorted": continue
+    if os.path.relpath(dirpath, INBOX).split(os.sep)[0] in ("unsorted", "rejected"): continue
     for f in sorted(files):
         ext = os.path.splitext(f)[1].lower()
         if ext not in VIDEO | IMAGE: continue
@@ -76,6 +110,14 @@ for dirpath, dirs, files in os.walk(INBOX):
         found, kind = players_in(context), kind_of(context)
         pid = found[0] if len(found) == 1 else None
         entry = {"file": f, "at": time.strftime("%Y-%m-%d %H:%M"), "player": pid, "players": found, "kind": kind}
+        digest = sha256(src)
+        if digest in known:                                  # already in the system: reject, keep the file aside
+            rej = free_name(os.path.join(INBOX, "rejected", f))
+            entry.update(rejected=True, duplicateOf=known[digest], to=os.path.relpath(rej, ROOT))
+            print(("[dry] " if DRY else "") + f"{context} ✗ rejected: already in the system as {known[digest]}")
+            if not DRY:
+                os.makedirs(os.path.dirname(rej), exist_ok=True); shutil.move(src, rej)
+            log.append(entry); done += 1; continue
         if len(found) > 1:                                   # a compilation: several players in one clip, split later by the agents
             dest_dir = os.path.join(ROOT, "datasets/video/_compilations", stroke_dir(kind))
             entry["note"] = "compilation of " + ", ".join(found) + ": split into one segment per player (Footage Scout / Serve Analyst)"
@@ -88,8 +130,9 @@ for dirpath, dirs, files in os.walk(INBOX):
             dest_dir = os.path.join(ROOT, f"datasets/serves/{pid}")
         else:
             dest_dir = os.path.join(ROOT, f"datasets/video/{pid}/{kind or 'unsorted'}")
-        dest = os.path.join(dest_dir, f)
+        dest = free_name(os.path.join(dest_dir, f))
         entry["to"] = os.path.relpath(dest, ROOT)
+        known[digest] = entry["to"]                          # a second copy later in this run is rejected too
         print(("[dry] " if DRY else "") + f"{context} → {entry['to']}")
         if not DRY:
             os.makedirs(dest_dir, exist_ok=True); shutil.move(src, dest)
@@ -118,4 +161,5 @@ for dirpath, dirs, files in os.walk(INBOX):
         log.append(entry); done += 1
 if not DRY:
     json.dump(log, open(log_path, "w"), indent=1, ensure_ascii=False)
+    json.dump(index, open(INDEX_PATH, "w"), indent=0)
 print(f"{done} file(s) {'would be ' if DRY else ''}filed. Log: {os.path.relpath(log_path, ROOT)}")
