@@ -2,7 +2,9 @@
 // RUN CYCLE — picks the animation frame for a player from how they're moving. Owner: Animator (agents/animator/).
 //
 // Anim.frame(p, B, near, id) → { kind, dir, frame, turn, bob, lean, crouch, feet: [left, right], knees, arms }
-//   kind  : "ready" | "receive" | "run" | "backpedal" | "siderun" | "shuffle" | "plant" | "split" | "slide"
+//   kind  : "ready" | "receive" | "run" | "backpedal" | "siderun" | "shuffle" | "split" | "slide"
+//           and the direction-change beats "decel" → "plant" → "crossover" | "dropstep" | "pushoff" (see DIRECTION CHANGES)
+//   accel : 0..1 on running kinds: how much acceleration lean is in the pose (fades toward top speed)
 //   dir   : where the body travels on screen: "away" (up the screen) | "toward" | "left" | "right" | null
 //   frame : 0..19 — every moving kind is a 20-frame cycle (one full stride: left step + right step)
 //   turn  : −1..1 how far the body is turned sideways toward screen left/right (side runs show the profile)
@@ -98,7 +100,127 @@
   const still = (o) => Object.assign({ turn: 0, knees: [{ dx: 0, dy: 0 }, { dx: 0, dy: 0 }] }, o,
     { feet: o.feet.map(f => ({ dy: 0, sole: 0, ...f })) });
 
-  function pick(p, B, near, id) {
+  // =====================================================================
+  // DIRECTION CHANGES (Ryan's priority). A hard change of direction reads as four beats:
+  //   decel     — braking steps: the lead foot reaches out ahead, the body sinks and leans back against the old way
+  //   plant     — the lead foot loaded wide and low; the hips start to open toward the new way
+  //   crossover — out of a sideways plant the outside leg swings across in front of the body toward the new way;
+  //   dropstep  —   when the new way is backward the hip opens and that foot steps back;
+  //   pushoff   —   when it is forward the back foot drives through with the body tipped in
+  //   then the normal run, with an ACCELERATION LEAN that fades as the speed builds to top speed.
+  // All of it is read from the velocity (and p.plant, which moveBody sets on a hard brake): animation never moves the body.
+  // Screen directions equal court directions here: court +x = screen right, court +y = up the screen (dy +).
+  // =====================================================================
+  const DC = { plantMin: 0.06, plantMax: 0.3, cut: 0.24 };   // seconds: shortest plant, a plant that ends in a stop, the cut step
+  const TURN_KINDS = new Set(["decel", "plant", "crossover", "dropstep", "pushoff"]);
+  const clamp01 = (u) => Math.max(0, Math.min(1, u));
+  const sstep = (u) => { u = clamp01(u); return u * u * (3 - 2 * u); };
+  const sgn = (v) => (v < 0 ? -1 : 1);
+  const screenDir = (d) => Math.abs(d.x) >= Math.abs(d.y) ? (d.x > 0 ? "right" : "left") : (d.y > 0 ? "away" : "toward");
+  const steps = (u) => reduce() ? Math.round(clamp01(u) * 3) / 3 : clamp01(u);   // reduced motion: 4 poses, no in-between
+
+  // The state machine. Keeps the last cruising heading, finds the brake, the plant and the cut, and the acceleration.
+  function track(p, B, g, dt) {
+    const s = p._dc || (p._dc = { mode: null, t: 0, head: null, v0: 0, nd: null, sp: 0, acc: 0 });
+    const sp = Math.hypot(p.vx, p.vy);
+    if (dt > 0) s.acc += ((sp - s.sp) / dt - s.acc) * Math.min(1, dt * 10);   // smoothed change of speed, m/s²
+    s.sp = sp; s.t += dt;
+    if (p.slide > 0 || p.air > 0) { s.mode = null; return s; }
+    const along = s.head ? p.vx * s.head.x + p.vy * s.head.y : 0;      // speed still carried the old way
+    const nd = sp > 0.4 ? { x: p.vx / sp, y: p.vy / sp } : null;
+    const go = (mode) => { s.mode = mode; s.t = 0; };
+    if (s.mode === null) {
+      if (p.plant > 0 && s.head && sp > 1.5) { go("decel"); s.v0 = Math.max(sp, along); }
+      else if (sp > 1.2) s.head = nd;
+    } else if (s.mode === "decel") {
+      if (along < 0.3 || s.t > 0.8) go("plant");
+      else if (!(p.plant > 0) && along > 0.6 * s.v0 && s.acc > 0) { s.mode = null; s.head = nd; }   // gave up the brake
+    } else if (s.mode === "plant") {
+      if (s.t >= DC.plantMin && sp > 0.9 && nd) {
+        if (nd.x * s.head.x + nd.y * s.head.y < 0.5) { go("cut"); s.nd = nd; }
+        else { s.mode = null; s.head = nd; }                          // pushed off the same way again
+      } else if (s.t > DC.plantMax && sp <= 0.9) { s.mode = null; s.head = null; }   // came to a stop: ready takes over
+    } else if (s.mode === "cut") {
+      if (p.plant > 0 && s.t > 0.08 && sp > 1.5) { s.head = s.nd; go("decel"); s.v0 = sp; }   // reversed again mid-cut
+      else if (s.t >= DC.cut / g.cadence) { s.mode = null; s.head = nd || s.nd; }
+    }
+    return s;
+  }
+
+  // Braking steps, u 0..1 = share of the old speed already shed.
+  function decelPose(s, u, g) {
+    const h = s.head, e = sstep(u), lead = h.x >= 0 ? 1 : 0, ls = lead ? 1 : -1, lat = Math.abs(h.x) >= Math.abs(h.y);
+    const feet = [], knees = [];
+    feet[lead] = { dx: ls * 0.24 + h.x * 0.34 * e, dy: h.y * 0.16 * e, lift: 0, sole: 0 };
+    feet[1 - lead] = { dx: -ls * 0.24 + h.x * 0.04, dy: -h.y * 0.03 * e, lift: 0.045 * Math.sin(Math.PI * Math.min(1, u * 1.8)), sole: 0 };   // a quick stutter step
+    knees[lead] = { dx: h.x * 0.06 * e, dy: h.y * 0.04 * e }; knees[1 - lead] = { dx: 0, dy: 0 };
+    return { kind: "decel", dir: screenDir(h), frame: Math.min(N - 1, Math.floor(u * N)),
+             bob: -0.015 * e, lean: -h.x * 0.065 * e, crouch: 0.03 + 0.05 * e + g.crouch, bend: 0,
+             turn: lat ? sgn(h.x) * (1 - 0.5 * e) : 0, feet, knees, arms: [0.4 * e, 0.4 * e] };
+  }
+
+  // Loaded in the plant, w 0..1 over the first beat; nd = where the body is starting to go.
+  function plantPose(s, w, g, nd) {
+    const h = s.head, e = sstep(w), lead = h.x >= 0 ? 1 : 0, ls = lead ? 1 : -1, lat = Math.abs(h.x) >= Math.abs(h.y);
+    const feet = [], knees = [];
+    feet[lead] = { dx: ls * 0.24 + h.x * 0.4, dy: h.y * 0.18, lift: 0, sole: 0 };
+    feet[1 - lead] = { dx: -ls * 0.26 + h.x * 0.02, dy: -h.y * 0.03, lift: 0, sole: 0 };
+    knees[lead] = { dx: h.x * 0.08, dy: h.y * 0.05 }; knees[1 - lead] = { dx: 0, dy: 0 };
+    const open = Math.abs(nd.x) > 0.5 ? sgn(nd.x) * 0.35 * e : 0;   // hips begin to open toward the new way
+    return { kind: "plant", dir: screenDir(nd), frame: Math.min(N - 1, Math.floor(w * N)),
+             bob: -0.025, lean: lerp(-h.x * 0.065, nd.x * 0.03, e), crouch: 0.085 + g.crouch, bend: 0,
+             turn: (lat ? sgn(h.x) * 0.5 * (1 - e) : 0) + open, feet, knees, arms: [0.4, 0.4] };
+  }
+
+  // The first step out, w 0..1 over the cut.
+  function cutPose(s, w, g, near) {
+    const nd = s.nd, e = sstep(w), arc = Math.sin(Math.PI * w), fast = sstep(Math.min(1, w * 1.7));
+    const feet = [], knees = [], arms = [0, 0], front = near ? 1 : -1;   // front of the body: toward the net
+    let kind, turn = 0, lean = 0, bend = 0, crouch;
+    if (Math.abs(nd.x) >= Math.abs(nd.y)) {               // CROSSOVER: the outside leg swings across, hips and shoulders turn
+      const sN = sgn(nd.x), out = sN > 0 ? 0 : 1, inn = 1 - out;
+      const from = -sN * (0.3 + 0.32 * clamp01(-s.head.x * sN));   // where the plant left that foot: far out after a full reversal
+      feet[out] = { dx: lerp(from, sN * 0.3, e), dy: front * 0.07 * arc, lift: 0.13 * arc * Math.sqrt(g.knee), sole: 0 };
+      feet[inn] = { dx: lerp(sN * 0.26, sN * 0.12, e), dy: -front * 0.02 * arc, lift: 0, sole: 0 };   // the pivot foot pushes off
+      knees[out] = { dx: sN * 0.12 * arc, dy: front * 0.03 * arc }; knees[inn] = { dx: 0, dy: 0 };
+      arms[out] = -0.8 * arc * g.arm; arms[inn] = 0.8 * arc * g.arm;
+      kind = "crossover"; turn = sN * fast; lean = sN * (0.04 + g.lean) * (1 - 0.35 * e);
+      crouch = lerp(0.08, 0.035, e);
+    } else {
+      const sD = sgn(nd.y), forward = near ? sD > 0 : sD < 0;
+      if (!forward) {                                      // DROP STEP: open the hip, step back with that foot
+        const kd = s.head.x < -0.2 ? 0 : 1, sd = kd ? 1 : -1;   // the side the body was moving to (right by default)
+        feet[kd] = { dx: lerp(sd * 0.26, sd * 0.42, e), dy: sD * 0.2 * e, lift: 0.08 * arc, sole: 0 };
+        feet[1 - kd] = { dx: -sd * 0.24, dy: -sD * 0.03 * e, lift: 0, sole: 0 };
+        knees[kd] = { dx: sd * 0.04 * arc, dy: 0 }; knees[1 - kd] = { dx: 0, dy: 0 };
+        arms[kd] = -0.6 * arc; arms[1 - kd] = 0.6 * arc;
+        kind = "dropstep"; turn = sd * 0.6 * fast; lean = sd * 0.03 * e; crouch = lerp(0.075, 0.04, e);
+      } else {                                             // PUSH-OFF: the back foot drives through, body tipped in
+        const kp = s.head.x > 0 ? 0 : 1;
+        feet[kp] = { dx: kp ? 0.17 : -0.17, dy: lerp(-sD * 0.1, sD * 0.18, e), lift: 0.12 * arc, sole: near && sD > 0 ? arc : 0 };
+        feet[1 - kp] = { dx: kp ? -0.2 : 0.2, dy: -sD * 0.06 * e, lift: 0, sole: 0 };
+        knees[kp] = { dx: 0, dy: sD * 0.08 * arc }; knees[1 - kp] = { dx: 0, dy: 0 };
+        arms[kp] = -0.8 * arc * g.arm; arms[1 - kp] = 0.8 * arc * g.arm;
+        kind = "pushoff"; bend = 0.04 * (1 - 0.5 * e); crouch = lerp(0.07, 0.03, e);
+      }
+    }
+    return { kind, dir: screenDir(nd), frame: Math.min(N - 1, Math.floor(w * N)),
+             bob: -0.025 * (1 - e) + 0.012 * arc * g.bounce, lean, crouch: crouch + g.crouch, bend, turn, feet, knees, arms };
+  }
+
+  function turnaround(p, s, g, near) {
+    let fr;
+    if (s.mode === "decel") fr = decelPose(s, steps(1 - Math.max(0, p.vx * s.head.x + p.vy * s.head.y) / (s.v0 || 1)), g);
+    else if (s.mode === "plant") {
+      const sp = Math.hypot(p.vx, p.vy);
+      fr = plantPose(s, steps(s.t / 0.12), g, sp > 0.4 ? { x: p.vx / sp, y: p.vy / sp } : { x: -s.head.x, y: -s.head.y });
+    } else fr = cutPose(s, steps(s.t / (DC.cut / g.cadence)), g, near);
+    if (reduce()) fr.bob = 0;
+    return fr;
+  }
+
+  function pick(p, B, near, id, dt = 0) {
+    const g = GAIT[id] || DEF, dc = track(p, B, g, dt);
     const sp = Math.hypot(p.vx, p.vy), top = B.top || 6;
     const fwd = near ? p.vy : -p.vy;                       // + = toward the net, whichever side you're on
     const side = p.vx;                                     // + = screen right (court x)
@@ -110,7 +232,8 @@
     }
     if (p.air > 0) return still({ kind: "split", dir: null, frame: 0, bob: -0.06, lean: 0, crouch: 0.03,
                             feet: [{ dx: -0.3, lift: 0.04 }, { dx: 0.3, lift: 0.04 }], arms: [0.3, 0.3] });
-    if (p.plant > 0) {                                     // changing direction: plant wide and low, lean against the old way
+    if (dc.mode) return turnaround(p, dc, g, near);       // braking, planted or cutting out: the direction-change beats
+    if (p.plant > 0) {                                     // a plant with no heading on record yet: the plain wide, low stance
       const back = -Math.sign(side || 1);
       return still({ kind: "plant", dir: null, frame: 0, bob: -0.05, lean: back * 0.04, crouch: 0.06,
                feet: [{ dx: -0.42, lift: 0 }, { dx: 0.42, lift: 0 }], arms: [0.4, 0.4] });
@@ -126,7 +249,6 @@
       return still({ kind: "ready", dir: null, frame: 0, bob: breathe, lean: 0, crouch: 0.025,
                feet: [{ dx: -0.26, lift: 0 }, { dx: 0.26, lift: 0 }], arms: [0.2, 0.2] });
     }
-    const g = GAIT[id] || DEF;
     // Gait phase: strides per second rise with speed (≈1.1/s jogging → ≈1.7/s sprinting), shaped by the player's cadence.
     const rate = (0.9 + 0.11 * sp) * g.cadence / (0.4 + sp / 3);   // phase per unit of p.run (which moveBody advances)
     const dRun = p._animRun == null ? 0 : Math.max(0, p.run - p._animRun);
@@ -150,25 +272,39 @@
     const tilt = Math.max(-1, Math.min(1, side / top));
     if (kind === "run" || kind === "backpedal") fr.lean += tilt * g.lean;   // lean into a diagonal
     if (kind === "siderun") fr.lean += Math.sign(side) * g.lean * stride;  // lean into the run
-    return Object.assign(fr, { kind, dir, frame: k });
+    // ACCELERATION LEAN: while the speed is still building, the body tips into the run; it fades toward top speed.
+    const acc = clamp01(dc.acc / (B.accel || 8)) * (1 - stride);
+    if (acc > 0.02) {
+      if (kind === "siderun" || kind === "shuffle") fr.lean += Math.sign(side) * 0.05 * acc;
+      else if (kind === "run") { fr.bend = (fr.bend || 0) + 0.035 * acc; fr.lean += tilt * 0.03 * acc; }
+      fr.crouch += 0.02 * acc;
+    }
+    if (reduce()) fr.bob = 0;
+    return Object.assign(fr, { kind, dir, frame: k, accel: acc });
   }
 
   // FLUENT TRANSITIONS. Inside a cycle the 20 frames are already tweened. When the movement changes kind
   // (ready → shuffle → side run → plant → run …) the new pose is cross-faded from the last pose drawn over
   // BLEND seconds, so feet, knees and arms travel to their new place instead of jumping. Turn and lean ease too.
-  const BLEND = 0.2;
-  function frame(p, B, near, id) {
-    const fr = pick(p, B, near, id), now = performance.now() / 1000;
-    const s = p._animSmooth || (p._animSmooth = { turn: 0, lean: 0, kind: fr.kind, from: null, t: 9, last: null, at: now });
+  // The direction-change beats already flow into each other, so between two of them the blend is short (QUICK)
+  // and turn/lean ease twice as fast: a cut is quick, and a long cross-fade would wash out the plant.
+  const BLEND = 0.2, QUICK = 0.07;
+  function frame(p, B, near, id, now) {                  // now (seconds) is optional: tests pass their own clock
+    if (now == null) now = performance.now() / 1000;
+    const s = p._animSmooth || (p._animSmooth = { turn: 0, lean: 0, kind: null, dir: null, from: null, t: 9, len: BLEND, last: null, at: now });
     const dt = Math.min(0.1, Math.max(0, now - s.at)); s.at = now;
-    if (reduce()) { s.last = fr; s.kind = fr.kind; return fr; }
-    if (fr.kind !== s.kind || fr.dir !== s.dir) { s.from = s.last; s.t = 0; s.kind = fr.kind; s.dir = fr.dir; }
+    const fr = pick(p, B, near, id, dt);
+    if (reduce()) { s.last = fr; s.kind = fr.kind; s.dir = fr.dir; return fr; }
+    if (fr.kind !== s.kind || fr.dir !== s.dir) {
+      s.len = TURN_KINDS.has(fr.kind) && TURN_KINDS.has(s.kind) ? QUICK : BLEND;
+      s.from = s.last; s.t = 0; s.kind = fr.kind; s.dir = fr.dir;
+    }
     s.t += dt;
-    const k = 1 - Math.exp(-dt * 12);                      // time-based easing: the same feel at 30, 60 or 120 fps
+    const k = 1 - Math.exp(-dt * (TURN_KINDS.has(fr.kind) ? 24 : 12));   // time-based easing: the same feel at 30, 60 or 120 fps
     s.turn += (fr.turn - s.turn) * k; s.lean += (fr.lean - s.lean) * k;
     let out = fr;
-    if (s.from && s.t < BLEND) {
-      const w = 1 - s.t / BLEND, e = w * w * (3 - 2 * w); // smoothstep from the old pose to the new one
+    if (s.from && s.t < s.len) {
+      const w = 1 - s.t / s.len, e = w * w * (3 - 2 * w); // smoothstep from the old pose to the new one
       out = Object.assign(tween(fr, s.from, e), { kind: fr.kind, dir: fr.dir, frame: fr.frame });
     }
     out.turn = s.turn; out.lean = s.lean;
@@ -177,5 +313,5 @@
   }
 
 
-  window.Anim = { frame, FRAMES: N, GAIT, framesFor };
+  window.Anim = { frame, FRAMES: N, GAIT, framesFor, TURN_KINDS };
 })();
