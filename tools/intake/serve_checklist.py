@@ -16,7 +16,7 @@ Run it again after every inbox drop. It reads only what is on disk:
   (median confidence), frame rate and frame size. Grades (GAME-DESIGN thresholds for reading joints by eye and by the
   tracker): GOOD = player ≥ 550 px tall and confidence ≥ 0.6; USABLE = ≥ 350 px and ≥ 0.45; REFETCH otherwise.
 """
-import glob, json, os, re
+import glob, json, math, os, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, "datasets/footage/SERVE_CHECKLIST.md")
@@ -57,15 +57,21 @@ def own_videos(pid):
 
 
 def quality(video):
-    """Grade one clip from its keypoints (written by the intake next to it)."""
-    base = os.path.splitext(os.path.join(ROOT, video))[0]
-    kp = base.replace(" ", "-") + ".keypoints.json"
+    """Grade one clip. Two independent trackers: Apple Vision (<clip>.keypoints.json, the intake) and YOLO11m-pose
+    (<clip>.yolo.keypoints.json, tools/intake/yolo_pose.py). A tracker's own confidence can be confidently wrong, so the
+    grade rests on where the two AGREE: the median distance between the same joint in both, as % of the player's
+    height (Nov 27). Also: how tall the player is in the picture, and YOLO's median joint confidence.
+    GOOD = player >= 550 px, trackers within 4 % of his height, YOLO confidence >= 0.6; USABLE = >= 350 px and within
+    8 %, or a small player (>= 250 px) both read within 3 % with YOLO >= 0.85 (body readable, hands and racket too
+    small); REFETCH otherwise (GAME-DESIGN thresholds). Without a YOLO file it falls back to Vision's confidence."""
+    base = os.path.splitext(os.path.join(ROOT, video))[0].replace(" ", "-")
+    kp, yk = base + ".keypoints.json", base + ".yolo.keypoints.json"
     if not os.path.exists(kp):
         return None
     d = json.load(open(kp)); W, H = d.get("width") or 0, d.get("height") or 0
+    V = {f["i"]: f.get("joints") or {} for f in d.get("frames", [])}
     tall, conf = [], []
-    for f in d.get("frames", []):
-        j = f.get("joints") or {}
+    for j in V.values():
         ys = [v[1] for v in j.values()]; cs = [v[2] for v in j.values() if len(v) > 2]
         if len(ys) >= 8:
             tall.append((max(ys) - min(ys)) * H / 0.9)        # nose-to-ankle is ~0.9 of standing height
@@ -74,9 +80,35 @@ def quality(video):
         return {"grade": "REFETCH", "why": "no player found", "size": f"{W}x{H}", "fps": round(d.get("fps", 0))}
     tall.sort(); conf.sort()
     px, c = tall[len(tall) // 2], conf[len(conf) // 2]
-    grade = "GOOD" if px >= 550 and c >= 0.6 else "USABLE" if px >= 350 and c >= 0.45 else "REFETCH"
-    why = [] if grade == "GOOD" else (["player only %d px tall" % px] if px < 550 else []) + (["joints unclear (%.2f)" % c] if c < 0.6 else [])
-    return {"grade": grade, "px": round(px), "conf": round(c, 2), "size": f"{W}x{H}", "fps": round(d.get("fps", 0)), "why": ", ".join(why)}
+    q = {"px": round(px), "conf": round(c, 2), "size": f"{W}x{H}", "fps": round(d.get("fps", 0))}
+    agree = yconf = None
+    if os.path.exists(yk):
+        Y = {f["i"]: f.get("joints") or {} for f in json.load(open(yk)).get("frames", [])}
+        gaps, ycs = [], []
+        for i, vj in V.items():
+            yj = Y.get(i) or {}
+            for n in vj:
+                if n in yj:
+                    gaps.append(math.hypot((vj[n][0] - yj[n][0]) * W, (vj[n][1] - yj[n][1]) * H) / px * 100)
+            ycs += [v[2] for v in yj.values()]
+        if gaps:
+            gaps.sort(); ycs.sort()
+            agree, yconf = gaps[len(gaps) // 2], ycs[len(ycs) // 2]
+            q.update(agreePct=round(agree, 1), yoloConf=round(yconf, 2))
+    why = []
+    if agree is not None:
+        grade = ("GOOD" if px >= 550 and agree <= 4 and yconf >= 0.6
+                 else "USABLE" if (px >= 350 and agree <= 8) or (px >= 250 and agree <= 3 and yconf >= 0.85)
+                 else "REFETCH")   # a small player both trackers read the same way: body readable, hands and racket not
+        if agree > 4: why.append("trackers disagree by %.1f %% of his height" % agree)
+        if yconf < 0.6: why.append("YOLO unsure (%.2f)" % yconf)
+    else:
+        grade = "GOOD" if px >= 550 and c >= 0.6 else "USABLE" if px >= 350 and c >= 0.45 else "REFETCH"
+        if c < 0.6: why.append("joints unclear (%.2f)" % c)
+        why.append("no YOLO check yet")
+    if px < 550: why.insert(0, "player only %d px tall" % px + (": body readable, hands and racket too small" if grade == "USABLE" else ""))
+    q.update(grade=grade, why=", ".join(why) if grade != "GOOD" or agree is None else "")
+    return q
 
 
 def second_clip(vids):
@@ -131,9 +163,10 @@ md = ["# Serve footage checklist", "",
       "| Pro | Hand | 1st serve | 2nd serve | Own clips | Compilation segments |", "|---|---|---|---|---|---|"]
 md += [f"| {n} | {'L' if h == 'L' else 'R'} | {a} | {b} | {v} | {c} |" for n, h, a, b, v, c in rows]
 md += ["", "## Picture quality of the clips that are in", "",
+       "Two trackers read every clip (Apple Vision and YOLO11m-pose). The gap is how far apart they put the same joint, as % of the player's height: small = both see the body the same way.",
        "GOOD: every joint readable · USABLE: works, a sharper or closer clip would be better · REFETCH: too small or blurry to read the body.", "",
-       "| Pro | Clip | Grade | Player height | Tracker confidence | Frame | fps | Why |", "|---|---|---|---|---|---|---|---|"]
-md += [f"| {n} | {v} | {q['grade']} | {q.get('px', '-')} px | {q.get('conf', '-')} | {q['size']} | {q['fps']} | {q.get('why', '')} |" for n, v, q in qual]
+       "| Pro | Clip | Grade | Player height | Vision vs YOLO gap | YOLO confidence | Vision confidence | Frame | fps | Why |", "|---|---|---|---|---|---|---|---|---|---|"]
+md += [f"| {n} | {v} | {q['grade']} | {q.get('px', '-')} px | {str(q['agreePct']) + ' %' if 'agreePct' in q else '-'} | {q.get('yoloConf', '-')} | {q.get('conf', '-')} | {q['size']} | {q['fps']} | {q.get('why', '')} |" for n, v, q in qual]
 md += ["", "## To fetch", ""]
 for name, need, links in todo:
     md.append(f"- [ ] **{name}**: {' and '.join(need)}")

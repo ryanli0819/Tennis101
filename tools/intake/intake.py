@@ -13,6 +13,8 @@ What it does with each file in datasets/inbox/ (sub-folders too):
 4. Videos: if macOS can't decode the codec (AV1 from YouTube on M1/M2), converts a 1080p H.264 copy first
    (tools/intake/convert.py, PyAV in tools/.venv). Then runs pose.swift (every person, every frame) → <name>.keypoints.json next to the clip; for serve clips also
    pick_server.py (keeps the server). Saves 8 stills for the Appearance Scout in datasets/players/<id>/images/stills/.
+   Then YOLO11m-pose (tools/intake/yolo_pose.py, if tools/.venv and tools/models are set up) as a second tracker, and
+   refreshes datasets/footage/SERVE_CHECKLIST.md with each clip's picture-quality grade.
 5. Logs everything in datasets/inbox/intake-log.json (what moved where, what was analysed, what failed).
 0. Rejects what is already in the system (Ryan, Nov 25): a file whose content (SHA-256) matches a video or photo already
    anywhere under datasets/ — or one filed earlier in the same run — is moved to the macOS Trash (recoverable; no
@@ -158,8 +160,13 @@ for dirpath, dirs, files in os.walk(INBOX):
             if kind and kind.startswith("serve") and len(found) == 1:   # one server to pick (not in a compilation)
                 entry["server"] = run([sys.executable, "-I", os.path.join(TOOLS, "pick_server.py"), kp, pid, "unknown view"])
             entry["stills"] = run(["swift", os.path.join(TOOLS, "grab.swift"), dest, frames, "8"])
+            ypy, ymodel = os.path.join(ROOT, "tools/.venv/bin/python"), os.path.join(ROOT, "tools/models/yolo11m-pose.pt")
+            if os.path.exists(ypy) and os.path.exists(ymodel):   # second tracker for the quality grade (serve_checklist.py)
+                entry["yolo"] = run([ypy, "-I", os.path.join(ROOT, "tools/intake/yolo_pose.py"), dest, kp])
         log.append(entry); done += 1
 if not DRY:
     json.dump(log, open(log_path, "w"), indent=1, ensure_ascii=False)
     json.dump(index, open(INDEX_PATH, "w"), indent=0)
+    if done:   # refresh the serve checklist (who's in, picture quality, what to fetch)
+        run([sys.executable, "-I", os.path.join(ROOT, "tools/intake/serve_checklist.py")])
 print(f"{done} file(s) {'would be ' if DRY else ''}filed. Log: {os.path.relpath(log_path, ROOT)}")

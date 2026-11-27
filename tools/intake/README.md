@@ -32,3 +32,13 @@ Files without a player name wait in `inbox/unsorted/`. A file naming several pla
 Videos and photos never leave the Mac (git-ignored); only keypoints (numbers) are committed.
 
 Optional: `install-watcher.sh` makes macOS run the intake automatically whenever a file lands in the inbox.
+
+## Second tracker (YOLO) and the serve checklist
+
+Every new video also runs through YOLO11m-pose (`tools/intake/yolo_pose.py`; Ultralytics, AGPL-3.0, offline analysis
+only, telemetry off), and `datasets/footage/SERVE_CHECKLIST.md` is refreshed. A clip's grade rests on where the two
+trackers agree (the gap between the same joint in Apple Vision and YOLO, as % of the player's height) and on how tall
+the player is in the picture, not on one tracker's own confidence. To set YOLO up on another Mac:
+
+    tools/.venv/bin/python -m pip install ultralytics && tools/.venv/bin/yolo settings sync=False
+    mkdir -p tools/models && cd tools/models && ../.venv/bin/python -c "from ultralytics import YOLO; YOLO('yolo11m-pose.pt')"

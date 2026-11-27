@@ -13,7 +13,7 @@ Quality: the player should fill most of the frame height (at least ~550 px tall)
 | Carlos Alcaraz | R | ✅ in, used | ✅ same clip (one serve) | 13 | 4 |
 | Ben Shelton | L | ✅ in, used | ❌ fetch | 2 | 2 |
 | Daniil Medvedev | R | 🟡 compilation segment only | ❌ fetch | 0 | 2 |
-| Flavio Cobolli | R | ⚠️ in, picture too poor: refetch | ❌ fetch | 1 | 0 |
+| Flavio Cobolli | R | 📥 in, rebuild next | ❌ fetch | 1 | 0 |
 | Arthur Fils | R | ❌ fetch | ❌ fetch | 0 | 0 |
 | Frances Tiafoe | R | ❌ fetch | ❌ fetch | 0 | 0 |
 | Alex de Minaur | R | 🟡 compilation segment only | ❌ fetch | 0 | 3 |
@@ -28,22 +28,23 @@ Quality: the player should fill most of the frame height (at least ~550 px tall)
 | Brandon Nakashima | R | ❌ fetch | ❌ fetch | 0 | 0 |
 | Learner Tien | L | ❌ fetch | ❌ fetch | 0 | 0 |
 | Roger Federer | R | ✅ in, used | ❌ fetch | 1 | 0 |
-| Rafael Nadal | L | ⚠️ in, picture too poor: refetch | ❌ fetch | 1 | 0 |
-| Nick Kyrgios | R | ⚠️ in, picture too poor: refetch | ❌ fetch | 1 | 0 |
+| Rafael Nadal | L | 📥 in, rebuild next | ❌ fetch | 1 | 0 |
+| Nick Kyrgios | R | 📥 in, rebuild next | ❌ fetch | 1 | 0 |
 
 ## Picture quality of the clips that are in
 
+Two trackers read every clip (Apple Vision and YOLO11m-pose). The gap is how far apart they put the same joint, as % of the player's height: small = both see the body the same way.
 GOOD: every joint readable · USABLE: works, a sharper or closer clip would be better · REFETCH: too small or blurry to read the body.
 
-| Pro | Clip | Grade | Player height | Tracker confidence | Frame | fps | Why |
-|---|---|---|---|---|---|---|---|
-| Alexander Zverev | zverev serve backview.mov | GOOD | 845 px | 0.75 | 1182x2092 | 55 |  |
-| Alexander Zverev | zverev serve sidebackview.mov | GOOD | 661 px | 0.79 | 748x1618 | 55 |  |
-| Ben Shelton | shelton serve backview.mov | GOOD | 753 px | 0.72 | 748x1618 | 55 |  |
-| Ben Shelton | shelton serve motion.mov | REFETCH | 1004 px | 0.43 | 1116x1924 | 31 | joints unclear (0.43) |
-| Flavio Cobolli | cobolli first serve.mov | REFETCH | 291 px | 0.76 | 494x838 | 48 | player only 290 px tall |
-| Rafael Nadal | Nadal serve.mov | REFETCH | 336 px | 0.75 | 616x798 | 58 | player only 336 px tall |
-| Nick Kyrgios | kyrgios Kygrios serve.mov | REFETCH | 329 px | 0.7 | 616x798 | 51 | player only 329 px tall |
+| Pro | Clip | Grade | Player height | Vision vs YOLO gap | YOLO confidence | Vision confidence | Frame | fps | Why |
+|---|---|---|---|---|---|---|---|---|---|
+| Alexander Zverev | zverev serve backview.mov | GOOD | 845 px | 1.8 % | 0.97 | 0.75 | 1182x2092 | 55 |  |
+| Alexander Zverev | zverev serve sidebackview.mov | GOOD | 661 px | 1.4 % | 0.97 | 0.79 | 748x1618 | 55 |  |
+| Ben Shelton | shelton serve backview.mov | GOOD | 753 px | 1.9 % | 0.97 | 0.72 | 748x1618 | 55 |  |
+| Ben Shelton | shelton serve motion.mov | GOOD | 1004 px | 2.9 % | 0.87 | 0.43 | 1116x1924 | 31 |  |
+| Flavio Cobolli | cobolli first serve.mov | USABLE | 291 px | 2.2 % | 0.98 | 0.76 | 494x838 | 48 | player only 290 px tall: body readable, hands and racket too small |
+| Rafael Nadal | Nadal serve.mov | USABLE | 336 px | 2.0 % | 0.94 | 0.75 | 616x798 | 58 | player only 336 px tall: body readable, hands and racket too small |
+| Nick Kyrgios | kyrgios Kygrios serve.mov | USABLE | 329 px | 2.1 % | 0.97 | 0.7 | 616x798 | 51 | player only 329 px tall: body readable, hands and racket too small |
 
 ## To fetch
 
@@ -52,7 +53,7 @@ GOOD: every joint readable · USABLE: works, a sharper or closer clip would be b
   - 1st: https://www.youtube.com/watch?v=IQaEKk8luLM (Ben Shelton - Insane Serve and Forehand Slow Motion [4k]. Se)
 - [ ] **Daniil Medvedev**: 1st serve and 2nd serve
   - 1st: https://www.youtube.com/watch?v=ZJ39LcNagSM (✓ 31-39 s, from behind)
-- [ ] **Flavio Cobolli**: 1st serve (sharper clip) and 2nd serve
+- [ ] **Flavio Cobolli**: 2nd serve
   - 1st: https://www.youtube.com/watch?v=XewX3v0Ku6o (✓ 16-24 s)
   - 2nd: https://www.youtube.com/watch?v=iTzvJaTh9SQ (spin serve)
 - [ ] **Arthur Fils**: 1st serve and 2nd serve
@@ -88,7 +89,7 @@ GOOD: every joint readable · USABLE: works, a sharper or closer clip would be b
 - [ ] **Roger Federer**: 2nd serve
   - 1st: https://www.youtube.com/watch?v=1YuShuvbZnM (Roger Federer Serve Slow Motion - ATP Tennis Serve Technique)
   - 1st: https://www.youtube.com/watch?v=WsQ0ghZg5FE (Roger Federer Side View Serve in Super Slow Motion. 33 s.)
-- [ ] **Rafael Nadal**: 1st serve (sharper clip) and 2nd serve
+- [ ] **Rafael Nadal**: 2nd serve
   - 1st: https://www.youtube.com/watch?v=VXTxuWxafKg (super slow motion, Cincinnati 2013)
-- [ ] **Nick Kyrgios**: 1st serve (sharper clip) and 2nd serve
+- [ ] **Nick Kyrgios**: 2nd serve
   - 1st: https://www.youtube.com/watch?v=oZ7hwsx1MmU (✓ 4-16 s)
