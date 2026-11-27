@@ -8,17 +8,17 @@ Quality: the player should fill most of the frame height (at least ~550 px tall)
 
 | Pro | Hand | 1st serve | 2nd serve | Own clips | Compilation segments |
 |---|---|---|---|---|---|
-| Alexander Zverev | R | ✅ in, used | ❌ fetch | 6 | 2 |
+| Alexander Zverev | R | ✅ in, used | ✅ in, used | 6 | 2 |
 | Jannik Sinner | R | ✅ in, used | ✅ in, used | 6 | 1 |
-| Carlos Alcaraz | R | ✅ in, used | ✅ same clip (one serve) | 13 | 4 |
+| Carlos Alcaraz | R | ✅ in, used | ✅ in, used | 13 | 4 |
 | Ben Shelton | L | ✅ in, used | ❌ fetch | 2 | 2 |
 | Daniil Medvedev | R | 🟡 compilation segment only | ❌ fetch | 0 | 2 |
 | Flavio Cobolli | R | ✅ in, used | ❌ fetch | 1 | 0 |
 | Arthur Fils | R | ❌ fetch | ❌ fetch | 0 | 0 |
-| Frances Tiafoe | R | ✅ in, used | 📥 in, rebuild next | 2 | 0 |
+| Frances Tiafoe | R | ✅ in, used | ✅ in, used | 2 | 0 |
 | Alex de Minaur | R | 🟡 compilation segment only | ❌ fetch | 0 | 3 |
 | Rafael Jódar | R | ❌ fetch | ❌ fetch | 0 | 0 |
-| Novak Djokovic | R | ✅ in, used | 📥 in, rebuild next | 2 | 2 |
+| Novak Djokovic | R | ✅ in, used | ✅ in, used | 2 | 2 |
 | Taylor Fritz | R | 🟡 compilation segment only | ❌ fetch | 0 | 4 |
 | Felix Auger-Aliassime | R | ❌ fetch | ❌ fetch | 0 | 0 |
 | Tommy Paul | R | ❌ fetch | ❌ fetch | 0 | 0 |
@@ -57,7 +57,6 @@ GOOD: every joint readable · USABLE: works, a sharper or closer clip would be b
 
 ## To fetch
 
-- [ ] **Alexander Zverev**: 2nd serve
 - [ ] **Ben Shelton**: 2nd serve
   - 1st: https://www.youtube.com/watch?v=IQaEKk8luLM (Ben Shelton - Insane Serve and Forehand Slow Motion [4k]. Se)
 - [ ] **Daniil Medvedev**: 1st serve and 2nd serve

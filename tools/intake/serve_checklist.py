@@ -132,7 +132,8 @@ for pid, name, hand in roster:
     else:
         first = "❌ fetch"
     sec_v = second_clip(vids)
-    if pid == "sinner":
+    own_js = os.path.join(ROOT, f"src/serve/motion/{pid}-serve.js")
+    if pid in clip_players and os.path.exists(own_js) and '"second":{' in open(own_js).read():
         second = "✅ in, used"
     elif pid == "alcaraz":
         second = "✅ same clip (one serve)"
