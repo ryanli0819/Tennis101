@@ -8,17 +8,17 @@ Quality: the player should fill most of the frame height (at least ~550 px tall)
 
 | Pro | Hand | 1st serve | 2nd serve | Own clips | Compilation segments |
 |---|---|---|---|---|---|
-| Alexander Zverev | R | ✅ in, used | ❌ fetch | 3 | 2 |
+| Alexander Zverev | R | ✅ in, used | ❌ fetch | 6 | 2 |
 | Jannik Sinner | R | ✅ in, used | ✅ in, used | 6 | 1 |
 | Carlos Alcaraz | R | ✅ in, used | ✅ same clip (one serve) | 13 | 4 |
 | Ben Shelton | L | ✅ in, used | ❌ fetch | 2 | 2 |
 | Daniil Medvedev | R | 🟡 compilation segment only | ❌ fetch | 0 | 2 |
-| Flavio Cobolli | R | 📥 in, rebuild next | ❌ fetch | 1 | 0 |
+| Flavio Cobolli | R | ✅ in, used | ❌ fetch | 1 | 0 |
 | Arthur Fils | R | ❌ fetch | ❌ fetch | 0 | 0 |
-| Frances Tiafoe | R | ❌ fetch | ❌ fetch | 0 | 0 |
+| Frances Tiafoe | R | ✅ in, used | 📥 in, rebuild next | 2 | 0 |
 | Alex de Minaur | R | 🟡 compilation segment only | ❌ fetch | 0 | 3 |
 | Rafael Jódar | R | ❌ fetch | ❌ fetch | 0 | 0 |
-| Novak Djokovic | R | 🟡 compilation segment only | ❌ fetch | 0 | 2 |
+| Novak Djokovic | R | ✅ in, used | 📥 in, rebuild next | 2 | 2 |
 | Taylor Fritz | R | 🟡 compilation segment only | ❌ fetch | 0 | 4 |
 | Felix Auger-Aliassime | R | ❌ fetch | ❌ fetch | 0 | 0 |
 | Tommy Paul | R | ❌ fetch | ❌ fetch | 0 | 0 |
@@ -28,8 +28,8 @@ Quality: the player should fill most of the frame height (at least ~550 px tall)
 | Brandon Nakashima | R | ❌ fetch | ❌ fetch | 0 | 0 |
 | Learner Tien | L | ❌ fetch | ❌ fetch | 0 | 0 |
 | Roger Federer | R | ✅ in, used | ❌ fetch | 1 | 0 |
-| Rafael Nadal | L | 📥 in, rebuild next | ❌ fetch | 1 | 0 |
-| Nick Kyrgios | R | 📥 in, rebuild next | ❌ fetch | 1 | 0 |
+| Rafael Nadal | L | ✅ in, used | ❌ fetch | 1 | 0 |
+| Nick Kyrgios | R | ✅ in, used | ❌ fetch | 3 | 0 |
 
 ## Picture quality of the clips that are in
 
@@ -38,13 +38,22 @@ GOOD: every joint readable · USABLE: works, a sharper or closer clip would be b
 
 | Pro | Clip | Grade | Player height | Vision vs YOLO gap | YOLO confidence | Vision confidence | Frame | fps | Why |
 |---|---|---|---|---|---|---|---|---|---|
+| Alexander Zverev | Zverev First serve.mov | USABLE | 459 px | 2.0 % | 0.98 | 0.72 | 664x1008 | 58 | player only 459 px tall: body readable, hands and racket too small |
+| Alexander Zverev | Zverev Front Wide.mov | REFETCH | 233 px | 2.4 % | 0.99 | 0.76 | 512x752 | 58 | player only 233 px tall |
+| Alexander Zverev | Zverev front T.mov | USABLE | 275 px | 2.0 % | 0.98 | 0.78 | 512x752 | 57 | player only 274 px tall: body readable, hands and racket too small |
 | Alexander Zverev | zverev serve backview.mov | GOOD | 845 px | 1.8 % | 0.97 | 0.75 | 1182x2092 | 55 |  |
 | Alexander Zverev | zverev serve sidebackview.mov | GOOD | 661 px | 1.4 % | 0.97 | 0.79 | 748x1618 | 55 |  |
 | Ben Shelton | shelton serve backview.mov | GOOD | 753 px | 1.9 % | 0.97 | 0.72 | 748x1618 | 55 |  |
 | Ben Shelton | shelton serve motion.mov | GOOD | 1004 px | 2.9 % | 0.87 | 0.43 | 1116x1924 | 31 |  |
 | Flavio Cobolli | cobolli first serve.mov | USABLE | 291 px | 2.2 % | 0.98 | 0.76 | 494x838 | 48 | player only 290 px tall: body readable, hands and racket too small |
+| Frances Tiafoe | Tiafoe First Wide.mov | USABLE | 388 px | 2.0 % | 0.98 | 0.7 | 494x820 | 45 | player only 388 px tall: body readable, hands and racket too small |
+| Frances Tiafoe | Tiafoe Second .mov | USABLE | 400 px | 1.8 % | 0.98 | 0.7 | 494x820 | 42 | player only 399 px tall: body readable, hands and racket too small |
+| Novak Djokovic | Djokovic First.mov | USABLE | 371 px | 1.7 % | 0.98 | 0.73 | 434x802 | 44 | player only 370 px tall: body readable, hands and racket too small |
+| Novak Djokovic | Djokovic Second.mov | USABLE | 316 px | 2.4 % | 0.98 | 0.73 | 676x858 | 45 | player only 316 px tall: body readable, hands and racket too small |
 | Rafael Nadal | Nadal serve.mov | USABLE | 336 px | 2.0 % | 0.94 | 0.75 | 616x798 | 58 | player only 336 px tall: body readable, hands and racket too small |
 | Nick Kyrgios | kyrgios Kygrios serve.mov | USABLE | 329 px | 2.1 % | 0.97 | 0.7 | 616x798 | 51 | player only 329 px tall: body readable, hands and racket too small |
+| Nick Kyrgios | kyrgios Kyrigos First T.mov | USABLE | 427 px | 2.4 % | 0.97 | 0.71 | 914x1358 | 30 | player only 427 px tall: body readable, hands and racket too small |
+| Nick Kyrgios | kyrgios Kyrigos First Wide.mov | REFETCH | 141 px | 3.0 % | 0.98 | 0.78 | 488x774 | 44 | player only 140 px tall |
 
 ## To fetch
 
@@ -58,17 +67,11 @@ GOOD: every joint readable · USABLE: works, a sharper or closer clip would be b
   - 2nd: https://www.youtube.com/watch?v=iTzvJaTh9SQ (spin serve)
 - [ ] **Arthur Fils**: 1st serve and 2nd serve
   - 1st: https://www.youtube.com/watch?v=LvA9IJcS2ok (✓ about 380-391 s, front view)
-- [ ] **Frances Tiafoe**: 1st serve and 2nd serve
-  - 1st: https://www.youtube.com/watch?v=DnjZqPocLeM (ティアフォーのフラットサーブ（スロー) / Frances Tiafoe Flat Serve Slow Motion.)
 - [ ] **Alex de Minaur**: 1st serve and 2nd serve
   - 1st: https://www.youtube.com/watch?v=LvA9IJcS2ok (✓ from 4:10, front view)
   - 2nd: https://www.youtube.com/watch?v=2TUIxZtAWnM (slice serve)
 - [ ] **Rafael Jódar**: 1st serve and 2nd serve
   - 1st: https://www.youtube.com/watch?v=jNnhYeRfyYo (✓ 26-38 s)
-- [ ] **Novak Djokovic**: 1st serve and 2nd serve
-  - 1st: https://www.youtube.com/watch?v=32nyPw9YUEA (✓ 95-103 s, court level)
-  - 2nd: https://www.youtube.com/watch?v=Qi7EhhmxxbY (kick serve, back view (not watched yet))
-  - 2nd: https://www.youtube.com/watch?v=1pcSmqbJ3bI (1st and 2nd serve (not watched yet))
 - [ ] **Taylor Fritz**: 1st serve and 2nd serve
 - [ ] **Felix Auger-Aliassime**: 1st serve and 2nd serve
   - 1st: https://www.youtube.com/watch?v=Bdmb1ZOSQa8 (Felix Auger-Aliassime Serve [Slow Motion].)

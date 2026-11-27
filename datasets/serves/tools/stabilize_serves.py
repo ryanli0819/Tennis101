@@ -74,7 +74,7 @@ def rows_to_arrays(rows):
 
 # Pros whose serve follows their own clip (x and height from the clip, depth from the roster serve at the same phase).
 # Files are written by export_motion.py; the roster serve still supplies depth, heels, toes, ears and index fingers.
-CLIP_PLAYERS = ["sinner", "zverev", "shelton", "federer"]
+CLIP_PLAYERS = ["sinner", "zverev", "shelton", "federer", "djokovic", "tiafoe", "nadal", "cobolli", "kyrgios"]
 
 
 def read_clips():
@@ -294,21 +294,26 @@ def lock_feet(tq, J, L):
 
 
 # ---------------------------------------------------------------- Sinner: his own clip + roster depth
-def phase_map(ev_from, ev_to, t):
-    xs = [ev_from[e] for e in EV if e in ev_from and e in ev_to]
-    ys = [ev_to[e] for e in EV if e in ev_from and e in ev_to]
-    return np.interp(t, xs, ys, left=None, right=None) + np.where(t < xs[0], t - xs[0], 0) + np.where(t > xs[-1], t - xs[-1], 0)
+def phase_map(ev_from, ev_to, t, keys=EV):
+    xs = [ev_from[e] for e in keys if e in ev_from and e in ev_to]
+    ys = [ev_to[e] for e in keys if e in ev_from and e in ev_to]
+    t = np.asarray(t, float)
+    return np.interp(t, xs, ys) + np.where(t < xs[0], t - xs[0], 0) + np.where(t > xs[-1], t - xs[-1], 0)
 
 
 def sinner_from_clip(clip, ref):
-    """clip: sinner-serve.js motion ({t, j:{name:[x,up]}}); ref: roster serve (rows). Returns t, J (frames × N × 3)."""
+    """clip: an exported own-clip motion ({t, j:{name:[x,up]}}); ref: the pro's roster serve (rows).
+    Returns t, J (frames × N × 3) and the events on the clip's clock.
+    Only the events the clip really shows ("knownEvents") line the two up. A clip that starts late (after the bounces,
+    or at the trophy) gets its missing beginning from the roster serve at the same phase, eased into the clip's first
+    frame over 0.35 s; its missing events are the roster's, mapped onto the clip's clock (Nov 27)."""
+    known = clip.get("knownEvents") or EV
     ft = np.array([f["t"] for f in clip["frames"]])
     rt, RJ = rows_to_arrays(ref["rows"])
-    tm = phase_map(clip["events"], ref["events"], ft)
+    tm = phase_map(clip["events"], ref["events"], ft, known)
     R = np.stack([np.stack([np.interp(tm, rt, RJ[:, k, c]) for c in range(3)], -1) for k in range(len(N))], 1)
     J = R.copy()
     have = clip["frames"][0]["j"].keys()
-    # the clip's root sits at x = 0; place it on the roster pelvis so the depth joints line up
     rp = (R[:, IX["leftHip"]] + R[:, IX["rightHip"]]) / 2
     cp = np.array([[(f["j"]["leftHip"][0] + f["j"]["rightHip"][0]) / 2, (f["j"]["leftHip"][1] + f["j"]["rightHip"][1]) / 2] for f in clip["frames"]])
     for n in N:
@@ -317,11 +322,23 @@ def sinner_from_clip(clip, ref):
         v = np.array([f["j"][n] for f in clip["frames"]])
         J[:, IX[n], 0] = v[:, 0] - cp[:, 0] + rp[:, 0]
         J[:, IX[n], 1] = v[:, 1]
-    # joints the clip lacks ride on their parent with the roster's offset
     for child, parent in (("leftEar", "nose"), ("rightEar", "nose"), ("leftIndex", "leftWrist"), ("rightIndex", "rightWrist"),
                           ("leftHeel", "leftAnkle"), ("rightHeel", "rightAnkle"), ("leftToe", "leftAnkle"), ("rightToe", "rightAnkle")):
         J[:, IX[child]] = J[:, IX[parent]] + (R[:, IX[child]] - R[:, IX[parent]])
-    return ft, J
+    ev = {e: clip["events"][e] for e in EV if e in clip["events"] and e in known}
+    for e in EV:   # what the clip doesn't show: the roster's moment on the clip's clock
+        if e not in ev and e in ref["events"]:
+            ev[e] = round(float(phase_map(ref["events"], clip["events"], [ref["events"][e]], known)[0]), 4)
+    if "start" not in known or ev["start"] < ft[0] - 1e-6:
+        pre_r = rt[rt < tm[0] - 1e-6]
+        if len(pre_r):
+            pre_t = phase_map(ref["events"], clip["events"], pre_r, known)
+            off = J[0] - RJ[np.searchsorted(rt, tm[0]) - 1 if np.searchsorted(rt, tm[0]) > 0 else 0]
+            w = np.clip(1 - (pre_t[-1] + (pre_t[1] - pre_t[0] if len(pre_t) > 1 else 0.02) - pre_t) / 0.35, 0, 1)
+            w = w * w * (3 - 2 * w)
+            P = RJ[rt < tm[0] - 1e-6] + off[None] * w[:, None, None]
+            ft, J = np.concatenate([pre_t, ft]), np.concatenate([P, J])
+    return ft, J, ev
 
 
 # ---------------------------------------------------------------- measuring
@@ -394,12 +411,12 @@ def seen_toss_side(tq, S, E, hand):
     return float(want * (S[m, IX[toss + "Wrist"], 0] - pel[:, 0] - (S[m, IX[toss + "Shoulder"], 0] - mid[:, 0])).mean())
 
 
-def contact_at_peak(tq, S, ev, hand):
+def contact_at_peak(tq, S, ev, hand, reach=0.2):
     """Ryan, Nov 24: hitting points were far too low (some clips marked contact 1.5-1.7 m up). Contact is where the
     racket hand is highest, searched within 0.2 s of the clip's mark and after the toss; finish is kept after it."""
     hit = "left" if hand == "L" else "right"
     c0 = ev["contact"]
-    m = (tq >= max(ev["tossRelease"] + 0.1, c0 - 0.2)) & (tq <= c0 + 0.2)
+    m = (tq >= max(ev["tossRelease"] + 0.1, c0 - reach)) & (tq <= c0 + reach)
     if m.sum() < 2:
         return ev, 0.0
     c = float(tq[m][np.argmax(S[m, IX[hit + "Wrist"], 1])])
@@ -510,10 +527,12 @@ def _resample(tq, S, warp):
     return grid, out
 
 
-def apply_style(pid, tq, S, ev, hand, L):
+def apply_style(pid, tq, S, ev, hand, L, own_clip=False):
     st = STYLES.get(pid)
     if not st:
         return tq, S, ev, {}
+    if own_clip:   # the pro's own clip already carries his bend, lean, arm path, speed and jump: keep only what it can't show
+        st = {k: v for k, v in st.items() if k in ("seen", "hold", "headTilt", "fwd")}
     S = S.copy(); ev = dict(ev)
     face = 1.0 if hand == "R" else -1.0
     toss, hit = ("left", "right") if hand == "R" else ("right", "left")
@@ -613,20 +632,20 @@ def main():
             if p["id"] in clips:
                 cl = clips[p["id"]]
                 clip = cl["first"] if role == "first" else cl.get("second", cl["first"])
-                t0, J0 = sinner_from_clip(clip, sv)
-                ev, src = dict(clip["events"]), clip["source"] + " + depth from " + sv["id"]
+                t0, J0, ev = sinner_from_clip(clip, sv)
+                src = clip["source"] + " + depth from " + sv["id"] + ("" if not clip.get("knownEvents") else " (start filled from it)")
             before = (bone_spread(J0), jitter(t0, J0), foot_slide(t0, J0))
             tq, S, L, locks = stabilize(t0, J0, ev, hand)
             flipx = seen_toss_side(tq, S, ev, hand) < 0
             if flipx:  # the user would see the toss arm on the wrong side: turn x round (bones and pinned feet are unchanged)
                 S = S.copy(); S[:, :, 0] *= -1
             turned = "turned" if flipx and turned else "sideways" if flipx else "depth" if turned else None
-            ev, moved = contact_at_peak(tq, S, ev, hand)
+            ev, moved = contact_at_peak(tq, S, ev, hand, 0.06 if p["id"] in clips else 0.2)   # own clips: contact was read by eye
             travel, styled = None, {}
             if p["id"] == "sinner":
                 tq, S, ev = sinner_style(tq, S, ev, hand)
                 travel = {"fwd": 0.7}   # GAME-DESIGN (Ryan: "make him jump forward"): lands about 0.7 m inside the baseline
-            tq, S, ev, styled = apply_style(p["id"], tq, S, ev, hand, L)
+            tq, S, ev, styled = apply_style(p["id"], tq, S, ev, hand, L, own_clip=p["id"] in clips)
             if styled.get("travel"): travel = dict(travel or {}, **styled["travel"])
             after = (bone_spread(S), jitter(tq, S, t0), foot_slide(tq, S))
             out.setdefault(p["id"], {})[role] = {

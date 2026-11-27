@@ -143,8 +143,8 @@ for pid, name, hand in roster:
     for v in vids:
         q = quality(v)
         if q: qual.append((name, os.path.basename(v), q))
-    bad = [q for n_, v_, q in qual if n_ == name and q["grade"] == "REFETCH"]
-    if bad and not first.startswith("✅"):
+    mine = [q for n_, v_, q in qual if n_ == name]
+    if mine and all(q["grade"] == "REFETCH" for q in mine) and not first.startswith("✅"):   # flag only when no clip is usable
         first = "⚠️ in, picture too poor: refetch"
     rows.append((name, hand, first, second, len(vids), len(comp)))
     if not first.startswith("✅") or not second.startswith("✅"):

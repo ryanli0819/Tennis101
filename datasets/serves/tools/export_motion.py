@@ -74,6 +74,46 @@ PLAYERS["federer"] = {  # slow motion from behind, deep knee bend and chest open
                "note": "1st serve, back-side view, slow motion (Roger Federer Back view.mov 1.6-7.6 s)"},
 }
 
+# Nov 27, 2026 (Ryan's labelled drops, triangulate-serve skill): event frames read off stills by eye.
+# "known": the events the clip really shows; a clip that starts late (after the bounces, or at the trophy) lists only
+# what it shows, and stabilize_serves.py fills the missing start from the pro's roster serve, blended into the clip.
+PLAYERS["djokovic"] = {
+    "first":  {"src": "datasets/serves/djokovic/Djokovic-First.keypoints.json", "mirror": False, "calm": (75, 92), "clean": "light",
+               "realSpeed": True, "events": {"start": 1, "tossRelease": 11, "trophy": 31, "contact": 45, "finish": 64},
+               "known": ["tossRelease", "trophy", "contact", "finish"],
+               "note": "1st serve, behind-high view, real speed (Djokovic First.mov; starts as the toss goes up)"},
+    "second": {"src": "datasets/serves/djokovic/Djokovic-Second.keypoints.json", "mirror": False, "calm": (65, 76), "clean": "light",
+               "realSpeed": True, "events": {"start": 0, "tossRelease": 1, "trophy": 9, "contact": 25, "finish": 45},
+               "known": ["trophy", "contact", "finish"],
+               "note": "2nd serve, behind-high view, real speed (Djokovic Second.mov; starts at the trophy)"},
+}
+PLAYERS["tiafoe"] = {
+    "first":  {"src": "datasets/serves/tiafoe/Tiafoe-First-Wide.keypoints.json", "mirror": False, "calm": (77, 100), "clean": "light",
+               "realSpeed": True, "events": {"start": 1, "tossRelease": 11, "trophy": 29, "contact": 49, "finish": 68},
+               "known": ["tossRelease", "trophy", "contact", "finish"],
+               "note": "1st serve (wide), behind-high view, real speed (Tiafoe First Wide.mov)"},
+    "second": {"src": "datasets/serves/tiafoe/Tiafoe-Second-.keypoints.json", "mirror": False, "calm": (76, 100), "clean": "light",
+               "realSpeed": True, "events": {"start": 0, "tossRelease": 3, "trophy": 21, "contact": 39, "finish": 56},
+               "known": ["tossRelease", "trophy", "contact", "finish"],
+               "note": "2nd serve, behind-high view, real speed (Tiafoe Second .mov; starts at the toss)"},
+}
+PLAYERS["nadal"] = {    # left-handed; the first 0.15 s is a close-up cut, the serve is the broadcast view from behind
+    "first":  {"src": "datasets/serves/nadal/Nadal-serve.keypoints.json", "mirror": False, "calm": (110, 127), "clean": "light",
+               "realSpeed": True, "leadFrom": 12, "events": {"start": 12, "tossRelease": 21, "trophy": 46, "contact": 65, "finish": 87},
+               "note": "1st serve, behind-high view, real speed (Nadal serve.mov 0.2-1.5 s, Madrid clay)"},
+}
+PLAYERS["cobolli"] = {  # holds ball and racket at the chest ~1 s, deep crouch, big forward jump; desktop shows after 4.6 s
+    "first":  {"src": "datasets/serves/cobolli/cobolli-first-serve.keypoints.json", "mirror": False, "calm": (10, 48), "clean": "light",
+               "realSpeed": True, "leadFrom": 20, "events": {"start": 64, "tossRelease": 82, "trophy": 103, "contact": 125, "finish": 149},
+               "note": "1st serve, behind-high view, real speed (cobolli first serve.mov 0.4-3.1 s)"},
+}
+PLAYERS["kyrgios"] = {  # close-up during the bounces, then a camera cut: only the wide part (1.74 s on) is one camera
+    "first":  {"src": "datasets/serves/kyrgios/kyrgios-Kyrigos-First-T.keypoints.json", "mirror": False, "calm": (88, 102), "clean": "light",
+               "realSpeed": True, "leadFrom": 52, "events": {"start": 52, "tossRelease": 54, "trophy": 60, "contact": 66, "finish": 79},
+               "known": ["tossRelease", "trophy", "contact", "finish"],
+               "note": "1st serve (T), broadcast view from behind, real speed (kyrgios Kyrigos First T.mov 1.74-2.6 s; player small)"},
+}
+
 def light_clean(d):
     """Raw joints with confidence >= 0.3; a joint that jumps away from both neighbours (and they agree) is a spike: dropped."""
     F = d["frames"]
@@ -146,7 +186,8 @@ def export(spec, player):
                 wgt = math.exp(-0.5 * (dt / SIG) ** 2)
                 wx += raw[c][n][0] * wgt; wy += raw[c][n][1] * wgt; ws += wgt
             fr["j"][n] = [round(wx / ws, 3), round(wy / ws, 3)]
-    return {"player": player, "source": spec["src"] + " (clean)", "note": spec["note"], "timeScale": round(k, 3), "smoothed": f"gaussian {int(SIG*1000)} ms",
+    extra = {"knownEvents": spec["known"]} if spec.get("known") else {}
+    return {**extra, "player": player, "source": spec["src"] + " (clean)", "note": spec["note"], "timeScale": round(k, 3), "smoothed": f"gaussian {int(SIG*1000)} ms",
             "units": "body heights; x + = player's right, y = above the ground; seen from behind",
             "events": {n: round((t_of[v] - t0) * k, 3) for n, v in E.items()}, "frames": frames}
 

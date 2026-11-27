@@ -48,8 +48,11 @@ def players_in(text):
 
 def kind_of(text):
     t = text.lower()
-    if re.search(r"2nd|second|kick", t) and "serve" in t: return "serve-second"
-    if "serve" in t or "serving" in t: return "serve-first"
+    # Ryan's labels (Nov 27): "Djokovic Second.mov", "Kyrgios First T.mov", "Tiafoe First Wide.mov" are serves even
+    # without the word "serve": first/second (1st/2nd) or a serve direction (T, wide, body) means a serve.
+    serveish = "serve" in t or "serving" in t or re.search(r"\b(first|1st|second|2nd|kick)\b", t) or re.search(r"\b(t|wide|body)\b", t)
+    if serveish and not re.search(r"forehand|backhand|slice|running|footwork", t):
+        return "serve-second" if re.search(r"2nd|second|kick", t) else "serve-first"
     for k, words in (("forehand", ["forehand"]), ("backhand", ["backhand"]), ("slice", ["slice"]),
                      ("running", ["running", "footwork", "movement", "sprint", "split"]), ("match", ["match", " vs ", "against"]),
                      ("practice", ["practice"])):
